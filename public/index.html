@@ -48,7 +48,7 @@
       font-size: 16px; color: #374151; line-height: 1.7; max-width: 520px; margin-bottom: 28px;
     }
     .login-motto-badge {
-      display: inline-block; background: rgba(255, 255, 255, 0.7);
+      display: inline-block; background: rgba(255, 255, 255, 0.75);
       border-left: 4px solid var(--emerald-accent); padding: 12px 18px;
       font-size: 14px; font-style: italic; color: #064e3b; font-weight: 600;
       border-radius: 0 8px 8px 0;
@@ -74,7 +74,7 @@
     .form-input:focus { border-color: var(--emerald-accent); box-shadow: 0 0 0 3px rgba(5,150,105,0.15); }
 
     /* Buttons */
-    .btn { padding: 8px 16px; border-radius: 6px; border: 1px solid transparent; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.15s; }
+    .btn { padding: 8px 16px; border-radius: 6px; border: 1px solid transparent; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
     .btn-emerald { background: var(--emerald-accent); color: #fff; }
     .btn-emerald:hover { background: var(--emerald-hover); }
     .btn-secondary { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
@@ -167,7 +167,7 @@
     .q-box { background: #fff; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 18px; margin-bottom: 18px; }
     .q-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     
-    /* Bookmark Style (Replaces flag) */
+    /* Bookmark Style */
     .bookmark-btn {
       background: none; border: 1px solid #cbd5e1; border-radius: 4px;
       padding: 4px 10px; font-size: 12px; font-weight: 700; color: #475569;
@@ -196,7 +196,7 @@
     }
     #insperaTextToolbar button:hover { background: #334155; }
 
-    /* Highlighting & Sticky Notes */
+    /* Highlighting */
     .user-highlight { background-color: var(--highlight-yellow); padding: 1px 2px; border-radius: 2px; }
     .note-inline-badge {
       background: #fef08a; border: 1px solid #ca8a04; border-radius: 3px;
@@ -216,12 +216,8 @@
     }
     .btn-locate:hover { background: #d1fae5; }
     .evidence-highlight-active {
-      background-color: #fef08a !important; padding: 2px 4px; border-radius: 3px;
-      animation: pulseHighlight 1.5s infinite alternate;
-    }
-    @keyframes pulseHighlight {
-      0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4); }
-      100% { box-shadow: 0 0 0 8px rgba(234, 179, 8, 0); }
+      background-color: #fde047 !important; padding: 2px 4px; border-radius: 3px;
+      box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.4);
     }
 
     /* Footer Nav */
@@ -258,12 +254,15 @@
     .modal-body { padding: 20px; overflow-y: auto; flex: 1; font-size: 13px; }
     .modal-footer { padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc; }
 
-    /* Question Editor Card Styling */
+    /* Live Question Cards Styling */
     .q-edit-card {
       background: #f8fafc; border: 1px solid var(--inspera-border);
       border-radius: 8px; padding: 16px; margin-bottom: 16px;
     }
     .q-edit-opt-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+
+    /* Active Subtabs */
+    .active-subtab { background: var(--emerald-accent) !important; color: #fff !important; border-color: var(--emerald-accent) !important; }
   </style>
 </head>
 <body>
@@ -323,6 +322,7 @@
       <div class="dash-tabs">
         <button class="dash-tab-btn active" onclick="switchDashTab('reading')">📖 Reading Tests</button>
         <button class="dash-tab-btn" onclick="switchDashTab('vocab')">🧠 Vocabulary Vault</button>
+        <button class="dash-tab-btn" onclick="switchDashTab('myvocab')">⭐ My Saved Vocabulary</button>
         <button class="dash-tab-btn teacher-item" onclick="switchDashTab('classes')">🏫 Class Management</button>
         <button class="dash-tab-btn teacher-item" onclick="switchDashTab('students')">👤 Students & Accounts</button>
         <button class="dash-tab-btn teacher-item" onclick="switchDashTab('analytics')">📊 Submissions & Scores</button>
@@ -344,7 +344,7 @@
         </div>
       </div>
 
-      <!-- TAB 2: VOCABULARY -->
+      <!-- TAB 2: VOCABULARY VAULT -->
       <div id="tab-vocab" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title"><span>Interactive Vocabulary Context Mode</span></div>
@@ -355,7 +355,15 @@
         </div>
       </div>
 
-      <!-- TAB 3: CLASSES -->
+      <!-- TAB 3: MY SAVED VOCAB -->
+      <div id="tab-myvocab" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title"><span>My Personal Saved Vocabulary</span></div>
+          <div id="mySavedVocabList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;"></div>
+        </div>
+      </div>
+
+      <!-- TAB 4: CLASSES -->
       <div id="tab-classes" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title">
@@ -371,7 +379,7 @@
         </div>
       </div>
 
-      <!-- TAB 4: STUDENTS -->
+      <!-- TAB 5: STUDENTS -->
       <div id="tab-students" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title">
@@ -387,7 +395,7 @@
         </div>
       </div>
 
-      <!-- TAB 5: ANALYTICS -->
+      <!-- TAB 6: ANALYTICS -->
       <div id="tab-analytics" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title"><span>Student Performance History</span></div>
@@ -493,19 +501,13 @@
           
           <div class="form-group" style="background: #f8fafc; border: 1.5px dashed var(--inspera-border); border-radius: 8px; padding: 14px;">
             <label style="font-weight: 800; color: var(--emerald-dark);">Raw Question Batch (Paste from Cambridge / Word)</label>
-            <textarea id="rePRawQuestions" class="form-input" style="height: 140px; font-family: monospace;" placeholder="Paste raw question text here, e.g.:
-1. What was the main fuel source?
-A. Wood
-B. Coal
-C. Oil
-D. Gas
-
-2. Industries shifted to coal due to timber shortage.
-A. TRUE
-B. FALSE
-C. NOT GIVEN
-
-3. Steam engines freed factories from their [3] dependence."></textarea>
+            <textarea id="rePRawQuestions" class="form-input" style="height: 140px; font-family: monospace;" placeholder="Questions 1-7
+Do the following statements agree with the information given in Reading Passage 1?
+TRUE       if the statement agrees...
+FALSE      if the statement contradicts...
+NOT GIVEN  if there is no information...
+1    Other people have been referred to as 'the last man who knew everything'.
+2    The fact that Young's childhood brilliance continued into adulthood was normal."></textarea>
             <button class="btn btn-emerald" style="margin-top: 10px; font-size: 12px;" onclick="autoParseRawToLiveCards()">
               ⚡ Auto-Detect & Generate Question Cards
             </button>
@@ -515,7 +517,7 @@ C. NOT GIVEN
           <div style="margin-top: 16px;">
             <label style="font-weight: 800; font-size: 14px; margin-bottom: 8px; display: block;">Interactive Question Cards (Edit & Select Key Below)</label>
             <div id="liveQuestionCardsBox">
-              <p style="color: #64748b; font-style: italic;">No question cards generated yet. Click the button above to auto-detect.</p>
+              <p style="color: #64748b; font-style: italic;">No question cards generated yet. Paste text above and click Auto-Detect.</p>
             </div>
           </div>
         </div>
@@ -616,7 +618,7 @@ C. NOT GIVEN
     /* ========================================================
        DATABASE CORE & MULTI-PASSAGE SAMPLE EXAM
        ======================================================== */
-    const DB_KEY = 'AMURO_OFFICIAL_IELTS_SUITE_V4';
+    const DB_KEY = 'AMURO_OFFICIAL_IELTS_SUITE_V5';
 
     let db = JSON.parse(localStorage.getItem(DB_KEY)) || {
       users: [
@@ -627,6 +629,7 @@ C. NOT GIVEN
         { id: 'c1', name: 'IELTS Intensive 7.5+' },
         { id: 'c2', name: 'Foundation Morning' }
       ],
+      savedVocab: {}, // { username: [ { word, mean, syn, passageTitle } ] }
       readingExams: [
         {
           id: 're_cambridge_mock',
@@ -818,11 +821,13 @@ C. NOT GIVEN
       document.querySelectorAll('.dash-pane').forEach(p => p.style.display = 'none');
       event.target.classList.add('active');
       document.getElementById('tab-' + tab).style.display = 'block';
+      if (tab === 'myvocab') renderMySavedVocab();
     }
 
     function renderDashboard() {
       renderReadingTable();
       renderVocabTab();
+      renderMySavedVocab();
       if (activeUser.role === 'teacher') {
         renderClassTable();
         renderStudentTable();
@@ -867,12 +872,71 @@ C. NOT GIVEN
       if (!p) return;
       document.getElementById('vocabPassagePane').innerHTML = p.paragraphs.map(pr => `<p>${pr.text}</p><br>`).join('');
       document.getElementById('vocabCardsPane').innerHTML = (p.vocab || []).map(v => `
-        <div style="background:#fff; border:1px solid var(--inspera-border); border-radius:6px; padding:12px; margin-bottom:10px;">
-          <div style="font-weight:700; color:var(--emerald-accent);">${v.word} (${v.type})</div>
-          <div style="font-size:13px; margin:4px 0;">${v.mean}</div>
+        <div style="background:#fff; border:1px solid var(--inspera-border); border-radius:8px; padding:14px; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-weight:700; color:var(--emerald-accent); font-size:15px;">${v.word} <span style="font-size:11px; color:#64748b;">(${v.type})</span></div>
+            <button class="btn btn-secondary" style="padding:3px 8px; font-size:11px;" onclick="saveToMyVault('${v.word}', '${v.mean}', '${v.syn}', '${exam.title}')">⭐ Save</button>
+          </div>
+          <div style="font-size:13px; margin:6px 0;">${v.mean}</div>
           <div style="font-size:12px; color:#64748b;">Synonyms: <b>${v.syn}</b></div>
+          <button class="btn btn-emerald" style="margin-top:8px; padding:4px 10px; font-size:11px; width:100%;" onclick="spotVocabWordInPassage('${v.word}')">🔍 Highlight in Passage</button>
         </div>
-      `).join('') || '<p style="color:#64748b;">No vocabulary defined for this passage.</p>';
+      `).join('') || '<p style="color:#64748b;">No vocabulary items recorded for this passage.</p>';
+    }
+
+    function spotVocabWordInPassage(word) {
+      const pPane = document.getElementById('vocabPassagePane');
+      // Clean previous highlight
+      pPane.querySelectorAll('.evidence-highlight-active').forEach(el => el.outerHTML = el.innerHTML);
+
+      const regex = new RegExp(`\\b(${word})\\b`, 'gi');
+      if (regex.test(pPane.innerHTML)) {
+        pPane.innerHTML = pPane.innerHTML.replace(regex, `<span class="evidence-highlight-active" id="activeVocabSpot">$1</span>`);
+        const target = document.getElementById('activeVocabSpot');
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        alert(`Word "${word}" was not found directly in the passage text.`);
+      }
+    }
+
+    function saveToMyVault(word, mean, syn, passageTitle) {
+      if (!activeUser) return;
+      if (!db.savedVocab) db.savedVocab = {};
+      if (!db.savedVocab[activeUser.username]) db.savedVocab[activeUser.username] = [];
+      const userList = db.savedVocab[activeUser.username];
+      if (userList.some(item => item.word.toLowerCase() === word.toLowerCase())) {
+        return alert(`Word "${word}" is already in your Saved Vault!`);
+      }
+      userList.push({ word, mean, syn, passageTitle });
+      persist();
+      alert(`Word "${word}" saved to your personal vault!`);
+    }
+
+    function renderMySavedVocab() {
+      const container = document.getElementById('mySavedVocabList');
+      if (!activeUser) return;
+      const list = (db.savedVocab && db.savedVocab[activeUser.username]) || [];
+      if (!list.length) {
+        container.innerHTML = `<p style="color:#64748b; font-style:italic;">You haven't saved any vocabulary items yet. Study vocabulary in tests and click "⭐ Save".</p>`;
+        return;
+      }
+      container.innerHTML = list.map((item, idx) => `
+        <div style="background:#fff; border:1px solid var(--inspera-border); border-radius:8px; padding:14px; position:relative;">
+          <div style="font-weight:700; color:var(--emerald-accent); font-size:16px;">${item.word}</div>
+          <div style="font-size:13px; margin:6px 0;">${item.mean}</div>
+          <div style="font-size:12px; color:#64748b;">Synonyms: <b>${item.syn}</b></div>
+          <div style="font-size:11px; color:#94a3b8; margin-top:8px;">Source: ${item.passageTitle}</div>
+          <button class="btn btn-danger" style="padding:2px 8px; font-size:10px; position:absolute; top:12px; right:12px;" onclick="removeSavedVocab(${idx})">Delete</button>
+        </div>
+      `).join('');
+    }
+
+    function removeSavedVocab(idx) {
+      if (confirm('Remove this word from your vault?')) {
+        db.savedVocab[activeUser.username].splice(idx, 1);
+        persist();
+        renderMySavedVocab();
+      }
     }
 
     function renderVocabTab() {
@@ -1143,7 +1207,7 @@ C. NOT GIVEN
       updateFooterNav();
     }
 
-    /* FOOTER NAVIGATION: EXACT QUESTION NUMBERS */
+    /* FOOTER NAVIGATION: EXACT NUMBERS (1, 2, 3...) */
     function buildFooterNav() {
       const container = document.getElementById('insperaFooterList');
       container.innerHTML = '';
@@ -1190,12 +1254,13 @@ C. NOT GIVEN
       });
     }
 
-    /* EVIDENCE LOCATOR: CLEAN PREVIOUS HIGHLIGHT BEFORE SETTING NEW */
+    /* EVIDENCE LOCATOR: CLEAN PREVIOUS HIGHLIGHT COMPLETELY BEFORE SHOWING NEW */
     function clearExistingEvidenceHighlights() {
-      document.querySelectorAll('.evidence-highlight-active').forEach(el => {
+      const leftPane = document.getElementById('insperaLeftPane');
+      leftPane.querySelectorAll('.evidence-highlight-active').forEach(el => {
         el.outerHTML = el.innerHTML;
       });
-      document.querySelectorAll('.para-block').forEach(el => {
+      leftPane.querySelectorAll('.para-block').forEach(el => {
         el.classList.remove('evidence-highlight-active');
       });
     }
@@ -1439,7 +1504,7 @@ C. NOT GIVEN
     }
 
     /* ========================================================
-       SMART AUTO-PARSER & LIVE CARD EDITOR
+       ULTRA-ROBUST CAMBRIDGE RAW QUESTION PARSER & LIVE EDITOR
        ======================================================== */
     let passageDrafts = { 1: { questions: [] }, 2: { questions: [] }, 3: { questions: [] } };
     let currentDraftTab = 1;
@@ -1517,55 +1582,101 @@ C. NOT GIVEN
       renderLiveQuestionCards(d.questions || []);
     }
 
+    /* THUẬT TOÁN TỰ ĐỘNG BÓC TÁCH CÂU HỎI THÔNG MINH */
     function autoParseRawToLiveCards() {
-      const raw = document.getElementById('rePRawQuestions').value.trim();
-      if (!raw) return alert('Please paste some question text first!');
+      const raw = document.getElementById('rePRawQuestions').value;
+      if (!raw.trim()) return alert('Please paste raw text from Cambridge/Word into the box first!');
 
-      const blocks = raw.split(/\n(?=\d+\.)/);
-      const generated = [];
+      // Phát hiện loại bài test: True/False hay Multiple Choice hay Gap Fill
+      const isTFNG = /true/i.test(raw) && /false/i.test(raw);
+      const isYesNo = /yes/i.test(raw) && /no/i.test(raw);
 
-      blocks.forEach((block, idx) => {
-        const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
-        if (!lines.length || !/^\d+\./.test(lines[0])) return;
+      // Tách từng dòng văn bản
+      const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const detected = [];
+      let currentQuestion = null;
 
-        const qNum = Number(lines[0].match(/^(\d+)\./)[1]);
-        const qText = lines[0].replace(/^\d+\.\s*/, '');
-        let opts = [];
-        let ans = '';
-        let exp = '';
-        let evi = '';
+      // Regex bắt câu: Hỗ trợ "1. ", "1) ", "1    " (nhiều khoảng trắng/tab)
+      const qNumRegex = /^(\d+)[\.\)\s\t]+(.*)$/;
 
-        lines.forEach(l => {
-          if (l.startsWith('EXPLANATION:')) exp = l.replace('EXPLANATION:', '').trim();
-          else if (l.startsWith('EVIDENCE:')) evi = l.replace('EVIDENCE:', '').trim();
-          else if (l.startsWith('ANS:')) ans = l.replace(/ANS:\s*\d+=/, '').trim();
-          else if (/^\*?[A-D][\.\)]/i.test(l) || /^\*?(TRUE|FALSE|NOT GIVEN|YES|NO)/i.test(l)) {
-            const clean = l.replace(/^\*/, '').trim();
-            opts.push(clean);
-            if (l.startsWith('*')) ans = clean;
-          }
-        });
-
-        const isGap = qText.includes('[') || block.includes('ANS:');
-        if (!isGap && !opts.length) {
-          opts = ['TRUE', 'FALSE', 'NOT GIVEN'];
-          ans = 'TRUE';
+      lines.forEach(line => {
+        // Bỏ qua các dòng chỉ dẫn chung đầu bài
+        if (/^questions\s+\d+/i.test(line) || /^in\s+boxes\s+\d+/i.test(line) || /^do\s+the\s+following/i.test(line) || /^\s*true\s+/i.test(line) || /^\s*false\s+/i.test(line) || /^\s*not\s+given/i.test(line)) {
+          return;
         }
-        if (opts.length && !ans) ans = opts[0];
 
-        generated.push({
-          id: `edit_q_${currentDraftTab}_${idx}_${Date.now()}`,
-          num: qNum,
-          type: isGap ? 'gap' : 'choice',
-          prompt: qText,
-          options: opts,
-          answer: ans,
-          explanation: exp,
-          evidenceSnippet: evi
-        });
+        const match = line.match(qNumRegex);
+        // Nếu gặp số thứ tự câu hỏi mới
+        if (match && Number(match[1]) > 0 && Number(match[1]) < 100) {
+          if (currentQuestion) detected.push(currentQuestion);
+          const qNum = Number(match[1]);
+          const qPrompt = match[2].trim();
+
+          let defaultOpts = [];
+          let defaultType = 'choice';
+          let defaultAns = '';
+
+          if (isTFNG) {
+            defaultOpts = ['TRUE', 'FALSE', 'NOT GIVEN'];
+            defaultAns = 'TRUE';
+          } else if (isYesNo) {
+            defaultOpts = ['YES', 'NO', 'NOT GIVEN'];
+            defaultAns = 'YES';
+          } else if (qPrompt.includes('[') || /no\s+more\s+than/i.test(raw)) {
+            defaultType = 'gap';
+          }
+
+          currentQuestion = {
+            id: `q_edit_${currentDraftTab}_${qNum}_${Date.now()}`,
+            num: qNum,
+            type: defaultType,
+            prompt: qPrompt,
+            options: defaultOpts,
+            answer: defaultAns,
+            explanation: '',
+            evidenceSnippet: ''
+          };
+          return;
+        }
+
+        // Nếu là dòng lựa chọn: A. Wood / B. Coal...
+        if (currentQuestion) {
+          const optMatch = line.match(/^([A-D])[\.\)]\s*(.*)$/i);
+          if (optMatch) {
+            currentQuestion.type = 'choice';
+            const optText = optMatch[2].trim();
+            currentQuestion.options.push(optText);
+            if (!currentQuestion.answer) currentQuestion.answer = optText;
+            return;
+          }
+
+          if (line.startsWith('EXPLANATION:')) {
+            currentQuestion.explanation = line.replace('EXPLANATION:', '').trim();
+            return;
+          }
+          if (line.startsWith('EVIDENCE:')) {
+            currentQuestion.evidenceSnippet = line.replace('EVIDENCE:', '').trim();
+            return;
+          }
+          if (line.startsWith('ANS:')) {
+            currentQuestion.answer = line.replace(/ANS:\s*(\d+=)?/, '').trim();
+            return;
+          }
+
+          // Dòng văn bản kéo dài tiếp theo của câu hỏi
+          if (currentQuestion.type === 'gap' && !currentQuestion.options.length) {
+            currentQuestion.prompt += ' ' + line;
+          }
+        }
       });
 
-      renderLiveQuestionCards(generated);
+      if (currentQuestion) detected.push(currentQuestion);
+
+      if (!detected.length) {
+        return alert('Could not detect question numbers! Make sure each question starts with a number like "1    ..." or "1. ...".');
+      }
+
+      renderLiveQuestionCards(detected);
     }
 
     function renderLiveQuestionCards(cards) {
@@ -1577,34 +1688,34 @@ C. NOT GIVEN
 
       box.innerHTML = cards.map(c => `
         <div class="q-edit-card" id="qcard_edit_${c.id}" data-qnum="${c.num}">
-          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-            <b>Question ${c.num}</b>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <b style="font-size:14px; color:var(--emerald-dark);">Question ${c.num}</b>
             <button class="btn btn-danger" style="padding:2px 8px; font-size:11px;" onclick="document.getElementById('qcard_edit_${c.id}').remove()">Delete</button>
           </div>
           <div class="form-group">
             <label>Question Type</label>
-            <select class="form-input" id="edit_type_${c.id}">
+            <select class="form-input" id="edit_type_${c.id}" onchange="toggleCardOptionType('${c.id}', this.value)">
               <option value="choice" ${c.type === 'choice' ? 'selected' : ''}>Multiple Choice / True-False-Not Given</option>
               <option value="gap" ${c.type === 'gap' ? 'selected' : ''}>Sentence / Summary Gap Fill</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Question Text</label>
+            <label>Question Prompt / Sentence</label>
             <input type="text" class="form-input" id="edit_prompt_${c.id}" value="${c.prompt}">
           </div>
-          ${c.type === 'choice' ? `
-            <div class="form-group">
-              <label>Options & Select Correct Key (Radio)</label>
-              ${c.options.map((opt, oIdx) => `
+          <div class="form-group" id="opt_container_${c.id}" style="${c.type === 'gap' ? 'display:none;' : ''}">
+            <label>Options & Select Correct Key (Radio)</label>
+            <div id="opt_list_${c.id}">
+              ${(c.options.length ? c.options : ['TRUE', 'FALSE', 'NOT GIVEN']).map((opt, oIdx) => `
                 <div class="q-edit-opt-item">
-                  <input type="radio" name="opt_choice_${c.id}" value="${opt}" ${c.answer === opt ? 'checked' : ''} onchange="document.getElementById('edit_ans_${c.id}').value = this.value">
+                  <input type="radio" name="opt_choice_${c.id}" value="${opt}" ${c.answer.toLowerCase() === opt.toLowerCase() ? 'checked' : ''} onchange="document.getElementById('edit_ans_${c.id}').value = this.value">
                   <input type="text" class="form-input opt-text-val" value="${opt}">
                 </div>
               `).join('')}
             </div>
-          ` : ''}
+          </div>
           <div class="form-group">
-            <label>Correct Answer (Key)</label>
+            <label>Correct Key / Answer</label>
             <input type="text" class="form-input" id="edit_ans_${c.id}" value="${c.answer}">
           </div>
           <div class="form-group">
@@ -1613,10 +1724,14 @@ C. NOT GIVEN
           </div>
           <div class="form-group">
             <label>Evidence Snippet (Locate in Passage)</label>
-            <input type="text" class="form-input" id="edit_evi_${c.id}" value="${c.evidenceSnippet || ''}" placeholder="Exact quote from passage to highlight...">
+            <input type="text" class="form-input" id="edit_evi_${c.id}" value="${c.evidenceSnippet || ''}" placeholder="Exact quote from passage text to highlight...">
           </div>
         </div>
       `).join('');
+    }
+
+    function toggleCardOptionType(cardId, type) {
+      document.getElementById(`opt_container_${cardId}`).style.display = (type === 'gap' ? 'none' : 'block');
     }
 
     function saveActiveExamFromCards() {
@@ -1648,7 +1763,7 @@ C. NOT GIVEN
         }
       });
 
-      if (!passages.length) return alert('Please enter at least one passage!');
+      if (!passages.length) return alert('Please enter at least one passage text!');
 
       if (editingId) {
         const ex = db.readingExams.find(e => e.id === editingId);
