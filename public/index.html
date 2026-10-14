@@ -9,20 +9,20 @@
       --mint-light: #f0fdf4;
       --mint-pastel: #d1fae5;
       --matcha-bg: #ecfccb;
-      --emerald-dark: #065f46;
+      --emerald-dark: #064e3b;
       --emerald-accent: #059669;
       --emerald-hover: #047857;
       --inspera-dark: #202428;
       --inspera-border: #cbd5e1;
-      --flag-gold: #f59e0b;
-      --highlight: #fef08a;
+      --bookmark-gold: #d97706;
+      --highlight-yellow: #fef08a;
       --text-main: #1f2937;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background: #fff; color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
     /* ========================================================
-       1. SPLIT LOGIN SCREEN: MATCHA & MINT PASTEL TONE
+       1. SPLIT LOGIN SCREEN: MATCHA & MINT WITH MASSIVE LOGO
        ======================================================== */
     #loginScreen {
       position: fixed; inset: 0; z-index: 9999;
@@ -37,19 +37,19 @@
     }
     .login-brand-tag {
       font-size: 14px; font-weight: 800; letter-spacing: 2.5px;
-      color: var(--emerald-accent); text-transform: uppercase; margin-bottom: 12px;
+      color: var(--emerald-accent); text-transform: uppercase; margin-bottom: 14px;
     }
     .login-hero-logo {
-      font-size: 58px; font-weight: 900; line-height: 1.05;
+      font-size: 64px; font-weight: 900; line-height: 1.05;
       color: var(--emerald-dark); margin-bottom: 24px; letter-spacing: 1px;
     }
     .login-hero-logo span { color: var(--emerald-accent); }
     .login-hero-desc {
-      font-size: 16px; color: #374151; line-height: 1.7; max-width: 500px; margin-bottom: 28px;
+      font-size: 16px; color: #374151; line-height: 1.7; max-width: 520px; margin-bottom: 28px;
     }
     .login-motto-badge {
       display: inline-block; background: rgba(255, 255, 255, 0.7);
-      border-left: 4px solid var(--emerald-accent); padding: 10px 16px;
+      border-left: 4px solid var(--emerald-accent); padding: 12px 18px;
       font-size: 14px; font-style: italic; color: #064e3b; font-weight: 600;
       border-radius: 0 8px 8px 0;
     }
@@ -142,7 +142,7 @@
     }
 
     .inspera-workspace { flex: 1; display: flex; overflow: hidden; position: relative; }
-    .passage-col { width: 50%; padding: 26px 30px; overflow-y: auto; font-size: 15px; line-height: 1.8; border-right: 1px solid var(--inspera-border); }
+    .passage-col { width: 50%; padding: 26px 30px; overflow-y: auto; font-size: 15px; line-height: 1.8; border-right: 1px solid var(--inspera-border); user-select: text; }
     .resizer-bar { width: 8px; cursor: col-resize; background: #f1f5f9; border-left: 1px solid var(--inspera-border); border-right: 1px solid var(--inspera-border); flex-shrink: 0; }
     .resizer-bar:hover { background: #cbd5e1; }
     .questions-col { width: 50%; padding: 26px 30px; overflow-y: auto; background: #fafafa; font-size: 14px; }
@@ -166,15 +166,42 @@
     /* Question box */
     .q-box { background: #fff; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 18px; margin-bottom: 18px; }
     .q-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .flag-btn {
+    
+    /* Bookmark Style (Replaces flag) */
+    .bookmark-btn {
       background: none; border: 1px solid #cbd5e1; border-radius: 4px;
-      padding: 4px 8px; font-size: 11px; font-weight: 700; color: #475569;
-      cursor: pointer; display: flex; align-items: center; gap: 4px;
+      padding: 4px 10px; font-size: 12px; font-weight: 700; color: #475569;
+      cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.1s;
     }
-    .flag-btn.flagged { background: #fef3c7; border-color: var(--flag-gold); color: #b45309; }
+    .bookmark-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .bookmark-btn.bookmarked {
+      background: #fef3c7; border-color: var(--bookmark-gold); color: #b45309;
+    }
+    .bookmark-btn.bookmarked svg { fill: var(--bookmark-gold); }
+
     .gap-inline-input {
       width: 140px; padding: 4px 8px; border: 1.5px solid #94a3b8;
       border-radius: 4px; font-weight: 700; color: var(--emerald-dark); outline: none; margin: 0 4px;
+    }
+
+    /* Floating Highlight & Note Menu */
+    #insperaTextToolbar {
+      display: none; position: absolute; z-index: 6000;
+      background: #1e293b; color: #fff; border-radius: 6px;
+      padding: 4px; box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    }
+    #insperaTextToolbar button {
+      background: none; border: none; color: #fff; padding: 6px 12px;
+      font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 4px;
+    }
+    #insperaTextToolbar button:hover { background: #334155; }
+
+    /* Highlighting & Sticky Notes */
+    .user-highlight { background-color: var(--highlight-yellow); padding: 1px 2px; border-radius: 2px; }
+    .note-inline-badge {
+      background: #fef08a; border: 1px solid #ca8a04; border-radius: 3px;
+      font-size: 11px; padding: 1px 4px; font-weight: 700; color: #854d0e;
+      cursor: pointer; margin-left: 4px; display: inline-block;
     }
 
     /* Explanation & Evidence Box */
@@ -184,7 +211,8 @@
     }
     .btn-locate {
       background: #ecfdf5; border: 1px solid var(--emerald-accent); color: var(--emerald-dark);
-      padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 6px;
+      padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 8px;
+      display: inline-flex; align-items: center; gap: 4px;
     }
     .btn-locate:hover { background: #d1fae5; }
     .evidence-highlight-active {
@@ -210,9 +238,9 @@
       justify-content: center; position: relative;
     }
     .footer-q-btn.answered { background: #374151; color: #fff; border-color: #374151; }
-    .footer-q-btn.flagged::after {
-      content: "★"; position: absolute; top: -6px; right: -4px;
-      font-size: 10px; color: var(--flag-gold);
+    .footer-q-btn.bookmarked::after {
+      content: ""; position: absolute; top: 0; right: 0;
+      width: 0; height: 0; border-top: 8px solid var(--bookmark-gold); border-left: 8px solid transparent;
     }
     .footer-q-btn.correct-eval { border-color: #10b981; background: #ecfdf5; color: #047857; }
     .footer-q-btn.incorrect-eval { border-color: #ef4444; background: #fef2f2; color: #b91c1c; }
@@ -229,6 +257,13 @@
     .modal-header { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 16px; }
     .modal-body { padding: 20px; overflow-y: auto; flex: 1; font-size: 13px; }
     .modal-footer { padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc; }
+
+    /* Question Editor Card Styling */
+    .q-edit-card {
+      background: #f8fafc; border: 1px solid var(--inspera-border);
+      border-radius: 8px; padding: 16px; margin-bottom: 16px;
+    }
+    .q-edit-opt-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -243,7 +278,7 @@
         IELTS WITH <span>AMURO</span>
       </div>
       <div class="login-hero-desc">
-        Thực hành tốt hơn, từng bài đọc một. Không gian luyện thi tập trung với bài đọc, câu hỏi và đồng hồ cùng lúc. Theo dõi kết quả và đối chiếu dẫn chứng ngay sau khi nộp bài.
+        Practice better, one passage at a time. A focused exam environment equipped with texts, questions, real-time timer, and instant evidence review.
       </div>
       <div class="login-motto-badge">
         "Let justice be done though the heavens fall"
@@ -252,7 +287,7 @@
     <div class="login-right-area">
       <div class="login-card">
         <h2>Sign In</h2>
-        <p>Enter your student or teacher account</p>
+        <p>Access your exam simulation account</p>
         <div class="form-group">
           <label>Username</label>
           <input type="text" id="logUser" class="form-input" placeholder="Username">
@@ -298,7 +333,7 @@
         <div class="card">
           <div class="card-title">
             <span>Reading Test Library</span>
-            <button class="btn btn-emerald teacher-item" onclick="openReadingEditorModal()">+ Create Reading Test (Auto-Parser)</button>
+            <button class="btn btn-emerald teacher-item" onclick="openReadingEditorModal()">+ Create Reading Test (Auto-Parser & Editor)</button>
           </div>
           <table>
             <thead>
@@ -398,9 +433,14 @@
     </div>
   </div>
 
-  <!-- ========================================================
-       MODALS: SUBMISSION SUMMARY (CLEAN SCORE POPUP)
-       ======================================================== -->
+  <!-- INSPERA HIGHLIGHT & NOTE TOOLBAR -->
+  <div id="insperaTextToolbar">
+    <button onclick="applyInsperaHighlight()">🖍️ Highlight</button>
+    <button onclick="applyInsperaNote()">📝 Note</button>
+    <button onclick="clearInsperaHighlight()">❌ Clear</button>
+  </div>
+
+  <!-- MODAL: CLEAN SCORE POPUP -->
   <div class="modal-overlay" id="scoreSummaryModal">
     <div class="modal-window" style="width: 450px; text-align: center;">
       <div class="modal-header" style="justify-content: center;">Test Submission Result</div>
@@ -410,7 +450,7 @@
           Correct: 32 / 40
         </p>
         <p style="font-size: 13px; color: #64748b; margin-top: 14px;">
-          Your responses have been recorded successfully. Click below to review every question alongside passage evidence and detailed explanations.
+          Your responses have been recorded. Click below to review every question alongside passage evidence and explanations.
         </p>
       </div>
       <div class="modal-footer" style="justify-content: center; gap: 12px;">
@@ -420,11 +460,12 @@
     </div>
   </div>
 
-  <!-- MODAL: AUTO-PARSER READING BUILDER -->
+  <!-- MODAL: AUTO-PARSER & LIVE QUESTION EDITOR (EDITABLE) -->
   <div class="modal-overlay" id="readingEditorModal">
     <div class="modal-window">
-      <div class="modal-header">Smart Reading Test Builder (Per-Passage)</div>
+      <div class="modal-header">Reading Test Builder (Auto-Detect & Live Edit)</div>
       <div class="modal-body">
+        <input type="hidden" id="editingExamId">
         <div class="form-group">
           <label>Exam Title</label>
           <input type="text" id="reTitle" class="form-input" placeholder="e.g. Cambridge 19 - Test 1 Academic Reading">
@@ -443,48 +484,45 @@
         <div>
           <div class="form-group">
             <label>Passage Title</label>
-            <input type="text" id="rePTitle" class="form-input" placeholder="e.g. The History of Early Clockwork">
+            <input type="text" id="rePTitle" class="form-input" placeholder="e.g. The Transition to Industrial Energy">
           </div>
           <div class="form-group">
-            <label>Passage Text Content (Use Paragraph A, Paragraph B... if Heading test)</label>
-            <textarea id="rePText" class="form-input" style="height: 180px; font-family: monospace;" placeholder="Dán văn bản bài đọc vào đây..."></textarea>
+            <label>Passage Content (Use Paragraph A, Paragraph B... for Headings)</label>
+            <textarea id="rePText" class="form-input" style="height: 160px; font-family: monospace;" placeholder="Paste passage paragraphs here..."></textarea>
           </div>
-          <div class="form-group">
-            <label>Raw Questions & Explanations (Auto-classified from prompt words)</label>
-            <p style="font-size: 11px; color: #64748b; margin-bottom: 4px;">
-              Hệ thống tự nhận diện: Nếu có từ <b>TRUE / FALSE</b> tự tạo T/F/NG; nếu có <b>List of Headings</b> tự tạo kéo thả; nếu có <code>[1]</code> hoặc <code>NO MORE THAN</code> tự tạo điền từ. Ghi <code>EXPLANATION:</code> và <code>EVIDENCE:</code> sau mỗi câu.
-            </p>
-            <textarea id="rePQuestions" class="form-input" style="height: 180px; font-family: monospace;" placeholder="[List of Headings]
-i. Early mechanical timing
-ii. Modern quartz innovations
-1. Paragraph A = i
-EXPLANATION: Paragraph A discusses the first mechanical clock towers.
-EVIDENCE: Paragraph A, sentence 1
+          
+          <div class="form-group" style="background: #f8fafc; border: 1.5px dashed var(--inspera-border); border-radius: 8px; padding: 14px;">
+            <label style="font-weight: 800; color: var(--emerald-dark);">Raw Question Batch (Paste from Cambridge / Word)</label>
+            <textarea id="rePRawQuestions" class="form-input" style="height: 140px; font-family: monospace;" placeholder="Paste raw question text here, e.g.:
+1. What was the main fuel source?
+A. Wood
+B. Coal
+C. Oil
+D. Gas
 
-[True / False / Not Given]
-2. Clock towers were affordable for individual citizens.
+2. Industries shifted to coal due to timber shortage.
 A. TRUE
-*B. FALSE
+B. FALSE
 C. NOT GIVEN
-EXPLANATION: Text confirms only towns could afford them.
-EVIDENCE: towns invested communal wealth
 
-[Sentence Completion]
-3. Clocks relied on heavy [3] to power gear movements.
-ANS: 3=weights / gravity
-EXPLANATION: Gravity and heavy stones drove the escapement.
-EVIDENCE: heavy weights suspended by rope"></textarea>
+3. Steam engines freed factories from their [3] dependence."></textarea>
+            <button class="btn btn-emerald" style="margin-top: 10px; font-size: 12px;" onclick="autoParseRawToLiveCards()">
+              ⚡ Auto-Detect & Generate Question Cards
+            </button>
           </div>
-          <div class="form-group">
-            <label>Vocabulary (Optional: word | type | synonyms)</label>
-            <textarea id="rePVocab" class="form-input" style="height: 70px; font-family: monospace;" placeholder="escapement | noun | mechanism, regulator
-communal | adj | shared, collective"></textarea>
+
+          <!-- Live Generated Cards Container -->
+          <div style="margin-top: 16px;">
+            <label style="font-weight: 800; font-size: 14px; margin-bottom: 8px; display: block;">Interactive Question Cards (Edit & Select Key Below)</label>
+            <div id="liveQuestionCardsBox">
+              <p style="color: #64748b; font-style: italic;">No question cards generated yet. Click the button above to auto-detect.</p>
+            </div>
           </div>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('readingEditorModal')">Cancel</button>
-        <button class="btn btn-emerald" onclick="saveAutoParsedExam()">Save Exam</button>
+        <button class="btn btn-emerald" onclick="saveActiveExamFromCards()">Save Full Exam</button>
       </div>
     </div>
   </div>
@@ -578,7 +616,7 @@ communal | adj | shared, collective"></textarea>
     /* ========================================================
        DATABASE CORE & MULTI-PASSAGE SAMPLE EXAM
        ======================================================== */
-    const DB_KEY = 'AMURO_OFFICIAL_IELTS_SUITE_V3';
+    const DB_KEY = 'AMURO_OFFICIAL_IELTS_SUITE_V4';
 
     let db = JSON.parse(localStorage.getItem(DB_KEY)) || {
       users: [
@@ -714,11 +752,10 @@ communal | adj | shared, collective"></textarea>
     let activeExam = null;
     let activePartNum = 1;
     let userAnswers = {};
-    let flaggedQuestions = new Set();
+    let bookmarkedQuestions = new Set();
     let isReviewMode = false;
     let examTimer = null;
     let secondsRemaining = 3600;
-    let latestSubmissionResult = null;
 
     /* ========================================================
        AUTH & USER CONTROLLER
@@ -812,6 +849,7 @@ communal | adj | shared, collective"></textarea>
             <button class="btn btn-emerald" onclick="launchExam('${e.id}')">Start Test</button>
             <button class="btn btn-secondary" onclick="openVocabDirectly('${e.id}')">Study Vocabulary</button>
             ${activeUser.role === 'teacher' ? `
+              <button class="btn btn-secondary" onclick="openEditExamModal('${e.id}')">Edit</button>
               <button class="btn btn-secondary" onclick="openAssignModal('${e.id}')">Assign</button>
               <button class="btn btn-danger" onclick="deleteExam('${e.id}')">Delete</button>
             ` : ''}
@@ -900,7 +938,7 @@ communal | adj | shared, collective"></textarea>
       isReviewMode = false;
       activePartNum = 1;
       userAnswers = {};
-      flaggedQuestions.clear();
+      bookmarkedQuestions.clear();
       secondsRemaining = activeExam.duration * 60;
 
       document.getElementById('dashboardApp').style.display = 'none';
@@ -913,6 +951,7 @@ communal | adj | shared, collective"></textarea>
       loadPassageView(activePartNum);
       buildFooterNav();
       setupResizer();
+      setupInsperaTextToolbar();
       startTimer();
     }
 
@@ -937,7 +976,7 @@ communal | adj | shared, collective"></textarea>
       const left = document.getElementById('insperaLeftPane');
       const right = document.getElementById('insperaRightPane');
 
-      // Render Passage (Left)
+      // Left: Passage
       let passageHtml = `<h2 style="font-size: 19px; font-weight: 800; margin-bottom: 14px;">${passage.title}</h2>`;
       passage.paragraphs.forEach(p => {
         const dropZone = p.headingQId ? `
@@ -956,7 +995,7 @@ communal | adj | shared, collective"></textarea>
       });
       left.innerHTML = passageHtml;
 
-      // Render Questions (Right)
+      // Right: Headings pool + Questions
       let rightHtml = '';
 
       if (passage.headingsPool && passage.headingsPool.length && !isReviewMode) {
@@ -975,7 +1014,7 @@ communal | adj | shared, collective"></textarea>
         `;
       }
 
-      // Headings evaluation items in Review Mode
+      // Headings evaluation items
       passage.paragraphs.forEach(p => {
         if (p.headingQId) {
           const uAns = userAnswers[p.headingQId] || '';
@@ -1007,7 +1046,7 @@ communal | adj | shared, collective"></textarea>
       // Regular Questions
       if (passage.questions) {
         passage.questions.forEach(q => {
-          const isFlagged = flaggedQuestions.has(q.id);
+          const isBookmarked = bookmarkedQuestions.has(q.id);
           const uAns = (userAnswers[q.id] || '').trim();
           let isCorrect = false;
           if (q.type === 'gap') {
@@ -1022,8 +1061,9 @@ communal | adj | shared, collective"></textarea>
               <div class="q-header-row">
                 <span style="font-weight: 800;">Question ${q.num}</span>
                 ${!isReviewMode ? `
-                  <button class="flag-btn ${isFlagged ? 'flagged' : ''}" onclick="toggleFlag('${q.id}')">
-                    ★ ${isFlagged ? 'Flagged' : 'Flag'}
+                  <button class="bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" onclick="toggleBookmark('${q.id}')">
+                    <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                    ${isBookmarked ? 'Bookmarked' : 'Bookmark'}
                   </button>
                 ` : ''}
               </div>
@@ -1054,9 +1094,9 @@ communal | adj | shared, collective"></textarea>
                 <div style="font-weight:700; color: ${isCorrect ? '#047857' : '#b91c1c'};">
                   ${isCorrect ? '✅ Correct' : '❌ Incorrect'} (Key: <b>${q.answer}</b>)
                 </div>
-                <div style="margin: 4px 0;">${q.explanation || 'No explanation.'}</div>
+                <div style="margin: 4px 0;">${q.explanation || 'No explanation provided.'}</div>
                 ${q.evidenceSnippet ? `
-                  <button class="btn-locate" onclick="locateEvidenceSnippet('${q.evidenceSnippet}')">🔍 Locate Evidence in Passage</button>
+                  <button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(q.evidenceSnippet)}')">🔍 Locate Evidence in Passage</button>
                 ` : ''}
               </div>
             `;
@@ -1096,14 +1136,14 @@ communal | adj | shared, collective"></textarea>
       updateFooterNav();
     }
 
-    function toggleFlag(qId) {
-      if (flaggedQuestions.has(qId)) flaggedQuestions.delete(qId);
-      else flaggedQuestions.add(qId);
+    function toggleBookmark(qId) {
+      if (bookmarkedQuestions.has(qId)) bookmarkedQuestions.delete(qId);
+      else bookmarkedQuestions.add(qId);
       loadPassageView(activePartNum);
       updateFooterNav();
     }
 
-    /* FOOTER NAVIGATION: KEEPS EXACT QUESTION NUMBERS (1, 2, 3...) */
+    /* FOOTER NAVIGATION: EXACT QUESTION NUMBERS */
     function buildFooterNav() {
       const container = document.getElementById('insperaFooterList');
       container.innerHTML = '';
@@ -1146,21 +1186,33 @@ communal | adj | shared, collective"></textarea>
       document.querySelectorAll('.footer-q-btn').forEach(btn => {
         const qId = btn.id.replace('fpill_', '');
         btn.classList.toggle('answered', Boolean(userAnswers[qId]));
-        btn.classList.toggle('flagged', flaggedQuestions.has(qId));
+        btn.classList.toggle('bookmarked', bookmarkedQuestions.has(qId));
       });
     }
 
-    /* EVIDENCE LOCATOR & HIGHLIGHT IN PASSAGE */
+    /* EVIDENCE LOCATOR: CLEAN PREVIOUS HIGHLIGHT BEFORE SETTING NEW */
+    function clearExistingEvidenceHighlights() {
+      document.querySelectorAll('.evidence-highlight-active').forEach(el => {
+        el.outerHTML = el.innerHTML;
+      });
+      document.querySelectorAll('.para-block').forEach(el => {
+        el.classList.remove('evidence-highlight-active');
+      });
+    }
+
     function locateParagraph(paraLabel) {
+      clearExistingEvidenceHighlights();
       const el = document.getElementById(`pblock_${paraLabel}`);
       if (!el) return;
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       el.classList.add('evidence-highlight-active');
-      setTimeout(() => el.classList.remove('evidence-highlight-active'), 3000);
     }
 
-    function locateEvidenceSnippet(snippet) {
+    function locateEvidenceSnippet(encodedSnippet) {
+      const snippet = decodeURIComponent(encodedSnippet);
       if (!snippet) return;
+      clearExistingEvidenceHighlights();
+
       const leftPane = document.getElementById('insperaLeftPane');
       const rawText = leftPane.innerHTML;
       const regex = new RegExp(`(${snippet})`, 'gi');
@@ -1169,6 +1221,58 @@ communal | adj | shared, collective"></textarea>
         const target = document.getElementById('activeLocateTarget');
         if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
+    }
+
+    /* INSPERA REAL HIGHLIGHT & NOTE TOOLBAR */
+    function setupInsperaTextToolbar() {
+      const leftPane = document.getElementById('insperaLeftPane');
+      const bar = document.getElementById('insperaTextToolbar');
+
+      leftPane.onmouseup = () => {
+        const sel = window.getSelection();
+        if (!sel.isCollapsed && sel.toString().trim()) {
+          const rect = sel.getRangeAt(0).getBoundingClientRect();
+          bar.style.top = `${rect.top - 40}px`;
+          bar.style.left = `${rect.left}px`;
+          bar.style.display = 'flex';
+        } else {
+          bar.style.display = 'none';
+        }
+      };
+    }
+
+    function applyInsperaHighlight() {
+      const sel = window.getSelection();
+      if (!sel.isCollapsed) {
+        const range = sel.getRangeAt(0);
+        const span = document.createElement('span');
+        span.className = 'user-highlight';
+        range.surroundContents(span);
+      }
+      document.getElementById('insperaTextToolbar').style.display = 'none';
+    }
+
+    function applyInsperaNote() {
+      const noteText = prompt('Enter your note for this selection:');
+      if (noteText && noteText.trim()) {
+        const sel = window.getSelection();
+        if (!sel.isCollapsed) {
+          const range = sel.getRangeAt(0);
+          const badge = document.createElement('span');
+          badge.className = 'note-inline-badge';
+          badge.textContent = '📝 Note';
+          badge.title = noteText;
+          badge.onclick = () => alert(`Note: ${noteText}`);
+          range.collapse(false);
+          range.insertNode(badge);
+        }
+      }
+      document.getElementById('insperaTextToolbar').style.display = 'none';
+    }
+
+    function clearInsperaHighlight() {
+      document.execCommand('removeFormat');
+      document.getElementById('insperaTextToolbar').style.display = 'none';
     }
 
     /* RESIZER */
@@ -1266,7 +1370,7 @@ communal | adj | shared, collective"></textarea>
       else if (pct >= 0.6) band = '6.5';
       else if (pct >= 0.5) band = '6.0';
 
-      latestSubmissionResult = {
+      const res = {
         id: 'res_' + Date.now(),
         examId: activeExam.id,
         userName: activeUser.name,
@@ -1277,10 +1381,9 @@ communal | adj | shared, collective"></textarea>
         timestamp: new Date().toLocaleString()
       };
 
-      db.results.push(latestSubmissionResult);
+      db.results.push(res);
       persist();
 
-      // Hiện Modal chỉ có điểm và số câu đúng
       document.getElementById('summaryBandDisplay').textContent = `Band ${band}`;
       document.getElementById('summaryScoreDisplay').textContent = `Correct: ${correct} / ${total} questions`;
       openModal('scoreSummaryModal');
@@ -1302,7 +1405,6 @@ communal | adj | shared, collective"></textarea>
 
       loadPassageView(activePartNum);
 
-      // Đổi màu footer pills theo đúng sai
       activeExam.passages.forEach(p => {
         p.paragraphs.forEach(para => {
           if (para.headingQId) {
@@ -1337,149 +1439,236 @@ communal | adj | shared, collective"></textarea>
     }
 
     /* ========================================================
-       SMART AUTO-PARSER (PER-PASSAGE MODULAR BUILDER)
+       SMART AUTO-PARSER & LIVE CARD EDITOR
        ======================================================== */
-    let passageDrafts = { 1: {}, 2: {}, 3: {} };
+    let passageDrafts = { 1: { questions: [] }, 2: { questions: [] }, 3: { questions: [] } };
     let currentDraftTab = 1;
 
     function openReadingEditorModal() {
-      passageDrafts = { 1: {}, 2: {}, 3: {} };
+      document.getElementById('editingExamId').value = '';
+      passageDrafts = { 1: { questions: [] }, 2: { questions: [] }, 3: { questions: [] } };
       document.getElementById('reTitle').value = '';
       document.getElementById('reDuration').value = 60;
       switchPassageEditor(1);
       openModal('readingEditorModal');
     }
 
+    function openEditExamModal(examId) {
+      const exam = db.readingExams.find(e => e.id === examId);
+      if (!exam) return;
+      document.getElementById('editingExamId').value = exam.id;
+      document.getElementById('reTitle').value = exam.title;
+      document.getElementById('reDuration').value = exam.duration;
+
+      passageDrafts = { 1: { questions: [] }, 2: { questions: [] }, 3: { questions: [] } };
+      exam.passages.forEach(p => {
+        passageDrafts[p.partNum] = {
+          title: p.title,
+          text: p.paragraphs.map(pr => pr.text).join('\n\n'),
+          rawBatch: '',
+          questions: p.questions ? JSON.parse(JSON.stringify(p.questions)) : []
+        };
+      });
+
+      switchPassageEditor(1);
+      openModal('readingEditorModal');
+    }
+
     function switchPassageEditor(pNum) {
-      saveCurrentPassageDraft(currentDraftTab);
+      saveActiveDraftCards(currentDraftTab);
       currentDraftTab = pNum;
       [1, 2, 3].forEach(n => document.getElementById(`subtab-p${n}`).classList.toggle('active-subtab', n === pNum));
       loadDraftToEditor(pNum);
     }
 
-    function saveCurrentPassageDraft(pNum) {
+    function saveActiveDraftCards(pNum) {
+      const currentList = [];
+      document.querySelectorAll('.q-edit-card').forEach(card => {
+        const qid = card.id.replace('qcard_edit_', '');
+        const prompt = document.getElementById(`edit_prompt_${qid}`).value;
+        const type = document.getElementById(`edit_type_${qid}`).value;
+        const answer = document.getElementById(`edit_ans_${qid}`).value;
+        const explanation = document.getElementById(`edit_exp_${qid}`).value;
+        const evidenceSnippet = document.getElementById(`edit_evi_${qid}`).value;
+
+        let options = [];
+        if (type === 'choice') {
+          card.querySelectorAll('.opt-text-val').forEach(optInp => {
+            if (optInp.value.trim()) options.push(optInp.value.trim());
+          });
+        }
+
+        currentList.push({ id: qid, num: Number(card.dataset.qnum), type, prompt, options, answer, explanation, evidenceSnippet });
+      });
+
       passageDrafts[pNum] = {
         title: document.getElementById('rePTitle').value.trim(),
         text: document.getElementById('rePText').value.trim(),
-        questionsRaw: document.getElementById('rePQuestions').value.trim(),
-        vocabRaw: document.getElementById('rePVocab').value.trim()
+        rawBatch: document.getElementById('rePRawQuestions').value,
+        questions: currentList
       };
     }
 
     function loadDraftToEditor(pNum) {
-      const d = passageDrafts[pNum] || {};
+      const d = passageDrafts[pNum] || { questions: [] };
       document.getElementById('rePTitle').value = d.title || `Passage ${pNum}`;
       document.getElementById('rePText').value = d.text || '';
-      document.getElementById('rePQuestions').value = d.questionsRaw || '';
-      document.getElementById('rePVocab').value = d.vocabRaw || '';
+      document.getElementById('rePRawQuestions').value = d.rawBatch || '';
+      renderLiveQuestionCards(d.questions || []);
     }
 
-    function saveAutoParsedExam() {
-      saveCurrentPassageDraft(currentDraftTab);
+    function autoParseRawToLiveCards() {
+      const raw = document.getElementById('rePRawQuestions').value.trim();
+      if (!raw) return alert('Please paste some question text first!');
+
+      const blocks = raw.split(/\n(?=\d+\.)/);
+      const generated = [];
+
+      blocks.forEach((block, idx) => {
+        const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+        if (!lines.length || !/^\d+\./.test(lines[0])) return;
+
+        const qNum = Number(lines[0].match(/^(\d+)\./)[1]);
+        const qText = lines[0].replace(/^\d+\.\s*/, '');
+        let opts = [];
+        let ans = '';
+        let exp = '';
+        let evi = '';
+
+        lines.forEach(l => {
+          if (l.startsWith('EXPLANATION:')) exp = l.replace('EXPLANATION:', '').trim();
+          else if (l.startsWith('EVIDENCE:')) evi = l.replace('EVIDENCE:', '').trim();
+          else if (l.startsWith('ANS:')) ans = l.replace(/ANS:\s*\d+=/, '').trim();
+          else if (/^\*?[A-D][\.\)]/i.test(l) || /^\*?(TRUE|FALSE|NOT GIVEN|YES|NO)/i.test(l)) {
+            const clean = l.replace(/^\*/, '').trim();
+            opts.push(clean);
+            if (l.startsWith('*')) ans = clean;
+          }
+        });
+
+        const isGap = qText.includes('[') || block.includes('ANS:');
+        if (!isGap && !opts.length) {
+          opts = ['TRUE', 'FALSE', 'NOT GIVEN'];
+          ans = 'TRUE';
+        }
+        if (opts.length && !ans) ans = opts[0];
+
+        generated.push({
+          id: `edit_q_${currentDraftTab}_${idx}_${Date.now()}`,
+          num: qNum,
+          type: isGap ? 'gap' : 'choice',
+          prompt: qText,
+          options: opts,
+          answer: ans,
+          explanation: exp,
+          evidenceSnippet: evi
+        });
+      });
+
+      renderLiveQuestionCards(generated);
+    }
+
+    function renderLiveQuestionCards(cards) {
+      const box = document.getElementById('liveQuestionCardsBox');
+      if (!cards.length) {
+        box.innerHTML = `<p style="color: #64748b; font-style: italic;">No question cards generated yet.</p>`;
+        return;
+      }
+
+      box.innerHTML = cards.map(c => `
+        <div class="q-edit-card" id="qcard_edit_${c.id}" data-qnum="${c.num}">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <b>Question ${c.num}</b>
+            <button class="btn btn-danger" style="padding:2px 8px; font-size:11px;" onclick="document.getElementById('qcard_edit_${c.id}').remove()">Delete</button>
+          </div>
+          <div class="form-group">
+            <label>Question Type</label>
+            <select class="form-input" id="edit_type_${c.id}">
+              <option value="choice" ${c.type === 'choice' ? 'selected' : ''}>Multiple Choice / True-False-Not Given</option>
+              <option value="gap" ${c.type === 'gap' ? 'selected' : ''}>Sentence / Summary Gap Fill</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Question Text</label>
+            <input type="text" class="form-input" id="edit_prompt_${c.id}" value="${c.prompt}">
+          </div>
+          ${c.type === 'choice' ? `
+            <div class="form-group">
+              <label>Options & Select Correct Key (Radio)</label>
+              ${c.options.map((opt, oIdx) => `
+                <div class="q-edit-opt-item">
+                  <input type="radio" name="opt_choice_${c.id}" value="${opt}" ${c.answer === opt ? 'checked' : ''} onchange="document.getElementById('edit_ans_${c.id}').value = this.value">
+                  <input type="text" class="form-input opt-text-val" value="${opt}">
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+          <div class="form-group">
+            <label>Correct Answer (Key)</label>
+            <input type="text" class="form-input" id="edit_ans_${c.id}" value="${c.answer}">
+          </div>
+          <div class="form-group">
+            <label>Explanation</label>
+            <input type="text" class="form-input" id="edit_exp_${c.id}" value="${c.explanation || ''}" placeholder="Explain why this answer is correct...">
+          </div>
+          <div class="form-group">
+            <label>Evidence Snippet (Locate in Passage)</label>
+            <input type="text" class="form-input" id="edit_evi_${c.id}" value="${c.evidenceSnippet || ''}" placeholder="Exact quote from passage to highlight...">
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function saveActiveExamFromCards() {
+      saveActiveDraftCards(currentDraftTab);
       const title = document.getElementById('reTitle').value.trim();
       const duration = Number(document.getElementById('reDuration').value) || 60;
+      const editingId = document.getElementById('editingExamId').value;
       if (!title) return alert('Exam Title is required!');
 
       const passages = [];
-      let globalQuestionCounter = 1;
-
       [1, 2, 3].forEach(pNum => {
         const d = passageDrafts[pNum];
         if (d && d.text) {
-          // Parse Paragraphs
-          const rawParagraphs = d.text.split('\n\n').filter(Boolean);
-          const hasHeadings = d.questionsRaw && d.questionsRaw.toLowerCase().includes('heading');
-
-          const paragraphs = rawParagraphs.map((pt, idx) => {
-            const label = `Paragraph ${String.fromCharCode(65 + idx)}`;
-            let headingQId = null;
-            let correctHeading = '';
-            let qNum = null;
-
-            if (hasHeadings) {
-              headingQId = `q_h_${pNum}_${idx}`;
-              qNum = globalQuestionCounter++;
-              // Look for match like: 1. Paragraph A = i
-              const match = d.questionsRaw.match(new RegExp(`Paragraph\\s+${String.fromCharCode(65 + idx)}\\s*=\\s*([ivxlcdm]+)`, 'i'));
-              if (match) correctHeading = match[1];
-            }
-            return { label, text: pt, headingQId, qNum, correctHeading };
-          });
-
-          // Parse Questions Automatically
-          const questions = [];
-          if (d.questionsRaw) {
-            const blocks = d.questionsRaw.split(/\n(?=\d+\.)/);
-            blocks.forEach(block => {
-              const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
-              if (!lines.length || !/^\d+\./.test(lines[0])) return;
-
-              const qMatch = lines[0].match(/^(\d+)\.\s*(.*)$/);
-              if (!qMatch) return;
-
-              const qText = qMatch[2];
-              let exp = '';
-              let evi = '';
-              let ans = '';
-              let opts = [];
-              let isGap = qText.includes('[') || block.includes('ANS:');
-
-              lines.forEach(l => {
-                if (l.startsWith('EXPLANATION:')) exp = l.replace('EXPLANATION:', '').trim();
-                else if (l.startsWith('EVIDENCE:')) evi = l.replace('EVIDENCE:', '').trim();
-                else if (l.startsWith('ANS:')) ans = l.replace(/ANS:\s*\d+=/, '').trim();
-                else if (/^\*?[A-Z][\.\)]/.test(l)) {
-                  const clean = l.replace(/^\*/, '').trim();
-                  opts.push(clean);
-                  if (l.startsWith('*')) ans = clean;
-                }
-              });
-
-              if (opts.length && !ans) ans = opts[0];
-              if (!isGap && !opts.length) {
-                opts = ['TRUE', 'FALSE', 'NOT GIVEN'];
-                ans = 'TRUE';
-              }
-
-              questions.push({
-                id: `q_${pNum}_${globalQuestionCounter}`,
-                num: globalQuestionCounter++,
-                type: isGap ? 'gap' : 'choice',
-                prompt: qText,
-                options: opts,
-                answer: ans,
-                explanation: exp,
-                evidenceSnippet: evi
-              });
-            });
-          }
+          const rawParas = d.text.split('\n\n').filter(Boolean);
+          const paragraphs = rawParas.map((pt, idx) => ({
+            label: `Paragraph ${String.fromCharCode(65 + idx)}`,
+            text: pt,
+            headingQId: null, correctHeading: ''
+          }));
 
           passages.push({
             partNum: pNum,
             title: d.title || `Passage ${pNum}`,
             paragraphs,
-            headingsPool: hasHeadings ? [
-              { id: 'i', text: 'Section overview' },
-              { id: 'ii', text: 'Historical context' },
-              { id: 'iii', text: 'Critical developments' }
-            ] : [],
-            questions,
+            headingsPool: [],
+            questions: d.questions || [],
             vocab: []
           });
         }
       });
 
-      if (!passages.length) return alert('Please enter at least one passage text!');
+      if (!passages.length) return alert('Please enter at least one passage!');
 
-      db.readingExams.push({
-        id: 're_' + Date.now(),
-        title, duration, assignedClasses: [],
-        passages
-      });
+      if (editingId) {
+        const ex = db.readingExams.find(e => e.id === editingId);
+        if (ex) {
+          ex.title = title;
+          ex.duration = duration;
+          ex.passages = passages;
+        }
+      } else {
+        db.readingExams.push({
+          id: 're_' + Date.now(),
+          title, duration, assignedClasses: [],
+          passages
+        });
+      }
+
       persist();
       closeModal('readingEditorModal');
       renderDashboard();
-      alert('Exam created successfully with auto-detected formats!');
+      alert('Exam saved successfully!');
     }
 
     /* CLASSES & STUDENTS */
