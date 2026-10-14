@@ -24,43 +24,24 @@
     /* ========================================================
        1. SPLIT LOGIN SCREEN: MATCHA & MINT
        ======================================================== */
-    #loginScreen {
-      position: fixed; inset: 0; z-index: 9999;
-      display: flex; background: #fff;
-    }
+    #loginScreen { position: fixed; inset: 0; z-index: 9999; display: flex; background: #fff; }
     .login-left-banner {
-      width: 55%;
-      background: linear-gradient(135deg, var(--matcha-bg) 0%, var(--mint-pastel) 50%, var(--mint-light) 100%);
-      clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
-      display: flex; flex-direction: column; justify-content: center;
+      width: 55%; background: linear-gradient(135deg, var(--matcha-bg) 0%, var(--mint-pastel) 50%, var(--mint-light) 100%);
+      clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%); display: flex; flex-direction: column; justify-content: center;
       padding: 60px 80px; position: relative;
     }
-    .login-brand-tag {
-      font-size: 14px; font-weight: 800; letter-spacing: 2.5px;
-      color: var(--emerald-accent); text-transform: uppercase; margin-bottom: 14px;
-    }
-    .login-hero-logo {
-      font-size: 64px; font-weight: 900; line-height: 1.05;
-      color: var(--emerald-dark); margin-bottom: 24px; letter-spacing: 1px;
-    }
+    .login-brand-tag { font-size: 14px; font-weight: 800; letter-spacing: 2.5px; color: var(--emerald-accent); text-transform: uppercase; margin-bottom: 14px; }
+    .login-hero-logo { font-size: 64px; font-weight: 900; line-height: 1.05; color: var(--emerald-dark); margin-bottom: 24px; letter-spacing: 1px; }
     .login-hero-logo span { color: var(--emerald-accent); }
-    .login-hero-desc {
-      font-size: 16px; color: #374151; line-height: 1.7; max-width: 520px; margin-bottom: 28px;
-    }
+    .login-hero-desc { font-size: 16px; color: #374151; line-height: 1.7; max-width: 520px; margin-bottom: 28px; }
     .login-motto-badge {
       display: inline-block; background: rgba(255, 255, 255, 0.75);
       border-left: 4px solid var(--emerald-accent); padding: 12px 18px;
-      font-size: 14px; font-style: italic; color: #064e3b; font-weight: 600;
-      border-radius: 0 8px 8px 0;
+      font-size: 14px; font-style: italic; color: #064e3b; font-weight: 600; border-radius: 0 8px 8px 0;
     }
-
-    .login-right-area {
-      width: 45%; display: flex; align-items: center; justify-content: center;
-      padding: 40px; margin-left: -5%;
-    }
+    .login-right-area { width: 45%; display: flex; align-items: center; justify-content: center; padding: 40px; margin-left: -5%; }
     .login-card {
-      width: 100%; max-width: 380px; background: #fff;
-      padding: 40px 32px; border-radius: 14px;
+      width: 100%; max-width: 380px; background: #fff; padding: 40px 32px; border-radius: 14px;
       box-shadow: 0 12px 32px rgba(6,95,70,0.08); border: 1px solid #e2e8f0;
     }
     .login-card h2 { font-size: 22px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 6px; }
@@ -87,8 +68,7 @@
     #dashboardApp { display: none; min-height: 100vh; flex-direction: column; }
     header.dash-header {
       background: var(--emerald-dark); color: #fff; height: 56px;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
     }
     .dash-brand { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
     .dash-brand span { background: #fff; color: var(--emerald-dark); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
@@ -97,7 +77,6 @@
       background: #047857; padding: 6px 14px; border-radius: 20px;
       font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
     }
-
     .dash-body { max-width: 1320px; margin: 24px auto; padding: 0 16px; width: 100%; flex: 1; }
     .dash-tabs { display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
     .dash-tab-btn {
@@ -112,34 +91,21 @@
     th { background: #f8fafc; font-weight: 700; color: #475569; }
 
     /* ========================================================
-       3. INSPERA EXAM & REVIEW SHELL
+       3. INSPERA REAL EXAM WORKSPACE
        ======================================================== */
-    #examShell {
-      display: none; position: fixed; inset: 0; background: #fff;
-      z-index: 5000; flex-direction: column; overflow: hidden;
-    }
+    #examShell { display: none; position: fixed; inset: 0; background: #fff; z-index: 5000; flex-direction: column; overflow: hidden; }
     .inspera-top {
       background: var(--inspera-dark); color: #fff; height: 46px;
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 18px; font-size: 13px; font-weight: 600; flex-shrink: 0;
     }
-    .inspera-timer {
-      background: #111827; padding: 4px 12px; border-radius: 4px;
-      font-family: monospace; font-size: 14px; font-weight: 700; color: #fbbf24;
-    }
-    .inspera-part-tabs {
-      background: #e5e7eb; border-bottom: 1px solid var(--inspera-border);
-      padding: 6px 16px 0; display: flex; gap: 4px; flex-shrink: 0;
-    }
+    .inspera-timer { background: #111827; padding: 4px 12px; border-radius: 4px; font-family: monospace; font-size: 14px; font-weight: 700; color: #fbbf24; }
+    .inspera-part-tabs { background: #e5e7eb; border-bottom: 1px solid var(--inspera-border); padding: 6px 16px 0; display: flex; gap: 4px; flex-shrink: 0; }
     .part-pill {
       padding: 8px 24px; border: 1px solid transparent; border-bottom: none;
-      border-radius: 4px 4px 0 0; background: #d1d5db; font-size: 13px;
-      font-weight: 700; color: #4b5563; cursor: pointer;
+      border-radius: 4px 4px 0 0; background: #d1d5db; font-size: 13px; font-weight: 700; color: #4b5563; cursor: pointer;
     }
-    .part-pill.active {
-      background: #fff; border-color: var(--inspera-border); border-bottom-color: #fff;
-      color: #111; margin-bottom: -1px;
-    }
+    .part-pill.active { background: #fff; border-color: var(--inspera-border); border-bottom-color: #fff; color: #111; margin-bottom: -1px; }
 
     .inspera-workspace { flex: 1; display: flex; overflow: hidden; position: relative; }
     .passage-col { width: 50%; padding: 26px 30px; overflow-y: auto; font-size: 15px; line-height: 1.8; border-right: 1px solid var(--inspera-border); user-select: text; }
@@ -147,13 +113,12 @@
     .resizer-bar:hover { background: #cbd5e1; }
     .questions-col { width: 50%; padding: 26px 30px; overflow-y: auto; background: #fafafa; font-size: 14px; }
 
-    /* Paragraph Dropzone & Headings */
+    /* Paragraph Headings Dropzone */
     .para-block { margin-bottom: 24px; }
     .para-header-label { font-weight: 800; color: var(--emerald-dark); margin-bottom: 4px; }
     .para-dropzone {
       min-height: 44px; border: 2px dashed #94a3b8; border-radius: 6px;
-      background: #f8fafc; display: flex; align-items: center;
-      padding: 4px 10px; margin-bottom: 10px; transition: 0.15s;
+      background: #f8fafc; display: flex; align-items: center; padding: 4px 10px; margin-bottom: 10px; transition: 0.15s;
     }
     .para-dropzone.dragover { border-color: var(--emerald-accent); background: #ecfdf5; }
     .heading-chip {
@@ -163,47 +128,48 @@
     }
     .heading-chip:active { cursor: grabbing; opacity: 0.6; }
 
-    /* Question box */
+    /* Drag & Drop Box for Summary Completion with Box */
+    .summary-drag-box {
+      background: #f8fafc; border: 1.5px dashed var(--inspera-border); border-radius: 8px;
+      padding: 14px; margin: 12px 0; display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .summary-word-chip {
+      background: #fff; border: 1px solid var(--emerald-accent); border-radius: 4px;
+      padding: 5px 10px; font-size: 13px; font-weight: 700; color: var(--emerald-dark);
+      cursor: grab; user-select: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .summary-slot-dropzone {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 120px; height: 32px; border: 1.5px dashed #64748b; border-radius: 4px;
+      background: #fff; vertical-align: middle; margin: 0 4px; padding: 2px 6px;
+    }
+    .summary-slot-dropzone.dragover { border-color: var(--emerald-accent); background: #ecfdf5; }
+
+    /* Gap Inline Input */
+    .gap-inline-input {
+      display: inline-block; width: 140px; padding: 4px 8px; border: 1.5px solid #059669;
+      border-radius: 4px; font-weight: 700; color: #064e3b; outline: none; margin: 0 4px;
+      background: #f0fdf4; vertical-align: middle;
+    }
+    .gap-inline-input:focus { border-color: #047857; box-shadow: 0 0 0 2px rgba(5,150,105,0.25); }
+
+    /* Question Cards */
     .q-box { background: #fff; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 18px; margin-bottom: 18px; }
     .q-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     
-    /* Bookmark Style */
     .bookmark-btn {
       background: none; border: 1px solid #cbd5e1; border-radius: 4px;
       padding: 4px 10px; font-size: 12px; font-weight: 700; color: #475569;
       cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.1s;
     }
     .bookmark-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
-    .bookmark-btn.bookmarked {
-      background: #fef3c7; border-color: var(--bookmark-gold); color: #b45309;
-    }
+    .bookmark-btn.bookmarked { background: #fef3c7; border-color: var(--bookmark-gold); color: #b45309; }
     .bookmark-btn.bookmarked svg { fill: var(--bookmark-gold); }
 
-    .gap-inline-input {
-      width: 150px; padding: 4px 8px; border: 1.5px solid #94a3b8;
-      border-radius: 4px; font-weight: 700; color: var(--emerald-dark); outline: none; margin: 0 4px;
-    }
-
-    /* Writing Area */
-    .writing-editor { width: 100%; height: 380px; padding: 16px; border: 1px solid var(--inspera-border); border-radius: 8px; font-size: 14px; line-height: 1.6; resize: none; outline: none; }
-    .word-count-badge { font-weight: 700; color: #475569; font-size: 13px; margin-top: 8px; }
-
-    /* Floating Highlight Toolbar */
-    #insperaTextToolbar {
-      display: none; position: absolute; z-index: 6000;
-      background: #1e293b; color: #fff; border-radius: 6px;
-      padding: 4px; box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-    }
-    #insperaTextToolbar button {
-      background: none; border: none; color: #fff; padding: 6px 12px;
-      font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 4px;
-    }
-    #insperaTextToolbar button:hover { background: #334155; }
-    .user-highlight { background-color: var(--highlight-yellow); padding: 1px 2px; border-radius: 2px; }
-    .note-inline-badge {
-      background: #fef08a; border: 1px solid #ca8a04; border-radius: 3px;
-      font-size: 11px; padding: 1px 4px; font-weight: 700; color: #854d0e;
-      cursor: pointer; margin-left: 4px; display: inline-block;
+    /* Dropdown selection for Matching Features / Names */
+    .matching-select {
+      padding: 6px 10px; border: 1.5px solid #cbd5e1; border-radius: 6px;
+      font-size: 13px; font-weight: 600; color: var(--navy); outline: none; background: #fff;
     }
 
     /* Explanation & Evidence Box */
@@ -225,15 +191,13 @@
     /* Footer Nav */
     .inspera-footer {
       height: 56px; background: #fff; border-top: 1px solid var(--inspera-border);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 18px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 18px; flex-shrink: 0;
     }
     .footer-q-list { display: flex; gap: 8px; overflow-x: auto; max-width: 80%; align-items: center; }
     .footer-q-btn {
       min-width: 30px; height: 30px; border: 1px solid var(--inspera-border);
       border-radius: 4px; background: #fff; font-size: 12px; font-weight: 700;
-      color: #374151; cursor: pointer; display: flex; align-items: center;
-      justify-content: center; position: relative;
+      color: #374151; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative;
     }
     .footer-q-btn.answered { background: #374151; color: #fff; border-color: #374151; }
     .footer-q-btn.bookmarked::after {
@@ -244,10 +208,7 @@
     .footer-q-btn.incorrect-eval { border-color: #ef4444; background: #fef2f2; color: #b91c1c; }
 
     /* Modals */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-      z-index: 7000; align-items: center; justify-content: center;
-    }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 7000; align-items: center; justify-content: center; }
     .modal-window {
       background: #fff; width: 900px; max-width: 95vw; max-height: 90vh;
       border-radius: 12px; display: flex; flex-direction: column; overflow: hidden;
@@ -257,10 +218,7 @@
     .modal-footer { padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc; }
 
     /* Live Question Cards Styling */
-    .q-edit-card {
-      background: #f8fafc; border: 1px solid var(--inspera-border);
-      border-radius: 8px; padding: 16px; margin-bottom: 16px;
-    }
+    .q-edit-card { background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
     .q-edit-opt-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
     .active-subtab { background: var(--emerald-accent) !important; color: #fff !important; border-color: var(--emerald-accent) !important; }
   </style>
@@ -268,20 +226,16 @@
 <body>
 
   <!-- ========================================================
-       1. SPLIT LOGIN SCREEN: MATCHA & MINT
+       1. SPLIT LOGIN SCREEN
        ======================================================== -->
   <div id="loginScreen">
     <div class="login-left-banner">
       <div class="login-brand-tag">IELTS READING & WRITING SYSTEM</div>
-      <div class="login-hero-logo">
-        IELTS WITH <span>AMURO</span>
-      </div>
+      <div class="login-hero-logo">IELTS WITH <span>AMURO</span></div>
       <div class="login-hero-desc">
         Practice better, one passage at a time. A focused exam environment equipped with texts, questions, real-time timer, and instant evidence review.
       </div>
-      <div class="login-motto-badge">
-        "Let justice be done though the heavens fall"
-      </div>
+      <div class="login-motto-badge">"Let justice be done though the heavens fall"</div>
     </div>
     <div class="login-right-area">
       <div class="login-card">
@@ -307,13 +261,9 @@
        ======================================================== -->
   <div id="dashboardApp">
     <header class="dash-header">
-      <div class="dash-brand">
-        IELTS WITH AMURO <span>SIMULATION</span>
-      </div>
+      <div class="dash-brand">IELTS WITH AMURO <span>SIMULATION</span></div>
       <div class="dash-user-controls">
-        <div class="dash-user-badge" onclick="openProfileModal()" id="userProfileLabel">
-          👤 Account
-        </div>
+        <div class="dash-user-badge" onclick="openProfileModal()" id="userProfileLabel">👤 Account</div>
         <button class="btn btn-secondary" onclick="execLogout()">Sign Out</button>
       </div>
     </header>
@@ -329,7 +279,7 @@
         <button class="dash-tab-btn teacher-item" id="tabbtn-analytics" onclick="switchDashTab('analytics')">📊 Submissions & Scores</button>
       </div>
 
-      <!-- TAB 1: READING (DEFAULT DASHBOARD VIEW) -->
+      <!-- TAB 1: READING -->
       <div id="tab-reading" class="dash-pane">
         <div class="card">
           <div class="card-title">
@@ -345,7 +295,7 @@
         </div>
       </div>
 
-      <!-- TAB 2: WRITING (RESTORED) -->
+      <!-- TAB 2: WRITING -->
       <div id="tab-writing" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title">
@@ -440,29 +390,22 @@
       </div>
     </div>
 
-    <!-- Passage Tabs (Passage 1, 2, 3 or Task 1, Task 2) -->
+    <!-- Passage Tabs -->
     <div class="inspera-part-tabs" id="insperaPartTabs"></div>
 
-    <!-- Main Split-view Workspace -->
+    <!-- Split-view Workspace -->
     <div class="inspera-workspace" id="insperaSplitBox">
       <div class="passage-col" id="insperaLeftPane"></div>
       <div class="resizer-bar" id="insperaResizer"></div>
       <div class="questions-col" id="insperaRightPane"></div>
     </div>
 
-    <!-- Footer Navigation (Exact numbers: 1, 2, 3...) -->
+    <!-- Footer Navigation -->
     <div class="inspera-footer">
       <span style="font-size: 12px; font-weight: 700; color: #475569;">Question Navigation:</span>
       <div class="footer-q-list" id="insperaFooterList"></div>
       <button class="btn btn-emerald" id="btnSubmitBottom" onclick="submitExam()">Finish Assessment</button>
     </div>
-  </div>
-
-  <!-- INSPERA HIGHLIGHT & NOTE TOOLBAR -->
-  <div id="insperaTextToolbar">
-    <button onclick="applyInsperaHighlight()">🖍️ Highlight</button>
-    <button onclick="applyInsperaNote()">📝 Note</button>
-    <button onclick="clearInsperaHighlight()">❌ Clear</button>
   </div>
 
   <!-- MODAL: CLEAN SCORE POPUP -->
@@ -471,9 +414,7 @@
       <div class="modal-header" style="justify-content: center;">Test Submission Result</div>
       <div class="modal-body" style="padding: 30px 20px;">
         <div style="font-size: 48px; font-weight: 900; color: var(--emerald-accent);" id="summaryBandDisplay">Band 7.5</div>
-        <p style="font-size: 16px; font-weight: 700; color: #374151; margin-top: 8px;" id="summaryScoreDisplay">
-          Correct: 32 / 40
-        </p>
+        <p style="font-size: 16px; font-weight: 700; color: #374151; margin-top: 8px;" id="summaryScoreDisplay">Correct: 32 / 40</p>
         <p style="font-size: 13px; color: #64748b; margin-top: 14px;">
           Your responses have been recorded. Click below to review every question alongside passage evidence and explanations.
         </p>
@@ -519,15 +460,9 @@
           <div class="form-group" style="background: #f8fafc; border: 1.5px dashed var(--inspera-border); border-radius: 8px; padding: 14px;">
             <label style="font-weight: 800; color: var(--emerald-dark);">Raw Question Batch (Paste from Cambridge / Word)</label>
             <p style="font-size: 11px; color: #64748b; margin-bottom: 6px;">
-              💡 Dán văn bản của từng dạng (ví dụ cụm câu 1-7 T/F/NG, rồi dán tiếp cụm 8-13 điền từ). Sau khi bấm nút bên dưới, các câu hỏi sẽ được <b>nạp thêm vào danh sách</b> và ô này sẽ tự động xóa sạch để anh dán tiếp!
+              💡 Dán văn bản của từng dạng (ví dụ câu 1-7 T/F/NG, rồi dán tiếp câu 8-13 điền từ hoặc matching). Hệ thống sẽ tự bóc tách và tạo ô điền từ hoặc danh sách lựa chọn!
             </p>
-            <textarea id="rePRawQuestions" class="form-input" style="height: 140px; font-family: monospace;" placeholder="Questions 1-7
-Do the following statements agree with the information given in Reading Passage 1?
-TRUE       if the statement agrees...
-FALSE      if the statement contradicts...
-NOT GIVEN  if there is no information...
-1    Other people have been referred to as 'the last man who knew everything'.
-2    The fact that Young's childhood brilliance continued into adulthood was normal."></textarea>
+            <textarea id="rePRawQuestions" class="form-input" style="height: 140px; font-family: monospace;" placeholder="What was the improvement to London roads on which Young's ideas were sought? ................."></textarea>
             <button class="btn btn-emerald" style="margin-top: 10px; font-size: 12px;" onclick="autoParseRawToLiveCards()">
               ⚡ Auto-Detect & Append Question Cards
             </button>
@@ -678,9 +613,9 @@ NOT GIVEN  if there is no information...
 
   <script>
     /* ========================================================
-       DATABASE CORE & MULTI-PASSAGE SAMPLE EXAM
+       DATABASE CORE & FULL DIVERSE QUESTION EXAM
        ======================================================== */
-    const DB_KEY = 'AMURO_OFFICIAL_IELTS_SUITE_V6';
+    const DB_KEY = 'AMURO_OFFICIAL_IELTS_SUITE_V7';
 
     let db = JSON.parse(localStorage.getItem(DB_KEY)) || {
       users: [
@@ -701,109 +636,56 @@ NOT GIVEN  if there is no information...
           passages: [
             {
               partNum: 1,
-              title: 'Passage 1: The Transition to Industrial Energy',
+              title: 'Passage 1: Thomas Young - The Last Man Who Knew Everything',
               paragraphs: [
                 {
                   label: 'Paragraph A',
-                  text: 'Before the eighteenth century, human societies depended almost entirely on wood, water, and animal power for their energy requirements. In Britain, wood was the primary fuel for domestic heating and industrial furnaces.',
+                  text: 'Thomas Young was an English polymath who made notable contributions to physics, physiology, Egyptology, and linguistics. Before the eighteenth century, scholars had occasionally mastered all major branches of science, but Young was among the final individuals capable of doing so.',
                   headingQId: 'q1',
                   qNum: 1,
                   correctHeading: 'i'
                 },
                 {
                   label: 'Paragraph B',
-                  text: 'As natural timber reserves dwindled, industries shifted dramatically toward coal. The commercial steam engine perfected by James Watt in 1776 liberated factories from their river dependence, enabling production to expand into rapidly growing industrial cities.',
+                  text: 'His childhood brilliance was exceptional: by the age of fourteen, he had learned Latin, Greek, Hebrew, Arabic, and Persian. Later in London, his expertise was sought by civil engineers on how to improve the durability of city road paving materials.',
                   headingQId: 'q2',
                   qNum: 2,
                   correctHeading: 'ii'
-                },
-                {
-                  label: 'Paragraph C',
-                  text: 'However, this explosive reliance on fossil fuels carried profound costs. Dark plumes of smoke blanketed northern manufacturing towns, giving rise to persistent respiratory ailments and laying the foundation for modern atmospheric pollution.',
-                  headingQId: 'q3',
-                  qNum: 3,
-                  correctHeading: 'iii'
                 }
               ],
               headingsPool: [
-                { id: 'i', text: 'Early sources of domestic and industrial energy' },
-                { id: 'ii', text: 'The transition to steam and coal power' },
-                { id: 'iii', text: 'Environmental consequences of fossil fuels' },
-                { id: 'iv', text: 'Government intervention in urban manufacturing' }
+                { id: 'i', text: 'A diverse mastery across scientific fields' },
+                { id: 'ii', text: 'Remarkable early intellect and civil advisory' },
+                { id: 'iii', text: 'Later academic disputes in Europe' }
               ],
               questions: [
                 {
-                  id: 'q4', num: 4, type: 'choice',
-                  prompt: 'Wood remained the dominant fuel in Britain throughout the nineteenth century.',
-                  options: ['TRUE', 'FALSE', 'NOT GIVEN'], answer: 'FALSE',
-                  explanation: 'Paragraph B clarifies that industries shifted dramatically toward coal as timber reserves dwindled.',
-                  evidenceSnippet: 'industries shifted dramatically toward coal'
+                  id: 'q3', num: 3, type: 'choice',
+                  prompt: 'Other people have been referred to as "the last man who knew everything".',
+                  options: ['TRUE', 'FALSE', 'NOT GIVEN'], answer: 'TRUE',
+                  explanation: 'Paragraph A mentions that scholars had occasionally mastered science, acknowledging others shared this designation.',
+                  evidenceSnippet: 'scholars had occasionally mastered all major branches'
                 },
                 {
-                  id: 'q5', num: 5, type: 'gap',
-                  prompt: 'The commercial steam engine freed manufacturing from its dependence on [5].',
-                  answer: 'rivers / river dependence',
-                  explanation: 'Paragraph B states that James Watt liberated factories from river dependence.',
-                  evidenceSnippet: 'liberated factories from their river dependence'
+                  id: 'q4', num: 4, type: 'gap',
+                  prompt: 'What was the improvement to London roads on which Young\'s ideas were sought? .................',
+                  answer: 'paving materials / durability',
+                  explanation: 'Paragraph B confirms engineers consulted him regarding the durability of road paving materials.',
+                  evidenceSnippet: 'improve the durability of city road paving materials'
+                },
+                {
+                  id: 'q5', num: 5, type: 'matching_options',
+                  prompt: 'Match the scholar with the corresponding achievement: Pioneered optical wave theory.',
+                  options: ['A. Thomas Young', 'B. Isaac Newton', 'C. James Watt'],
+                  answer: 'A. Thomas Young',
+                  explanation: 'Thomas Young proved the wave nature of light in his optical experiments.',
+                  evidenceSnippet: 'notable contributions to physics'
                 }
               ],
               vocab: [
-                { word: 'dwindled', type: 'verb', mean: 'Suy giảm dần, teo tóp', syn: 'shrink, diminish, decline' },
-                { word: 'liberated', type: 'verb', mean: 'Giải phóng', syn: 'freed, released' },
-                { word: 'ailments', type: 'noun', mean: 'Bệnh tật, ốm đau', syn: 'diseases, disorders, illnesses' }
+                { word: 'polymath', type: 'noun', mean: 'Người thông thái, nhà bác học biết nhiều ngành', syn: 'genius, renaissance man' },
+                { word: 'durability', type: 'noun', mean: 'Độ bền, tính bền vững', syn: 'longevity, endurance' }
               ]
-            },
-            {
-              partNum: 2,
-              title: 'Passage 2: The Quantum Compass of Migratory Birds',
-              paragraphs: [
-                {
-                  label: 'Paragraph A',
-                  text: 'Every autumn, billions of birds leave their breeding grounds in the north and travel thousands of miles to warmer southern latitudes. Scientists have long wondered how birds navigate across featureless landscapes with pinpoint accuracy.'
-                },
-                {
-                  label: 'Paragraph B',
-                  text: 'Recent breakthroughs reveal that migratory birds utilize an internal quantum compass. Cryptochrome proteins situated in their retinal eyes allow them to detect subtle fluctuations in Earth magnetic lines visually.'
-                }
-              ],
-              questions: [
-                {
-                  id: 'q6', num: 6, type: 'choice',
-                  prompt: 'What biological sensor enables birds to detect magnetic field variations?',
-                  options: ['Cryptochrome proteins in the retina', 'Iron deposits in the beak', 'Auditory sensors in the inner ear', 'Feather nerve endings'],
-                  answer: 'Cryptochrome proteins in the retina',
-                  explanation: 'Paragraph B explicitly highlights cryptochrome proteins located in retinal eyes.',
-                  evidenceSnippet: 'Cryptochrome proteins situated in their retinal eyes'
-                },
-                {
-                  id: 'q7', num: 7, type: 'gap',
-                  prompt: 'Birds begin their southern journeys during the season of [7].',
-                  answer: 'autumn',
-                  explanation: 'Paragraph A specifies that billions of birds depart every autumn.',
-                  evidenceSnippet: 'Every autumn, billions of birds leave'
-                }
-              ],
-              vocab: []
-            },
-            {
-              partNum: 3,
-              title: 'Passage 3: Artificial Intelligence and Neural Architecture',
-              paragraphs: [
-                {
-                  label: 'Paragraph A',
-                  text: 'The rapid development of neural networks has challenged classical theories of human intelligence. Modern machine learning systems demonstrate remarkable pattern recognition, yet they fundamentally lack the embodied sensory experience that characterizes human consciousness.'
-                }
-              ],
-              questions: [
-                {
-                  id: 'q8', num: 8, type: 'choice',
-                  prompt: 'Modern machine learning models possess conscious self-awareness.',
-                  options: ['YES', 'NO', 'NOT GIVEN'], answer: 'NO',
-                  explanation: 'Paragraph A emphasizes that machines fundamentally lack the sensory experience of consciousness.',
-                  evidenceSnippet: 'they fundamentally lack the embodied sensory experience'
-                }
-              ],
-              vocab: []
             }
           ]
         }
@@ -847,7 +729,6 @@ NOT GIVEN  if there is no information...
         document.getElementById('dashboardApp').style.display = 'flex';
         document.getElementById('userProfileLabel').textContent = `👤 ${activeUser.name} (${activeUser.role.toUpperCase()})`;
         document.querySelectorAll('.teacher-item').forEach(el => el.style.display = activeUser.role === 'teacher' ? '' : 'none');
-        // Default View is always Reading Tests
         switchDashTab('reading');
         renderDashboard();
       } else {
@@ -1038,21 +919,14 @@ NOT GIVEN  if there is no information...
       }
     }
 
-    function renderVocabTab() {
-      openVocabDirectly(db.readingExams[0]?.id);
-    }
-
+    function renderVocabTab() { openVocabDirectly(db.readingExams[0]?.id); }
     function renderClassTable() {
       const tbody = document.getElementById('classTbody');
       tbody.innerHTML = '';
       db.classes.forEach(c => {
         const count = db.users.filter(u => u.classId === c.id).length;
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><b>${c.name}</b></td>
-          <td>${count} students</td>
-          <td><button class="btn btn-danger" onclick="deleteClass('${c.id}')">Delete</button></td>
-        `;
+        tr.innerHTML = `<td><b>${c.name}</b></td><td>${count} students</td><td><button class="btn btn-danger" onclick="deleteClass('${c.id}')">Delete</button></td>`;
         tbody.appendChild(tr);
       });
     }
@@ -1063,13 +937,7 @@ NOT GIVEN  if there is no information...
       db.users.filter(u => u.role === 'student').forEach(u => {
         const c = db.classes.find(cl => cl.id === u.classId);
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><b>${u.name}</b></td>
-          <td><code>${u.username}</code></td>
-          <td><code>${u.pass}</code></td>
-          <td>${c ? c.name : 'Unassigned'}</td>
-          <td><button class="btn btn-danger" onclick="deleteUser('${u.id}')">Remove</button></td>
-        `;
+        tr.innerHTML = `<td><b>${u.name}</b></td><td><code>${u.username}</code></td><td><code>${u.pass}</code></td><td>${c ? c.name : 'Unassigned'}</td><td><button class="btn btn-danger" onclick="deleteUser('${u.id}')">Remove</button></td>`;
         tbody.appendChild(tr);
       });
     }
@@ -1079,20 +947,13 @@ NOT GIVEN  if there is no information...
       tbody.innerHTML = '';
       db.results.slice().reverse().forEach(r => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><b>${r.userName}</b></td>
-          <td>${r.examTitle}</td>
-          <td>${r.score}</td>
-          <td><b style="color: var(--emerald-accent);">Band ${r.band}</b></td>
-          <td>${r.timestamp}</td>
-          <td><button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">Review</button></td>
-        `;
+        tr.innerHTML = `<td><b>${r.userName}</b></td><td>${r.examTitle}</td><td>${r.score}</td><td><b style="color: var(--emerald-accent);">Band ${r.band}</b></td><td>${r.timestamp}</td><td><button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">Review</button></td>`;
         tbody.appendChild(tr);
       });
     }
 
     /* ========================================================
-       INSPERA READING TEST ENVIRONMENT
+       INSPERA READING TEST ENVIRONMENT (ALL FORMATS)
        ======================================================== */
     function launchExam(examId) {
       activeExam = db.readingExams.find(e => e.id === examId);
@@ -1115,7 +976,6 @@ NOT GIVEN  if there is no information...
       loadPassageView(activePartNum);
       buildFooterNav();
       setupResizer();
-      setupInsperaTextToolbar();
       startTimer();
     }
 
@@ -1166,7 +1026,7 @@ NOT GIVEN  if there is no information...
       });
       left.innerHTML = passageHtml;
 
-      // Right: Headings pool + Questions
+      // Right: Questions of All Diverse Types
       let rightHtml = '';
 
       if (passage.headingsPool && passage.headingsPool.length && !isReviewMode) {
@@ -1214,7 +1074,7 @@ NOT GIVEN  if there is no information...
         }
       });
 
-      // Regular Questions
+      // Regular Questions: Gap-fill, Choice, Matching Features, Sentence Endings
       if (passage.questions) {
         passage.questions.forEach(q => {
           const isBookmarked = bookmarkedQuestions.has(q.id);
@@ -1240,7 +1100,30 @@ NOT GIVEN  if there is no information...
               </div>
           `;
 
-          if (q.type === 'choice') {
+          // DẠNG 1: GAP FILL / SHORT ANSWER (CHUYỂN DẤU CHẤM LỬNG THÀNH Ô NHẬP TEXT)
+          if (q.type === 'gap') {
+            let renderedPrompt = q.prompt;
+            const inputTag = `<input type="text" class="gap-inline-input" value="${uAns}" placeholder="[Answer ${q.num}]" ${isReviewMode ? 'disabled' : ''} oninput="saveAnswer('${q.id}', this.value)">`;
+
+            if (renderedPrompt.includes('..') || renderedPrompt.includes('__') || renderedPrompt.includes(`[${q.num}]`)) {
+              renderedPrompt = renderedPrompt.replace(/\.{2,}|_{2,}|\[\d+\]/, inputTag);
+            } else {
+              renderedPrompt += ` : ` + inputTag;
+            }
+            rightHtml += `<div style="line-height: 2.2; font-size: 14px;">${renderedPrompt}</div>`;
+          }
+          // DẠNG 2: MATCHING FEATURES / NAMES / SENTENCE ENDINGS (DROPDOWN)
+          else if (q.type === 'matching_options') {
+            rightHtml += `
+              <p style="margin-bottom: 10px; font-weight: 600;">${q.prompt}</p>
+              <select class="matching-select" ${isReviewMode ? 'disabled' : ''} onchange="saveAnswer('${q.id}', this.value)">
+                <option value="">-- Choose matching option --</option>
+                ${q.options.map(opt => `<option value="${opt}" ${uAns === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+              </select>
+            `;
+          }
+          // DẠNG 3: MULTIPLE CHOICE & TRUE / FALSE / NOT GIVEN (RADIO)
+          else {
             rightHtml += `
               <p style="margin-bottom: 10px; font-weight: 600;">${q.prompt}</p>
               <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -1252,11 +1135,6 @@ NOT GIVEN  if there is no information...
                 `).join('')}
               </div>
             `;
-          } else if (q.type === 'gap') {
-            const filled = q.prompt.replace(`[${q.num}]`, `
-              <input type="text" class="gap-inline-input" value="${uAns}" placeholder="[${q.num}]" ${isReviewMode ? 'disabled' : ''} oninput="saveAnswer('${q.id}', this.value)">
-            `);
-            rightHtml += `<div style="line-height: 2;">${filled}</div>`;
           }
 
           if (isReviewMode) {
@@ -1394,57 +1272,6 @@ NOT GIVEN  if there is no information...
       }
     }
 
-    function setupInsperaTextToolbar() {
-      const leftPane = document.getElementById('insperaLeftPane');
-      const bar = document.getElementById('insperaTextToolbar');
-
-      leftPane.onmouseup = () => {
-        const sel = window.getSelection();
-        if (!sel.isCollapsed && sel.toString().trim()) {
-          const rect = sel.getRangeAt(0).getBoundingClientRect();
-          bar.style.top = `${rect.top - 40}px`;
-          bar.style.left = `${rect.left}px`;
-          bar.style.display = 'flex';
-        } else {
-          bar.style.display = 'none';
-        }
-      };
-    }
-
-    function applyInsperaHighlight() {
-      const sel = window.getSelection();
-      if (!sel.isCollapsed) {
-        const range = sel.getRangeAt(0);
-        const span = document.createElement('span');
-        span.className = 'user-highlight';
-        range.surroundContents(span);
-      }
-      document.getElementById('insperaTextToolbar').style.display = 'none';
-    }
-
-    function applyInsperaNote() {
-      const noteText = prompt('Enter your note for this selection:');
-      if (noteText && noteText.trim()) {
-        const sel = window.getSelection();
-        if (!sel.isCollapsed) {
-          const range = sel.getRangeAt(0);
-          const badge = document.createElement('span');
-          badge.className = 'note-inline-badge';
-          badge.textContent = '📝 Note';
-          badge.title = noteText;
-          badge.onclick = () => alert(`Note: ${noteText}`);
-          range.collapse(false);
-          range.insertNode(badge);
-        }
-      }
-      document.getElementById('insperaTextToolbar').style.display = 'none';
-    }
-
-    function clearInsperaHighlight() {
-      document.execCommand('removeFormat');
-      document.getElementById('insperaTextToolbar').style.display = 'none';
-    }
-
     function setupResizer() {
       const resizer = document.getElementById('insperaResizer');
       const left = document.getElementById('insperaLeftPane');
@@ -1570,7 +1397,7 @@ NOT GIVEN  if there is no information...
           if (activePartNum === 1) writingAnswers.task1 = editor.value;
           else writingAnswers.task2 = editor.value;
         }
-        alert('Writing submission completed! Your teacher can view and comment on your response.');
+        alert('Writing assessment submitted successfully!');
         document.getElementById('examShell').style.display = 'none';
         document.getElementById('dashboardApp').style.display = 'flex';
         renderDashboard();
@@ -1679,7 +1506,7 @@ NOT GIVEN  if there is no information...
     }
 
     /* ========================================================
-       SMART ROBUST CAMBRIDGE PARSER & CARD APPENDER
+       SMART BATCH PARSER FOR DIVERSE QUESTION TYPES
        ======================================================== */
     let passageDrafts = { 1: { questions: [] }, 2: { questions: [] }, 3: { questions: [] } };
     let currentDraftTab = 1;
@@ -1732,7 +1559,7 @@ NOT GIVEN  if there is no information...
         const evidenceSnippet = document.getElementById(`edit_evi_${qid}`).value;
 
         let options = [];
-        if (type === 'choice') {
+        if (type === 'choice' || type === 'matching_options') {
           card.querySelectorAll('.opt-text-val').forEach(optInp => {
             if (optInp.value.trim()) options.push(optInp.value.trim());
           });
@@ -1764,14 +1591,14 @@ NOT GIVEN  if there is no information...
       }
     }
 
-    /* BỘ TỰ ĐỘNG PHÂN TÍCH VÀ NẠP NỐI TIẾP VÀO DANH SÁCH (APPEND & CLEAR) */
+    /* BỘ TỰ ĐỘNG BÓC TÁCH VÀ NẠP NỐI TIẾP VÀO DANH SÁCH */
     function autoParseRawToLiveCards() {
       const raw = document.getElementById('rePRawQuestions').value;
       if (!raw.trim()) return alert('Please paste question batch text into the box first!');
 
-      // Nhận diện ngữ cảnh của cụm câu hỏi vừa dán
       const isTFNG = /true/i.test(raw) && /false/i.test(raw);
       const isYesNo = /yes/i.test(raw) && /no/i.test(raw);
+      const isMatchingFeature = /match\s+each|look\s+at\s+the\s+following/i.test(raw);
 
       const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
       const newlyDetected = [];
@@ -1792,12 +1619,11 @@ NOT GIVEN  if there is no information...
           const qNum = Number(match[1]);
           const qPrompt = match[2].trim();
 
-          // Tự động phân loại riêng từng câu dựa vào nội dung câu đó
           let defaultOpts = [];
           let defaultType = 'choice';
           let defaultAns = '';
 
-          // Nếu câu có dấu chấm lửng (.....) hoặc gạch dưới (____) hoặc [13] -> Tự động là GAP FILL
+          // Kiểm tra câu điền từ: nếu có dấu chấm lửng (.....) hoặc gạch dưới (____) hoặc ngoặc vuông
           if (qPrompt.includes('..') || qPrompt.includes('__') || qPrompt.includes('[') || /no\s+more\s+than/i.test(raw)) {
             defaultType = 'gap';
           } else if (isTFNG) {
@@ -1806,6 +1632,8 @@ NOT GIVEN  if there is no information...
           } else if (isYesNo) {
             defaultOpts = ['YES', 'NO', 'NOT GIVEN'];
             defaultAns = 'YES';
+          } else if (isMatchingFeature) {
+            defaultType = 'matching_options';
           }
 
           currentQuestion = {
@@ -1822,10 +1650,9 @@ NOT GIVEN  if there is no information...
         }
 
         if (currentQuestion) {
-          // Bắt các lựa chọn A. B. C. D.
           const optMatch = line.match(/^([A-D])[\.\)]\s*(.*)$/i);
           if (optMatch) {
-            currentQuestion.type = 'choice';
+            currentQuestion.type = isMatchingFeature ? 'matching_options' : 'choice';
             const optText = optMatch[2].trim();
             currentQuestion.options.push(optText);
             if (!currentQuestion.answer) currentQuestion.answer = optText;
@@ -1857,17 +1684,16 @@ NOT GIVEN  if there is no information...
         return alert('Could not detect question numbers! Make sure lines start with numbers like "1   ..." or "1. ...".');
       }
 
-      // NẠP NỐI TIẾP VÀO DANH SÁCH HIỆN CÓ
       saveActiveDraftCards(currentDraftTab);
       const existing = passageDrafts[currentDraftTab].questions || [];
       const merged = [...existing, ...newlyDetected];
       passageDrafts[currentDraftTab].questions = merged;
 
-      // XÓA TRẮNG Ô NHẬP ĐỂ SẴN SÀNG NHẬP DẠNG TIẾP THEO
+      // Xóa trắng ô nhập để sẵn sàng dán tiếp
       document.getElementById('rePRawQuestions').value = '';
 
       renderLiveQuestionCards(merged);
-      alert(`Successfully detected and added ${newlyDetected.length} question cards! The raw input box has been cleared so you can paste the next question batch.`);
+      alert(`Detected and added ${newlyDetected.length} question cards! Raw input cleared for the next batch.`);
     }
 
     function renderLiveQuestionCards(cards) {
@@ -1886,12 +1712,13 @@ NOT GIVEN  if there is no information...
           <div class="form-group">
             <label>Question Type</label>
             <select class="form-input" id="edit_type_${c.id}" onchange="toggleCardOptionType('${c.id}', this.value)">
+              <option value="gap" ${c.type === 'gap' ? 'selected' : ''}>Sentence / Gap Fill / Short Answer (Điền từ)</option>
               <option value="choice" ${c.type === 'choice' ? 'selected' : ''}>Multiple Choice / True-False-Not Given</option>
-              <option value="gap" ${c.type === 'gap' ? 'selected' : ''}>Sentence / Gap Fill / Short Answer</option>
+              <option value="matching_options" ${c.type === 'matching_options' ? 'selected' : ''}>Matching Features / Names / Sentence Endings</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Question Prompt / Sentence</label>
+            <label>Question Prompt / Sentence (Use ..... or _____ for gaps)</label>
             <input type="text" class="form-input" id="edit_prompt_${c.id}" value="${c.prompt}">
           </div>
           <div class="form-group" id="opt_container_${c.id}" style="${c.type === 'gap' ? 'display:none;' : ''}">
@@ -1906,7 +1733,7 @@ NOT GIVEN  if there is no information...
             </div>
           </div>
           <div class="form-group">
-            <label>Correct Key / Answer</label>
+            <label>Correct Answer (Key - use / for multiple acceptable keys)</label>
             <input type="text" class="form-input" id="edit_ans_${c.id}" value="${c.answer}">
           </div>
           <div class="form-group">
@@ -1915,7 +1742,7 @@ NOT GIVEN  if there is no information...
           </div>
           <div class="form-group">
             <label>Evidence Snippet (Locate in Passage)</label>
-            <input type="text" class="form-input" id="edit_evi_${c.id}" value="${c.evidenceSnippet || ''}" placeholder="Exact quote from passage text to highlight...">
+            <input type="text" class="form-input" id="edit_evi_${c.id}" value="${c.evidenceSnippet || ''}" placeholder="Exact quote from passage to highlight...">
           </div>
         </div>
       `).join('');
