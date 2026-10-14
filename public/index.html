@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IELTS WITH AMURO - Testing Platform</title>
+  <style>
+    :root {
+      --amuro-navy: #0f172a;
+      --amuro-blue: #2563eb;
+      --amuro-gold: #f59e0b;
+      --bg: #f8fafc;
+      --border: #e2e8f0;
+      --border-dark: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --highlight: #fef08a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+    
+    /* Navigation Bar */
+    header.main-nav {
+      background: var(--amuro-navy);
+      color: #fff;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+    .brand { font-weight: 800; font-size: 16px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+    .brand span { background: var(--amuro-blue); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .badge { background: #334155; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+
+    .btn { padding: 6px 14px; border-radius: 6px; border: 1px solid transparent; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.15s; }
+    .btn-primary { background: var(--amuro-blue); color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary { background: #e2e8f0; color: #334155; }
+    .btn-secondary:hover { background: #cbd5e1; }
+    .btn-danger { background: #ef4444; color: #fff; }
+
+    /* Dashboard Layout */
+    .container { max-width: 1240px; margin: 24px auto; padding: 0 16px; width: 100%; flex: 1; }
+    .tabs-bar { display: flex; gap: 12px; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+    .tab-item { padding: 10px 18px; border: none; background: none; font-weight: 700; font-size: 14px; color: var(--text-muted); cursor: pointer; position: relative; bottom: -2px; }
+    .tab-item.active { color: var(--amuro-blue); border-bottom: 2px solid var(--amuro-blue); }
+
+    .card { background: #fff; border-radius: 8px; border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: #f8fafc; font-weight: 700; color: #475569; }
+
+    /* Login Screen */
+    #loginScreen { flex: 1; display: flex; align-items: center; justify-content: center; }
+    .login-box { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 32px; width: 380px; box-shadow: 0 4px 14px rgba(0,0,0,0.05); }
+
+    /* EXAM SHELL (INSPERA SIMULATION) */
+    #examShell { display: none; position: fixed; inset: 0; background: #fff; z-index: 1000; flex-direction: column; }
+    .exam-top { background: #1e293b; color: #fff; height: 46px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-size: 13px; font-weight: 600; }
+    .exam-timer { background: #0f172a; padding: 4px 10px; border-radius: 4px; font-family: monospace; font-size: 14px; color: var(--amuro-gold); font-weight: 700; }
+    .exam-workspace { flex: 1; display: flex; overflow: hidden; }
+    
+    .left-pane { width: 50%; padding: 24px; overflow-y: auto; line-height: 1.7; border-right: 1px solid var(--border-dark); }
+    .right-pane { width: 50%; padding: 24px; overflow-y: auto; background: #fafafa; }
+    .passage-img { max-width: 100%; border-radius: 6px; margin: 12px 0; border: 1px solid var(--border); }
+
+    /* DRAG & DROP MATCHING HEADINGS */
+    .drag-pool { background: #f1f5f9; border: 1px dashed #94a3b8; border-radius: 6px; padding: 12px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
+    .draggable-card { background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 8px 12px; font-size: 13px; cursor: grab; user-select: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .draggable-card:active { cursor: grabbing; opacity: 0.6; }
+    
+    .drop-zone { min-height: 44px; border: 2px dashed #94a3b8; border-radius: 4px; background: #fff; display: flex; align-items: center; padding: 4px 8px; margin-top: 6px; }
+    .drop-zone.over { border-color: var(--amuro-blue); background: #eff6ff; }
+    .drop-zone .draggable-card { width: 100%; margin: 0; }
+
+    /* INLINE GAP COMPLETION */
+    .gap-input { width: 140px; padding: 3px 8px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: 700; color: var(--amuro-blue); margin: 0 4px; outline: none; }
+    .gap-input:focus { border-color: var(--amuro-blue); box-shadow: 0 0 0 1px var(--amuro-blue); }
+
+    /* EVIDENCE LOCATOR HIGHLIGHT */
+    .highlight-locate { background: var(--highlight) !important; padding: 2px 4px; border-radius: 3px; transition: background 0.3s; }
+
+    /* VOCABULARY VIEW MODE */
+    .vocab-list { display: flex; flex-direction: column; gap: 10px; }
+    .vocab-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 12px; cursor: pointer; transition: 0.15s; }
+    .vocab-card:hover { border-color: var(--amuro-blue); background: #f8fafc; }
+    .vocab-word { font-weight: 700; color: var(--amuro-blue); font-size: 14px; }
+    .vocab-syn { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    /* WRITING ENVIRONMENT (INSPERA & DOC COMMENTING) */
+    .writing-editor { width: 100%; height: 380px; padding: 14px; border: 1px solid var(--border-dark); border-radius: 6px; font-size: 14px; line-height: 1.6; resize: none; outline: none; }
+    .word-count-badge { font-weight: 700; color: #475569; font-size: 13px; margin-top: 6px; }
+
+    /* Comment Box Style */
+    .comment-thread { background: #fffbeb; border-left: 4px solid var(--amuro-gold); padding: 8px 12px; margin-bottom: 8px; font-size: 13px; }
+    .comment-author { font-weight: 700; color: #92400e; font-size: 12px; }
+
+    /* Footer Nav */
+    .exam-footer { height: 54px; background: #fff; border-top: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+    .footer-cells { display: flex; gap: 4px; overflow-x: auto; max-width: 80%; }
+    .cell-btn { min-width: 28px; height: 28px; border: 1px solid var(--border-dark); border-radius: 4px; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .cell-btn.filled { background: #334155; color: #fff; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="main-nav">
+    <div class="brand">
+      IELTS WITH AMURO <span>STUDY ROOM</span>
+    </div>
+    <div class="nav-right" id="navUserArea"></div>
+  </header>
+
+  <!-- Login Screen -->
+  <div id="loginScreen">
+    <div class="login-box">
+      <h2 style="margin-bottom: 6px; font-size: 18px;">Học Viện IELTS WITH AMURO</h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Đăng nhập để luyện Reading & Writing</p>
+      <div style="margin-bottom: 12px;">
+        <label style="font-size: 12px; font-weight: 600;">Tên tài khoản:</label>
+        <input type="text" id="logUser" style="width: 100%; padding: 8px; border: 1px solid var(--border-dark); border-radius: 4px; margin-top: 4px;">
+      </div>
+      <div style="margin-bottom: 18px;">
+        <label style="font-size: 12px; font-weight: 600;">Mật khẩu:</label>
+        <input type="password" id="logPass" style="width: 100%; padding: 8px; border: 1px solid var(--border-dark); border-radius: 4px; margin-top: 4px;">
+      </div>
+      <button class="btn btn-primary" style="width: 100%; padding: 9px;" onclick="doLogin()">Vào Phòng Học</button>
+      <div style="font-size: 11px; color: var(--text-muted); margin-top: 14px;">
+        * Quản trị viên: <b>amuro</b> | Mật khẩu: <b>amuro123</b>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Workspace -->
+  <div class="container" id="dashboard" style="display: none;">
+    <div class="tabs-bar">
+      <button class="tab-item active" onclick="switchNavTab('reading')">📖 Đề Luyện Reading</button>
+      <button class="tab-item" onclick="switchNavTab('writing')">✍️ Đề Luyện Writing</button>
+      <button class="tab-item" onclick="switchNavTab('vocab')">🧠 Tra Cứu & Học Từ Vựng</button>
+      <button class="tab-item teacher-only" onclick="switchNavTab('grading')">📝 Chấm Bài Writing (Google Docs View)</button>
+    </div>
+
+    <!-- READING EXAMS -->
+    <div id="view-reading" class="tab-view">
+      <div class="card">
+        <div class="card-title">
+          <span>Kho Đề Thi Reading Chuẩn Thi Máy</span>
+          <button class="btn btn-primary teacher-only" onclick="openCreateReadingModal()">+ Soạn Đề Reading Mới</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Tên Bài Đọc</th><th>Thời Lượng</th><th>Dạng Câu Hỏi</th><th>Thao Tác</th></tr>
+          </thead>
+          <tbody id="readingTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- WRITING EXAMS -->
+    <div id="view-writing" class="tab-view" style="display: none;">
+      <div class="card">
+        <div class="card-title">
+          <span>Kho Đề Thi Writing (Task 1 & Task 2)</span>
+          <button class="btn btn-primary teacher-only" onclick="openCreateWritingModal()">+ Thêm Đề Writing</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Đề Bài</th><th>Loại Task</th><th>Thời Lượng</th><th>Thao Tác</th></tr>
+          </thead>
+          <tbody id="writingTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VOCABULARY INTERACTIVE MODE -->
+    <div id="view-vocab" class="tab-view" style="display: none;">
+      <div class="card">
+        <div class="card-title">
+          <span>Chế Độ Học Từ Vựng Theo Ngữ Cảnh Bài Đọc (Interactive Vocab)</span>
+        </div>
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+          Bấm vào bất kỳ từ vựng nào ở cột phải để tự động định vị và phát sáng từ đó trong bài đọc bên trái.
+        </p>
+        <div style="display: flex; height: 500px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden;">
+          <div style="width: 60%; padding: 20px; overflow-y: auto; line-height: 1.8; border-right: 1px solid var(--border);" id="vocabReadingPassage">
+            <!-- Bài đọc có chứa từ vựng -->
+          </div>
+          <div style="width: 40%; padding: 16px; overflow-y: auto; background: #fafafa;" id="vocabCardsContainer">
+            <!-- Danh sách card từ vựng -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEACHER GRADING (GOOGLE DOCS VIEW) -->
+    <div id="view-grading" class="tab-view" style="display: none;">
+      <div class="card">
+        <div class="card-title">
+          <span>Danh Sách Bài Nộp Writing Cần Chấm</span>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Học Sinh</th><th>Đề Bài</th><th>Thời Gian Nộp</th><th>Điểm Đã Chấm</th><th>Thao Tác</th></tr>
+          </thead>
+          <tbody id="gradingTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXAM ENGINE SHELL (INSPERA SIMULATION) -->
+  <div id="examShell">
+    <div class="exam-top">
+      <span id="shellExamTitle">IELTS Examination</span>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span class="exam-timer" id="shellTimer">60:00</span>
+        <button class="btn btn-secondary" onclick="exitShell()">Thoát</button>
+        <button class="btn btn-danger" onclick="submitActiveExam()">Nộp Bài</button>
+      </div>
+    </div>
+    
+    <div class="exam-workspace" id="examWorkspaceArea">
+      <!-- Màn hình chia 2 cột sẽ được render tại đây -->
+    </div>
+
+    <div class="exam-footer">
+      <span style="font-size: 12px; font-weight: 700; color: #475569;">Question Navigation:</span>
+      <div class="footer-cells" id="shellNavCells"></div>
+      <button class="btn btn-primary" onclick="submitActiveExam()">Hoàn Thành</button>
+    </div>
+  </div>
+
+  <script>
+    /* =====================================================================
+       CLIENT CORE LOGIC: KÉO THẢ, EVIDENCE LOCATOR & GOOGLE DOCS COMMENT
+       ===================================================================== */
+    let currentUser = null;
+    let localDB = null;
+    let activeExam = null;
+    let userAnswers = {};
+    let timerId = null;
+    let timeLeft = 3600;
+
+    // Tải dữ liệu ban đầu từ API
+    async function fetchDB() {
+      const res = await fetch('/api/data');
+      localDB = await res.json();
+      renderAll();
+    }
+
+    // Đăng nhập
+    async function doLogin() {
+      const username = document.getElementById('logUser').value.trim();
+      const password = document.getElementById('logPass').value.trim();
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      if (!res.ok) return alert('Tài khoản hoặc mật khẩu không đúng!');
+      currentUser = await res.json();
+      
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      
+      const navUser = document.getElementById('navUserArea');
+      navUser.innerHTML = `
+        <span class="badge">${currentUser.role === 'teacher' ? '👨‍🏫 ' + currentUser.name : '👨‍🎓 ' + currentUser.name}</span>
+        <button class="btn btn-secondary" onclick="location.reload()">Đăng Xuất</button>
+      `;
+
+      if (currentUser.role !== 'teacher') {
+        document.querySelectorAll('.teacher-only').forEach(el => el.style.display = 'none');
+      }
+
+      fetchDB();
+    }
+
+    function switchNavTab(tab) {
+      document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-view').forEach(v => v.style.display = 'none');
+      event.target.classList.add('active');
+      document.getElementById('view-' + tab).style.display = 'block';
+    }
+
+    function renderAll() {
+      renderReadingTable();
+      renderWritingTable();
+      renderVocabSection();
+      renderGradingTable();
+    }
+
+    /* -------------------------------------------------------------
+       1. MATCHING HEADINGS KÉO - THẢ & BÀI ĐỌC READING INSPERA
+       ------------------------------------------------------------- */
+    function renderReadingTable() {
+      const tbody = document.getElementById('readingTable');
+      tbody.innerHTML = '';
+      localDB.readingExams.forEach(e => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${e.title}</b></td>
+          <td>${e.duration} phút</td>
+          <td>${e.formats || 'Matching Headings, Gap-fill...'}</td>
+          <td>
+            <button class="btn btn-primary" onclick="launchReadingExam('${e.id}')">Vào Thi</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function launchReadingExam(examId) {
+      activeExam = localDB.readingExams.find(e => e.id === examId);
+      userAnswers = {};
+      timeLeft = activeExam.duration * 60;
+
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('examShell').style.display = 'flex';
+      document.getElementById('shellExamTitle').textContent = activeExam.title;
+
+      renderReadingInsperaUI();
+      buildNavCells();
+      startTimer();
+    }
+
+    function renderReadingInsperaUI() {
+      const area = document.getElementById('examWorkspaceArea');
+      area.innerHTML = `
+        <div class="left-pane" id="passageDisplay">
+          <h2>${activeExam.passageTitle}</h2>
+          ${activeExam.image ? `<img src="${activeExam.image}" class="passage-img">` : ''}
+          <div id="passageParagraphs">${activeExam.passageHtml}</div>
+        </div>
+        <div class="right-pane" id="questionsDisplay"></div>
+      `;
+
+      const qDisplay = document.getElementById('questionsDisplay');
+      
+      // XỬ LÝ DẠNG BÀI MATCHING HEADINGS KÉO - THẢ (HTML5 DRAG AND DROP)
+      if (activeExam.headingsGroup) {
+        const group = activeExam.headingsGroup;
+        let html = `
+          <div class="card" style="margin-bottom: 20px;">
+            <b style="font-size: 13px; text-transform: uppercase;">${group.title}</b>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 6px 0 12px 0;">
+              Kéo tiêu đề thích hợp và thả vào ô tương ứng của từng đoạn văn.
+            </p>
+            <div class="drag-pool" id="dragPool" ondragover="allowDrop(event)" ondrop="handleDropToPool(event)">
+              ${group.headings.map((h, i) => `
+                <div class="draggable-card" draggable="true" id="drag_h_${i}" ondragstart="handleDragStart(event, '${h.id}', '${h.text}')">
+                  <b>${h.id}.</b>${h.text}
+                </div>
+              `).join('')}
+            </div>
+            
+            <div style="margin-top: 14px;">
+              ${group.questions.map(q => `
+                <div style="margin-bottom: 12px;">
+                  <span style="font-size: 13px; font-weight: 700;">${q.label}:</span>
+                  <div class="drop-zone" id="drop_zone_${q.id}" ondragover="allowDrop(event)" ondrop="handleDropToQuestion(event, '${q.id}')">
+                    <span style="color: #94a3b8; font-size: 12px;" id="placeholder_${q.id}">Thả tiêu đề vào đây...</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        qDisplay.innerHTML += html;
+      }
+
+      // XỬ LÝ DẠNG ĐIỀN TỪ (CHẤP NHẬN NHIỀU ĐÁP ÁN: A / B / C)
+      if (activeExam.gapGroup) {
+        let filledText = activeExam.gapGroup.template;
+        activeExam.gapGroup.questions.forEach(q => {
+          const inp = `<input type="text" class="gap-input" placeholder="[${q.id}]" oninput="saveAnswer('${q.id}', this.value)">`;
+          filledText = filledText.replace(`[${q.id}]`, inp);
+        });
+        qDisplay.innerHTML += `
+          <div class="card">
+            <b style="font-size: 13px; text-transform: uppercase;">${activeExam.gapGroup.title}</b>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 6px 0 12px 0;">${activeExam.gapGroup.instructions}</p>
+            <div style="line-height: 2.2; font-size: 14px;">${filledText}</div>
+          </div>
+        `;
+      }
+    }
+
+    // Sự kiện Kéo - Thả
+    function allowDrop(e) { e.preventDefault(); }
+    function handleDragStart(e, id, text) {
+      e.dataTransfer.setData('headingId', id);
+      e.dataTransfer.setData('cardElementId', e.target.id);
+    }
+    function handleDropToQuestion(e, qId) {
+      e.preventDefault();
+      const headingId = e.dataTransfer.getData('headingId');
+      const cardElId = e.dataTransfer.getData('cardElementId');
+      const card = document.getElementById(cardElId);
+      
+      const zone = document.getElementById(`drop_zone_${qId}`);
+      document.getElementById(`placeholder_${qId}`).style.display = 'none';
+      zone.appendChild(card);
+      userAnswers[qId] = headingId;
+    }
+    function handleDropToPool(e) {
+      e.preventDefault();
+      const cardElId = e.dataTransfer.getData('cardElementId');
+      document.getElementById('dragPool').appendChild(document.getElementById(cardElId));
+    }
+
+    function saveAnswer(qId, val) {
+      userAnswers[qId] = val.trim();
+    }
+
+    /* -------------------------------------------------------------
+       2. EVIDENCE LOCATOR (ĐỊNH VỊ DẪN CHỨNG KHI XEM GIẢI THÍCH)
+       ------------------------------------------------------------- */
+    function locateEvidenceInPassage(paragraphId, snippetText) {
+      const p = document.getElementById(paragraphId);
+      if (!p) return;
+      p.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      p.classList.add('highlight-locate');
+      setTimeout(() => p.classList.remove('highlight-locate'), 3000);
+    }
+
+    /* -------------------------------------------------------------
+       3. INTERACTIVE VOCABULARY VIEW (BẤM TỪ PHÁT SÁNG BÀI ĐỌC)
+       ------------------------------------------------------------- */
+    function renderVocabSection() {
+      const pArea = document.getElementById('vocabReadingPassage');
+      const cArea = document.getElementById('vocabCardsContainer');
+      
+      const sampleText = `Industrialization brought massive changes. Many cities suffered from <span id="v_word_1" style="font-weight:700;">unprecedented</span> levels of smoke. The government had to <span id="v_word_2" style="font-weight:700;">implement</span> strict environmental regulations to <span id="v_word_3" style="font-weight:700;">mitigate</span> respiratory diseases among citizens.`;
+      pArea.innerHTML = sampleText;
+
+      const words = [
+        { id: 'v_word_1', word: 'unprecedented', type: 'adj', mean: 'Chưa từng có tiền lệ', syn: 'unparalleled, extraordinary' },
+        { id: 'v_word_2', word: 'implement', type: 'v', mean: 'Thực thi, áp dụng', syn: 'execute, carry out' },
+        { id: 'v_word_3', word: 'mitigate', type: 'v', mean: 'Giảm thiểu, làm dịu bớt', syn: 'alleviate, reduce, lessen' }
+      ];
+
+      cArea.innerHTML = words.map(w => `
+        <div class="vocab-card" onclick="highlightVocabInText('${w.id}')">
+          <div class="vocab-word">${w.word} <span style="font-size: 11px; font-weight: normal; color: #64748b;">(${w.type})</span></div>
+          <div style="font-size: 13px; margin-top: 3px;">${w.mean}</div>
+          <div class="vocab-syn">Đồng nghĩa: <b>${w.syn}</b></div>
+        </div>
+      `).join('');
+    }
+
+    function highlightVocabInText(spanId) {
+      const el = document.getElementById(spanId);
+      if (!el) return;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.style.backgroundColor = 'var(--amuro-gold)';
+      el.style.padding = '2px 6px';
+      el.style.borderRadius = '3px';
+      setTimeout(() => { el.style.backgroundColor = 'transparent'; }, 2000);
+    }
+
+    /* -------------------------------------------------------------
+       4. WRITING SYSTEM & CHẤM BÀI PHONG CÁCH GOOGLE DOCS
+       ------------------------------------------------------------- */
+    function renderWritingTable() {
+      const tbody = document.getElementById('writingTable');
+      tbody.innerHTML = '';
+      localDB.writingExams.forEach(w => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${w.title}</b></td>
+          <td>Task ${w.taskNumber}</td>
+          <td>${w.duration} phút</td>
+          <td><button class="btn btn-primary" onclick="launchWritingExam('${w.id}')">Làm Bài</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function launchWritingExam(examId) {
+      const we = localDB.writingExams.find(x => x.id === examId);
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('examShell').style.display = 'flex';
+      document.getElementById('shellExamTitle').textContent = we.title;
+
+      const area = document.getElementById('examWorkspaceArea');
+      area.innerHTML = `
+        <div class="left-pane">
+          <h2>${we.title}</h2>
+          <p style="margin: 12px 0; font-size: 14px; line-height: 1.6;">${we.prompt}</p>
+          ${we.image ? `<img src="${we.image}" class="passage-img">` : ''}
+        </div>
+        <div class="right-pane" style="display: flex; flex-direction: column;">
+          <textarea class="writing-editor" id="studentEssay" placeholder="Type your response here..." oninput="updateWordCount(this.value)"></textarea>
+          <div class="word-count-badge" id="wordCountLabel">Total Words: 0</div>
+        </div>
+      `;
+    }
+
+    function updateWordCount(text) {
+      const count = text.trim() ? text.trim().split(/\s+/).length : 0;
+      document.getElementById('wordCountLabel').textContent = `Total Words: ${count}`;
+    }
+
+    function renderGradingTable() {
+      const tbody = document.getElementById('gradingTable');
+      tbody.innerHTML = '';
+      localDB.writingSubmissions.forEach(sub => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${sub.studentName}</b></td>
+          <td>${sub.examTitle}</td>
+          <td>${sub.timestamp}</td>
+          <td><b style="color: var(--amuro-blue);">${sub.score ? 'Band ' + sub.score : 'Chưa chấm'}</b></td>
+          <td><button class="btn btn-primary" onclick="openDocGradingModal('${sub.id}')">Mở Chấm Điểm</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openDocGradingModal(subId) {
+      const sub = localDB.writingSubmissions.find(s => s.id === subId);
+      const commentsHtml = sub.comments.map(c => `
+        <div class="comment-thread">
+          <div class="comment-author">${c.author}:</div>
+          <div style="font-weight: 600; text-decoration: underline;">"${c.selectedText}"</div>
+          <div>👉 ${c.comment}</div>
+        </div>
+      `).join('');
+
+      alert(`Chế độ chấm bài kiểu Google Docs:\n\nBài viết của ${sub.studentName}:\n\n${sub.essay}\n\nNhận xét hiện tại:\n${commentsHtml || 'Chưa có nhận xét'}`);
+    }
+
+    /* -------------------------------------------------------------
+       5. NỘP BÀI READING & CHẤP NHẬN NHIỀU ĐÁP ÁN (SUBTLE / SLIGHT)
+       ------------------------------------------------------------- */
+    async function submitActiveExam() {
+      if (!confirm('Xác nhận hoàn thành và nộp bài?')) return;
+      clearInterval(timerId);
+
+      let correct = 0;
+      let total = 0;
+
+      // So khớp đáp án (hỗ trợ nhiều đáp án phân tách bằng dấu / hoặc |)
+      if (activeExam.gapGroup) {
+        activeExam.gapGroup.questions.forEach(q => {
+          total++;
+          const userAns = (userAnswers[q.id] || '').trim().toLowerCase();
+          const accepted = q.acceptedAnswers.map(a => a.trim().toLowerCase());
+          if (accepted.includes(userAns)) correct++;
+        });
+      }
+
+      await fetch('/api/reading/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studentName: currentUser.name,
+          examTitle: activeExam.title,
+          correct,
+          total,
+          answers: userAnswers
+        })
+      });
+
+      alert(`Nộp bài thành công!\nSố câu đúng: ${correct}/${total}`);
+      location.reload();
+    }
+
+    function exitShell() {
+      if (confirm('Thoát khỏi bài thi?')) location.reload();
+    }
+
+    function buildNavCells() {
+      const nav = document.getElementById('shellNavCells');
+      nav.innerHTML = '';
+      for (let i = 1; i <= 10; i++) {
+        nav.innerHTML += `<button class="cell-btn">${i}</button>`;
+      }
+    }
+
+    function startTimer() {
+      const timerEl = document.getElementById('shellTimer');
+      timerId = setInterval(() => {
+        if (timeLeft <= 0) return clearInterval(timerId);
+        timeLeft--;
+        const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+        const s = String(timeLeft % 60).padStart(2, '0');
+        timerEl.textContent = `${m}:${s}`;
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
