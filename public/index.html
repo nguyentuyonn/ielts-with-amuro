@@ -22,7 +22,7 @@
     body { background: #fff; color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
     /* ========================================================
-       1. SPLIT LOGIN SCREEN: MATCHA & MINT WITH MASSIVE LOGO
+       1. SPLIT LOGIN SCREEN: MATCHA & MINT
        ======================================================== */
     #loginScreen {
       position: fixed; inset: 0; z-index: 9999;
@@ -180,11 +180,15 @@
     .bookmark-btn.bookmarked svg { fill: var(--bookmark-gold); }
 
     .gap-inline-input {
-      width: 140px; padding: 4px 8px; border: 1.5px solid #94a3b8;
+      width: 150px; padding: 4px 8px; border: 1.5px solid #94a3b8;
       border-radius: 4px; font-weight: 700; color: var(--emerald-dark); outline: none; margin: 0 4px;
     }
 
-    /* Floating Highlight & Note Menu */
+    /* Writing Area */
+    .writing-editor { width: 100%; height: 380px; padding: 16px; border: 1px solid var(--inspera-border); border-radius: 8px; font-size: 14px; line-height: 1.6; resize: none; outline: none; }
+    .word-count-badge { font-weight: 700; color: #475569; font-size: 13px; margin-top: 8px; }
+
+    /* Floating Highlight Toolbar */
     #insperaTextToolbar {
       display: none; position: absolute; z-index: 6000;
       background: #1e293b; color: #fff; border-radius: 6px;
@@ -195,8 +199,6 @@
       font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 4px;
     }
     #insperaTextToolbar button:hover { background: #334155; }
-
-    /* Highlighting */
     .user-highlight { background-color: var(--highlight-yellow); padding: 1px 2px; border-radius: 2px; }
     .note-inline-badge {
       background: #fef08a; border: 1px solid #ca8a04; border-radius: 3px;
@@ -260,8 +262,6 @@
       border-radius: 8px; padding: 16px; margin-bottom: 16px;
     }
     .q-edit-opt-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-
-    /* Active Subtabs */
     .active-subtab { background: var(--emerald-accent) !important; color: #fff !important; border-color: var(--emerald-accent) !important; }
   </style>
 </head>
@@ -320,15 +320,16 @@
 
     <div class="dash-body">
       <div class="dash-tabs">
-        <button class="dash-tab-btn active" onclick="switchDashTab('reading')">📖 Reading Tests</button>
-        <button class="dash-tab-btn" onclick="switchDashTab('vocab')">🧠 Vocabulary Vault</button>
-        <button class="dash-tab-btn" onclick="switchDashTab('myvocab')">⭐ My Saved Vocabulary</button>
-        <button class="dash-tab-btn teacher-item" onclick="switchDashTab('classes')">🏫 Class Management</button>
-        <button class="dash-tab-btn teacher-item" onclick="switchDashTab('students')">👤 Students & Accounts</button>
-        <button class="dash-tab-btn teacher-item" onclick="switchDashTab('analytics')">📊 Submissions & Scores</button>
+        <button class="dash-tab-btn active" id="tabbtn-reading" onclick="switchDashTab('reading')">📖 Reading Tests</button>
+        <button class="dash-tab-btn" id="tabbtn-writing" onclick="switchDashTab('writing')">✍️ Writing Tests (Task 1 & 2)</button>
+        <button class="dash-tab-btn" id="tabbtn-vocab" onclick="switchDashTab('vocab')">🧠 Vocabulary Vault</button>
+        <button class="dash-tab-btn" id="tabbtn-myvocab" onclick="switchDashTab('myvocab')">⭐ My Saved Vocabulary</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-classes" onclick="switchDashTab('classes')">🏫 Class Management</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-students" onclick="switchDashTab('students')">👤 Students & Accounts</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-analytics" onclick="switchDashTab('analytics')">📊 Submissions & Scores</button>
       </div>
 
-      <!-- TAB 1: READING -->
+      <!-- TAB 1: READING (DEFAULT DASHBOARD VIEW) -->
       <div id="tab-reading" class="dash-pane">
         <div class="card">
           <div class="card-title">
@@ -344,7 +345,23 @@
         </div>
       </div>
 
-      <!-- TAB 2: VOCABULARY VAULT -->
+      <!-- TAB 2: WRITING (RESTORED) -->
+      <div id="tab-writing" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Writing Assessment Library (Task 1 & Task 2)</span>
+            <button class="btn btn-emerald teacher-item" onclick="openWritingEditorModal()">+ Create Writing Test (Both Tasks)</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Test Title</th><th>Duration</th><th>Tasks</th><th>Action</th></tr>
+            </thead>
+            <tbody id="writingTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 3: VOCABULARY VAULT -->
       <div id="tab-vocab" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title"><span>Interactive Vocabulary Context Mode</span></div>
@@ -355,7 +372,7 @@
         </div>
       </div>
 
-      <!-- TAB 3: MY SAVED VOCAB -->
+      <!-- TAB 4: MY SAVED VOCAB -->
       <div id="tab-myvocab" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title"><span>My Personal Saved Vocabulary</span></div>
@@ -363,7 +380,7 @@
         </div>
       </div>
 
-      <!-- TAB 4: CLASSES -->
+      <!-- TAB 5: CLASSES -->
       <div id="tab-classes" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title">
@@ -379,7 +396,7 @@
         </div>
       </div>
 
-      <!-- TAB 5: STUDENTS -->
+      <!-- TAB 6: STUDENTS -->
       <div id="tab-students" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title">
@@ -395,7 +412,7 @@
         </div>
       </div>
 
-      <!-- TAB 6: ANALYTICS -->
+      <!-- TAB 7: ANALYTICS -->
       <div id="tab-analytics" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title"><span>Student Performance History</span></div>
@@ -423,7 +440,7 @@
       </div>
     </div>
 
-    <!-- Passage Tabs (Passage 1, 2, 3) -->
+    <!-- Passage Tabs (Passage 1, 2, 3 or Task 1, Task 2) -->
     <div class="inspera-part-tabs" id="insperaPartTabs"></div>
 
     <!-- Main Split-view Workspace -->
@@ -468,10 +485,10 @@
     </div>
   </div>
 
-  <!-- MODAL: AUTO-PARSER & LIVE QUESTION EDITOR (EDITABLE) -->
+  <!-- MODAL: AUTO-PARSER & LIVE QUESTION EDITOR -->
   <div class="modal-overlay" id="readingEditorModal">
     <div class="modal-window">
-      <div class="modal-header">Reading Test Builder (Auto-Detect & Live Edit)</div>
+      <div class="modal-header">Reading Test Builder (Batch Auto-Parser & Editor)</div>
       <div class="modal-body">
         <input type="hidden" id="editingExamId">
         <div class="form-group">
@@ -501,6 +518,9 @@
           
           <div class="form-group" style="background: #f8fafc; border: 1.5px dashed var(--inspera-border); border-radius: 8px; padding: 14px;">
             <label style="font-weight: 800; color: var(--emerald-dark);">Raw Question Batch (Paste from Cambridge / Word)</label>
+            <p style="font-size: 11px; color: #64748b; margin-bottom: 6px;">
+              💡 Dán văn bản của từng dạng (ví dụ cụm câu 1-7 T/F/NG, rồi dán tiếp cụm 8-13 điền từ). Sau khi bấm nút bên dưới, các câu hỏi sẽ được <b>nạp thêm vào danh sách</b> và ô này sẽ tự động xóa sạch để anh dán tiếp!
+            </p>
             <textarea id="rePRawQuestions" class="form-input" style="height: 140px; font-family: monospace;" placeholder="Questions 1-7
 Do the following statements agree with the information given in Reading Passage 1?
 TRUE       if the statement agrees...
@@ -509,13 +529,16 @@ NOT GIVEN  if there is no information...
 1    Other people have been referred to as 'the last man who knew everything'.
 2    The fact that Young's childhood brilliance continued into adulthood was normal."></textarea>
             <button class="btn btn-emerald" style="margin-top: 10px; font-size: 12px;" onclick="autoParseRawToLiveCards()">
-              ⚡ Auto-Detect & Generate Question Cards
+              ⚡ Auto-Detect & Append Question Cards
             </button>
           </div>
 
           <!-- Live Generated Cards Container -->
           <div style="margin-top: 16px;">
-            <label style="font-weight: 800; font-size: 14px; margin-bottom: 8px; display: block;">Interactive Question Cards (Edit & Select Key Below)</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <label style="font-weight: 800; font-size: 14px;">Interactive Question Cards (Edit & Select Key Below)</label>
+              <button class="btn btn-secondary" style="padding:3px 8px; font-size:11px;" onclick="clearAllDraftCards()">Clear Cards</button>
+            </div>
             <div id="liveQuestionCardsBox">
               <p style="color: #64748b; font-style: italic;">No question cards generated yet. Paste text above and click Auto-Detect.</p>
             </div>
@@ -525,6 +548,45 @@ NOT GIVEN  if there is no information...
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('readingEditorModal')">Cancel</button>
         <button class="btn btn-emerald" onclick="saveActiveExamFromCards()">Save Full Exam</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CREATE WRITING ASSESSMENT -->
+  <div class="modal-overlay" id="writingEditorModal">
+    <div class="modal-window">
+      <div class="modal-header">Create Writing Assessment (Task 1 & Task 2)</div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Exam Title</label>
+          <input type="text" id="weTitle" class="form-input" placeholder="e.g. Writing Simulation 02">
+        </div>
+        <div class="form-group">
+          <label>Duration (Minutes)</label>
+          <input type="number" id="weDuration" class="form-input" value="60">
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 1</h4>
+          <div class="form-group">
+            <label>Prompt</label>
+            <textarea id="weT1Prompt" class="form-input" style="height: 90px;" placeholder="The chart below shows..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Chart Image URL (Optional)</label>
+            <input type="text" id="weT1Image" class="form-input" placeholder="https://example.com/chart.png">
+          </div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px;">
+          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 2</h4>
+          <div class="form-group">
+            <label>Prompt</label>
+            <textarea id="weT2Prompt" class="form-input" style="height: 90px;" placeholder="Some people believe that... Discuss both views and give your opinion."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('writingEditorModal')">Cancel</button>
+        <button class="btn btn-emerald" onclick="saveWritingExam()">Save Writing Test</button>
       </div>
     </div>
   </div>
@@ -618,7 +680,7 @@ NOT GIVEN  if there is no information...
     /* ========================================================
        DATABASE CORE & MULTI-PASSAGE SAMPLE EXAM
        ======================================================== */
-    const DB_KEY = 'AMURO_OFFICIAL_IELTS_SUITE_V5';
+    const DB_KEY = 'AMURO_OFFICIAL_IELTS_SUITE_V6';
 
     let db = JSON.parse(localStorage.getItem(DB_KEY)) || {
       users: [
@@ -629,7 +691,7 @@ NOT GIVEN  if there is no information...
         { id: 'c1', name: 'IELTS Intensive 7.5+' },
         { id: 'c2', name: 'Foundation Morning' }
       ],
-      savedVocab: {}, // { username: [ { word, mean, syn, passageTitle } ] }
+      savedVocab: {},
       readingExams: [
         {
           id: 're_cambridge_mock',
@@ -746,6 +808,20 @@ NOT GIVEN  if there is no information...
           ]
         }
       ],
+      writingExams: [
+        {
+          id: 'we_sample_1',
+          title: 'IELTS Academic Writing Simulation 01',
+          duration: 60,
+          task1: {
+            prompt: 'The chart below shows global energy consumption by source between 1990 and 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+            image: ''
+          },
+          task2: {
+            prompt: 'Some people argue that technological progress increases the gap between rich and poor nations, while others believe it has the opposite effect. Discuss both views and give your own opinion.'
+          }
+        }
+      ],
       results: []
     };
 
@@ -754,7 +830,9 @@ NOT GIVEN  if there is no information...
     let activeUser = JSON.parse(localStorage.getItem('AMURO_CURRENT_USER')) || null;
     let activeExam = null;
     let activePartNum = 1;
+    let activeExamType = 'reading';
     let userAnswers = {};
+    let writingAnswers = { task1: '', task2: '' };
     let bookmarkedQuestions = new Set();
     let isReviewMode = false;
     let examTimer = null;
@@ -769,6 +847,8 @@ NOT GIVEN  if there is no information...
         document.getElementById('dashboardApp').style.display = 'flex';
         document.getElementById('userProfileLabel').textContent = `👤 ${activeUser.name} (${activeUser.role.toUpperCase()})`;
         document.querySelectorAll('.teacher-item').forEach(el => el.style.display = activeUser.role === 'teacher' ? '' : 'none');
+        // Default View is always Reading Tests
+        switchDashTab('reading');
         renderDashboard();
       } else {
         document.getElementById('loginScreen').style.display = 'flex';
@@ -819,13 +899,16 @@ NOT GIVEN  if there is no information...
     function switchDashTab(tab) {
       document.querySelectorAll('.dash-tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.dash-pane').forEach(p => p.style.display = 'none');
-      event.target.classList.add('active');
-      document.getElementById('tab-' + tab).style.display = 'block';
+      const targetBtn = document.getElementById('tabbtn-' + tab);
+      if (targetBtn) targetBtn.classList.add('active');
+      const targetPane = document.getElementById('tab-' + tab);
+      if (targetPane) targetPane.style.display = 'block';
       if (tab === 'myvocab') renderMySavedVocab();
     }
 
     function renderDashboard() {
       renderReadingTable();
+      renderWritingTable();
       renderVocabTab();
       renderMySavedVocab();
       if (activeUser.role === 'teacher') {
@@ -864,6 +947,23 @@ NOT GIVEN  if there is no information...
       });
     }
 
+    function renderWritingTable() {
+      const tbody = document.getElementById('writingTbody');
+      tbody.innerHTML = '';
+      db.writingExams.forEach(w => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${w.title}</b></td>
+          <td>${w.duration} mins</td>
+          <td>Task 1 & Task 2</td>
+          <td>
+            <button class="btn btn-emerald" onclick="launchWritingExam('${w.id}')">Start Writing</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
     function openVocabDirectly(examId) {
       switchDashTab('vocab');
       const exam = db.readingExams.find(e => e.id === examId);
@@ -886,7 +986,6 @@ NOT GIVEN  if there is no information...
 
     function spotVocabWordInPassage(word) {
       const pPane = document.getElementById('vocabPassagePane');
-      // Clean previous highlight
       pPane.querySelectorAll('.evidence-highlight-active').forEach(el => el.outerHTML = el.innerHTML);
 
       const regex = new RegExp(`\\b(${word})\\b`, 'gi');
@@ -993,12 +1092,13 @@ NOT GIVEN  if there is no information...
     }
 
     /* ========================================================
-       INSPERA EXAM ENGINE & REVIEW WORKSPACE
+       INSPERA READING TEST ENVIRONMENT
        ======================================================== */
     function launchExam(examId) {
       activeExam = db.readingExams.find(e => e.id === examId);
       if (!activeExam) return;
 
+      activeExamType = 'reading';
       isReviewMode = false;
       activePartNum = 1;
       userAnswers = {};
@@ -1021,11 +1121,18 @@ NOT GIVEN  if there is no information...
 
     function renderPartPills() {
       const nav = document.getElementById('insperaPartTabs');
-      nav.innerHTML = activeExam.passages.map(p => `
-        <button class="part-pill ${p.partNum === activePartNum ? 'active' : ''}" onclick="switchExamPassage(${p.partNum})">
-          Passage ${p.partNum}
-        </button>
-      `).join('');
+      if (activeExamType === 'writing') {
+        nav.innerHTML = `
+          <button class="part-pill ${activePartNum === 1 ? 'active' : ''}" onclick="switchWritingTask(1)">Writing Task 1</button>
+          <button class="part-pill ${activePartNum === 2 ? 'active' : ''}" onclick="switchWritingTask(2)">Writing Task 2</button>
+        `;
+      } else {
+        nav.innerHTML = activeExam.passages.map(p => `
+          <button class="part-pill ${p.partNum === activePartNum ? 'active' : ''}" onclick="switchExamPassage(${p.partNum})">
+            Passage ${p.partNum}
+          </button>
+        `).join('');
+      }
     }
 
     function switchExamPassage(partNum) {
@@ -1070,7 +1177,7 @@ NOT GIVEN  if there is no information...
             <div id="headingsPoolBox" ondragover="allowDrop(event)" ondrop="handleReturnToPool(event)">
               ${passage.headingsPool.map(h => `
                 <div class="heading-chip" draggable="true" id="hchip_${h.id}" ondragstart="handleDragStart(event, '${h.id}')">
-                  <b>${h.id}.</b>${h.text}
+                  <b>${h.id}.</b> ${h.text}
                 </div>
               `).join('')}
             </div>
@@ -1207,10 +1314,10 @@ NOT GIVEN  if there is no information...
       updateFooterNav();
     }
 
-    /* FOOTER NAVIGATION: EXACT NUMBERS (1, 2, 3...) */
     function buildFooterNav() {
       const container = document.getElementById('insperaFooterList');
       container.innerHTML = '';
+      if (activeExamType === 'writing') return;
 
       let allQuestionEntries = [];
       activeExam.passages.forEach(p => {
@@ -1254,7 +1361,6 @@ NOT GIVEN  if there is no information...
       });
     }
 
-    /* EVIDENCE LOCATOR: CLEAN PREVIOUS HIGHLIGHT COMPLETELY BEFORE SHOWING NEW */
     function clearExistingEvidenceHighlights() {
       const leftPane = document.getElementById('insperaLeftPane');
       leftPane.querySelectorAll('.evidence-highlight-active').forEach(el => {
@@ -1288,7 +1394,6 @@ NOT GIVEN  if there is no information...
       }
     }
 
-    /* INSPERA REAL HIGHLIGHT & NOTE TOOLBAR */
     function setupInsperaTextToolbar() {
       const leftPane = document.getElementById('insperaLeftPane');
       const bar = document.getElementById('insperaTextToolbar');
@@ -1340,7 +1445,6 @@ NOT GIVEN  if there is no information...
       document.getElementById('insperaTextToolbar').style.display = 'none';
     }
 
-    /* RESIZER */
     function setupResizer() {
       const resizer = document.getElementById('insperaResizer');
       const left = document.getElementById('insperaLeftPane');
@@ -1396,11 +1500,82 @@ NOT GIVEN  if there is no information...
     }
 
     /* ========================================================
+       INSPERA WRITING ASSESSMENTS (TASK 1 & TASK 2)
+       ======================================================== */
+    function launchWritingExam(examId) {
+      activeExam = db.writingExams.find(w => w.id === examId);
+      if (!activeExam) return;
+
+      activeExamType = 'writing';
+      activePartNum = 1;
+      writingAnswers = { task1: '', task2: '' };
+      secondsRemaining = activeExam.duration * 60;
+
+      document.getElementById('dashboardApp').style.display = 'none';
+      document.getElementById('examShell').style.display = 'flex';
+      document.getElementById('insperaExamTitle').textContent = activeExam.title;
+
+      renderPartPills();
+      loadWritingWorkspace(activePartNum);
+      setupResizer();
+      startTimer();
+    }
+
+    function switchWritingTask(taskNum) {
+      const editor = document.getElementById('writingEditor');
+      if (editor) {
+        if (activePartNum === 1) writingAnswers.task1 = editor.value;
+        else writingAnswers.task2 = editor.value;
+      }
+      activePartNum = taskNum;
+      renderPartPills();
+      loadWritingWorkspace(activePartNum);
+    }
+
+    function loadWritingWorkspace(taskNum) {
+      const left = document.getElementById('insperaLeftPane');
+      const right = document.getElementById('insperaRightPane');
+      const isTask1 = (taskNum === 1);
+      const taskData = isTask1 ? activeExam.task1 : activeExam.task2;
+      const currentText = isTask1 ? writingAnswers.task1 : writingAnswers.task2;
+
+      left.innerHTML = `
+        <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 12px;">Writing Task ${taskNum}</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin-bottom: 16px;">${taskData.prompt}</p>
+        ${taskData.image ? `<img src="${taskData.image}" style="max-width:100%; border-radius:6px; border:1px solid var(--inspera-border);">` : ''}
+      `;
+
+      right.innerHTML = `
+        <textarea class="writing-editor" id="writingEditor" placeholder="Type your response here..." oninput="updateWordCount(this.value)">${currentText}</textarea>
+        <div class="word-count-badge" id="writingWordCount">Total Words: 0</div>
+      `;
+      updateWordCount(currentText);
+    }
+
+    function updateWordCount(str) {
+      const count = str.trim() ? str.trim().split(/\s+/).length : 0;
+      document.getElementById('writingWordCount').textContent = `Total Words: ${count}`;
+    }
+
+    /* ========================================================
        CLEAN SUBMISSION & REVIEW TRIGGER
        ======================================================== */
     function submitExam() {
       if (!confirm('Are you sure you want to finish the exam?')) return;
       clearInterval(examTimer);
+
+      if (activeExamType === 'writing') {
+        const editor = document.getElementById('writingEditor');
+        if (editor) {
+          if (activePartNum === 1) writingAnswers.task1 = editor.value;
+          else writingAnswers.task2 = editor.value;
+        }
+        alert('Writing submission completed! Your teacher can view and comment on your response.');
+        document.getElementById('examShell').style.display = 'none';
+        document.getElementById('dashboardApp').style.display = 'flex';
+        renderDashboard();
+        return;
+      }
 
       let correct = 0;
       let total = 0;
@@ -1504,7 +1679,7 @@ NOT GIVEN  if there is no information...
     }
 
     /* ========================================================
-       ULTRA-ROBUST CAMBRIDGE RAW QUESTION PARSER & LIVE EDITOR
+       SMART ROBUST CAMBRIDGE PARSER & CARD APPENDER
        ======================================================== */
     let passageDrafts = { 1: { questions: [] }, 2: { questions: [] }, 3: { questions: [] } };
     let currentDraftTab = 1;
@@ -1582,48 +1757,55 @@ NOT GIVEN  if there is no information...
       renderLiveQuestionCards(d.questions || []);
     }
 
-    /* THUẬT TOÁN TỰ ĐỘNG BÓC TÁCH CÂU HỎI THÔNG MINH */
+    function clearAllDraftCards() {
+      if (confirm('Clear all question cards for this passage?')) {
+        passageDrafts[currentDraftTab].questions = [];
+        renderLiveQuestionCards([]);
+      }
+    }
+
+    /* BỘ TỰ ĐỘNG PHÂN TÍCH VÀ NẠP NỐI TIẾP VÀO DANH SÁCH (APPEND & CLEAR) */
     function autoParseRawToLiveCards() {
       const raw = document.getElementById('rePRawQuestions').value;
-      if (!raw.trim()) return alert('Please paste raw text from Cambridge/Word into the box first!');
+      if (!raw.trim()) return alert('Please paste question batch text into the box first!');
 
-      // Phát hiện loại bài test: True/False hay Multiple Choice hay Gap Fill
+      // Nhận diện ngữ cảnh của cụm câu hỏi vừa dán
       const isTFNG = /true/i.test(raw) && /false/i.test(raw);
       const isYesNo = /yes/i.test(raw) && /no/i.test(raw);
 
-      // Tách từng dòng văn bản
       const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-      const detected = [];
+      const newlyDetected = [];
       let currentQuestion = null;
 
-      // Regex bắt câu: Hỗ trợ "1. ", "1) ", "1    " (nhiều khoảng trắng/tab)
-      const qNumRegex = /^(\d+)[\.\)\s\t]+(.*)$/;
+      // Regex nhận số câu: "1  Text", "1. Text", "1) Text", "Question 1:"
+      const qNumRegex = /^(?:question\s+)?(\d+)[\.\)\s\t]+(.*)$/i;
 
       lines.forEach(line => {
-        // Bỏ qua các dòng chỉ dẫn chung đầu bài
+        // Bỏ qua các dòng chỉ mục chung
         if (/^questions\s+\d+/i.test(line) || /^in\s+boxes\s+\d+/i.test(line) || /^do\s+the\s+following/i.test(line) || /^\s*true\s+/i.test(line) || /^\s*false\s+/i.test(line) || /^\s*not\s+given/i.test(line)) {
           return;
         }
 
         const match = line.match(qNumRegex);
-        // Nếu gặp số thứ tự câu hỏi mới
         if (match && Number(match[1]) > 0 && Number(match[1]) < 100) {
-          if (currentQuestion) detected.push(currentQuestion);
+          if (currentQuestion) newlyDetected.push(currentQuestion);
           const qNum = Number(match[1]);
           const qPrompt = match[2].trim();
 
+          // Tự động phân loại riêng từng câu dựa vào nội dung câu đó
           let defaultOpts = [];
           let defaultType = 'choice';
           let defaultAns = '';
 
-          if (isTFNG) {
+          // Nếu câu có dấu chấm lửng (.....) hoặc gạch dưới (____) hoặc [13] -> Tự động là GAP FILL
+          if (qPrompt.includes('..') || qPrompt.includes('__') || qPrompt.includes('[') || /no\s+more\s+than/i.test(raw)) {
+            defaultType = 'gap';
+          } else if (isTFNG) {
             defaultOpts = ['TRUE', 'FALSE', 'NOT GIVEN'];
             defaultAns = 'TRUE';
           } else if (isYesNo) {
             defaultOpts = ['YES', 'NO', 'NOT GIVEN'];
             defaultAns = 'YES';
-          } else if (qPrompt.includes('[') || /no\s+more\s+than/i.test(raw)) {
-            defaultType = 'gap';
           }
 
           currentQuestion = {
@@ -1639,8 +1821,8 @@ NOT GIVEN  if there is no information...
           return;
         }
 
-        // Nếu là dòng lựa chọn: A. Wood / B. Coal...
         if (currentQuestion) {
+          // Bắt các lựa chọn A. B. C. D.
           const optMatch = line.match(/^([A-D])[\.\)]\s*(.*)$/i);
           if (optMatch) {
             currentQuestion.type = 'choice';
@@ -1663,20 +1845,29 @@ NOT GIVEN  if there is no information...
             return;
           }
 
-          // Dòng văn bản kéo dài tiếp theo của câu hỏi
           if (currentQuestion.type === 'gap' && !currentQuestion.options.length) {
             currentQuestion.prompt += ' ' + line;
           }
         }
       });
 
-      if (currentQuestion) detected.push(currentQuestion);
+      if (currentQuestion) newlyDetected.push(currentQuestion);
 
-      if (!detected.length) {
-        return alert('Could not detect question numbers! Make sure each question starts with a number like "1    ..." or "1. ...".');
+      if (!newlyDetected.length) {
+        return alert('Could not detect question numbers! Make sure lines start with numbers like "1   ..." or "1. ...".');
       }
 
-      renderLiveQuestionCards(detected);
+      // NẠP NỐI TIẾP VÀO DANH SÁCH HIỆN CÓ
+      saveActiveDraftCards(currentDraftTab);
+      const existing = passageDrafts[currentDraftTab].questions || [];
+      const merged = [...existing, ...newlyDetected];
+      passageDrafts[currentDraftTab].questions = merged;
+
+      // XÓA TRẮNG Ô NHẬP ĐỂ SẴN SÀNG NHẬP DẠNG TIẾP THEO
+      document.getElementById('rePRawQuestions').value = '';
+
+      renderLiveQuestionCards(merged);
+      alert(`Successfully detected and added ${newlyDetected.length} question cards! The raw input box has been cleared so you can paste the next question batch.`);
     }
 
     function renderLiveQuestionCards(cards) {
@@ -1696,7 +1887,7 @@ NOT GIVEN  if there is no information...
             <label>Question Type</label>
             <select class="form-input" id="edit_type_${c.id}" onchange="toggleCardOptionType('${c.id}', this.value)">
               <option value="choice" ${c.type === 'choice' ? 'selected' : ''}>Multiple Choice / True-False-Not Given</option>
-              <option value="gap" ${c.type === 'gap' ? 'selected' : ''}>Sentence / Summary Gap Fill</option>
+              <option value="gap" ${c.type === 'gap' ? 'selected' : ''}>Sentence / Gap Fill / Short Answer</option>
             </select>
           </div>
           <div class="form-group">
@@ -1784,6 +1975,37 @@ NOT GIVEN  if there is no information...
       closeModal('readingEditorModal');
       renderDashboard();
       alert('Exam saved successfully!');
+    }
+
+    /* WRITING TEST BUILDER */
+    function openWritingEditorModal() {
+      document.getElementById('weTitle').value = '';
+      document.getElementById('weDuration').value = 60;
+      document.getElementById('weT1Prompt').value = '';
+      document.getElementById('weT1Image').value = '';
+      document.getElementById('weT2Prompt').value = '';
+      openModal('writingEditorModal');
+    }
+
+    function saveWritingExam() {
+      const title = document.getElementById('weTitle').value.trim();
+      const duration = Number(document.getElementById('weDuration').value) || 60;
+      const t1Prompt = document.getElementById('weT1Prompt').value.trim();
+      const t1Image = document.getElementById('weT1Image').value.trim();
+      const t2Prompt = document.getElementById('weT2Prompt').value.trim();
+
+      if (!title || !t1Prompt || !t2Prompt) return alert('Please fill in title and both task prompts!');
+
+      db.writingExams.push({
+        id: 'we_' + Date.now(),
+        title, duration,
+        task1: { prompt: t1Prompt, image: t1Image },
+        task2: { prompt: t2Prompt }
+      });
+      persist();
+      closeModal('writingEditorModal');
+      renderDashboard();
+      alert('Writing assessment created!');
     }
 
     /* CLASSES & STUDENTS */
