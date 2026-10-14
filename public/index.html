@@ -129,7 +129,6 @@
     }
     .para-dropzone.dragover { border-color: var(--emerald-accent); background: #ecfdf5; }
     
-    /* Chips / Cards for Drag & Drop */
     .draggable-chip {
       background: #fff; border: 1.5px solid #059669; border-radius: 6px;
       padding: 6px 12px; font-size: 13px; font-weight: 700; color: #064e3b;
@@ -137,13 +136,11 @@
     }
     .draggable-chip:active { cursor: grabbing; opacity: 0.5; }
 
-    /* Floating Draggable Box of Options (Word Box / Name Box) */
     .drag-options-pool-box {
       background: #f8fafc; border: 1.5px dashed var(--inspera-border); border-radius: 8px;
       padding: 14px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px;
     }
 
-    /* Drop slot inside sentence or table */
     .drag-slot-zone {
       display: inline-flex; align-items: center; justify-content: center;
       min-width: 140px; height: 34px; border: 2px dashed #059669; border-radius: 6px;
@@ -151,9 +148,20 @@
     }
     .drag-slot-zone.dragover { background: #d1fae5; border-color: #047857; }
 
+    /* Radio Matrix Table (Matching Features, Names, Information) */
+    table.radio-matrix {
+      width: 100%; border-collapse: collapse; margin: 16px 0; table-layout: fixed;
+    }
+    table.radio-matrix th, table.radio-matrix td {
+      border: 1px solid #cbd5e0; padding: 8px 10px; text-align: center; vertical-align: middle;
+    }
+    table.radio-matrix th:first-child, table.radio-matrix td:first-child {
+      text-align: left; width: 60%; font-weight: 500;
+    }
+
     /* Inline Input for typing */
     .inspera-inline-input {
-      display: inline-block; width: 135px; height: 30px; padding: 2px 8px;
+      display: inline-block; width: 145px; height: 32px; padding: 2px 8px;
       border: 1.5px solid #059669; border-radius: 4px; font-weight: 700;
       color: #064e3b; outline: none; margin: 0 4px; background: #f0fdf4; vertical-align: middle; font-size: 13.5px;
     }
@@ -174,11 +182,6 @@
     .option-row-label { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13.5px; }
     .option-row-label:hover { background: #f8fafc; }
     .option-row-label input { cursor: pointer; width: 16px; height: 16px; }
-
-    .matching-select {
-      padding: 6px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px;
-      font-size: 13px; font-weight: 600; color: var(--text-main); outline: none; background: #fff;
-    }
 
     /* Explanation & Evidence Box */
     .review-explanation-box {
@@ -205,7 +208,8 @@
     .footer-q-btn {
       min-width: 30px; height: 30px; border: 1px solid var(--inspera-border);
       border-radius: 4px; background: #fff; font-size: 12px; font-weight: 700;
-      color: #374151; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative;
+      color: #374151; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; position: relative;
     }
     .footer-q-btn.answered { background: #374151; color: #fff; border-color: #374151; }
     .footer-q-btn.bookmarked::after {
@@ -224,6 +228,9 @@
     .modal-header { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 16px; }
     .modal-body { padding: 20px; overflow-y: auto; flex: 1; font-size: 13px; }
     .modal-footer { padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc; }
+
+    .q-edit-card { background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    .active-subtab { background: var(--emerald-accent) !important; color: #fff !important; border-color: var(--emerald-accent) !important; }
   </style>
 </head>
 <body>
@@ -277,6 +284,9 @@
         <button class="dash-tab-btn" id="tabbtn-writing" onclick="switchDashTab('writing')">✍️ Writing Tests (Task 1 & 2)</button>
         <button class="dash-tab-btn" id="tabbtn-vocab" onclick="switchDashTab('vocab')">🧠 Vocabulary Vault</button>
         <button class="dash-tab-btn" id="tabbtn-myvocab" onclick="switchDashTab('myvocab')">⭐ My Saved Vocabulary</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-classes" onclick="switchDashTab('classes')">🏫 Class Management</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-students" onclick="switchDashTab('students')">👤 Students & Accounts</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-analytics" onclick="switchDashTab('analytics')">📊 Submissions & Scores</button>
       </div>
 
       <!-- TAB 1: READING -->
@@ -284,10 +294,11 @@
         <div class="card">
           <div class="card-title">
             <span>Reading Test Library</span>
+            <button class="btn btn-emerald teacher-item" onclick="openReadingEditorModal()">+ Create Reading Test (Auto-Parser & Editor)</button>
           </div>
           <table>
             <thead>
-              <tr><th>Test Title</th><th>Duration</th><th>Passages</th><th>Format Coverage</th><th>Action</th></tr>
+              <tr><th>Test Title</th><th>Duration</th><th>Passages</th><th>Assigned Cohort</th><th>Actions</th></tr>
             </thead>
             <tbody id="readingTbody"></tbody>
           </table>
@@ -297,7 +308,10 @@
       <!-- TAB 2: WRITING -->
       <div id="tab-writing" class="dash-pane" style="display: none;">
         <div class="card">
-          <div class="card-title"><span>Writing Assessment Library</span></div>
+          <div class="card-title">
+            <span>Writing Assessment Library (Task 1 & Task 2)</span>
+            <button class="btn btn-emerald teacher-item" onclick="openWritingEditorModal()">+ Create Writing Test (Both Tasks)</button>
+          </div>
           <table>
             <thead>
               <tr><th>Test Title</th><th>Duration</th><th>Tasks</th><th>Action</th></tr>
@@ -325,12 +339,57 @@
           <div id="mySavedVocabList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;"></div>
         </div>
       </div>
+
+      <!-- TAB 5: CLASSES -->
+      <div id="tab-classes" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Class Cohorts</span>
+            <button class="btn btn-emerald" onclick="openCreateClassModal()">+ Add New Class</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Class Name</th><th>Total Students</th><th>Action</th></tr>
+            </thead>
+            <tbody id="classTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 6: STUDENTS -->
+      <div id="tab-students" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Student Accounts & Class Placement</span>
+            <button class="btn btn-emerald" onclick="openCreateStudentModal()">+ Register Student</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Full Name</th><th>Username</th><th>Password</th><th>Assigned Class</th><th>Action</th></tr>
+            </thead>
+            <tbody id="studentTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 7: ANALYTICS -->
+      <div id="tab-analytics" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title"><span>Student Performance History</span></div>
+          <table>
+            <thead>
+              <tr><th>Student Name</th><th>Exam Title</th><th>Score</th><th>Band</th><th>Submission Date</th><th>Action</th></tr>
+            </thead>
+            <tbody id="analyticsTbody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- ========================================================
        3. INSPERA REAL EXAM WORKSPACE
-       ======================================================== -->
+       ======================================================== */
   <div id="examShell">
     <div class="inspera-top">
       <span id="insperaExamTitle">IELTS Reading Exam</span>
@@ -341,14 +400,17 @@
       </div>
     </div>
 
+    <!-- Passage Tabs -->
     <div class="inspera-part-tabs" id="insperaPartTabs"></div>
 
+    <!-- Split-view Workspace -->
     <div class="inspera-workspace" id="insperaSplitBox">
       <div class="passage-col" id="insperaLeftPane"></div>
       <div class="resizer-bar" id="insperaResizer"></div>
       <div class="questions-col" id="insperaRightPane"></div>
     </div>
 
+    <!-- Footer Navigation (Exact numbers: 1, 2, 3...) -->
     <div class="inspera-footer">
       <span style="font-size: 12px; font-weight: 700; color: #475569;">Question Navigation:</span>
       <div class="footer-q-list" id="insperaFooterList"></div>
@@ -374,7 +436,89 @@
     </div>
   </div>
 
-  <!-- PROFILE MODAL -->
+  <!-- MODAL: AUTO-PARSER & LIVE QUESTION EDITOR -->
+  <div class="modal-overlay" id="readingEditorModal">
+    <div class="modal-window">
+      <div class="modal-header">Reading Test Builder (Universal Auto-Parser & Editor)</div>
+      <div class="modal-body">
+        <input type="hidden" id="editingExamId">
+        <div class="form-group">
+          <label>Exam Title</label>
+          <input type="text" id="reTitle" class="form-input" placeholder="e.g. Cambridge 19 - Test 1 Academic Reading">
+        </div>
+        <div class="form-group">
+          <label>Duration (Minutes)</label>
+          <input type="number" id="reDuration" class="form-input" value="60">
+        </div>
+
+        <div style="display: flex; gap: 8px; margin: 16px 0 12px; border-bottom: 2px solid #e2e8f0;">
+          <button class="btn btn-secondary active-subtab" id="subtab-p1" onclick="switchPassageEditor(1)">Passage 1</button>
+          <button class="btn btn-secondary" id="subtab-p2" onclick="switchPassageEditor(2)">Passage 2</button>
+          <button class="btn btn-secondary" id="subtab-p3" onclick="switchPassageEditor(3)">Passage 3</button>
+        </div>
+
+        <div>
+          <div class="form-group">
+            <label>Passage Title</label>
+            <input type="text" id="rePTitle" class="form-input" placeholder="e.g. The Transition to Industrial Energy">
+          </div>
+          <div class="form-group">
+            <label>Passage Content (Use Paragraph A, Paragraph B... for Headings)</label>
+            <textarea id="rePText" class="form-input" style="height: 160px; font-family: monospace;" placeholder="Paste passage paragraphs here..."></textarea>
+          </div>
+          
+          <div class="form-group" style="background: #f8fafc; border: 1.5px dashed var(--inspera-border); border-radius: 8px; padding: 14px;">
+            <label style="font-weight: 800; color: var(--emerald-dark);">Raw Question Batch (Paste from Cambridge / Word)</label>
+            <p style="font-size: 11px; color: #64748b; margin-bottom: 6px;">
+              💡 Dán văn bản của từng dạng câu hỏi vào đây. Hệ thống sẽ tự nhận diện và nạp vào danh sách nhóm phía dưới!
+            </p>
+            <textarea id="rePRawQuestions" class="form-input" style="height: 150px; font-family: monospace;" placeholder="Paste raw questions directly from PDF/Word here..."></textarea>
+            <button class="btn btn-emerald" style="margin-top: 10px; font-size: 12px;" onclick="autoParseRawToLiveCards()">
+              ⚡ Auto-Detect & Append Question Group
+            </button>
+          </div>
+
+          <!-- Live Generated Cards Container -->
+          <div style="margin-top: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <label style="font-weight: 800; font-size: 14px;">Interactive Question Groups & Items</label>
+              <button class="btn btn-secondary" style="padding:3px 8px; font-size:11px;" onclick="clearAllDraftCards()">Clear Cards</button>
+            </div>
+            <div id="liveQuestionCardsBox">
+              <p style="color: #64748b; font-style: italic;">No question cards generated yet. Paste text above and click Auto-Detect.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('readingEditorModal')">Cancel</button>
+        <button class="btn btn-emerald" onclick="saveActiveExamFromCards()">Save Full Exam</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OTHER MANAGEMENT MODALS -->
+  <div class="modal-overlay" id="classModal">
+    <div class="modal-window" style="width: 400px;">
+      <div class="modal-header">Add Cohort / Class</div>
+      <div class="modal-body"><div class="form-group"><label>Class Name</label><input type="text" id="newClassName" class="form-input"></div></div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('classModal')">Cancel</button><button class="btn btn-emerald" onclick="saveNewClass()">Save</button></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="studentModal">
+    <div class="modal-window" style="width: 440px;">
+      <div class="modal-header">Register Student Account</div>
+      <div class="modal-body">
+        <div class="form-group"><label>Full Name</label><input type="text" id="stuFullName" class="form-input"></div>
+        <div class="form-group"><label>Username</label><input type="text" id="stuUsername" class="form-input"></div>
+        <div class="form-group"><label>Password</label><input type="text" id="stuPassword" class="form-input" value="123456"></div>
+        <div class="form-group"><label>Class</label><select id="stuClassSelect" class="form-input"></select></div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('studentModal')">Cancel</button><button class="btn btn-emerald" onclick="saveNewStudent()">Create Account</button></div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="profileModal">
     <div class="modal-window" style="width: 400px;">
       <div class="modal-header">Account Profile</div>
@@ -382,232 +526,119 @@
         <div class="form-group"><label>Full Name</label><input type="text" id="profNameInput" class="form-input"></div>
         <div class="form-group"><label>New Password</label><input type="password" id="profPassInput" class="form-input"></div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('profileModal')">Cancel</button>
-        <button class="btn btn-emerald" onclick="saveProfileChanges()">Save</button>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('profileModal')">Cancel</button><button class="btn btn-emerald" onclick="saveProfileChanges()">Save</button></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="assignModal">
+    <div class="modal-window" style="width: 420px;">
+      <div class="modal-header">Assign Exam to Cohort</div>
+      <div class="modal-body"><input type="hidden" id="assignExamId"><div class="form-group"><label>Target Cohort</label><select id="assignCohortSelect" class="form-input"></select></div></div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('assignModal')">Cancel</button><button class="btn btn-emerald" onclick="executeAssign()">Confirm</button></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="writingEditorModal">
+    <div class="modal-window">
+      <div class="modal-header">Create Writing Assessment (Task 1 & Task 2)</div>
+      <div class="modal-body">
+        <div class="form-group"><label>Exam Title</label><input type="text" id="weTitle" class="form-input" placeholder="e.g. Writing Simulation 02"></div>
+        <div class="form-group"><label>Duration (Minutes)</label><input type="number" id="weDuration" class="form-input" value="60"></div>
+        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 1</h4>
+          <div class="form-group"><label>Prompt</label><textarea id="weT1Prompt" class="form-input" style="height: 90px;"></textarea></div>
+          <div class="form-group"><label>Chart Image URL (Optional)</label><input type="text" id="weT1Image" class="form-input"></div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px;">
+          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 2</h4>
+          <div class="form-group"><label>Prompt</label><textarea id="weT2Prompt" class="form-input" style="height: 90px;"></textarea></div>
+        </div>
       </div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('writingEditorModal')">Cancel</button><button class="btn btn-emerald" onclick="saveWritingExam()">Save Writing Test</button></div>
     </div>
   </div>
 
   <script>
     /* ========================================================
-       MASTER COMPREHENSIVE IELTS READING DEMO (ALL FORMATS)
+       DATABASE CORE & FULL MOCK TESTS
        ======================================================== */
-    const DB_KEY = 'AMURO_MASTER_IELTS_OFFICIAL_V10';
+    const DB_KEY = 'AMURO_OFFICIAL_IELTS_SUITE_V11';
 
     let db = JSON.parse(localStorage.getItem(DB_KEY)) || {
       users: [
         { id: 'u_admin', username: 'amuro', pass: 'amuro123', name: 'Teacher Amuro', role: 'teacher' },
-        { id: 'u_s1', username: 'student1', pass: '123456', name: 'Alex Johnson', role: 'student' }
+        { id: 'u_s1', username: 'student1', pass: '123456', name: 'Alex Johnson', role: 'student', classId: 'c1' }
+      ],
+      classes: [
+        { id: 'c1', name: 'IELTS Intensive 7.5+' },
+        { id: 'c2', name: 'Foundation Morning' }
       ],
       savedVocab: {},
       readingExams: [
         {
-          id: 're_master_all_types',
-          title: 'IELTS Reading Master Demo - Full Question Formats',
+          id: 're_master_test_121',
+          title: 'IELTS Official Reading Practice (Hunter-Gatherers & Pines)',
           duration: 60,
+          assignedClasses: ['c1'],
           passages: [
             {
               partNum: 1,
-              title: 'Passage 1: Roman Engineering & Architectural Legacy in Gaul',
+              title: 'Passage 1: Sleep Study on Modern-Day Hunter-Gatherers Dispels Popular Notions',
               paragraphs: [
-                {
-                  label: 'Paragraph A',
-                  text: 'The amphitheatre at Nimes is an exceptional survivor of Roman architectural prowess. Designed to accommodate more than 20,000 spectators, visitors gained access to their seats through an intricate subterranean network of barrel-vaulted corridors that ensured rapid evacuation within minutes.'
-                },
-                {
-                  label: 'Paragraph B',
-                  text: 'During the turbulent Middle Ages following the collapse of the Western Empire, local populations transformed the arena into a fortified citadel. Residential dwellings, wells, and a fortified chapel were constructed within the arena walls to seek refuge against periodic Visigothic incursions.'
-                },
-                {
-                  label: 'Paragraph C',
-                  text: 'By the early nineteenth century, romantic antiquarian interest catalyzed comprehensive restoration campaigns under architect Henri Antoine Revoil. Medieval tenements were demolished, restoring the arena to its monumental dignity for civic festivals and bullfighting spectacles.'
-                },
-                {
-                  label: 'Paragraph D',
-                  text: 'Modern architectural analysis reveals that the precision of Roman masonry relied heavily on hydraulic lime mortar and standardized limestone blocks extracted from nearby Barutel quarries, allowing vaults to withstand seismic tremors for two millennia.'
-                }
+                { label: 'Paragraph A', text: 'The sleep troubles common in modern life have long been blamed on our industrial society, from city lights to long work hours. Sleep researchers often look back on a time when humans were able to get more rest by sleeping and waking to the rhythms of the sun. It turns out that this may not be quite right.' },
+                { label: 'Paragraph B', text: 'In a recent study, researchers traveled all over the world to examine sleep in some of the world\'s last remaining hunter-gatherer societies – the Hadza of Tanzania, the San of Namibia, and the Tsimane of Bolivia. Medical devices were used to record sleeping habits.' },
+                { label: 'Paragraph C', text: 'They found very similar sleep patterns despite their geographic isolation. On average, all three groups sleep a little less than 6.5 hours a night, do not take naps, and don\'t go to sleep when it gets dark.' }
               ],
               groups: [
-                // 1. MATCHING HEADINGS (KÉO THẢ VÀO ĐỈNH PARAGRAPH)
                 {
-                  id: 'grp_headings',
-                  header: 'Questions 1-3',
-                  instructions: 'Choose the correct heading for Paragraphs A-C from the list of headings below. Drag the correct heading into the box over each paragraph.',
-                  type: 'matching_headings',
-                  headingsPool: [
-                    { id: 'i', text: 'Medieval transformation into a fortified residential haven' },
-                    { id: 'ii', text: 'Subterranean corridors and massive spectator capacity' },
-                    { id: 'iii', text: 'Nineteenth-century restoration and clearance of slums' },
-                    { id: 'iv', text: 'Quarrying methods and seismic structural vulnerability' }
-                  ],
-                  questions: [
-                    { id: 'q1', num: 1, paraLabel: 'Paragraph A', correctHeading: 'ii', explanation: 'Paragraph A describes accommodating 20,000 spectators via vaulted corridors.', evidenceSnippet: 'accommodate more than 20,000 spectators' },
-                    { id: 'q2', num: 2, paraLabel: 'Paragraph B', correctHeading: 'i', explanation: 'Paragraph B explains its conversion into a citadel with houses.', evidenceSnippet: 'transformed the arena into a fortified citadel' },
-                    { id: 'q3', num: 3, paraLabel: 'Paragraph C', correctHeading: 'iii', explanation: 'Paragraph C details the demolition of medieval tenements and restoration.', evidenceSnippet: 'restoring the arena to its monumental dignity' }
-                  ]
-                },
-                // 2. MATCHING INFORMATION (WHICH PARAGRAPH CONTAINS)
-                {
-                  id: 'grp_matching_info',
-                  header: 'Question 4',
-                  instructions: 'Which paragraph contains the following information? Choose the correct letter, A-D.',
+                  id: 'grp_1',
+                  header: 'Questions 1-4',
+                  instructions: 'Choose TRUE if the statement agrees with the information, FALSE if the statement contradicts, or NOT GIVEN.',
                   type: 'choice',
                   questions: [
-                    {
-                      id: 'q4', num: 4,
-                      prompt: 'Details of the specific geological source of the stones used in construction.',
-                      options: ['Paragraph A', 'Paragraph B', 'Paragraph C', 'Paragraph D'],
-                      answer: 'Paragraph D',
-                      explanation: 'Paragraph D explicitly references limestone extracted from Barutel quarries.',
-                      evidenceSnippet: 'limestone blocks extracted from nearby Barutel quarries'
-                    }
+                    { id: 'q1', num: 1, prompt: 'Scientists studied hunter-gatherer societies because their sleep patterns are assumed to be similar to humans 10,000 years ago.', options: ['TRUE', 'FALSE', 'NOT GIVEN'], answer: 'TRUE', explanation: 'Paragraph B states pre-industrial societies are thought to sleep the way humans did over 10,000 years ago.', evidenceSnippet: 'sleep the way humans did more than 10,000 years ago' },
+                    { id: 'q2', num: 2, prompt: 'The medical devices used in research were specially designed for humid conditions.', options: ['TRUE', 'FALSE', 'NOT GIVEN'], answer: 'NOT GIVEN', explanation: 'The text mentions humid locations, but not that devices were specially designed for them.', evidenceSnippet: '' }
                   ]
                 },
-                // 3. TRUE / FALSE / NOT GIVEN
                 {
-                  id: 'grp_tfng',
-                  header: 'Question 5',
-                  instructions: 'Do the following statements agree with the information given in Reading Passage 1? Write TRUE, FALSE, or NOT GIVEN.',
-                  type: 'choice',
+                  id: 'grp_2',
+                  header: 'Questions 5-7',
+                  instructions: 'Complete the notes below. Write ONE WORD ONLY from the passage for each answer.',
+                  type: 'summary_inline',
+                  summaryTemplate: 'Scientists recorded an afternoon drop in [5]. Studies of hunter-gatherers show napping was rare and occurred more often during the [6]. The devices may not have detected [7] naps.',
                   questions: [
-                    {
-                      id: 'q5', num: 5,
-                      prompt: 'The arena was completely demolished during Visigothic attacks.',
-                      options: ['TRUE', 'FALSE', 'NOT GIVEN'],
-                      answer: 'FALSE',
-                      explanation: 'Paragraph B mentions it was transformed into a fortified citadel to seek refuge, not demolished.',
-                      evidenceSnippet: 'constructed within the arena walls to seek refuge'
-                    }
-                  ]
-                },
-                // 4. MULTIPLE CHOICE (SINGLE: 1 OF 4)
-                {
-                  id: 'grp_mcq_single',
-                  header: 'Question 6',
-                  instructions: 'Choose the correct letter, A, B, C or D.',
-                  type: 'choice',
-                  questions: [
-                    {
-                      id: 'q6', num: 6,
-                      prompt: 'What was the primary function of the barrel-vaulted corridors?',
-                      options: [
-                        'A. To store hydraulic lime mortar during repairs',
-                        'B. To enable rapid entry and evacuation of spectators',
-                        'C. To serve as residential quarters for gladiators',
-                        'D. To defend against seismic earth movements'
-                      ],
-                      answer: 'B. To enable rapid entry and evacuation of spectators',
-                      explanation: 'Paragraph A confirms the subterranean network ensured rapid evacuation.',
-                      evidenceSnippet: 'ensured rapid evacuation within minutes'
-                    }
-                  ]
-                },
-                // 5. MULTIPLE CHOICE (MULTI-SELECT: CHOOSE TWO LETTERS)
-                {
-                  id: 'grp_mcq_multi',
-                  header: 'Questions 7-8',
-                  instructions: 'Choose TWO letters, A-E. Which TWO elements were built inside the arena during the Middle Ages?',
-                  type: 'multi_select',
-                  selectCount: 2,
-                  questions: [
-                    {
-                      id: 'q_multi_7_8',
-                      numRange: [7, 8],
-                      prompt: 'Select TWO medieval modifications made to the arena interior:',
-                      options: [
-                        'A. A monumental bullfighting ring',
-                        'B. Residential houses for local citizens',
-                        'C. A fortified religious chapel',
-                        'D. Large quarries for hydraulic lime',
-                        'E. Modern tourist walkways'
-                      ],
-                      correctKeys: ['B', 'C'],
-                      explanations: {
-                        'B': 'Paragraph B states residential dwellings were built inside.',
-                        'C': 'Paragraph B explicitly mentions a fortified chapel was constructed.'
-                      },
-                      evidences: {
-                        'B': 'Residential dwellings, wells',
-                        'C': 'a fortified chapel were constructed'
-                      }
-                    }
-                  ]
-                },
-                // 6. SUMMARY COMPLETION WITH DRAGGABLE BOX OF WORDS (KÉO THẢ TỪ CHO SẴN VÀO ĐOẠN VĂN)
-                {
-                  id: 'grp_summary_drag',
-                  header: 'Questions 9-10',
-                  instructions: 'Complete the summary below using the list of words, A-E, below. Drag the correct word into each slot.',
-                  type: 'summary_drag_box',
-                  wordPool: [
-                    { id: 'A', text: 'seismic tremors' },
-                    { id: 'B', text: 'medieval tenements' },
-                    { id: 'C', text: 'hydraulic lime' },
-                    { id: 'D', text: 'barren quarries' },
-                    { id: 'E', text: 'wooden beams' }
-                  ],
-                  summaryTemplate: 'During nineteenth-century restoration campaigns, workers demolished unsightly [9] to reveal the Roman structure. The lasting stability of the monument was attributed to the superior binding properties of [10] mixed with limestone.',
-                  questions: [
-                    { id: 'q9', num: 9, answer: 'B', explanation: 'Paragraph C notes medieval tenements were cleared.', evidenceSnippet: 'Medieval tenements were demolished' },
-                    { id: 'q10', num: 10, answer: 'C', explanation: 'Paragraph D notes reliance on hydraulic lime mortar.', evidenceSnippet: 'relied heavily on hydraulic lime mortar' }
-                  ]
-                },
-                // 7. SENTENCE / GAP FILL (GÕ TỪ TRỰC TIẾP TRONG VĂN BẢN)
-                {
-                  id: 'grp_gap_type',
-                  header: 'Question 11',
-                  instructions: 'Complete the sentence below. Choose NO MORE THAN TWO WORDS from the passage for the answer.',
-                  type: 'gap_inline',
-                  prompt: 'The limestone blocks utilized for the arena masonry were sourced from the nearby [11] .',
-                  questions: [
-                    { id: 'q11', num: 11, answer: 'Barutel quarries / Barutel', explanation: 'Paragraph D states stone was extracted from Barutel quarries.', evidenceSnippet: 'extracted from nearby Barutel quarries' }
-                  ]
-                },
-                // 8. MATCHING NAMES / SCIENTIFIC THEORIES (DROPDOWN / KÉO THẢ TÊN NGƯỜI)
-                {
-                  id: 'grp_matching_names',
-                  header: 'Question 12',
-                  instructions: 'Look at the following person and statement. Match the person with the correct achievement.',
-                  type: 'matching_options',
-                  questions: [
-                    {
-                      id: 'q12', num: 12,
-                      prompt: 'Led the nineteenth-century architectural restoration campaign of the monument:',
-                      options: ['Henri Antoine Revoil', 'James Watt', 'Thomas Young'],
-                      answer: 'Henri Antoine Revoil',
-                      explanation: 'Paragraph C names architect Henri Antoine Revoil as leader of the restoration.',
-                      evidenceSnippet: 'restoration campaigns under architect Henri Antoine Revoil'
-                    }
-                  ]
-                },
-                // 9. MATCHING SENTENCE ENDINGS (NỐI VẾ CÂU)
-                {
-                  id: 'grp_sentence_endings',
-                  header: 'Question 13',
-                  instructions: 'Complete each sentence with the correct ending, A-C, below.',
-                  type: 'matching_options',
-                  questions: [
-                    {
-                      id: 'q13', num: 13,
-                      prompt: 'Standardized masonry combined with hydraulic mortar .................',
-                      options: [
-                        'A. allowed vaults to endure seismic tremors for thousands of years.',
-                        'B. caused the immediate collapse of subterranean corridors.',
-                        'C. prevented any bullfighting activities from taking place.'
-                      ],
-                      answer: 'A. allowed vaults to endure seismic tremors for thousands of years.',
-                      explanation: 'Paragraph D confirms the combination allowed vaults to withstand tremors for two millennia.',
-                      evidenceSnippet: 'allowing vaults to withstand seismic tremors for two millennia'
-                    }
+                    { id: 'q5', num: 5, answer: 'energy', explanation: 'Text confirms scientists documented that people\'s energy falls in the mid-afternoon.', evidenceSnippet: 'people\'s energy often falls in the mid-afternoon' },
+                    { id: 'q6', num: 6, answer: 'summer', explanation: 'Naps occurred on up to 22 percent of summer days.', evidenceSnippet: '22 percent of summer days' },
+                    { id: 'q7', num: 7, answer: 'short', explanation: 'Some subjects took naps that were short, perhaps 15 minutes or less.', evidenceSnippet: 'naps that were short' }
                   ]
                 }
               ],
               vocab: [
-                { word: 'subterranean', type: 'adj', mean: 'Dưới lòng đất', syn: 'underground, subsurface' },
-                { word: 'citadel', type: 'noun', mean: 'Thành lũy, pháo đài', syn: 'fortress, stronghold' },
-                { word: 'antiquarian', type: 'adj', mean: 'Thuộc về khảo cổ, đồ cổ', syn: 'historical, ancient' }
+                { word: 'circadian', type: 'adj', mean: 'Chu kỳ sinh học hàng ngày', syn: 'daily, 24-hour cycle' },
+                { word: 'isolation', type: 'noun', mean: 'Sự cô lập, biệt lập', syn: 'seclusion, separation' }
               ]
+            },
+            {
+              partNum: 2,
+              title: 'Passage 2: Bristlecone Pines - Longevity in Harsh Environments',
+              paragraphs: [
+                { label: 'Paragraph A', text: 'On the dry, windswept mountain tops of the Great Basin in the western United States grow the bristlecone pines. What makes them remarkable is their longevity: their average age is over 1,000 years, with the oldest known as Methuselah dated at 4,723 years.' },
+                { label: 'Paragraph B', text: 'Douglass noted that wide rings were produced during wet years, and narrow rings during dry seasons. Patterns of ring variability allow precise dating of climatic conditions in the past.' }
+              ],
+              groups: [
+                {
+                  id: 'grp_3',
+                  header: 'Questions 8-9',
+                  instructions: 'Which paragraph contains the following information? Choose the correct letter, A-B.',
+                  type: 'radio_matrix',
+                  columns: ['A', 'B'],
+                  questions: [
+                    { id: 'q8', num: 8, prompt: 'An explanation of differences in tree ring patterns.', answer: 'B', explanation: 'Paragraph B explains wide rings during wet years and narrow rings during dry seasons.', evidenceSnippet: 'wide rings of certain species of trees were produced during wet years' },
+                    { id: 'q9', num: 9, prompt: 'Mention of the extreme longevity and name of the oldest specimen.', answer: 'A', explanation: 'Paragraph A mentions Methuselah dated at 4,723 years.', evidenceSnippet: 'oldest specimen - an individual known as Methuselah' }
+                  ]
+                }
+              ],
+              vocab: []
             }
           ]
         }
@@ -631,6 +662,7 @@
     let activePartNum = 1;
     let activeExamType = 'reading';
     let userAnswers = {};
+    let writingAnswers = { task1: '', task2: '' };
     let bookmarkedQuestions = new Set();
     let isReviewMode = false;
     let examTimer = null;
@@ -643,7 +675,8 @@
       if (activeUser) {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('dashboardApp').style.display = 'flex';
-        document.getElementById('userProfileLabel').textContent = `👤 ${activeUser.name}`;
+        document.getElementById('userProfileLabel').textContent = `👤 ${activeUser.name} (${activeUser.role.toUpperCase()})`;
+        document.querySelectorAll('.teacher-item').forEach(el => el.style.display = activeUser.role === 'teacher' ? '' : 'none');
         switchDashTab('reading');
         renderDashboard();
       } else {
@@ -686,7 +719,7 @@
     }
 
     /* ========================================================
-       DASHBOARD
+       DASHBOARD CONTROLLER
        ======================================================== */
     function switchDashTab(tab) {
       document.querySelectorAll('.dash-tab-btn').forEach(b => b.classList.remove('active'));
@@ -700,21 +733,37 @@
       renderReadingTable();
       renderWritingTable();
       renderVocabTab();
+      renderMySavedVocab();
+      if (activeUser.role === 'teacher') {
+        renderClassTable();
+        renderStudentTable();
+        renderAnalyticsTable();
+      }
     }
 
     function renderReadingTable() {
       const tbody = document.getElementById('readingTbody');
       tbody.innerHTML = '';
-      db.readingExams.forEach(e => {
+      let list = db.readingExams;
+      if (activeUser.role === 'student') {
+        list = db.readingExams.filter(e => e.assignedClasses.includes(activeUser.classId));
+      }
+      list.forEach(e => {
+        const clsNames = (e.assignedClasses || []).map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ') || 'All';
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><b>${e.title}</b></td>
           <td>${e.duration} mins</td>
           <td>${e.passages.length} Passage(s)</td>
-          <td><span style="color:var(--emerald-accent); font-weight:700;">All 9 IELTS Question Types</span></td>
+          <td><span style="color: #64748b;">${clsNames}</span></td>
           <td>
-            <button class="btn btn-emerald" onclick="launchExam('${e.id}')">Start Full Test</button>
+            <button class="btn btn-emerald" onclick="launchExam('${e.id}')">Start Test</button>
             <button class="btn btn-secondary" onclick="openVocabDirectly('${e.id}')">Study Vocabulary</button>
+            ${activeUser.role === 'teacher' ? `
+              <button class="btn btn-secondary" onclick="openEditExamModal('${e.id}')">Edit</button>
+              <button class="btn btn-secondary" onclick="openAssignModal('${e.id}')">Assign</button>
+              <button class="btn btn-danger" onclick="deleteExam('${e.id}')">Delete</button>
+            ` : ''}
           </td>
         `;
         tbody.appendChild(tr);
@@ -730,7 +779,7 @@
           <td><b>${w.title}</b></td>
           <td>${w.duration} mins</td>
           <td>Task 1 & Task 2</td>
-          <td><button class="btn btn-emerald" onclick="alert('Writing environment ready!')">Start Writing</button></td>
+          <td><button class="btn btn-emerald" onclick="launchWritingExam('${w.id}')">Start Writing</button></td>
         `;
         tbody.appendChild(tr);
       });
@@ -752,7 +801,7 @@
           <div style="font-size:12px; color:#64748b;">Synonyms: <b>${v.syn}</b></div>
           <button class="btn btn-emerald" style="margin-top:8px; padding:4px 10px; font-size:11px; width:100%;" onclick="spotVocabWordInPassage('${v.word}')">🔍 Highlight in Passage</button>
         </div>
-      `).join('');
+      `).join('') || '<p style="color:#64748b;">No vocabulary items recorded for this passage.</p>';
     }
 
     function spotVocabWordInPassage(word) {
@@ -793,6 +842,38 @@
 
     function renderVocabTab() { openVocabDirectly(db.readingExams[0]?.id); }
 
+    function renderClassTable() {
+      const tbody = document.getElementById('classTbody');
+      tbody.innerHTML = '';
+      db.classes.forEach(c => {
+        const count = db.users.filter(u => u.classId === c.id).length;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><b>${c.name}</b></td><td>${count} students</td><td><button class="btn btn-danger" onclick="deleteClass('${c.id}')">Delete</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderStudentTable() {
+      const tbody = document.getElementById('studentTbody');
+      tbody.innerHTML = '';
+      db.users.filter(u => u.role === 'student').forEach(u => {
+        const c = db.classes.find(cl => cl.id === u.classId);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><b>${u.name}</b></td><td><code>${u.username}</code></td><td><code>${u.pass}</code></td><td>${c ? c.name : 'Unassigned'}</td><td><button class="btn btn-danger" onclick="deleteUser('${u.id}')">Remove</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderAnalyticsTable() {
+      const tbody = document.getElementById('analyticsTbody');
+      tbody.innerHTML = '';
+      db.results.slice().reverse().forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><b>${r.userName}</b></td><td>${r.examTitle}</td><td>${r.score}</td><td><b style="color: var(--emerald-accent);">Band ${r.band}</b></td><td>${r.timestamp}</td><td><button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">Review</button></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
     /* ========================================================
        INSPERA EXAM ENGINE (FULL INTERACTIVE REAL SIMULATION)
        ======================================================== */
@@ -822,11 +903,18 @@
 
     function renderPartPills() {
       const nav = document.getElementById('insperaPartTabs');
-      nav.innerHTML = activeExam.passages.map(p => `
-        <button class="part-pill ${p.partNum === activePartNum ? 'active' : ''}" onclick="switchExamPassage(${p.partNum})">
-          Passage ${p.partNum}
-        </button>
-      `).join('');
+      if (activeExamType === 'writing') {
+        nav.innerHTML = `
+          <button class="part-pill ${activePartNum === 1 ? 'active' : ''}" onclick="switchWritingTask(1)">Writing Task 1</button>
+          <button class="part-pill ${activePartNum === 2 ? 'active' : ''}" onclick="switchWritingTask(2)">Writing Task 2</button>
+        `;
+      } else {
+        nav.innerHTML = activeExam.passages.map(p => `
+          <button class="part-pill ${p.partNum === activePartNum ? 'active' : ''}" onclick="switchExamPassage(${p.partNum})">
+            Passage ${p.partNum}
+          </button>
+        `).join('');
+      }
     }
 
     function switchExamPassage(partNum) {
@@ -841,105 +929,46 @@
       const left = document.getElementById('insperaLeftPane');
       const right = document.getElementById('insperaRightPane');
 
-      // 1. Render Left Passage with Heading Dropzones
       let passageHtml = `<h2 style="font-size:19px; font-weight:800; margin-bottom:14px;">${passage.title}</h2>`;
       passage.paragraphs.forEach(p => {
-        // Find if this paragraph has a Matching Heading question
-        const headingQ = (passage.groups.find(g => g.type === 'matching_headings')?.questions || []).find(q => q.paraLabel === p.label);
-        const dropZone = headingQ ? `
-          <div class="para-dropzone" id="dz_${headingQ.id}" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="handleDropHeading(event, '${headingQ.id}')">
-            <span style="color:#94a3b8; font-size:12px;" id="plh_${headingQ.id}">Drop heading for ${p.label} here...</span>
-          </div>
-        ` : '';
-
         passageHtml += `
           <div class="para-block" id="pblock_${p.label.replace(/\s+/g, '')}">
             <div class="para-header-label">${p.label}</div>
-            ${dropZone}
             <p id="ptext_${p.label.replace(/\s+/g, '')}">${p.text}</p>
           </div>
         `;
       });
       left.innerHTML = passageHtml;
 
-      // 2. Render Right Clustered Question Groups
       let rightHtml = '';
-      passage.groups.forEach(grp => {
+      (passage.groups || []).forEach(grp => {
         rightHtml += `
           <div class="group-wrapper-box" id="grp_box_${grp.id}">
             <div class="group-header-title">${grp.header}</div>
             <div class="group-instruction-text">${grp.instructions}</div>
         `;
 
-        // FORMAT 1: MATCHING HEADINGS
-        if (grp.type === 'matching_headings') {
-          if (!isReviewMode) {
-            rightHtml += `
-              <div class="drag-options-pool-box" id="headingsPoolBox" ondragover="allowDrop(event)" ondrop="handleReturnToPool(event, 'headingsPoolBox')">
-                ${grp.headingsPool.map(h => `
-                  <div class="draggable-chip" draggable="true" id="hchip_${h.id}" ondragstart="handleDragStart(event, '${h.id}', 'heading')">
-                    ${h.id}.${h.text}
-                  </div>
-                `).join('')}
-              </div>
-            `;
-          }
-          grp.questions.forEach(q => {
-            const uAns = userAnswers[q.id] || '';
-            const isRight = (uAns.toLowerCase() === q.correctHeading.toLowerCase());
-            rightHtml += `
-              <div class="q-item-row" id="qitem_${q.id}">
-                <div style="font-weight:700;">Question ${q.num}: Matching Heading for ${q.paraLabel}</div>
-                <div style="font-size:13px; color:#64748b;">Selected: <b>${uAns || '(Unanswered - Drag from box above)'}</b></div>
-            `;
-            if (isReviewMode) {
-              rightHtml += `
-                <div class="review-explanation-box">
-                  <div style="font-weight:700; color:${isRight ? '#047857' : '#b91c1c'};">${isRight ? '✅ Correct' : '❌ Incorrect'} (Key: [${q.correctHeading}])</div>
-                  <div style="margin:4px 0;">${q.explanation}</div>
-                  <button class="btn-locate" onclick="locateParagraph('${q.paraLabel.replace(/\s+/g, '')}')">📍 Locate ${q.paraLabel}</button>
-                </div>
-              `;
-            }
-            rightHtml += `</div>`;
-          });
-        }
-
-        // FORMAT 2: SUMMARY COMPLETION WITH DRAGGABLE BOX (KÉO THẢ TỪ VÀO CHỖ TRỐNG)
-        else if (grp.type === 'summary_drag_box') {
-          if (!isReviewMode) {
-            rightHtml += `
-              <div class="drag-options-pool-box" id="summaryPoolBox" ondragover="allowDrop(event)" ondrop="handleReturnToPool(event, 'summaryPoolBox')">
-                ${grp.wordPool.map(w => `
-                  <div class="draggable-chip" draggable="true" id="wchip_${w.id}" ondragstart="handleDragStart(event, '${w.id}', 'summary_word')">
-                    <b>${w.id}.</b>${w.text}
-                  </div>
-                `).join('')}
-              </div>
-            `;
-          }
+        // 1. SUMMARY INLINE COMPLETION
+        if (grp.type === 'summary_inline') {
           let renderedSummary = grp.summaryTemplate;
           grp.questions.forEach(q => {
-            const uAns = userAnswers[q.id] || '';
-            const slotHtml = `
-              <span class="drag-slot-zone" id="slot_${q.id}" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="handleDropToSlot(event, '${q.id}')">
-                <span style="font-size:12px; color:#64748b;" id="slot_lbl_${q.id}">${uAns ? `[${uAns}]` : `[Slot ${q.num}]`}</span>
-              </span>
-            `;
-            renderedSummary = renderedSummary.replace(`[${q.num}]`, slotHtml);
+            const uAns = (userAnswers[q.id] || '').trim();
+            const inputHtml = `<input type="text" class="inspera-inline-input" value="${uAns}" placeholder="[${q.num}]" ${isReviewMode ? 'disabled' : ''} oninput="saveAnswer('${q.id}', this.value)">`;
+            renderedSummary = renderedSummary.replace(`[${q.num}]`, inputHtml);
           });
-          rightHtml += `<div style="line-height:2.4; font-size:14.5px;">${renderedSummary}</div>`;
+          rightHtml += `<div style="line-height:2.2; font-size:14.5px;">${renderedSummary}</div>`;
 
           if (isReviewMode) {
             rightHtml += `<div style="margin-top:12px; border-top:1px solid #e2e8f0; padding-top:10px;">`;
             grp.questions.forEach(q => {
-              const uAns = userAnswers[q.id] || '';
+              const uAns = (userAnswers[q.id] || '').trim();
               const isRight = (uAns.toLowerCase() === q.answer.toLowerCase());
               rightHtml += `
                 <div class="review-explanation-box" style="margin-bottom:8px;">
-                  <div style="font-weight:700; color:${isRight ? '#047857' : '#b91c1c'};">Question ${q.num}: ${isRight ? '✅ Correct' : '❌ Incorrect'} (Key: Option [${q.answer}])</div>
-                  <div>${q.explanation}</div>
-                  <button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(q.evidenceSnippet)}')">🔍 Locate Evidence</button>
+                  <div style="font-weight:700; color:${isRight ? '#047857' : '#b91c1c'};">Question ${q.num}: ${isRight ? '✅ Correct' : '❌ Incorrect'} (Key: <b>${q.answer}</b>)</div>
+                  <div>Your answer: <b>${uAns || '(Unanswered)'}</b></div>
+                  <div style="font-size:12px; margin:4px 0;">${q.explanation}</div>
+                  ${q.evidenceSnippet ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(q.evidenceSnippet)}')">🔍 Locate Evidence</button>` : ''}
                 </div>
               `;
             });
@@ -947,99 +976,51 @@
           }
         }
 
-        // FORMAT 3: MULTIPLE SELECT (CHỌN 2 TRONG 5 HOẶC 3 TRONG 7)
-        else if (grp.type === 'multi_select') {
-          grp.questions.forEach(q => {
-            const cur = userAnswers[q.id] || [];
-            rightHtml += `
-              <div class="q-item-row" id="qitem_${q.id}">
-                <div class="q-item-header"><span>${q.prompt}</span></div>
-                <div style="display:flex; flex-direction:column; gap:6px;">
-                  ${q.options.map(opt => {
-                    const ltr = opt.trim().charAt(0);
-                    const isChecked = cur.includes(ltr);
-                    return `
-                      <label class="option-row-label">
-                        <input type="checkbox" value="${ltr}" ${isChecked ? 'checked' : ''} ${isReviewMode ? 'disabled' : ''} onchange="toggleMultiSelectChoice('${q.id}', '${ltr}',${grp.selectCount})">
-                        <span>${opt}</span>
-                      </label>
-                    `;
-                  }).join('')}
-                </div>
-            `;
-            if (isReviewMode) {
-              rightHtml += `<div style="margin-top:10px;">`;
-              q.correctKeys.forEach(k => {
-                const isSelected = cur.includes(k);
-                rightHtml += `
-                  <div class="review-explanation-box" style="margin-bottom:6px;">
-                    <div style="font-weight:700; color:${isSelected ? '#047857' : '#b91c1c'};">Option [${k}]: ${isSelected ? '✅ Correct' : '❌ Missed'}</div>
-                    <div>${q.explanations[k]}</div>
-                    <button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(q.evidences[k])}')">🔍 Locate for Option ${k}</button>
-                  </div>
-                `;
-              });
-              rightHtml += `</div>`;
-            }
-            rightHtml += `</div>`;
-          });
-        }
+        // 2. RADIO MATRIX TABLE (MATCHING INFORMATION / NAMES / CLASSIFICATION)
+        else if (grp.type === 'radio_matrix') {
+          rightHtml += `
+            <table class="radio-matrix">
+              <thead>
+                <tr>
+                  <th>Statement / Question</th>
+                  ${grp.columns.map(col => `<th>${col}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${grp.questions.map(q => {
+                  const uAns = userAnswers[q.id] || '';
+                  return `
+                    <tr id="qitem_${q.id}">
+                      <td><b>Question ${q.num}:</b> ${q.prompt}</td>${grp.columns.map(col => `
+                        <td>
+                          <input type="radio" name="matrix_${q.id}" value="${col}" ${uAns === col ? 'checked' : ''} ${isReviewMode ? 'disabled' : ''} onchange="saveAnswer('${q.id}', '${col}')">
+                        </td>
+                      `).join('')}
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          `;
 
-        // FORMAT 4: INLINE GAP TYPING (GÕ TỪ TRỰC TIẾP VÀO CÂU)
-        else if (grp.type === 'gap_inline') {
-          grp.questions.forEach(q => {
-            const uAns = userAnswers[q.id] || '';
-            let renderedPrompt = grp.prompt;
-            const inputHtml = `<input type="text" class="inspera-inline-input" value="${uAns}" placeholder="[${q.num}]" ${isReviewMode ? 'disabled' : ''} oninput="saveAnswer('${q.id}', this.value)">`;
-            renderedPrompt = renderedPrompt.replace(`[${q.num}]`, inputHtml);
-            rightHtml += `
-              <div class="q-item-row" id="qitem_${q.id}">
-                <div class="q-item-header"><span>Question ${q.num}</span></div>
-                <div style="line-height:2.2; font-size:14.5px;">${renderedPrompt}</div>
-            `;
-            if (isReviewMode) {
-              const acc = q.answer.split(/[\/|]/).map(x => x.trim().toLowerCase());
-              const isRight = acc.includes(uAns.toLowerCase());
+          if (isReviewMode) {
+            rightHtml += `<div style="margin-top:10px;">`;
+            grp.questions.forEach(q => {
+              const uAns = userAnswers[q.id] || '';
+              const isRight = (uAns === q.answer);
               rightHtml += `
-                <div class="review-explanation-box">
-                  <div style="font-weight:700; color:${isRight ? '#047857' : '#b91c1c'};">Question ${q.num}: ${isRight ? '✅ Correct' : '❌ Incorrect'} (Key: <b>${q.answer}</b>)</div>
+                <div class="review-explanation-box" style="margin-bottom:8px;">
+                  <div style="font-weight:700; color:${isRight ? '#047857' : '#b91c1c'};">Question ${q.num}: ${isRight ? '✅ Correct' : '❌ Incorrect'} (Key: [${q.answer}])</div>
                   <div>${q.explanation}</div>
-                  <button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(q.evidenceSnippet)}')">🔍 Locate Evidence</button>
+                  ${q.evidenceSnippet ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(q.evidenceSnippet)}')">🔍 Locate Evidence</button>` : ''}
                 </div>
               `;
-            }
+            });
             rightHtml += `</div>`;
-          });
+          }
         }
 
-        // FORMAT 5: MATCHING OPTIONS (NAMES / SENTENCE ENDINGS - DROPDOWN)
-        else if (grp.type === 'matching_options') {
-          grp.questions.forEach(q => {
-            const uAns = userAnswers[q.id] || '';
-            const isRight = (uAns === q.answer);
-            rightHtml += `
-              <div class="q-item-row" id="qitem_${q.id}">
-                <div class="q-item-header"><span>Question ${q.num}</span></div>
-                <p style="margin-bottom:8px; font-weight:600;">${q.prompt}</p>
-                <select class="matching-select" ${isReviewMode ? 'disabled' : ''} onchange="saveAnswer('${q.id}', this.value)">
-                  <option value="">-- Choose matching option --</option>
-                  ${q.options.map(opt => `<option value="${opt}" ${uAns === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-                </select>
-            `;
-            if (isReviewMode) {
-              rightHtml += `
-                <div class="review-explanation-box">
-                  <div style="font-weight:700; color:${isRight ? '#047857' : '#b91c1c'};">Question ${q.num}: ${isRight ? '✅ Correct' : '❌ Incorrect'} (Key: <b>${q.answer}</b>)</div>
-                  <div>${q.explanation}</div>
-                  <button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(q.evidenceSnippet)}')">🔍 Locate Evidence</button>
-                </div>
-              `;
-            }
-            rightHtml += `</div>`;
-          });
-        }
-
-        // FORMAT 6: SINGLE CHOICE & TRUE/FALSE/NOT GIVEN (RADIO)
+        // 3. STANDARD CHOICE / TFNG
         else {
           grp.questions.forEach(q => {
             const uAns = userAnswers[q.id] || '';
@@ -1062,7 +1043,7 @@
                 <div class="review-explanation-box">
                   <div style="font-weight:700; color:${isRight ? '#047857' : '#b91c1c'};">Question ${q.num}: ${isRight ? '✅ Correct' : '❌ Incorrect'} (Key: <b>${q.answer}</b>)</div>
                   <div>${q.explanation}</div>
-                  <button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(q.evidenceSnippet)}')">🔍 Locate Evidence</button>
+                  ${q.evidenceSnippet ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(q.evidenceSnippet)}')">🔍 Locate Evidence</button>` : ''}
                 </div>
               `;
             }
@@ -1070,61 +1051,10 @@
           });
         }
 
-        rightHtml += `</div>`; // Close group-wrapper-box
+        rightHtml += `</div>`;
       });
 
       right.innerHTML = rightHtml;
-    }
-
-    /* DRAG & DROP HANDLERS (HEADINGS & SUMMARY WORDS) */
-    function allowDrop(e) { e.preventDefault(); e.currentTarget.classList.add('dragover'); }
-    function dragLeave(e) { e.currentTarget.classList.remove('dragover'); }
-    function handleDragStart(e, val, type) {
-      e.dataTransfer.setData('val', val);
-      e.dataTransfer.setData('elemId', e.target.id);
-      e.dataTransfer.setData('type', type);
-    }
-    function handleDropHeading(e, qId) {
-      e.preventDefault(); e.currentTarget.classList.remove('dragover');
-      const val = e.dataTransfer.getData('val');
-      const elemId = e.dataTransfer.getData('elemId');
-      const el = document.getElementById(elemId);
-      const zone = document.getElementById(`dz_${qId}`);
-      document.getElementById(`plh_${qId}`).style.display = 'none';
-      zone.appendChild(el);
-      userAnswers[qId] = val;
-      updateFooterNav();
-    }
-    function handleDropToSlot(e, qId) {
-      e.preventDefault(); e.currentTarget.classList.remove('dragover');
-      const val = e.dataTransfer.getData('val');
-      const elemId = e.dataTransfer.getData('elemId');
-      const el = document.getElementById(elemId);
-      const slot = document.getElementById(`slot_${qId}`);
-      document.getElementById(`slot_lbl_${qId}`).style.display = 'none';
-      slot.appendChild(el);
-      userAnswers[qId] = val;
-      updateFooterNav();
-    }
-    function handleReturnToPool(e, poolId) {
-      e.preventDefault();
-      const elemId = e.dataTransfer.getData('elemId');
-      document.getElementById(poolId).appendChild(document.getElementById(elemId));
-    }
-
-    function toggleMultiSelectChoice(qId, letter, maxCount) {
-      if (!userAnswers[qId]) userAnswers[qId] = [];
-      const idx = userAnswers[qId].indexOf(letter);
-      if (idx >= 0) userAnswers[qId].splice(idx, 1);
-      else {
-        if (userAnswers[qId].length >= maxCount) {
-          alert(`You can select at most ${maxCount} choices.`);
-          loadPassageView(activePartNum);
-          return;
-        }
-        userAnswers[qId].push(letter);
-      }
-      updateFooterNav();
     }
 
     function saveAnswer(qId, val) {
@@ -1133,68 +1063,64 @@
       updateFooterNav();
     }
 
-    /* FOOTER NAV */
     function buildFooterNav() {
       const container = document.getElementById('insperaFooterList');
       container.innerHTML = '';
-      let list = [];
+      if (activeExamType === 'writing') return;
 
+      let allQuestionEntries = [];
       activeExam.passages.forEach(p => {
-        p.groups.forEach(g => {
-          if (g.type === 'multi_select') {
-            g.questions.forEach(q => q.numRange.forEach(n => list.push({ id: q.id, num: n, partNum: p.partNum })));
-          } else {
-            g.questions.forEach(q => list.push({ id: q.id, num: q.num, partNum: p.partNum }));
-          }
+        (p.groups || []).forEach(grp => {
+          grp.questions.forEach(q => {
+            allQuestionEntries.push({ id: q.id, num: q.num, partNum: p.partNum });
+          });
         });
       });
-      list.sort((a,b) => a.num - b.num);
 
-      list.forEach(item => {
+      allQuestionEntries.sort((a,b) => a.num - b.num);
+
+      allQuestionEntries.forEach(item => {
         const btn = document.createElement('button');
         btn.className = 'footer-q-btn';
-        btn.id = `fpill_${item.id}_${item.num}`;
+        btn.id = `fpill_${item.id}`;
         btn.textContent = item.num;
         btn.onclick = () => {
           if (activePartNum !== item.partNum) switchExamPassage(item.partNum);
           setTimeout(() => {
-            const target = document.getElementById(`dz_${item.id}`) || document.getElementById(`slot_${item.id}`) || document.getElementById(`qitem_${item.id}`);
-            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const el = document.getElementById(`qitem_${item.id}`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }, 80);
         };
         container.appendChild(btn);
       });
+
       updateFooterNav();
     }
 
     function updateFooterNav() {
       document.querySelectorAll('.footer-q-btn').forEach(btn => {
-        const qId = btn.id.split('_')[1];
-        const answered = Array.isArray(userAnswers[qId]) ? (userAnswers[qId].length > 0) : Boolean(userAnswers[qId]);
-        btn.classList.toggle('answered', answered);
+        const qId = btn.id.replace('fpill_', '');
+        btn.classList.toggle('answered', Boolean(userAnswers[qId]));
       });
     }
 
-    /* LOCATE & EVIDENCE HIGHLIGHT */
-    function clearHighlights() {
-      document.querySelectorAll('.evidence-highlight-active').forEach(el => el.outerHTML = el.innerHTML);
-    }
-    function locateParagraph(label) {
-      clearHighlights();
-      const el = document.getElementById(`pblock_${label}`);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.classList.add('evidence-highlight-active');
-      }
-    }
-    function locateEvidenceSnippet(encoded) {
-      clearHighlights();
-      const snippet = decodeURIComponent(encoded);
+    function clearExistingEvidenceHighlights() {
       const leftPane = document.getElementById('insperaLeftPane');
+      leftPane.querySelectorAll('.evidence-highlight-active').forEach(el => el.outerHTML = el.innerHTML);
+    }
+
+    function locateEvidenceSnippet(encodedSnippet) {
+      const snippet = decodeURIComponent(encodedSnippet);
+      if (!snippet) return;
+      clearExistingEvidenceHighlights();
+
+      const leftPane = document.getElementById('insperaLeftPane');
+      const rawText = leftPane.innerHTML;
       const regex = new RegExp(`(${snippet})`, 'gi');
-      if (regex.test(leftPane.innerHTML)) {
-        leftPane.innerHTML = leftPane.innerHTML.replace(regex, `<span class="evidence-highlight-active" id="activeEvidenceSpot">$1</span>`);
-        document.getElementById('activeEvidenceSpot')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (regex.test(rawText)) {
+        leftPane.innerHTML = rawText.replace(regex, `<span class="evidence-highlight-active" id="activeLocateTarget">$1</span>`);
+        const target = document.getElementById('activeLocateTarget');
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
 
@@ -1203,15 +1129,23 @@
       const left = document.getElementById('insperaLeftPane');
       const right = document.getElementById('insperaRightPane');
       const box = document.getElementById('insperaSplitBox');
+
       resizer.onmousedown = (e) => {
         e.preventDefault();
         const onMove = (moveEvt) => {
           const rect = box.getBoundingClientRect();
-          const w = ((moveEvt.clientX - rect.left) / rect.width) * 100;
-          if (w > 20 && w < 80) { left.style.width = `${w}%`; right.style.width = `${100 - w}%`; }
+          const newLeftPct = ((moveEvt.clientX - rect.left) / rect.width) * 100;
+          if (newLeftPct > 20 && newLeftPct < 80) {
+            left.style.width = `${newLeftPct}%`;
+            right.style.width = `${100 - newLeftPct}%`;
+          }
         };
-        const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
-        window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
+        const onUp = () => {
+          window.removeEventListener('mousemove', onMove);
+          window.removeEventListener('mouseup', onUp);
+        };
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
       };
     }
 
@@ -1220,7 +1154,12 @@
       const timerEl = document.getElementById('insperaTimer');
       examTimer = setInterval(() => {
         if (isReviewMode) { timerEl.textContent = 'REVIEW MODE'; return; }
-        if (secondsRemaining <= 0) { clearInterval(examTimer); submitExam(); return; }
+        if (secondsRemaining <= 0) {
+          clearInterval(examTimer);
+          alert('Time has expired!');
+          submitExam();
+          return;
+        }
         secondsRemaining--;
         const m = String(Math.floor(secondsRemaining / 60)).padStart(2, '0');
         const s = String(secondsRemaining % 60).padStart(2, '0');
@@ -1236,54 +1175,103 @@
       }
     }
 
-    /* SUBMISSION & EVALUATION */
+    /* WRITING */
+    function launchWritingExam(examId) {
+      activeExam = db.writingExams.find(w => w.id === examId);
+      if (!activeExam) return;
+
+      activeExamType = 'writing';
+      activePartNum = 1;
+      writingAnswers = { task1: '', task2: '' };
+      secondsRemaining = activeExam.duration * 60;
+
+      document.getElementById('dashboardApp').style.display = 'none';
+      document.getElementById('examShell').style.display = 'flex';
+      document.getElementById('insperaExamTitle').textContent = activeExam.title;
+
+      renderPartPills();
+      loadWritingWorkspace(activePartNum);
+      setupResizer();
+      startTimer();
+    }
+
+    function switchWritingTask(taskNum) {
+      activePartNum = taskNum;
+      renderPartPills();
+      loadWritingWorkspace(activePartNum);
+    }
+
+    function loadWritingWorkspace(taskNum) {
+      const left = document.getElementById('insperaLeftPane');
+      const right = document.getElementById('insperaRightPane');
+      const isTask1 = (taskNum === 1);
+      const taskData = isTask1 ? activeExam.task1 : activeExam.task2;
+      const currentText = isTask1 ? writingAnswers.task1 : writingAnswers.task2;
+
+      left.innerHTML = `
+        <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 12px;">Writing Task ${taskNum}</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin-bottom: 16px;">${taskData.prompt}</p>
+      `;
+
+      right.innerHTML = `
+        <textarea class="writing-editor" id="writingEditor" placeholder="Type your response here..." oninput="updateWordCount(this.value)">${currentText}</textarea>
+        <div class="word-count-badge" id="writingWordCount">Total Words: 0</div>
+      `;
+      updateWordCount(currentText);
+    }
+
+    function updateWordCount(str) {
+      const count = str.trim() ? str.trim().split(/\s+/).length : 0;
+      document.getElementById('writingWordCount').textContent = `Total Words: ${count}`;
+    }
+
+    /* SUBMISSION */
     function submitExam() {
       if (!confirm('Are you sure you want to finish the exam?')) return;
       clearInterval(examTimer);
+
+      if (activeExamType === 'writing') {
+        alert('Writing assessment submitted successfully!');
+        document.getElementById('examShell').style.display = 'none';
+        document.getElementById('dashboardApp').style.display = 'flex';
+        renderDashboard();
+        return;
+      }
 
       let correct = 0;
       let total = 0;
 
       activeExam.passages.forEach(p => {
-        p.groups.forEach(g => {
-          if (g.type === 'matching_headings') {
-            g.questions.forEach(q => {
-              total++;
-              if ((userAnswers[q.id] || '').toLowerCase() === q.correctHeading.toLowerCase()) correct++;
-            });
-          } else if (g.type === 'summary_drag_box') {
-            g.questions.forEach(q => {
-              total++;
-              if ((userAnswers[q.id] || '').toLowerCase() === q.answer.toLowerCase()) correct++;
-            });
-          } else if (g.type === 'multi_select') {
-            g.questions.forEach(q => {
-              total += g.selectCount;
-              const cur = userAnswers[q.id] || [];
-              q.correctKeys.forEach(k => { if (cur.includes(k)) correct++; });
-            });
-          } else {
-            g.questions.forEach(q => {
-              total++;
-              const u = (userAnswers[q.id] || '').trim().toLowerCase();
-              if (q.type === 'gap') {
-                const acc = q.answer.split(/[\/|]/).map(x => x.trim().toLowerCase());
-                if (acc.includes(u)) correct++;
-              } else {
-                if (u === q.answer.toLowerCase()) correct++;
-              }
-            });
-          }
+        (p.groups || []).forEach(grp => {
+          grp.questions.forEach(q => {
+            total++;
+            const u = (userAnswers[q.id] || '').toLowerCase().trim();
+            if (u === q.answer.toLowerCase()) correct++;
+          });
         });
       });
 
       let band = '5.0';
-      const pct = correct / total;
-      if (pct >= 0.85) band = '8.5 - 9.0';
-      else if (pct >= 0.75) band = '7.5 - 8.0';
-      else if (pct >= 0.65) band = '7.0';
-      else if (pct >= 0.55) band = '6.5';
-      else if (pct >= 0.45) band = '6.0';
+      const pct = total > 0 ? correct / total : 0;
+      if (pct >= 0.9) band = '8.5 - 9.0';
+      else if (pct >= 0.8) band = '7.5 - 8.0';
+      else if (pct >= 0.7) band = '7.0';
+      else if (pct >= 0.6) band = '6.5';
+      else if (pct >= 0.5) band = '6.0';
+
+      const res = {
+        id: 'res_' + Date.now(),
+        examId: activeExam.id,
+        userName: activeUser.name,
+        examTitle: activeExam.title,
+        score: `${correct}/${total}`,
+        band,
+        userAnswersCopy: JSON.parse(JSON.stringify(userAnswers)),
+        timestamp: new Date().toLocaleString()
+      };
+
+      db.results.push(res);
+      persist();
 
       document.getElementById('summaryBandDisplay').textContent = `Band ${band}`;
       document.getElementById('summaryScoreDisplay').textContent = `Correct: ${correct} / ${total} questions`;
@@ -1306,10 +1294,321 @@
       loadPassageView(activePartNum);
     }
 
+    function reopenReviewFromHistory(resId) {
+      const res = db.results.find(r => r.id === resId);
+      if (!res) return;
+      activeExam = db.readingExams.find(e => e.id === res.examId) || db.readingExams[0];
+      userAnswers = res.userAnswersCopy || {};
+      launchExam(activeExam.id);
+      enterReviewModeFromSummary();
+    }
+
+    /* BUILDER / PARSER */
+    let passageDrafts = { 1: { groups: [] }, 2: { groups: [] }, 3: { groups: [] } };
+    let currentDraftTab = 1;
+
+    function openReadingEditorModal() {
+      document.getElementById('editingExamId').value = '';
+      passageDrafts = { 1: { groups: [] }, 2: { groups: [] }, 3: { groups: [] } };
+      document.getElementById('reTitle').value = '';
+      document.getElementById('reDuration').value = 60;
+      switchPassageEditor(1);
+      openModal('readingEditorModal');
+    }
+
+    function openEditExamModal(examId) {
+      const exam = db.readingExams.find(e => e.id === examId);
+      if (!exam) return;
+      document.getElementById('editingExamId').value = exam.id;
+      document.getElementById('reTitle').value = exam.title;
+      document.getElementById('reDuration').value = exam.duration;
+
+      passageDrafts = { 1: { groups: [] }, 2: { groups: [] }, 3: { groups: [] } };
+      exam.passages.forEach(p => {
+        passageDrafts[p.partNum] = {
+          title: p.title,
+          text: p.paragraphs.map(pr => pr.text).join('\n\n'),
+          groups: p.groups ? JSON.parse(JSON.stringify(p.groups)) : []
+        };
+      });
+
+      switchPassageEditor(1);
+      openModal('readingEditorModal');
+    }
+
+    function switchPassageEditor(pNum) {
+      currentDraftTab = pNum;
+      [1, 2, 3].forEach(n => document.getElementById(`subtab-p${n}`).classList.toggle('active-subtab', n === pNum));
+      loadDraftToEditor(pNum);
+    }
+
+    function loadDraftToEditor(pNum) {
+      const d = passageDrafts[pNum] || { groups: [] };
+      document.getElementById('rePTitle').value = d.title || `Passage ${pNum}`;
+      document.getElementById('rePText').value = d.text || '';
+      renderLiveConfiguredGroups(d.groups || []);
+    }
+
+    function clearAllDraftCards() {
+      if (confirm('Clear all configured groups for this passage?')) {
+        passageDrafts[currentDraftTab].groups = [];
+        renderLiveConfiguredGroups([]);
+      }
+    }
+
+    function autoParseRawToLiveCards() {
+      const raw = document.getElementById('rePRawQuestions').value;
+      if (!raw.trim()) return alert('Please paste question batch text into the box first!');
+
+      let header = 'Questions Group';
+      const headerMatch = raw.match(/questions\s+\d+[\s\-\–to]+\d+/i);
+      if (headerMatch) header = headerMatch[0];
+
+      const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const isSummary = /summary|complete the notes/i.test(raw);
+      const gapMatches = [...raw.matchAll(/(?:\[(\d+)\]|(\d+)\s*[\.\_\-]{2,})/g)];
+
+      if (isSummary && gapMatches.length >= 1) {
+        let summaryText = raw.replace(/questions\s+\d+[\s\-\–to]+\d+/i, '').trim();
+        const questions = [];
+        gapMatches.forEach(m => {
+          const num = Number(m[1] || m[2]);
+          summaryText = summaryText.replace(m[0], `[${num}]`);
+          questions.push({
+            id: `q_sum_${num}_${Date.now()}`,
+            num: num,
+            type: 'gap',
+            answer: '',
+            explanation: '',
+            evidenceSnippet: ''
+          });
+        });
+
+        const newGroup = {
+          id: 'grp_' + Date.now(),
+          header: header,
+          instructions: 'Complete the summary below. Choose NO MORE THAN TWO WORDS from the passage for each answer.',
+          type: 'summary_inline',
+          summaryTemplate: summaryText,
+          questions: questions
+        };
+
+        if (!passageDrafts[currentDraftTab].groups) passageDrafts[currentDraftTab].groups = [];
+        passageDrafts[currentDraftTab].groups.push(newGroup);
+        document.getElementById('rePRawQuestions').value = '';
+        renderLiveConfiguredGroups(passageDrafts[currentDraftTab].groups);
+        alert('Added Summary Completion Group!');
+        return;
+      }
+
+      const qNumRegex = /^(?:question\s+)?(\d+)[\.\)\s\t]+(.*)$/i;
+      const questions = [];
+      let currentQ = null;
+
+      lines.forEach(line => {
+        if (/^questions\s+\d+/i.test(line)) return;
+        const match = line.match(qNumRegex);
+        if (match && Number(match[1]) > 0 && Number(match[1]) < 100) {
+          if (currentQ) questions.push(currentQ);
+          const qNum = Number(match[1]);
+          const qPrompt = match[2].trim();
+          const isTFNG = /true/i.test(raw);
+          currentQ = {
+            id: `q_std_${qNum}_${Date.now()}`,
+            num: qNum,
+            type: 'choice',
+            prompt: qPrompt,
+            options: isTFNG ? ['TRUE', 'FALSE', 'NOT GIVEN'] : [],
+            answer: isTFNG ? 'TRUE' : '',
+            explanation: '',
+            evidenceSnippet: ''
+          };
+          return;
+        }
+
+        if (currentQ) {
+          const optMatch = line.match(/^([A-D])[\.\)]\s*(.*)$/i);
+          if (optMatch) {
+            currentQ.type = 'choice';
+            const optText = `${optMatch[1]}. ${optMatch[2].trim()}`;
+            currentQ.options.push(optText);
+            if (!currentQ.answer) currentQ.answer = optText;
+          }
+        }
+      });
+      if (currentQ) questions.push(currentQ);
+
+      const newGroup = {
+        id: 'grp_' + Date.now(),
+        header: header,
+        instructions: 'Answer the questions below.',
+        type: 'standard',
+        questions: questions
+      };
+
+      if (!passageDrafts[currentDraftTab].groups) passageDrafts[currentDraftTab].groups = [];
+      passageDrafts[currentDraftTab].groups.push(newGroup);
+      document.getElementById('rePRawQuestions').value = '';
+      renderLiveConfiguredGroups(passageDrafts[currentDraftTab].groups);
+      alert('Added Questions Group!');
+    }
+
+    function renderLiveConfiguredGroups(groups) {
+      const box = document.getElementById('liveQuestionCardsBox');
+      if (!groups.length) {
+        box.innerHTML = `<p style="color: #64748b; font-style: italic;">No question items generated yet. Paste text above and click Auto-Detect.</p>`;
+        return;
+      }
+
+      box.innerHTML = groups.map((g, gIdx) => `
+        <div class="q-edit-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px; margin-bottom:10px;">
+            <b style="font-size:15px; color:var(--emerald-dark);">${g.header} (${g.type.toUpperCase()})</b>
+            <button class="btn btn-danger" style="padding:2px 8px; font-size:11px;" onclick="passageDrafts[currentDraftTab].groups.splice(${gIdx}, 1); renderLiveConfiguredGroups(passageDrafts[currentDraftTab].groups);">Delete Group</button>
+          </div>
+          <div class="form-group">
+            <label>Group Instructions</label>
+            <input type="text" class="form-input" value="${g.instructions}" oninput="g.instructions = this.value">
+          </div>
+          <div style="margin-top:10px;">
+            <b style="font-size:13px;">Questions in Group:</b>
+            ${g.questions.map(q => `
+              <div style="background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:10px; margin-top:8px;">
+                <div style="font-weight:700;">Question ${q.num}</div>
+                <div style="margin:4px 0;"><input type="text" class="form-input" value="${q.answer || ''}" placeholder="Correct key / Answer" oninput="q.answer = this.value"></div>
+                <div style="margin:4px 0;"><input type="text" class="form-input" value="${q.explanation || ''}" placeholder="Explanation" oninput="q.explanation = this.value"></div>
+                <div style="margin:4px 0;"><input type="text" class="form-input" value="${q.evidenceSnippet || ''}" placeholder="Evidence text in passage" oninput="q.evidenceSnippet = this.value"></div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function saveActiveExamFromCards() {
+      const title = document.getElementById('reTitle').value.trim();
+      const duration = Number(document.getElementById('reDuration').value) || 60;
+      const editingId = document.getElementById('editingExamId').value;
+      if (!title) return alert('Exam Title is required!');
+
+      passageDrafts[currentDraftTab].title = document.getElementById('rePTitle').value.trim();
+      passageDrafts[currentDraftTab].text = document.getElementById('rePText').value.trim();
+
+      const passages = [];
+      [1, 2, 3].forEach(pNum => {
+        const d = passageDrafts[pNum];
+        if (d && d.text) {
+          const rawParas = d.text.split('\n\n').filter(Boolean);
+          const paragraphs = rawParas.map((pt, idx) => ({
+            label: `Paragraph ${String.fromCharCode(65 + idx)}`,
+            text: pt
+          }));
+
+          passages.push({
+            partNum: pNum,
+            title: d.title || `Passage ${pNum}`,
+            paragraphs,
+            groups: d.groups || [],
+            vocab: []
+          });
+        }
+      });
+
+      if (!passages.length) return alert('Please enter at least one passage text!');
+
+      if (editingId) {
+        const ex = db.readingExams.find(e => e.id === editingId);
+        if (ex) { ex.title = title; ex.duration = duration; ex.passages = passages; }
+      } else {
+        db.readingExams.push({
+          id: 're_' + Date.now(),
+          title, duration, assignedClasses: [],
+          passages
+        });
+      }
+
+      persist();
+      closeModal('readingEditorModal');
+      renderDashboard();
+      alert('Exam saved successfully!');
+    }
+
+    /* WRITING & HELPERS */
+    function openWritingEditorModal() {
+      document.getElementById('weTitle').value = '';
+      document.getElementById('weDuration').value = 60;
+      document.getElementById('weT1Prompt').value = '';
+      document.getElementById('weT1Image').value = '';
+      document.getElementById('weT2Prompt').value = '';
+      openModal('writingEditorModal');
+    }
+    function saveWritingExam() {
+      const title = document.getElementById('weTitle').value.trim();
+      const duration = Number(document.getElementById('weDuration').value) || 60;
+      const t1Prompt = document.getElementById('weT1Prompt').value.trim();
+      const t1Image = document.getElementById('weT1Image').value.trim();
+      const t2Prompt = document.getElementById('weT2Prompt').value.trim();
+      if (!title || !t1Prompt || !t2Prompt) return alert('Fill in all prompts!');
+
+      db.writingExams.push({
+        id: 'we_' + Date.now(),
+        title, duration,
+        task1: { prompt: t1Prompt, image: t1Image },
+        task2: { prompt: t2Prompt }
+      });
+      persist();
+      closeModal('writingEditorModal');
+      renderDashboard();
+      alert('Writing assessment saved!');
+    }
+
+    function openCreateClassModal() { document.getElementById('newClassName').value = ''; openModal('classModal'); }
+    function saveNewClass() {
+      const name = document.getElementById('newClassName').value.trim();
+      if (!name) return;
+      db.classes.push({ id: 'c_' + Date.now(), name });
+      persist(); closeModal('classModal'); renderDashboard();
+    }
+    function openCreateStudentModal() {
+      document.getElementById('stuFullName').value = '';
+      document.getElementById('stuUsername').value = '';
+      document.getElementById('stuPassword').value = '123456';
+      const sel = document.getElementById('stuClassSelect');
+      sel.innerHTML = db.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      openModal('studentModal');
+    }
+    function saveNewStudent() {
+      const n = document.getElementById('stuFullName').value.trim();
+      const u = document.getElementById('stuUsername').value.trim();
+      const p = document.getElementById('stuPassword').value.trim();
+      const c = document.getElementById('stuClassSelect').value;
+      if (!n || !u || !p) return alert('All fields required!');
+      db.users.push({ id: 'u_' + Date.now(), name: n, username: u, pass: p, role: 'student', classId: c });
+      persist(); closeModal('studentModal'); renderDashboard();
+    }
+    function openAssignModal(eId) {
+      document.getElementById('assignExamId').value = eId;
+      const sel = document.getElementById('assignCohortSelect');
+      sel.innerHTML = db.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      openModal('assignModal');
+    }
+    function executeAssign() {
+      const eId = document.getElementById('assignExamId').value;
+      const cId = document.getElementById('assignCohortSelect').value;
+      const ex = db.readingExams.find(e => e.id === eId);
+      if (ex && !ex.assignedClasses.includes(cId)) {
+        ex.assignedClasses.push(cId);
+        persist(); renderDashboard();
+      }
+      closeModal('assignModal');
+    }
+    function deleteExam(id) { if (confirm('Delete exam?')) { db.readingExams = db.readingExams.filter(e => e.id !== id); persist(); renderDashboard(); } }
+    function deleteClass(id) { if (confirm('Delete class?')) { db.classes = db.classes.filter(c => c.id !== id); persist(); renderDashboard(); } }
+    function deleteUser(id) { if (confirm('Remove user?')) { db.users = db.users.filter(u => u.id !== id); persist(); renderDashboard(); } }
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    // Start session
+    // Start Session
     checkSession();
   </script>
 </body>
