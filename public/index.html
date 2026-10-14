@@ -85,25 +85,30 @@
     .highlight-locate { background: var(--highlight) !important; padding: 2px 4px; border-radius: 3px; transition: background 0.3s; }
 
     /* VOCABULARY VIEW MODE */
-    .vocab-list { display: flex; flex-direction: column; gap: 10px; }
-    .vocab-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 12px; cursor: pointer; transition: 0.15s; }
+    .vocab-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 12px; cursor: pointer; transition: 0.15s; margin-bottom: 10px; }
     .vocab-card:hover { border-color: var(--amuro-blue); background: #f8fafc; }
     .vocab-word { font-weight: 700; color: var(--amuro-blue); font-size: 14px; }
     .vocab-syn { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
-    /* WRITING ENVIRONMENT (INSPERA & DOC COMMENTING) */
+    /* WRITING ENVIRONMENT (INSPERA) */
     .writing-editor { width: 100%; height: 380px; padding: 14px; border: 1px solid var(--border-dark); border-radius: 6px; font-size: 14px; line-height: 1.6; resize: none; outline: none; }
     .word-count-badge { font-weight: 700; color: #475569; font-size: 13px; margin-top: 6px; }
-
-    /* Comment Box Style */
-    .comment-thread { background: #fffbeb; border-left: 4px solid var(--amuro-gold); padding: 8px 12px; margin-bottom: 8px; font-size: 13px; }
-    .comment-author { font-weight: 700; color: #92400e; font-size: 12px; }
 
     /* Footer Nav */
     .exam-footer { height: 54px; background: #fff; border-top: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
     .footer-cells { display: flex; gap: 4px; overflow-x: auto; max-width: 80%; }
     .cell-btn { min-width: 28px; height: 28px; border: 1px solid var(--border-dark); border-radius: 4px; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
-    .cell-btn.filled { background: #334155; color: #fff; }
+
+    /* Modal Styling */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+    .modal-box { background: #fff; width: 850px; max-width: 95vw; max-height: 90vh; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
+    .modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 15px; }
+    .modal-body { padding: 18px; overflow-y: auto; flex: 1; font-size: 13px; }
+    .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; background: #f9fafb; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; }
+    .form-control { width: 100%; padding: 8px 10px; border: 1px solid var(--border-dark); border-radius: 6px; font-size: 13px; outline: none; }
+    textarea.form-control { font-family: monospace; line-height: 1.4; resize: vertical; }
   </style>
 </head>
 <body>
@@ -120,19 +125,16 @@
   <div id="loginScreen">
     <div class="login-box">
       <h2 style="margin-bottom: 6px; font-size: 18px;">Học Viện IELTS WITH AMURO</h2>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Đăng nhập để luyện Reading & Writing</p>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Đăng nhập để vào phòng luyện thi</p>
       <div style="margin-bottom: 12px;">
         <label style="font-size: 12px; font-weight: 600;">Tên tài khoản:</label>
-        <input type="text" id="logUser" style="width: 100%; padding: 8px; border: 1px solid var(--border-dark); border-radius: 4px; margin-top: 4px;">
+        <input type="text" id="logUser" style="width: 100%; padding: 8px; border: 1px solid var(--border-dark); border-radius: 4px; margin-top: 4px;" placeholder="Tên đăng nhập">
       </div>
       <div style="margin-bottom: 18px;">
         <label style="font-size: 12px; font-weight: 600;">Mật khẩu:</label>
-        <input type="password" id="logPass" style="width: 100%; padding: 8px; border: 1px solid var(--border-dark); border-radius: 4px; margin-top: 4px;">
+        <input type="password" id="logPass" style="width: 100%; padding: 8px; border: 1px solid var(--border-dark); border-radius: 4px; margin-top: 4px;" placeholder="Mật khẩu">
       </div>
       <button class="btn btn-primary" style="width: 100%; padding: 9px;" onclick="doLogin()">Vào Phòng Học</button>
-      <div style="font-size: 11px; color: var(--text-muted); margin-top: 14px;">
-        * Quản trị viên: <b>amuro</b> | Mật khẩu: <b>amuro123</b>
-      </div>
     </div>
   </div>
 
@@ -142,7 +144,7 @@
       <button class="tab-item active" onclick="switchNavTab('reading')">📖 Đề Luyện Reading</button>
       <button class="tab-item" onclick="switchNavTab('writing')">✍️ Đề Luyện Writing</button>
       <button class="tab-item" onclick="switchNavTab('vocab')">🧠 Tra Cứu & Học Từ Vựng</button>
-      <button class="tab-item teacher-only" onclick="switchNavTab('grading')">📝 Chấm Bài Writing (Google Docs View)</button>
+      <button class="tab-item teacher-only" onclick="switchNavTab('grading')">📝 Chấm Bài Writing</button>
     </div>
 
     <!-- READING EXAMS -->
@@ -184,20 +186,16 @@
           <span>Chế Độ Học Từ Vựng Theo Ngữ Cảnh Bài Đọc (Interactive Vocab)</span>
         </div>
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
-          Bấm vào bất kỳ từ vựng nào ở cột phải để tự động định vị và phát sáng từ đó trong bài đọc bên trái.
+          Bấm vào từ vựng ở cột bên phải để tự động cuộn và phát sáng vị trí của từ trong bài đọc.
         </p>
         <div style="display: flex; height: 500px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden;">
-          <div style="width: 60%; padding: 20px; overflow-y: auto; line-height: 1.8; border-right: 1px solid var(--border);" id="vocabReadingPassage">
-            <!-- Bài đọc có chứa từ vựng -->
-          </div>
-          <div style="width: 40%; padding: 16px; overflow-y: auto; background: #fafafa;" id="vocabCardsContainer">
-            <!-- Danh sách card từ vựng -->
-          </div>
+          <div style="width: 60%; padding: 20px; overflow-y: auto; line-height: 1.8; border-right: 1px solid var(--border);" id="vocabReadingPassage"></div>
+          <div style="width: 40%; padding: 16px; overflow-y: auto; background: #fafafa;" id="vocabCardsContainer"></div>
         </div>
       </div>
     </div>
 
-    <!-- TEACHER GRADING (GOOGLE DOCS VIEW) -->
+    <!-- TEACHER GRADING -->
     <div id="view-grading" class="tab-view" style="display: none;">
       <div class="card">
         <div class="card-title">
@@ -213,7 +211,7 @@
     </div>
   </div>
 
-  <!-- EXAM ENGINE SHELL (INSPERA SIMULATION) -->
+  <!-- EXAM ENGINE SHELL -->
   <div id="examShell">
     <div class="exam-top">
       <span id="shellExamTitle">IELTS Examination</span>
@@ -223,11 +221,7 @@
         <button class="btn btn-danger" onclick="submitActiveExam()">Nộp Bài</button>
       </div>
     </div>
-    
-    <div class="exam-workspace" id="examWorkspaceArea">
-      <!-- Màn hình chia 2 cột sẽ được render tại đây -->
-    </div>
-
+    <div class="exam-workspace" id="examWorkspaceArea"></div>
     <div class="exam-footer">
       <span style="font-size: 12px; font-weight: 700; color: #475569;">Question Navigation:</span>
       <div class="footer-cells" id="shellNavCells"></div>
@@ -235,10 +229,67 @@
     </div>
   </div>
 
+  <!-- MODAL: SOẠN ĐỀ READING BẰNG TEXT TỰ NHIÊN -->
+  <div class="modal-overlay" id="readingModal">
+    <div class="modal-box">
+      <div class="modal-header">Soạn / Nhập Đề Reading Mới (Full Các Dạng)</div>
+      <div class="modal-body">
+        <div style="background: #eef2ff; border: 1px solid #c7d2fe; padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 12px; color: #3730a3; line-height: 1.5;">
+          💡 <b>Dán trực tiếp từ Word/PDF:</b><br>
+          • <b>Matching Headings:</b> Đặt <code>[GROUP 1: Matching Headings]</code>, tiếp đến <code>HEADINGS:</code> (i. ...), rồi <code>1. Paragraph A = i</code>.<br>
+          • <b>Điền từ:</b> Dùng <code>[8]</code>, <code>[9]</code> trong đoạn văn. Ghi đáp án: <code>ANSWERS: 8 = water / animal power</code>.<br>
+          • <b>Trắc nghiệm & T/F/NG:</b> Đặt dấu <code>*</code> trước đáp án đúng (ví dụ: <code>*B. FALSE</code>).<br>
+          • <b>Từ vựng:</b> Đặt ở cuối <code>[VOCABULARY]</code>: <code>* từ | loại từ | nghĩa | syn: đồng nghĩa</code>.
+        </div>
+        <div class="form-group">
+          <label>Nội dung đề thi hoàn chỉnh (Cú pháp Cambridge):</label>
+          <textarea id="readingRawInput" class="form-control" style="height: 380px; font-size: 12px;" placeholder="Dán toàn bộ văn bản đề theo mẫu vào đây..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('readingModal')">Hủy</button>
+        <button class="btn btn-primary" onclick="processAndSaveReadingExam()">Lưu Đề Thi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: THÊM ĐỀ WRITING -->
+  <div class="modal-overlay" id="writingModal">
+    <div class="modal-box" style="width: 550px;">
+      <div class="modal-header">Thêm Đề Thi Writing Mới</div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Tiêu đề / Tên đề bài:</label>
+          <input type="text" id="wTitle" class="form-control" placeholder="Ví dụ: Task 2 - Nuclear Energy">
+        </div>
+        <div class="form-group">
+          <label>Loại Task:</label>
+          <select id="wTask" class="form-control">
+            <option value="1">Writing Task 1 (Mô tả biểu đồ / bản đồ / quy trình)</option>
+            <option value="2">Writing Task 2 (Nghị luận xã hội)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Thời lượng (phút):</label>
+          <input type="number" id="wDuration" class="form-control" value="60">
+        </div>
+        <div class="form-group">
+          <label>Đường link ảnh đề bài (nếu có):</label>
+          <input type="text" id="wImage" class="form-control" placeholder="https://example.com/chart.png">
+        </div>
+        <div class="form-group">
+          <label>Yêu cầu đề bài (Prompt):</label>
+          <textarea id="wPrompt" class="form-control" style="height: 120px;" placeholder="Nhập yêu cầu đề bài vào đây..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('writingModal')">Hủy</button>
+        <button class="btn btn-primary" onclick="saveWritingExam()">Lưu Đề Writing</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    /* =====================================================================
-       CLIENT CORE LOGIC: KÉO THẢ, EVIDENCE LOCATOR & GOOGLE DOCS COMMENT
-       ===================================================================== */
     let currentUser = null;
     let localDB = null;
     let activeExam = null;
@@ -246,23 +297,28 @@
     let timerId = null;
     let timeLeft = 3600;
 
-    // Tải dữ liệu ban đầu từ API
     async function fetchDB() {
-      const res = await fetch('/api/data');
-      localDB = await res.json();
-      renderAll();
+      try {
+        const res = await fetch('/api/data');
+        localDB = await res.json();
+        renderAll();
+      } catch (err) {
+        console.error("Lỗi kết nối dữ liệu máy chủ:", err);
+      }
     }
 
-    // Đăng nhập
     async function doLogin() {
       const username = document.getElementById('logUser').value.trim();
       const password = document.getElementById('logPass').value.trim();
+      if (!username || !password) return alert('Vui lòng điền đủ tên tài khoản và mật khẩu');
+
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
       });
-      if (!res.ok) return alert('Tài khoản hoặc mật khẩu không đúng!');
+
+      if (!res.ok) return alert('Tài khoản hoặc mật khẩu không chính xác!');
       currentUser = await res.json();
       
       document.getElementById('loginScreen').style.display = 'none';
@@ -289,15 +345,141 @@
     }
 
     function renderAll() {
+      if (!localDB) return;
       renderReadingTable();
       renderWritingTable();
       renderVocabSection();
       renderGradingTable();
     }
 
-    /* -------------------------------------------------------------
-       1. MATCHING HEADINGS KÉO - THẢ & BÀI ĐỌC READING INSPERA
-       ------------------------------------------------------------- */
+    /* MỞ & ĐÓNG MODAL SOẠN ĐỀ */
+    function openCreateReadingModal() {
+      document.getElementById('readingRawInput').value = '';
+      openModal('readingModal');
+    }
+    function openCreateWritingModal() {
+      document.getElementById('wTitle').value = '';
+      document.getElementById('wPrompt').value = '';
+      document.getElementById('wImage').value = '';
+      openModal('writingModal');
+    }
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    /* XỬ LÝ NHẬP ĐỀ THI READING */
+    async function processAndSaveReadingExam() {
+      const raw = document.getElementById('readingRawInput').value.trim();
+      if (!raw) return alert('Vui lòng dán nội dung đề!');
+
+      const titleMatch = raw.match(/\[TITLE:\s*(.*?)\]/i);
+      const title = titleMatch ? titleMatch[1] : 'Reading Practice Test';
+
+      const durationMatch = raw.match(/\[DURATION:\s*(\d+)\]/i);
+      const duration = durationMatch ? Number(durationMatch[1]) : 60;
+
+      // Tách Passage
+      let passageHtml = '';
+      const passageMatch = raw.match(/--- PASSAGE 1 ---([\s\S]*?)--- QUESTIONS ---/i);
+      if (passageMatch) {
+        passageHtml = passageMatch[1].trim().split('\n\n').map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+      }
+
+      // Xử lý Headings
+      let headingsGroup = null;
+      if (raw.includes('Matching Headings')) {
+        const hListMatch = raw.match(/HEADINGS:([\s\S]*?)(?=\d+\.|\n\n)/i);
+        const headings = [];
+        if (hListMatch) {
+          hListMatch[1].trim().split('\n').forEach(line => {
+            const m = line.trim().match(/^([ivxlcdm]+)\.\s*(.*)$/i);
+            if (m) headings.push({ id: m[1], text: m[2] });
+          });
+        }
+
+        const questions = [];
+        const qMatches = [...raw.matchAll(/(\d+)\.\s*(Paragraph\s+[A-Z])\s*=\s*([ivxlcdm]+)/gi)];
+        qMatches.forEach(m => {
+          questions.push({ id: m[1], label: m[2], answer: m[3].toLowerCase() });
+        });
+
+        headingsGroup = {
+          title: 'Matching Headings',
+          headings,
+          questions
+        };
+      }
+
+      // Xử lý Gap-fill (Summary)
+      let gapGroup = null;
+      const gapMatch = raw.match(/\[GROUP \d+:\s*(?:Summary\vert{}Sentence Completion)\][\s\S]*?TEXT:([\s\S]*?)ANSWERS:([\s\S]*?)(?=\[GROUP|\[VOCABULARY|$)/i);
+      if (gapMatch) {
+        const textTemplate = gapMatch[1].trim();
+        const answersRaw = gapMatch[2].trim();
+        const questions = [];
+
+        answersRaw.split('\n').forEach(line => {
+          const m = line.match(/(\d+)\s*=\s*(.*)/);
+          if (m) {
+            const accepted = m[2].split(/[\/|]/).map(x => x.trim().toLowerCase());
+            questions.push({ id: m[1], acceptedAnswers: accepted });
+          }
+        });
+
+        gapGroup = {
+          title: 'Summary Completion',
+          instructions: 'Điền từ thích hợp vào chỗ trống.',
+          template: textTemplate,
+          questions
+        };
+      }
+
+      // Gửi lên Server
+      const newExam = {
+        title,
+        duration,
+        formats: 'Matching Headings, Gap-fill...',
+        passageTitle: title,
+        passageHtml,
+        headingsGroup,
+        gapGroup
+      };
+
+      const res = await fetch('/api/exams/reading', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newExam)
+      });
+
+      if (res.ok) {
+        alert('Tạo đề Reading thành công!');
+        closeModal('readingModal');
+        fetchDB();
+      }
+    }
+
+    async function saveWritingExam() {
+      const title = document.getElementById('wTitle').value.trim();
+      const taskNumber = document.getElementById('wTask').value;
+      const duration = Number(document.getElementById('wDuration').value) || 60;
+      const image = document.getElementById('wImage').value.trim();
+      const prompt = document.getElementById('wPrompt').value.trim();
+
+      if (!title || !prompt) return alert('Vui lòng điền đủ tiêu đề và nội dung yêu cầu đề bài!');
+
+      const res = await fetch('/api/exams/writing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, taskNumber, duration, image, prompt })
+      });
+
+      if (res.ok) {
+        alert('Lưu đề Writing thành công!');
+        closeModal('writingModal');
+        fetchDB();
+      }
+    }
+
+    /* HIỂN THỊ DANH SÁCH */
     function renderReadingTable() {
       const tbody = document.getElementById('readingTable');
       tbody.innerHTML = '';
@@ -307,138 +489,48 @@
           <td><b>${e.title}</b></td>
           <td>${e.duration} phút</td>
           <td>${e.formats || 'Matching Headings, Gap-fill...'}</td>
-          <td>
-            <button class="btn btn-primary" onclick="launchReadingExam('${e.id}')">Vào Thi</button>
-          </td>
+          <td><button class="btn btn-primary" onclick="launchReadingExam('${e.id}')">Vào Thi</button></td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    function launchReadingExam(examId) {
-      activeExam = localDB.readingExams.find(e => e.id === examId);
-      userAnswers = {};
-      timeLeft = activeExam.duration * 60;
-
-      document.getElementById('dashboard').style.display = 'none';
-      document.getElementById('examShell').style.display = 'flex';
-      document.getElementById('shellExamTitle').textContent = activeExam.title;
-
-      renderReadingInsperaUI();
-      buildNavCells();
-      startTimer();
-    }
-
-    function renderReadingInsperaUI() {
-      const area = document.getElementById('examWorkspaceArea');
-      area.innerHTML = `
-        <div class="left-pane" id="passageDisplay">
-          <h2>${activeExam.passageTitle}</h2>
-          ${activeExam.image ? `<img src="${activeExam.image}" class="passage-img">` : ''}
-          <div id="passageParagraphs">${activeExam.passageHtml}</div>
-        </div>
-        <div class="right-pane" id="questionsDisplay"></div>
-      `;
-
-      const qDisplay = document.getElementById('questionsDisplay');
-      
-      // XỬ LÝ DẠNG BÀI MATCHING HEADINGS KÉO - THẢ (HTML5 DRAG AND DROP)
-      if (activeExam.headingsGroup) {
-        const group = activeExam.headingsGroup;
-        let html = `
-          <div class="card" style="margin-bottom: 20px;">
-            <b style="font-size: 13px; text-transform: uppercase;">${group.title}</b>
-            <p style="font-size: 13px; color: var(--text-muted); margin: 6px 0 12px 0;">
-              Kéo tiêu đề thích hợp và thả vào ô tương ứng của từng đoạn văn.
-            </p>
-            <div class="drag-pool" id="dragPool" ondragover="allowDrop(event)" ondrop="handleDropToPool(event)">
-              ${group.headings.map((h, i) => `
-                <div class="draggable-card" draggable="true" id="drag_h_${i}" ondragstart="handleDragStart(event, '${h.id}', '${h.text}')">
-                  <b>${h.id}.</b>${h.text}
-                </div>
-              `).join('')}
-            </div>
-            
-            <div style="margin-top: 14px;">
-              ${group.questions.map(q => `
-                <div style="margin-bottom: 12px;">
-                  <span style="font-size: 13px; font-weight: 700;">${q.label}:</span>
-                  <div class="drop-zone" id="drop_zone_${q.id}" ondragover="allowDrop(event)" ondrop="handleDropToQuestion(event, '${q.id}')">
-                    <span style="color: #94a3b8; font-size: 12px;" id="placeholder_${q.id}">Thả tiêu đề vào đây...</span>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
+    function renderWritingTable() {
+      const tbody = document.getElementById('writingTable');
+      tbody.innerHTML = '';
+      localDB.writingExams.forEach(w => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${w.title}</b></td>
+          <td>Task ${w.taskNumber}</td>
+          <td>${w.duration} phút</td>
+          <td><button class="btn btn-primary" onclick="launchWritingExam('${w.id}')">Làm Bài</button></td>
         `;
-        qDisplay.innerHTML += html;
-      }
+        tbody.appendChild(tr);
+      });
+    }
 
-      // XỬ LÝ DẠNG ĐIỀN TỪ (CHẤP NHẬN NHIỀU ĐÁP ÁN: A / B / C)
-      if (activeExam.gapGroup) {
-        let filledText = activeExam.gapGroup.template;
-        activeExam.gapGroup.questions.forEach(q => {
-          const inp = `<input type="text" class="gap-input" placeholder="[${q.id}]" oninput="saveAnswer('${q.id}', this.value)">`;
-          filledText = filledText.replace(`[${q.id}]`, inp);
-        });
-        qDisplay.innerHTML += `
-          <div class="card">
-            <b style="font-size: 13px; text-transform: uppercase;">${activeExam.gapGroup.title}</b>
-            <p style="font-size: 13px; color: var(--text-muted); margin: 6px 0 12px 0;">${activeExam.gapGroup.instructions}</p>
-            <div style="line-height: 2.2; font-size: 14px;">${filledText}</div>
-          </div>
+    function renderGradingTable() {
+      const tbody = document.getElementById('gradingTable');
+      tbody.innerHTML = '';
+      localDB.writingSubmissions.forEach(sub => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${sub.studentName}</b></td>
+          <td>${sub.examTitle}</td>
+          <td>${sub.timestamp}</td>
+          <td><b style="color: var(--amuro-blue);">${sub.score ? 'Band ' + sub.score : 'Chưa chấm'}</b></td>
+          <td><button class="btn btn-primary" onclick="alert('Đã sẵn sàng mở chấm bài')">Chấm Bài</button></td>
         `;
-      }
+        tbody.appendChild(tr);
+      });
     }
 
-    // Sự kiện Kéo - Thả
-    function allowDrop(e) { e.preventDefault(); }
-    function handleDragStart(e, id, text) {
-      e.dataTransfer.setData('headingId', id);
-      e.dataTransfer.setData('cardElementId', e.target.id);
-    }
-    function handleDropToQuestion(e, qId) {
-      e.preventDefault();
-      const headingId = e.dataTransfer.getData('headingId');
-      const cardElId = e.dataTransfer.getData('cardElementId');
-      const card = document.getElementById(cardElId);
-      
-      const zone = document.getElementById(`drop_zone_${qId}`);
-      document.getElementById(`placeholder_${qId}`).style.display = 'none';
-      zone.appendChild(card);
-      userAnswers[qId] = headingId;
-    }
-    function handleDropToPool(e) {
-      e.preventDefault();
-      const cardElId = e.dataTransfer.getData('cardElementId');
-      document.getElementById('dragPool').appendChild(document.getElementById(cardElId));
-    }
-
-    function saveAnswer(qId, val) {
-      userAnswers[qId] = val.trim();
-    }
-
-    /* -------------------------------------------------------------
-       2. EVIDENCE LOCATOR (ĐỊNH VỊ DẪN CHỨNG KHI XEM GIẢI THÍCH)
-       ------------------------------------------------------------- */
-    function locateEvidenceInPassage(paragraphId, snippetText) {
-      const p = document.getElementById(paragraphId);
-      if (!p) return;
-      p.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      p.classList.add('highlight-locate');
-      setTimeout(() => p.classList.remove('highlight-locate'), 3000);
-    }
-
-    /* -------------------------------------------------------------
-       3. INTERACTIVE VOCABULARY VIEW (BẤM TỪ PHÁT SÁNG BÀI ĐỌC)
-       ------------------------------------------------------------- */
     function renderVocabSection() {
       const pArea = document.getElementById('vocabReadingPassage');
       const cArea = document.getElementById('vocabCardsContainer');
+      pArea.innerHTML = `Industrialization brought massive changes. Many cities suffered from <span id="v_word_1" style="font-weight:700;">unprecedented</span> levels of smoke. The government had to <span id="v_word_2" style="font-weight:700;">implement</span> strict environmental regulations to <span id="v_word_3" style="font-weight:700;">mitigate</span> respiratory diseases.`;
       
-      const sampleText = `Industrialization brought massive changes. Many cities suffered from <span id="v_word_1" style="font-weight:700;">unprecedented</span> levels of smoke. The government had to <span id="v_word_2" style="font-weight:700;">implement</span> strict environmental regulations to <span id="v_word_3" style="font-weight:700;">mitigate</span> respiratory diseases among citizens.`;
-      pArea.innerHTML = sampleText;
-
       const words = [
         { id: 'v_word_1', word: 'unprecedented', type: 'adj', mean: 'Chưa từng có tiền lệ', syn: 'unparalleled, extraordinary' },
         { id: 'v_word_2', word: 'implement', type: 'v', mean: 'Thực thi, áp dụng', syn: 'execute, carry out' },
@@ -464,24 +556,95 @@
       setTimeout(() => { el.style.backgroundColor = 'transparent'; }, 2000);
     }
 
-    /* -------------------------------------------------------------
-       4. WRITING SYSTEM & CHẤM BÀI PHONG CÁCH GOOGLE DOCS
-       ------------------------------------------------------------- */
-    function renderWritingTable() {
-      const tbody = document.getElementById('writingTable');
-      tbody.innerHTML = '';
-      localDB.writingExams.forEach(w => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><b>${w.title}</b></td>
-          <td>Task ${w.taskNumber}</td>
-          <td>${w.duration} phút</td>
-          <td><button class="btn btn-primary" onclick="launchWritingExam('${w.id}')">Làm Bài</button></td>
+    /* CHẠY PHÒNG THI READING */
+    function launchReadingExam(examId) {
+      activeExam = localDB.readingExams.find(e => e.id === examId);
+      userAnswers = {};
+      timeLeft = activeExam.duration * 60;
+
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('examShell').style.display = 'flex';
+      document.getElementById('shellExamTitle').textContent = activeExam.title;
+
+      const area = document.getElementById('examWorkspaceArea');
+      area.innerHTML = `
+        <div class="left-pane" id="passageDisplay">
+          <h2>${activeExam.passageTitle}</h2>
+          <div id="passageParagraphs">${activeExam.passageHtml}</div>
+        </div>
+        <div class="right-pane" id="questionsDisplay"></div>
+      `;
+
+      const qDisplay = document.getElementById('questionsDisplay');
+      
+      // Kéo thả Heading
+      if (activeExam.headingsGroup) {
+        const group = activeExam.headingsGroup;
+        qDisplay.innerHTML += `
+          <div class="card" style="margin-bottom: 20px;">
+            <b style="font-size: 13px; text-transform: uppercase;">${group.title}</b>
+            <div class="drag-pool" id="dragPool" ondragover="allowDrop(event)" ondrop="handleDropToPool(event)">
+              ${group.headings.map((h, i) => `
+                <div class="draggable-card" draggable="true" id="drag_h_${i}" ondragstart="handleDragStart(event, '${h.id}', '${h.text}')">
+                  <b>${h.id}.</b>${h.text}
+                </div>
+              `).join('')}
+            </div>
+            <div>
+              ${group.questions.map(q => `
+                <div style="margin-bottom: 12px;">
+                  <span style="font-size: 13px; font-weight: 700;">${q.label}:</span>
+                  <div class="drop-zone" id="drop_zone_${q.id}" ondragover="allowDrop(event)" ondrop="handleDropToQuestion(event, '${q.id}')">
+                    <span style="color: #94a3b8; font-size: 12px;" id="placeholder_${q.id}">Thả tiêu đề vào đây...</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
         `;
-        tbody.appendChild(tr);
-      });
+      }
+
+      // Điền từ
+      if (activeExam.gapGroup) {
+        let filledText = activeExam.gapGroup.template;
+        activeExam.gapGroup.questions.forEach(q => {
+          const inp = `<input type="text" class="gap-input" placeholder="[${q.id}]" oninput="userAnswers['${q.id}'] = this.value.trim()">`;
+          filledText = filledText.replace(`[${q.id}]`, inp);
+        });
+        qDisplay.innerHTML += `
+          <div class="card">
+            <b style="font-size: 13px; text-transform: uppercase;">${activeExam.gapGroup.title}</b>
+            <div style="line-height: 2.2; font-size: 14px; margin-top: 10px;">${filledText}</div>
+          </div>
+        `;
+      }
+
+      startTimer();
     }
 
+    // Drag Drop handlers
+    function allowDrop(e) { e.preventDefault(); }
+    function handleDragStart(e, id, text) {
+      e.dataTransfer.setData('headingId', id);
+      e.dataTransfer.setData('cardElementId', e.target.id);
+    }
+    function handleDropToQuestion(e, qId) {
+      e.preventDefault();
+      const headingId = e.dataTransfer.getData('headingId');
+      const cardElId = e.dataTransfer.getData('cardElementId');
+      const card = document.getElementById(cardElId);
+      const zone = document.getElementById(`drop_zone_${qId}`);
+      document.getElementById(`placeholder_${qId}`).style.display = 'none';
+      zone.appendChild(card);
+      userAnswers[qId] = headingId;
+    }
+    function handleDropToPool(e) {
+      e.preventDefault();
+      const cardElId = e.dataTransfer.getData('cardElementId');
+      document.getElementById('dragPool').appendChild(document.getElementById(cardElId));
+    }
+
+    /* CHẠY PHÒNG THI WRITING */
     function launchWritingExam(examId) {
       const we = localDB.writingExams.find(x => x.id === examId);
       document.getElementById('dashboard').style.display = 'none';
@@ -500,6 +663,7 @@
           <div class="word-count-badge" id="wordCountLabel">Total Words: 0</div>
         </div>
       `;
+      startTimer();
     }
 
     function updateWordCount(text) {
@@ -507,52 +671,43 @@
       document.getElementById('wordCountLabel').textContent = `Total Words: ${count}`;
     }
 
-    function renderGradingTable() {
-      const tbody = document.getElementById('gradingTable');
-      tbody.innerHTML = '';
-      localDB.writingSubmissions.forEach(sub => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><b>${sub.studentName}</b></td>
-          <td>${sub.examTitle}</td>
-          <td>${sub.timestamp}</td>
-          <td><b style="color: var(--amuro-blue);">${sub.score ? 'Band ' + sub.score : 'Chưa chấm'}</b></td>
-          <td><button class="btn btn-primary" onclick="openDocGradingModal('${sub.id}')">Mở Chấm Điểm</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function openDocGradingModal(subId) {
-      const sub = localDB.writingSubmissions.find(s => s.id === subId);
-      const commentsHtml = sub.comments.map(c => `
-        <div class="comment-thread">
-          <div class="comment-author">${c.author}:</div>
-          <div style="font-weight: 600; text-decoration: underline;">"${c.selectedText}"</div>
-          <div>👉 ${c.comment}</div>
-        </div>
-      `).join('');
-
-      alert(`Chế độ chấm bài kiểu Google Docs:\n\nBài viết của ${sub.studentName}:\n\n${sub.essay}\n\nNhận xét hiện tại:\n${commentsHtml || 'Chưa có nhận xét'}`);
-    }
-
-    /* -------------------------------------------------------------
-       5. NỘP BÀI READING & CHẤP NHẬN NHIỀU ĐÁP ÁN (SUBTLE / SLIGHT)
-       ------------------------------------------------------------- */
     async function submitActiveExam() {
-      if (!confirm('Xác nhận hoàn thành và nộp bài?')) return;
+      if (!confirm('Bạn có chắc chắn muốn nộp bài?')) return;
       clearInterval(timerId);
 
+      // Nếu đang nộp bài Writing
+      const essayEl = document.getElementById('studentEssay');
+      if (essayEl) {
+        await fetch('/api/writing/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            studentName: currentUser.name,
+            examTitle: document.getElementById('shellExamTitle').textContent,
+            essay: essayEl.value
+          })
+        });
+        alert('Nộp bài Writing thành công!');
+        location.reload();
+        return;
+      }
+
+      // Nếu đang nộp Reading
       let correct = 0;
       let total = 0;
 
-      // So khớp đáp án (hỗ trợ nhiều đáp án phân tách bằng dấu / hoặc |)
+      if (activeExam.headingsGroup) {
+        activeExam.headingsGroup.questions.forEach(q => {
+          total++;
+          if ((userAnswers[q.id] || '').toLowerCase() === q.answer.toLowerCase()) correct++;
+        });
+      }
+
       if (activeExam.gapGroup) {
         activeExam.gapGroup.questions.forEach(q => {
           total++;
-          const userAns = (userAnswers[q.id] || '').trim().toLowerCase();
-          const accepted = q.acceptedAnswers.map(a => a.trim().toLowerCase());
-          if (accepted.includes(userAns)) correct++;
+          const u = (userAnswers[q.id] || '').toLowerCase();
+          if (q.acceptedAnswers.includes(u)) correct++;
         });
       }
 
@@ -563,31 +718,27 @@
           studentName: currentUser.name,
           examTitle: activeExam.title,
           correct,
-          total,
-          answers: userAnswers
+          total
         })
       });
 
-      alert(`Nộp bài thành công!\nSố câu đúng: ${correct}/${total}`);
+      alert(`Hoàn thành bài thi Reading!\nSố câu đúng: ${correct}/${total}`);
       location.reload();
     }
 
     function exitShell() {
-      if (confirm('Thoát khỏi bài thi?')) location.reload();
-    }
-
-    function buildNavCells() {
-      const nav = document.getElementById('shellNavCells');
-      nav.innerHTML = '';
-      for (let i = 1; i <= 10; i++) {
-        nav.innerHTML += `<button class="cell-btn">${i}</button>`;
-      }
+      if (confirm('Thoát khỏi phòng thi?')) location.reload();
     }
 
     function startTimer() {
       const timerEl = document.getElementById('shellTimer');
       timerId = setInterval(() => {
-        if (timeLeft <= 0) return clearInterval(timerId);
+        if (timeLeft <= 0) {
+          clearInterval(timerId);
+          alert('Hết giờ làm bài!');
+          submitActiveExam();
+          return;
+        }
         timeLeft--;
         const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
         const s = String(timeLeft % 60).padStart(2, '0');
