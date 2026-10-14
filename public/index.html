@@ -1,750 +1,1631 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IELTS WITH AMURO - Testing Platform</title>
+  <title>IELTS WITH AMURO - Official Computer-Delivered Testing</title>
   <style>
     :root {
-      --amuro-navy: #0f172a;
-      --amuro-blue: #2563eb;
-      --amuro-gold: #f59e0b;
-      --bg: #f8fafc;
-      --border: #e2e8f0;
-      --border-dark: #cbd5e1;
-      --text: #0f172a;
-      --text-muted: #64748b;
+      --cyan-soft: #e0f2fe;
+      --cyan-mint: #ccfbf1;
+      --cyan-deep: #0891b2;
+      --navy: #0f172a;
+      --navy-light: #1e293b;
+      --inspera-bg: #f8fafc;
+      --inspera-border: #cbd5e1;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --flag-gold: #f59e0b;
       --highlight: #fef08a;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
-    body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
-    
-    /* Navigation Bar */
-    header.main-nav {
-      background: var(--amuro-navy);
-      color: #fff;
-      height: 54px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-    }
-    .brand { font-weight: 800; font-size: 16px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
-    .brand span { background: var(--amuro-blue); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
-    .nav-right { display: flex; align-items: center; gap: 12px; }
-    .badge { background: #334155; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background: #fff; color: var(--navy); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-    .btn { padding: 6px 14px; border-radius: 6px; border: 1px solid transparent; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.15s; }
-    .btn-primary { background: var(--amuro-blue); color: #fff; }
-    .btn-primary:hover { background: #1d4ed8; }
-    .btn-secondary { background: #e2e8f0; color: #334155; }
-    .btn-secondary:hover { background: #cbd5e1; }
+    /* ========================================================
+       1. DIAGONAL MODERN PASTEL LOGIN SCREEN
+       ======================================================== */
+    #loginScreen {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; background: #fff;
+    }
+    .login-diagonal-left {
+      width: 55%;
+      background: linear-gradient(135deg, #e0f2fe 0%, #ccfbf1 50%, #e0e7ff 100%);
+      clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%);
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 60px 80px; position: relative;
+    }
+    .login-brand-tag {
+      font-size: 13px; font-weight: 800; letter-spacing: 2px;
+      color: var(--cyan-deep); text-transform: uppercase; margin-bottom: 12px;
+    }
+    .login-hero-title {
+      font-size: 50px; font-weight: 900; line-height: 1.15;
+      color: #0f172a; margin-bottom: 20px;
+    }
+    .login-hero-title span { color: var(--primary); }
+    .login-hero-desc {
+      font-size: 16px; color: #334155; line-height: 1.7; max-width: 520px; margin-bottom: 30px;
+    }
+    .login-motto-box {
+      border-left: 3px solid var(--primary); padding-left: 14px;
+      font-size: 14px; font-style: italic; color: #475569; font-weight: 600;
+    }
+
+    .login-diagonal-right {
+      width: 45%; display: flex; align-items: center; justify-content: center;
+      padding: 40px; margin-left: -5%;
+    }
+    .login-card {
+      width: 100%; max-width: 380px; background: #fff;
+      padding: 40px 32px; border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid var(--inspera-border);
+    }
+    .login-card h2 { font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+    .login-card p { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; text-align: left; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; }
+    .form-input {
+      width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1;
+      border-radius: 8px; font-size: 14px; outline: none; transition: 0.15s;
+    }
+    .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(2,132,199,0.15); }
+
+    /* Buttons */
+    .btn { padding: 8px 16px; border-radius: 6px; border: 1px solid transparent; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.15s; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
+    .btn-secondary:hover { background: #e2e8f0; }
     .btn-danger { background: #ef4444; color: #fff; }
 
-    /* Dashboard Layout */
-    .container { max-width: 1240px; margin: 24px auto; padding: 0 16px; width: 100%; flex: 1; }
-    .tabs-bar { display: flex; gap: 12px; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
-    .tab-item { padding: 10px 18px; border: none; background: none; font-weight: 700; font-size: 14px; color: var(--text-muted); cursor: pointer; position: relative; bottom: -2px; }
-    .tab-item.active { color: var(--amuro-blue); border-bottom: 2px solid var(--amuro-blue); }
+    /* ========================================================
+       2. DASHBOARD
+       ======================================================== */
+    #dashboardApp { display: none; min-height: 100vh; flex-direction: column; }
+    header.dash-header {
+      background: var(--navy); color: #fff; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px;
+    }
+    .dash-brand { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .dash-brand span { background: var(--primary); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .dash-user-controls { display: flex; align-items: center; gap: 12px; }
+    .dash-user-badge {
+      background: var(--navy-light); padding: 6px 14px; border-radius: 20px;
+      font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #334155;
+    }
 
-    .card { background: #fff; border-radius: 8px; border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+    .dash-body { max-width: 1320px; margin: 24px auto; padding: 0 16px; width: 100%; flex: 1; }
+    .dash-tabs { display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
+    .dash-tab-btn {
+      padding: 10px 20px; border: none; background: none; font-weight: 700;
+      font-size: 14px; color: #64748b; cursor: pointer; position: relative; bottom: -2px;
+    }
+    .dash-tab-btn.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+    .card { background: #fff; border-radius: 8px; border: 1px solid var(--inspera-border); padding: 22px; margin-bottom: 22px; }
     .card-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
-
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
     th { background: #f8fafc; font-weight: 700; color: #475569; }
 
-    /* Login Screen */
-    #loginScreen { flex: 1; display: flex; align-items: center; justify-content: center; }
-    .login-box { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 32px; width: 380px; box-shadow: 0 4px 14px rgba(0,0,0,0.05); }
+    /* ========================================================
+       3. INSPERA EXAM SHELL (100% REAL SIMULATION)
+       ======================================================== */
+    #examShell {
+      display: none; position: fixed; inset: 0; background: #fff;
+      z-index: 5000; flex-direction: column; overflow: hidden;
+    }
+    .inspera-top {
+      background: #202428; color: #fff; height: 46px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 18px; font-size: 13px; font-weight: 600; flex-shrink: 0;
+    }
+    .inspera-timer {
+      background: #111827; padding: 4px 12px; border-radius: 4px;
+      font-family: monospace; font-size: 14px; font-weight: 700; color: #fbbf24;
+    }
+    .inspera-part-tabs {
+      background: #e5e7eb; border-bottom: 1px solid var(--inspera-border);
+      padding: 6px 16px 0; display: flex; gap: 4px; flex-shrink: 0;
+    }
+    .part-pill {
+      padding: 8px 24px; border: 1px solid transparent; border-bottom: none;
+      border-radius: 4px 4px 0 0; background: #d1d5db; font-size: 13px;
+      font-weight: 700; color: #4b5563; cursor: pointer;
+    }
+    .part-pill.active {
+      background: #fff; border-color: var(--inspera-border); border-bottom-color: #fff;
+      color: #111; margin-bottom: -1px;
+    }
 
-    /* EXAM SHELL (INSPERA SIMULATION) */
-    #examShell { display: none; position: fixed; inset: 0; background: #fff; z-index: 1000; flex-direction: column; }
-    .exam-top { background: #1e293b; color: #fff; height: 46px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-size: 13px; font-weight: 600; }
-    .exam-timer { background: #0f172a; padding: 4px 10px; border-radius: 4px; font-family: monospace; font-size: 14px; color: var(--amuro-gold); font-weight: 700; }
-    .exam-workspace { flex: 1; display: flex; overflow: hidden; }
-    
-    .left-pane { width: 50%; padding: 24px; overflow-y: auto; line-height: 1.7; border-right: 1px solid var(--border-dark); }
-    .right-pane { width: 50%; padding: 24px; overflow-y: auto; background: #fafafa; }
-    .passage-img { max-width: 100%; border-radius: 6px; margin: 12px 0; border: 1px solid var(--border); }
+    .inspera-workspace { flex: 1; display: flex; overflow: hidden; position: relative; }
+    .passage-col { width: 50%; padding: 26px 30px; overflow-y: auto; font-size: 15px; line-height: 1.8; border-right: 1px solid var(--inspera-border); }
+    .resizer-bar { width: 8px; cursor: col-resize; background: #f1f5f9; border-left: 1px solid var(--inspera-border); border-right: 1px solid var(--inspera-border); flex-shrink: 0; }
+    .resizer-bar:hover { background: #cbd5e1; }
+    .questions-col { width: 50%; padding: 26px 30px; overflow-y: auto; background: #fafafa; font-size: 14px; }
 
-    /* DRAG & DROP MATCHING HEADINGS */
-    .drag-pool { background: #f1f5f9; border: 1px dashed #94a3b8; border-radius: 6px; padding: 12px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
-    .draggable-card { background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 8px 12px; font-size: 13px; cursor: grab; user-select: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-    .draggable-card:active { cursor: grabbing; opacity: 0.6; }
-    
-    .drop-zone { min-height: 44px; border: 2px dashed #94a3b8; border-radius: 4px; background: #fff; display: flex; align-items: center; padding: 4px 8px; margin-top: 6px; }
-    .drop-zone.over { border-color: var(--amuro-blue); background: #eff6ff; }
-    .drop-zone .draggable-card { width: 100%; margin: 0; }
+    /* Paragraph Headings Drop Zone */
+    .para-block { margin-bottom: 24px; }
+    .para-header-label { font-weight: 800; color: var(--navy); margin-bottom: 4px; }
+    .para-dropzone {
+      min-height: 44px; border: 2px dashed #94a3b8; border-radius: 6px;
+      background: #f8fafc; display: flex; align-items: center;
+      padding: 4px 10px; margin-bottom: 10px; transition: 0.15s;
+    }
+    .para-dropzone.dragover { border-color: var(--primary); background: #eff6ff; }
+    .heading-chip {
+      background: #fff; border: 1.5px solid #cbd5e1; border-radius: 6px;
+      padding: 8px 12px; font-size: 13px; font-weight: 600; margin-bottom: 8px;
+      cursor: grab; user-select: none; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .heading-chip:active { cursor: grabbing; opacity: 0.6; }
 
-    /* INLINE GAP COMPLETION */
-    .gap-input { width: 140px; padding: 3px 8px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: 700; color: var(--amuro-blue); margin: 0 4px; outline: none; }
-    .gap-input:focus { border-color: var(--amuro-blue); box-shadow: 0 0 0 1px var(--amuro-blue); }
+    /* Question cards */
+    .q-box { background: #fff; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 18px; margin-bottom: 18px; }
+    .q-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .flag-btn {
+      background: none; border: 1px solid #cbd5e1; border-radius: 4px;
+      padding: 4px 8px; font-size: 11px; font-weight: 700; color: #475569;
+      cursor: pointer; display: flex; align-items: center; gap: 4px;
+    }
+    .flag-btn.flagged { background: #fef3c7; border-color: var(--flag-gold); color: #b45309; }
+    .gap-inline-input {
+      width: 140px; padding: 4px 8px; border: 1.5px solid #94a3b8;
+      border-radius: 4px; font-weight: 700; color: var(--primary); outline: none; margin: 0 4px;
+    }
 
-    /* EVIDENCE LOCATOR HIGHLIGHT */
-    .highlight-locate { background: var(--highlight) !important; padding: 2px 4px; border-radius: 3px; transition: background 0.3s; }
+    /* Writing Area */
+    .writing-textarea {
+      width: 100%; height: 380px; padding: 16px; border: 1px solid var(--inspera-border);
+      border-radius: 8px; font-size: 14px; line-height: 1.6; resize: none; outline: none;
+    }
+    .word-count-badge { font-weight: 700; color: #475569; font-size: 13px; margin-top: 8px; }
 
-    /* VOCABULARY VIEW MODE */
-    .vocab-card { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 12px; cursor: pointer; transition: 0.15s; margin-bottom: 10px; }
-    .vocab-card:hover { border-color: var(--amuro-blue); background: #f8fafc; }
-    .vocab-word { font-weight: 700; color: var(--amuro-blue); font-size: 14px; }
-    .vocab-syn { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    /* Highlight floating menu */
+    #textHighlightMenu {
+      display: none; position: absolute; z-index: 6000;
+      background: #1e293b; color: #fff; border-radius: 6px;
+      padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+    #textHighlightMenu button {
+      background: none; border: none; color: #fff; padding: 6px 10px;
+      font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 4px;
+    }
 
-    /* WRITING ENVIRONMENT (INSPERA) */
-    .writing-editor { width: 100%; height: 380px; padding: 14px; border: 1px solid var(--border-dark); border-radius: 6px; font-size: 14px; line-height: 1.6; resize: none; outline: none; }
-    .word-count-badge { font-weight: 700; color: #475569; font-size: 13px; margin-top: 6px; }
+    /* Footer Navigation */
+    .inspera-footer {
+      height: 56px; background: #fff; border-top: 1px solid var(--inspera-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 18px; flex-shrink: 0;
+    }
+    .footer-q-list { display: flex; gap: 14px; overflow-x: auto; max-width: 80%; }
+    .footer-q-btn {
+      min-width: 28px; height: 28px; border: 1px solid var(--inspera-border);
+      border-radius: 4px; background: #fff; font-size: 12px; font-weight: 700;
+      color: #374151; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; position: relative;
+    }
+    .footer-q-btn.answered { background: #374151; color: #fff; border-color: #374151; }
+    .footer-q-btn.flagged::after {
+      content: "★"; position: absolute; top: -6px; right: -4px;
+      font-size: 10px; color: var(--flag-gold);
+    }
 
-    /* Footer Nav */
-    .exam-footer { height: 54px; background: #fff; border-top: 1px solid var(--border-dark); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
-    .footer-cells { display: flex; gap: 4px; overflow-x: auto; max-width: 80%; }
-    .cell-btn { min-width: 28px; height: 28px; border: 1px solid var(--border-dark); border-radius: 4px; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; }
-
-    /* Modal Styling */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
-    .modal-box { background: #fff; width: 850px; max-width: 95vw; max-height: 90vh; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
-    .modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 15px; }
-    .modal-body { padding: 18px; overflow-y: auto; flex: 1; font-size: 13px; }
-    .modal-footer { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; background: #f9fafb; }
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; }
-    .form-control { width: 100%; padding: 8px 10px; border: 1px solid var(--border-dark); border-radius: 6px; font-size: 13px; outline: none; }
-    textarea.form-control { font-family: monospace; line-height: 1.4; resize: vertical; }
+    /* Modals */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 7000; align-items: center; justify-content: center;
+    }
+    .modal-window {
+      background: #fff; width: 900px; max-width: 95vw; max-height: 90vh;
+      border-radius: 10px; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .modal-header { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 16px; }
+    .modal-body { padding: 20px; overflow-y: auto; flex: 1; font-size: 13px; }
+    .modal-footer { padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc; }
   </style>
 </head>
 <body>
 
-  <!-- Top Navigation -->
-  <header class="main-nav">
-    <div class="brand">
-      IELTS WITH AMURO <span>STUDY ROOM</span>
-    </div>
-    <div class="nav-right" id="navUserArea"></div>
-  </header>
-
-  <!-- Login Screen -->
+  <!-- ========================================================
+       1. DIAGONAL LOGIN SCREEN (PASTEL TONE & LOGO)
+       ======================================================== -->
   <div id="loginScreen">
-    <div class="login-box">
-      <h2 style="margin-bottom: 6px; font-size: 18px;">Học Viện IELTS WITH AMURO</h2>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Đăng nhập để vào phòng luyện thi</p>
-      <div style="margin-bottom: 12px;">
-        <label style="font-size: 12px; font-weight: 600;">Tên tài khoản:</label>
-        <input type="text" id="logUser" style="width: 100%; padding: 8px; border: 1px solid var(--border-dark); border-radius: 4px; margin-top: 4px;" placeholder="Tên đăng nhập">
+    <div class="login-diagonal-left">
+      <div class="login-brand-tag">IELTS Academic & General Portal</div>
+      <div class="login-hero-title">
+        IELTS WITH <span>AMURO</span>
       </div>
-      <div style="margin-bottom: 18px;">
-        <label style="font-size: 12px; font-weight: 600;">Mật khẩu:</label>
-        <input type="password" id="logPass" style="width: 100%; padding: 8px; border: 1px solid var(--border-dark); border-radius: 4px; margin-top: 4px;" placeholder="Mật khẩu">
+      <div class="login-hero-desc">
+        Practice better, one passage at a time. Experience authentic computer-delivered testing with split-view layout, real-time timer, and detailed evidence review.
       </div>
-      <button class="btn btn-primary" style="width: 100%; padding: 9px;" onclick="doLogin()">Vào Phòng Học</button>
-    </div>
-  </div>
-
-  <!-- Dashboard Workspace -->
-  <div class="container" id="dashboard" style="display: none;">
-    <div class="tabs-bar">
-      <button class="tab-item active" onclick="switchNavTab('reading')">📖 Đề Luyện Reading</button>
-      <button class="tab-item" onclick="switchNavTab('writing')">✍️ Đề Luyện Writing</button>
-      <button class="tab-item" onclick="switchNavTab('vocab')">🧠 Tra Cứu & Học Từ Vựng</button>
-      <button class="tab-item teacher-only" onclick="switchNavTab('grading')">📝 Chấm Bài Writing</button>
-    </div>
-
-    <!-- READING EXAMS -->
-    <div id="view-reading" class="tab-view">
-      <div class="card">
-        <div class="card-title">
-          <span>Kho Đề Thi Reading Chuẩn Thi Máy</span>
-          <button class="btn btn-primary teacher-only" onclick="openCreateReadingModal()">+ Soạn Đề Reading Mới</button>
-        </div>
-        <table>
-          <thead>
-            <tr><th>Tên Bài Đọc</th><th>Thời Lượng</th><th>Dạng Câu Hỏi</th><th>Thao Tác</th></tr>
-          </thead>
-          <tbody id="readingTable"></tbody>
-        </table>
+      <div class="login-motto-box">
+        "Let justice be done though the heavens fall"
       </div>
     </div>
-
-    <!-- WRITING EXAMS -->
-    <div id="view-writing" class="tab-view" style="display: none;">
-      <div class="card">
-        <div class="card-title">
-          <span>Kho Đề Thi Writing (Task 1 & Task 2)</span>
-          <button class="btn btn-primary teacher-only" onclick="openCreateWritingModal()">+ Thêm Đề Writing</button>
+    <div class="login-diagonal-right">
+      <div class="login-card">
+        <h2>Sign In</h2>
+        <p>Access your IELTS testing workspace</p>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="logUser" class="form-input" placeholder="Enter username">
         </div>
-        <table>
-          <thead>
-            <tr><th>Đề Bài</th><th>Loại Task</th><th>Thời Lượng</th><th>Thao Tác</th></tr>
-          </thead>
-          <tbody id="writingTable"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- VOCABULARY INTERACTIVE MODE -->
-    <div id="view-vocab" class="tab-view" style="display: none;">
-      <div class="card">
-        <div class="card-title">
-          <span>Chế Độ Học Từ Vựng Theo Ngữ Cảnh Bài Đọc (Interactive Vocab)</span>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="logPass" class="form-input" placeholder="Enter password">
         </div>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
-          Bấm vào từ vựng ở cột bên phải để tự động cuộn và phát sáng vị trí của từ trong bài đọc.
-        </p>
-        <div style="display: flex; height: 500px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden;">
-          <div style="width: 60%; padding: 20px; overflow-y: auto; line-height: 1.8; border-right: 1px solid var(--border);" id="vocabReadingPassage"></div>
-          <div style="width: 40%; padding: 16px; overflow-y: auto; background: #fafafa;" id="vocabCardsContainer"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TEACHER GRADING -->
-    <div id="view-grading" class="tab-view" style="display: none;">
-      <div class="card">
-        <div class="card-title">
-          <span>Danh Sách Bài Nộp Writing Cần Chấm</span>
-        </div>
-        <table>
-          <thead>
-            <tr><th>Học Sinh</th><th>Đề Bài</th><th>Thời Gian Nộp</th><th>Điểm Đã Chấm</th><th>Thao Tác</th></tr>
-          </thead>
-          <tbody id="gradingTable"></tbody>
-        </table>
+        <button class="btn btn-primary" style="width: 100%; padding: 11px; margin-top: 8px;" onclick="execLogin()">
+          Enter Practice Room
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- EXAM ENGINE SHELL -->
+  <!-- ========================================================
+       2. DASHBOARD
+       ======================================================== -->
+  <div id="dashboardApp">
+    <header class="dash-header">
+      <div class="dash-brand">
+        IELTS WITH AMURO <span>SIMULATION</span>
+      </div>
+      <div class="dash-user-controls">
+        <div class="dash-user-badge" onclick="openProfileModal()" id="userProfileLabel">
+          👤 Account
+        </div>
+        <button class="btn btn-secondary" onclick="execLogout()">Sign Out</button>
+      </div>
+    </header>
+
+    <div class="dash-body">
+      <div class="dash-tabs">
+        <button class="dash-tab-btn active" onclick="switchDashTab('reading')">📖 Reading Tests</button>
+        <button class="dash-tab-btn" onclick="switchDashTab('writing')">✍️ Writing Tests (Task 1 & 2)</button>
+        <button class="dash-tab-btn" onclick="switchDashTab('vocab')">🧠 Vocabulary Context</button>
+        <button class="dash-tab-btn teacher-item" onclick="switchDashTab('classes')">🏫 Class Management</button>
+        <button class="dash-tab-btn teacher-item" onclick="switchDashTab('students')">👤 Students & Accounts</button>
+        <button class="dash-tab-btn teacher-item" onclick="switchDashTab('analytics')">📊 Score Analytics</button>
+      </div>
+
+      <!-- TAB 1: READING -->
+      <div id="tab-reading" class="dash-pane">
+        <div class="card">
+          <div class="card-title">
+            <span>Reading Test Library</span>
+            <button class="btn btn-primary teacher-item" onclick="openReadingEditorModal()">+ Create Reading Test (Per-Passage)</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Test Title</th><th>Duration</th><th>Passages</th><th>Assigned Class</th><th>Action</th></tr>
+            </thead>
+            <tbody id="readingTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: WRITING -->
+      <div id="tab-writing" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Writing Test Library (Full Tasks)</span>
+            <button class="btn btn-primary teacher-item" onclick="openWritingEditorModal()">+ Create Writing Test (Task 1 & 2)</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Test Title</th><th>Duration</th><th>Tasks Included</th><th>Action</th></tr>
+            </thead>
+            <tbody id="writingTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 3: VOCABULARY -->
+      <div id="tab-vocab" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title"><span>Interactive Passage Vocabulary</span></div>
+          <div style="display: flex; height: 520px; border: 1px solid var(--inspera-border); border-radius: 8px; overflow: hidden;">
+            <div style="width: 60%; padding: 24px; overflow-y: auto; line-height: 1.8;" id="vocabPassagePane"></div>
+            <div style="width: 40%; padding: 18px; overflow-y: auto; background: #fafafa; border-left: 1px solid var(--inspera-border);" id="vocabCardsPane"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: CLASS MANAGEMENT -->
+      <div id="tab-classes" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Classes & Cohorts</span>
+            <button class="btn btn-primary" onclick="openCreateClassModal()">+ Add New Class</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Class Name</th><th>Total Students</th><th>Action</th></tr>
+            </thead>
+            <tbody id="classTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 5: STUDENT MANAGEMENT -->
+      <div id="tab-students" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Student Accounts & Class Placement</span>
+            <button class="btn btn-primary" onclick="openCreateStudentModal()">+ Register Student Account</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Full Name</th><th>Username</th><th>Password</th><th>Assigned Class</th><th>Action</th></tr>
+            </thead>
+            <tbody id="studentTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 6: SCORE ANALYTICS -->
+      <div id="tab-analytics" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title"><span>Student Submissions & Score Tracking</span></div>
+          <table>
+            <thead>
+              <tr><th>Student Name</th><th>Exam Title</th><th>Score</th><th>Band</th><th>Submission Date</th><th>Review</th></tr>
+            </thead>
+            <tbody id="analyticsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       3. INSPERA EXAM WORKSPACE
+       ======================================================== -->
   <div id="examShell">
-    <div class="exam-top">
-      <span id="shellExamTitle">IELTS Examination</span>
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <span class="exam-timer" id="shellTimer">60:00</span>
-        <button class="btn btn-secondary" onclick="exitShell()">Thoát</button>
-        <button class="btn btn-danger" onclick="submitActiveExam()">Nộp Bài</button>
+    <div class="inspera-top">
+      <span id="insperaExamTitle">IELTS Computer-Delivered Examination</span>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <span class="inspera-timer" id="insperaTimer">60:00</span>
+        <button class="btn btn-secondary" onclick="exitExamShell()">Exit</button>
+        <button class="btn btn-danger" onclick="submitExam()">Finish Test</button>
       </div>
     </div>
-    <div class="exam-workspace" id="examWorkspaceArea"></div>
-    <div class="exam-footer">
-      <span style="font-size: 12px; font-weight: 700; color: #475569;">Question Navigation:</span>
-      <div class="footer-cells" id="shellNavCells"></div>
-      <button class="btn btn-primary" onclick="submitActiveExam()">Hoàn Thành</button>
+
+    <!-- Part Navigation Pills -->
+    <div class="inspera-part-tabs" id="insperaPartTabs"></div>
+
+    <!-- Split Pane Workspace -->
+    <div class="inspera-workspace" id="insperaSplitBox">
+      <div class="passage-col" id="insperaLeftPane"></div>
+      <div class="resizer-bar" id="insperaResizer"></div>
+      <div class="questions-col" id="insperaRightPane"></div>
+    </div>
+
+    <!-- Footer Navigation -->
+    <div class="inspera-footer">
+      <span style="font-size: 12px; font-weight: 700; color: #475569;">Navigation:</span>
+      <div class="footer-q-list" id="insperaFooterList"></div>
+      <button class="btn btn-primary" onclick="submitExam()">Submit Assessment</button>
     </div>
   </div>
 
-  <!-- MODAL: SOẠN ĐỀ READING BẰNG TEXT TỰ NHIÊN -->
-  <div class="modal-overlay" id="readingModal">
-    <div class="modal-box">
-      <div class="modal-header">Soạn / Nhập Đề Reading Mới (Full Các Dạng)</div>
+  <!-- FLOATING HIGHLIGHT MENU -->
+  <div id="textHighlightMenu">
+    <button onclick="applySelectionHighlight()">🖍️ Highlight</button>
+    <button onclick="clearSelectionHighlight()">❌ Clear</button>
+  </div>
+
+  <!-- MODAL: PROFILE & PASSWORD -->
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal-window" style="width: 420px;">
+      <div class="modal-header">User Profile</div>
       <div class="modal-body">
-        <div style="background: #eef2ff; border: 1px solid #c7d2fe; padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 12px; color: #3730a3; line-height: 1.5;">
-          💡 <b>Dán trực tiếp từ Word/PDF:</b><br>
-          • <b>Matching Headings:</b> Đặt <code>[GROUP 1: Matching Headings]</code>, tiếp đến <code>HEADINGS:</code> (i. ...), rồi <code>1. Paragraph A = i</code>.<br>
-          • <b>Điền từ:</b> Dùng <code>[8]</code>, <code>[9]</code> trong đoạn văn. Ghi đáp án: <code>ANSWERS: 8 = water / animal power</code>.<br>
-          • <b>Trắc nghiệm & T/F/NG:</b> Đặt dấu <code>*</code> trước đáp án đúng (ví dụ: <code>*B. FALSE</code>).<br>
-          • <b>Từ vựng:</b> Đặt ở cuối <code>[VOCABULARY]</code>: <code>* từ | loại từ | nghĩa | syn: đồng nghĩa</code>.
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="profNameInput" class="form-input">
         </div>
         <div class="form-group">
-          <label>Nội dung đề thi hoàn chỉnh (Cú pháp Cambridge):</label>
-          <textarea id="readingRawInput" class="form-control" style="height: 380px; font-size: 12px;" placeholder="Dán toàn bộ văn bản đề theo mẫu vào đây..."></textarea>
+          <label>New Password (Optional)</label>
+          <input type="password" id="profPassInput" class="form-input" placeholder="Leave blank to keep current">
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('readingModal')">Hủy</button>
-        <button class="btn btn-primary" onclick="processAndSaveReadingExam()">Lưu Đề Thi</button>
+        <button class="btn btn-secondary" onclick="closeModal('profileModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveProfileChanges()">Save Changes</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: THÊM ĐỀ WRITING -->
-  <div class="modal-overlay" id="writingModal">
-    <div class="modal-box" style="width: 550px;">
-      <div class="modal-header">Thêm Đề Thi Writing Mới</div>
+  <!-- MODAL: CREATE READING TEST (PER-PASSAGE MODULAR BUILDER) -->
+  <div class="modal-overlay" id="readingEditorModal">
+    <div class="modal-window">
+      <div class="modal-header">Create Reading Test (Passage by Passage)</div>
       <div class="modal-body">
         <div class="form-group">
-          <label>Tiêu đề / Tên đề bài:</label>
-          <input type="text" id="wTitle" class="form-control" placeholder="Ví dụ: Task 2 - Nuclear Energy">
+          <label>Exam Title</label>
+          <input type="text" id="reTitle" class="form-input" placeholder="e.g. Cambridge 19 - Academic Reading Practice">
         </div>
         <div class="form-group">
-          <label>Loại Task:</label>
-          <select id="wTask" class="form-control">
-            <option value="1">Writing Task 1 (Mô tả biểu đồ / bản đồ / quy trình)</option>
-            <option value="2">Writing Task 2 (Nghị luận xã hội)</option>
-          </select>
+          <label>Time Duration (Minutes)</label>
+          <input type="number" id="reDuration" class="form-input" value="60">
         </div>
-        <div class="form-group">
-          <label>Thời lượng (phút):</label>
-          <input type="number" id="wDuration" class="form-control" value="60">
+
+        <div style="display: flex; gap: 8px; margin: 16px 0 12px; border-bottom: 2px solid #e2e8f0;">
+          <button class="btn btn-secondary active-subtab" id="subtab-p1" onclick="switchPassageBuilderTab(1)">Passage 1</button>
+          <button class="btn btn-secondary" id="subtab-p2" onclick="switchPassageBuilderTab(2)">Passage 2</button>
+          <button class="btn btn-secondary" id="subtab-p3" onclick="switchPassageBuilderTab(3)">Passage 3</button>
         </div>
-        <div class="form-group">
-          <label>Đường link ảnh đề bài (nếu có):</label>
-          <input type="text" id="wImage" class="form-control" placeholder="https://example.com/chart.png">
-        </div>
-        <div class="form-group">
-          <label>Yêu cầu đề bài (Prompt):</label>
-          <textarea id="wPrompt" class="form-control" style="height: 120px;" placeholder="Nhập yêu cầu đề bài vào đây..."></textarea>
+
+        <div id="passageBuilderFormArea">
+          <div class="form-group">
+            <label>Passage Title</label>
+            <input type="text" id="rePTitle" class="form-input" placeholder="e.g. The Life of Nikola Tesla">
+          </div>
+          <div class="form-group">
+            <label>Passage Text Content (Use Paragraph A, Paragraph B... for Headings)</label>
+            <textarea id="rePText" class="form-input" style="height: 180px; font-family: monospace;"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Questions, Explanations & Evidence (Cambridge Format)</label>
+            <textarea id="rePQuestions" class="form-input" style="height: 180px; font-family: monospace;" placeholder="1. Statement for T/F/NG
+A. TRUE
+*B. FALSE
+C. NOT GIVEN
+EXPLANATION: Paragraph B clarifies the opposite.
+EVIDENCE: Paragraph B, line 2
+
+2. Fill in the blank with [2]
+ANS: 2=steam engine
+EXPLANATION: James Watt's invention.
+EVIDENCE: steam engine"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Vocabulary with Synonyms</label>
+            <textarea id="rePVocab" class="form-input" style="height: 80px; font-family: monospace;" placeholder="dwindled | verb | shrink, diminish, decline
+liberated | verb | freed, released"></textarea>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('writingModal')">Hủy</button>
-        <button class="btn btn-primary" onclick="saveWritingExam()">Lưu Đề Writing</button>
+        <button class="btn btn-secondary" onclick="closeModal('readingEditorModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveModularReadingExam()">Save Full Exam</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CREATE WRITING TEST (FULL TASK 1 & 2) -->
+  <div class="modal-overlay" id="writingEditorModal">
+    <div class="modal-window">
+      <div class="modal-header">Create Writing Test (Task 1 & Task 2)</div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Exam Title</label>
+          <input type="text" id="weTitle" class="form-input" placeholder="e.g. Writing Practice Test 01">
+        </div>
+        <div class="form-group">
+          <label>Time Duration (Minutes)</label>
+          <input type="number" id="weDuration" class="form-input" value="60">
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+          <h4 style="margin-bottom: 8px; color: var(--primary);">Writing Task 1</h4>
+          <div class="form-group">
+            <label>Prompt</label>
+            <textarea id="weT1Prompt" class="form-input" style="height: 90px;" placeholder="The chart below shows..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Diagram / Chart Image URL</label>
+            <input type="text" id="weT1Image" class="form-input" placeholder="https://example.com/chart.png">
+          </div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px;">
+          <h4 style="margin-bottom: 8px; color: var(--primary);">Writing Task 2</h4>
+          <div class="form-group">
+            <label>Prompt</label>
+            <textarea id="weT2Prompt" class="form-input" style="height: 90px;" placeholder="Some people believe that... Discuss both views and give your opinion."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('writingEditorModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveWritingExam()">Save Writing Test</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: REVIEW ASSESSMENT -->
+  <div class="modal-overlay" id="reviewModal">
+    <div class="modal-window">
+      <div class="modal-header" id="revTitle">Assessment Performance & Explanations</div>
+      <div class="modal-body" id="revBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('reviewModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD CLASS -->
+  <div class="modal-overlay" id="classModal">
+    <div class="modal-window" style="width: 400px;">
+      <div class="modal-header">Add Class / Cohort</div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Class Name</label>
+          <input type="text" id="newClassName" class="form-input" placeholder="e.g. IELTS Foundation K24">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('classModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveNewClass()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTER STUDENT -->
+  <div class="modal-overlay" id="studentModal">
+    <div class="modal-window" style="width: 440px;">
+      <div class="modal-header">Register Student Account</div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="stuFullName" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="stuUsername" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="text" id="stuPassword" class="form-input" value="123456">
+        </div>
+        <div class="form-group">
+          <label>Class</label>
+          <select id="stuClassSelect" class="form-input"></select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('studentModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveNewStudent()">Create Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ASSIGN EXAM TO CLASS -->
+  <div class="modal-overlay" id="assignModal">
+    <div class="modal-window" style="width: 420px;">
+      <div class="modal-header">Assign Exam to Class</div>
+      <div class="modal-body">
+        <input type="hidden" id="assignExamId">
+        <div class="form-group">
+          <label>Select Target Cohort</label>
+          <select id="assignTargetClassSelect" class="form-input"></select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('assignModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="executeAssign()">Assign</button>
       </div>
     </div>
   </div>
 
   <script>
-    let currentUser = null;
-    let localDB = null;
+    /* ========================================================
+       DATABASE CORE & INITIAL EXAM SETS
+       ======================================================== */
+    const DB_KEY = 'AMURO_IELTS_OFFICIAL_DB';
+
+    let db = JSON.parse(localStorage.getItem(DB_KEY)) || {
+      users: [
+        { id: 'u_admin', username: 'amuro', pass: 'amuro123', name: 'Teacher Amuro', role: 'teacher' },
+        { id: 'u_s1', username: 'student1', pass: '123456', name: 'Alex Johnson', role: 'student', classId: 'c1' }
+      ],
+      classes: [
+        { id: 'c1', name: 'IELTS Intensive 7.5+' },
+        { id: 'c2', name: 'Foundation Morning' }
+      ],
+      readingExams: [
+        {
+          id: 're_sample_1',
+          title: 'Official Academic Reading Practice 01',
+          duration: 60,
+          assignedClasses: ['c1'],
+          passages: [
+            {
+              partNum: 1,
+              title: 'Passage 1: The Transition to Industrial Energy',
+              paragraphs: [
+                {
+                  label: 'Paragraph A',
+                  text: 'Before the eighteenth century, human societies depended almost entirely on wood, water, and animal power for their energy requirements. In Britain, wood was the primary fuel for domestic heating and industrial furnaces.',
+                  headingQId: 'q1',
+                  correctHeading: 'i'
+                },
+                {
+                  label: 'Paragraph B',
+                  text: 'As natural timber reserves dwindled, industries shifted dramatically toward coal. The commercial steam engine perfected by James Watt in 1776 liberated factories from their river dependence, enabling production to expand into rapidly growing industrial cities.',
+                  headingQId: 'q2',
+                  correctHeading: 'ii'
+                },
+                {
+                  label: 'Paragraph C',
+                  text: 'However, this explosive reliance on fossil fuels carried profound costs. Dark plumes of smoke blanketed northern manufacturing towns, giving rise to persistent respiratory ailments and laying the foundation for modern atmospheric pollution.',
+                  headingQId: 'q3',
+                  correctHeading: 'iii'
+                }
+              ],
+              headingsPool: [
+                { id: 'i', text: 'Early sources of domestic and industrial energy' },
+                { id: 'ii', text: 'The transition to steam and coal power' },
+                { id: 'iii', text: 'Environmental consequences of fossil fuels' },
+                { id: 'iv', text: 'Government intervention in urban factories' }
+              ],
+              questions: [
+                {
+                  id: 'q4', num: 4, type: 'choice',
+                  prompt: 'Wood remained the dominant fuel in Britain throughout the nineteenth century.',
+                  options: ['TRUE', 'FALSE', 'NOT GIVEN'], answer: 'FALSE',
+                  explanation: 'Paragraph B clarifies that industries shifted dramatically toward coal as timber reserves dwindled.',
+                  evidenceSnippet: 'industries shifted dramatically toward coal'
+                },
+                {
+                  id: 'q5', num: 5, type: 'gap',
+                  prompt: 'The commercial steam engine freed manufacturing from its dependence on [5].',
+                  answer: 'rivers / river dependence',
+                  explanation: 'Paragraph B states that James Watt liberated factories from river dependence.',
+                  evidenceSnippet: 'liberated factories from their river dependence'
+                }
+              ],
+              vocab: [
+                { word: 'dwindled', type: 'verb', mean: 'Suy giảm dần, teo tóp', syn: 'shrink, diminish, decline' },
+                { word: 'liberated', type: 'verb', mean: 'Giải phóng', syn: 'freed, released' },
+                { word: 'ailments', type: 'noun', mean: 'Bệnh tật, ốm đau', syn: 'diseases, disorders, illnesses' }
+              ]
+            },
+            {
+              partNum: 2,
+              title: 'Passage 2: The Quantum Compass of Migratory Birds',
+              paragraphs: [
+                {
+                  label: 'Paragraph A',
+                  text: 'Every autumn, billions of birds leave their breeding grounds in the north and travel thousands of miles to warmer southern latitudes. Scientists have long wondered how birds navigate with pinpoint accuracy.'
+                },
+                {
+                  label: 'Paragraph B',
+                  text: 'Recent breakthroughs reveal that migratory birds utilize an internal quantum compass. Cryptochrome proteins situated in their retinal eyes allow them to detect subtle fluctuations in Earth magnetic lines visually.'
+                }
+              ],
+              questions: [
+                {
+                  id: 'q6', num: 6, type: 'choice',
+                  prompt: 'What biological sensor enables birds to detect magnetic field variations?',
+                  options: ['Cryptochrome proteins in the retina', 'Iron deposits in the beak', 'Auditory sensors in the inner ear', 'Feather nerve endings'],
+                  answer: 'Cryptochrome proteins in the retina',
+                  explanation: 'Paragraph B explicitly highlights cryptochrome proteins located in retinal eyes.',
+                  evidenceSnippet: 'Cryptochrome proteins situated in their retinal eyes'
+                }
+              ]
+            },
+            {
+              partNum: 3,
+              title: 'Passage 3: Neuroplasticity and Cognitive Reserve',
+              paragraphs: [
+                {
+                  label: 'Paragraph A',
+                  text: 'For decades, neuroscientists maintained that the adult human brain was structurally fixed. Contemporary research indicates that neural pathways continually reorganize in response to learning and environmental stimulation.'
+                }
+              ],
+              questions: [
+                {
+                  id: 'q7', num: 7, type: 'choice',
+                  prompt: 'Early neuroscientists believed adult brains could readily generate new neural structures.',
+                  options: ['YES', 'NO', 'NOT GIVEN'], answer: 'NO',
+                  explanation: 'Paragraph A notes that neuroscientists historically claimed the adult brain was structurally fixed.',
+                  evidenceSnippet: 'neuroscientists maintained that the adult human brain was structurally fixed'
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      writingExams: [
+        {
+          id: 'we_sample_1',
+          title: 'IELTS Academic Writing Simulation 01',
+          duration: 60,
+          task1: {
+            prompt: 'The chart below shows global energy consumption by source between 1990 and 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+            image: ''
+          },
+          task2: {
+            prompt: 'Some people argue that technological progress increases the gap between rich and poor nations, while others believe it has the opposite effect. Discuss both views and give your own opinion.'
+          }
+        }
+      ],
+      results: []
+    };
+
+    function persist() {
+      localStorage.setItem(DB_KEY, JSON.stringify(db));
+    }
+
+    let activeUser = JSON.parse(localStorage.getItem('AMURO_ACTIVE_USER')) || null;
     let activeExam = null;
+    let activePartNum = 1;
+    let activeExamType = 'reading'; // 'reading' or 'writing'
     let userAnswers = {};
-    let timerId = null;
-    let timeLeft = 3600;
+    let writingAnswers = { task1: '', task2: '' };
+    let flaggedQuestions = new Set();
+    let examTimer = null;
+    let secondsRemaining = 3600;
 
-    async function fetchDB() {
-      try {
-        const res = await fetch('/api/data');
-        localDB = await res.json();
-        renderAll();
-      } catch (err) {
-        console.error("Lỗi kết nối dữ liệu máy chủ:", err);
+    /* ========================================================
+       AUTH & SESSION
+       ======================================================== */
+    function checkSession() {
+      if (activeUser) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboardApp').style.display = 'flex';
+        document.getElementById('userProfileLabel').textContent = `👤 ${activeUser.name} (${activeUser.role.toUpperCase()})`;
+        document.querySelectorAll('.teacher-item').forEach(el => el.style.display = activeUser.role === 'teacher' ? '' : 'none');
+        renderDashboard();
+      } else {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('dashboardApp').style.display = 'none';
       }
     }
 
-    async function doLogin() {
-      const username = document.getElementById('logUser').value.trim();
-      const password = document.getElementById('logPass').value.trim();
-      if (!username || !password) return alert('Vui lòng điền đủ tên tài khoản và mật khẩu');
+    function execLogin() {
+      const u = document.getElementById('logUser').value.trim();
+      const p = document.getElementById('logPass').value.trim();
+      const user = db.users.find(x => x.username === u && x.pass === p);
+      if (!user) return alert('Invalid username or password!');
 
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-
-      if (!res.ok) return alert('Tài khoản hoặc mật khẩu không chính xác!');
-      currentUser = await res.json();
-      
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
-      
-      const navUser = document.getElementById('navUserArea');
-      navUser.innerHTML = `
-        <span class="badge">${currentUser.role === 'teacher' ? '👨‍🏫 ' + currentUser.name : '👨‍🎓 ' + currentUser.name}</span>
-        <button class="btn btn-secondary" onclick="location.reload()">Đăng Xuất</button>
-      `;
-
-      if (currentUser.role !== 'teacher') {
-        document.querySelectorAll('.teacher-only').forEach(el => el.style.display = 'none');
-      }
-
-      fetchDB();
+      activeUser = user;
+      localStorage.setItem('AMURO_ACTIVE_USER', JSON.stringify(activeUser));
+      checkSession();
     }
 
-    function switchNavTab(tab) {
-      document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-view').forEach(v => v.style.display = 'none');
+    function execLogout() {
+      activeUser = null;
+      localStorage.removeItem('AMURO_ACTIVE_USER');
+      checkSession();
+    }
+
+    function openProfileModal() {
+      document.getElementById('profNameInput').value = activeUser.name;
+      document.getElementById('profPassInput').value = '';
+      openModal('profileModal');
+    }
+    function saveProfileChanges() {
+      const name = document.getElementById('profNameInput').value.trim();
+      const pass = document.getElementById('profPassInput').value.trim();
+      if (!name) return alert('Name cannot be empty!');
+      activeUser.name = name;
+      if (pass) activeUser.pass = pass;
+      const idx = db.users.findIndex(u => u.id === activeUser.id);
+      if (idx >= 0) db.users[idx] = activeUser;
+      persist();
+      localStorage.setItem('AMURO_ACTIVE_USER', JSON.stringify(activeUser));
+      closeModal('profileModal');
+      checkSession();
+      alert('Profile updated successfully!');
+    }
+
+    /* ========================================================
+       DASHBOARD CONTROLLER
+       ======================================================== */
+    function switchDashTab(tab) {
+      document.querySelectorAll('.dash-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.dash-pane').forEach(p => p.style.display = 'none');
       event.target.classList.add('active');
-      document.getElementById('view-' + tab).style.display = 'block';
+      document.getElementById('tab-' + tab).style.display = 'block';
     }
 
-    function renderAll() {
-      if (!localDB) return;
+    function renderDashboard() {
       renderReadingTable();
       renderWritingTable();
-      renderVocabSection();
-      renderGradingTable();
-    }
-
-    /* MỞ & ĐÓNG MODAL SOẠN ĐỀ */
-    function openCreateReadingModal() {
-      document.getElementById('readingRawInput').value = '';
-      openModal('readingModal');
-    }
-    function openCreateWritingModal() {
-      document.getElementById('wTitle').value = '';
-      document.getElementById('wPrompt').value = '';
-      document.getElementById('wImage').value = '';
-      openModal('writingModal');
-    }
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-    /* XỬ LÝ NHẬP ĐỀ THI READING */
-    async function processAndSaveReadingExam() {
-      const raw = document.getElementById('readingRawInput').value.trim();
-      if (!raw) return alert('Vui lòng dán nội dung đề!');
-
-      const titleMatch = raw.match(/\[TITLE:\s*(.*?)\]/i);
-      const title = titleMatch ? titleMatch[1] : 'Reading Practice Test';
-
-      const durationMatch = raw.match(/\[DURATION:\s*(\d+)\]/i);
-      const duration = durationMatch ? Number(durationMatch[1]) : 60;
-
-      // Tách Passage
-      let passageHtml = '';
-      const passageMatch = raw.match(/--- PASSAGE 1 ---([\s\S]*?)--- QUESTIONS ---/i);
-      if (passageMatch) {
-        passageHtml = passageMatch[1].trim().split('\n\n').map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
-      }
-
-      // Xử lý Headings
-      let headingsGroup = null;
-      if (raw.includes('Matching Headings')) {
-        const hListMatch = raw.match(/HEADINGS:([\s\S]*?)(?=\d+\.|\n\n)/i);
-        const headings = [];
-        if (hListMatch) {
-          hListMatch[1].trim().split('\n').forEach(line => {
-            const m = line.trim().match(/^([ivxlcdm]+)\.\s*(.*)$/i);
-            if (m) headings.push({ id: m[1], text: m[2] });
-          });
-        }
-
-        const questions = [];
-        const qMatches = [...raw.matchAll(/(\d+)\.\s*(Paragraph\s+[A-Z])\s*=\s*([ivxlcdm]+)/gi)];
-        qMatches.forEach(m => {
-          questions.push({ id: m[1], label: m[2], answer: m[3].toLowerCase() });
-        });
-
-        headingsGroup = {
-          title: 'Matching Headings',
-          headings,
-          questions
-        };
-      }
-
-      // Xử lý Gap-fill (Summary)
-      let gapGroup = null;
-      const gapMatch = raw.match(/\[GROUP \d+:\s*(?:Summary\vert{}Sentence Completion)\][\s\S]*?TEXT:([\s\S]*?)ANSWERS:([\s\S]*?)(?=\[GROUP|\[VOCABULARY|$)/i);
-      if (gapMatch) {
-        const textTemplate = gapMatch[1].trim();
-        const answersRaw = gapMatch[2].trim();
-        const questions = [];
-
-        answersRaw.split('\n').forEach(line => {
-          const m = line.match(/(\d+)\s*=\s*(.*)/);
-          if (m) {
-            const accepted = m[2].split(/[\/|]/).map(x => x.trim().toLowerCase());
-            questions.push({ id: m[1], acceptedAnswers: accepted });
-          }
-        });
-
-        gapGroup = {
-          title: 'Summary Completion',
-          instructions: 'Điền từ thích hợp vào chỗ trống.',
-          template: textTemplate,
-          questions
-        };
-      }
-
-      // Gửi lên Server
-      const newExam = {
-        title,
-        duration,
-        formats: 'Matching Headings, Gap-fill...',
-        passageTitle: title,
-        passageHtml,
-        headingsGroup,
-        gapGroup
-      };
-
-      const res = await fetch('/api/exams/reading', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newExam)
-      });
-
-      if (res.ok) {
-        alert('Tạo đề Reading thành công!');
-        closeModal('readingModal');
-        fetchDB();
+      renderVocabTab();
+      if (activeUser.role === 'teacher') {
+        renderClassTable();
+        renderStudentTable();
+        renderAnalyticsTable();
       }
     }
 
-    async function saveWritingExam() {
-      const title = document.getElementById('wTitle').value.trim();
-      const taskNumber = document.getElementById('wTask').value;
-      const duration = Number(document.getElementById('wDuration').value) || 60;
-      const image = document.getElementById('wImage').value.trim();
-      const prompt = document.getElementById('wPrompt').value.trim();
-
-      if (!title || !prompt) return alert('Vui lòng điền đủ tiêu đề và nội dung yêu cầu đề bài!');
-
-      const res = await fetch('/api/exams/writing', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, taskNumber, duration, image, prompt })
-      });
-
-      if (res.ok) {
-        alert('Lưu đề Writing thành công!');
-        closeModal('writingModal');
-        fetchDB();
-      }
-    }
-
-    /* HIỂN THỊ DANH SÁCH */
     function renderReadingTable() {
-      const tbody = document.getElementById('readingTable');
+      const tbody = document.getElementById('readingTbody');
       tbody.innerHTML = '';
-      localDB.readingExams.forEach(e => {
+      let list = db.readingExams;
+      if (activeUser.role === 'student') {
+        list = db.readingExams.filter(e => e.assignedClasses.includes(activeUser.classId));
+      }
+      list.forEach(e => {
+        const clsNames = e.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ') || 'All';
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><b>${e.title}</b></td>
-          <td>${e.duration} phút</td>
-          <td>${e.formats || 'Matching Headings, Gap-fill...'}</td>
-          <td><button class="btn btn-primary" onclick="launchReadingExam('${e.id}')">Vào Thi</button></td>
+          <td>${e.duration} mins</td>
+          <td>${e.passages.length} Passages</td>
+          <td><span style="color: #64748b;">${clsNames}</span></td>
+          <td>
+            <button class="btn btn-primary" onclick="launchReadingExam('${e.id}')">Start Test</button>
+            ${activeUser.role === 'teacher' ? `
+              <button class="btn btn-secondary" onclick="openAssignModal('${e.id}')">Assign</button>
+              <button class="btn btn-danger" onclick="deleteReadingExam('${e.id}')">Delete</button>
+            ` : ''}
+          </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
     function renderWritingTable() {
-      const tbody = document.getElementById('writingTable');
+      const tbody = document.getElementById('writingTbody');
       tbody.innerHTML = '';
-      localDB.writingExams.forEach(w => {
+      db.writingExams.forEach(w => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><b>${w.title}</b></td>
-          <td>Task ${w.taskNumber}</td>
-          <td>${w.duration} phút</td>
-          <td><button class="btn btn-primary" onclick="launchWritingExam('${w.id}')">Làm Bài</button></td>
+          <td>${w.duration} mins</td>
+          <td>Task 1 & Task 2</td>
+          <td>
+            <button class="btn btn-primary" onclick="launchWritingExam('${w.id}')">Start Writing</button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    function renderGradingTable() {
-      const tbody = document.getElementById('gradingTable');
+    function renderClassTable() {
+      const tbody = document.getElementById('classTbody');
       tbody.innerHTML = '';
-      localDB.writingSubmissions.forEach(sub => {
+      db.classes.forEach(c => {
+        const count = db.users.filter(u => u.classId === c.id).length;
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><b>${sub.studentName}</b></td>
-          <td>${sub.examTitle}</td>
-          <td>${sub.timestamp}</td>
-          <td><b style="color: var(--amuro-blue);">${sub.score ? 'Band ' + sub.score : 'Chưa chấm'}</b></td>
-          <td><button class="btn btn-primary" onclick="alert('Đã sẵn sàng mở chấm bài')">Chấm Bài</button></td>
+          <td><b>${c.name}</b></td>
+          <td>${count} students</td>
+          <td><button class="btn btn-danger" onclick="deleteClass('${c.id}')">Delete</button></td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    function renderVocabSection() {
-      const pArea = document.getElementById('vocabReadingPassage');
-      const cArea = document.getElementById('vocabCardsContainer');
-      pArea.innerHTML = `Industrialization brought massive changes. Many cities suffered from <span id="v_word_1" style="font-weight:700;">unprecedented</span> levels of smoke. The government had to <span id="v_word_2" style="font-weight:700;">implement</span> strict environmental regulations to <span id="v_word_3" style="font-weight:700;">mitigate</span> respiratory diseases.`;
-      
-      const words = [
-        { id: 'v_word_1', word: 'unprecedented', type: 'adj', mean: 'Chưa từng có tiền lệ', syn: 'unparalleled, extraordinary' },
-        { id: 'v_word_2', word: 'implement', type: 'v', mean: 'Thực thi, áp dụng', syn: 'execute, carry out' },
-        { id: 'v_word_3', word: 'mitigate', type: 'v', mean: 'Giảm thiểu, làm dịu bớt', syn: 'alleviate, reduce, lessen' }
-      ];
+    function renderStudentTable() {
+      const tbody = document.getElementById('studentTbody');
+      tbody.innerHTML = '';
+      db.users.filter(u => u.role === 'student').forEach(u => {
+        const c = db.classes.find(cl => cl.id === u.classId);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${u.name}</b></td>
+          <td><code>${u.username}</code></td>
+          <td><code>${u.pass}</code></td>
+          <td>${c ? c.name : 'Unassigned'}</td>
+          <td><button class="btn btn-danger" onclick="deleteStudent('${u.id}')">Remove</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
-      cArea.innerHTML = words.map(w => `
-        <div class="vocab-card" onclick="highlightVocabInText('${w.id}')">
-          <div class="vocab-word">${w.word} <span style="font-size: 11px; font-weight: normal; color: #64748b;">(${w.type})</span></div>
-          <div style="font-size: 13px; margin-top: 3px;">${w.mean}</div>
-          <div class="vocab-syn">Đồng nghĩa: <b>${w.syn}</b></div>
+    function renderAnalyticsTable() {
+      const tbody = document.getElementById('analyticsTbody');
+      tbody.innerHTML = '';
+      db.results.slice().reverse().forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${r.userName}</b></td>
+          <td>${r.examTitle}</td>
+          <td>${r.score}</td>
+          <td><b style="color: var(--primary);">Band ${r.band}</b></td>
+          <td>${r.timestamp}</td>
+          <td><button class="btn btn-secondary" onclick="viewResultDetails('${r.id}')">Review</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderVocabTab() {
+      const pPane = document.getElementById('vocabPassagePane');
+      const cPane = document.getElementById('vocabCardsPane');
+      pPane.innerHTML = `
+        Before the eighteenth century, human societies depended on wood and water.
+        As timber reserves <span id="vw_1" style="font-weight:700;">dwindled</span>, industries shifted to coal.
+        The steam engine <span id="vw_2" style="font-weight:700;">liberated</span> factories from river dependence.
+        However, toxic smoke caused severe respiratory <span id="vw_3" style="font-weight:700;">ailments</span>.
+      `;
+      const words = [
+        { id: 'vw_1', word: 'dwindled', type: 'verb', mean: 'Suy giảm, hao mòn', syn: 'shrink, diminish, decline' },
+        { id: 'vw_2', word: 'liberated', type: 'verb', mean: 'Giải phóng', syn: 'freed, released' },
+        { id: 'vw_3', word: 'ailments', type: 'noun', mean: 'Bệnh tật, ốm đau', syn: 'diseases, disorders, illnesses' }
+      ];
+      cPane.innerHTML = words.map(w => `
+        <div style="background:#fff; border:1px solid var(--inspera-border); border-radius:6px; padding:12px; margin-bottom:10px; cursor:pointer;" onclick="spotVocabWord('${w.id}')">
+          <div style="font-weight:700; color:var(--primary);">${w.word} <span style="font-size:11px; color:#64748b;">(${w.type})</span></div>
+          <div style="font-size:13px; margin:4px 0;">${w.mean}</div>
+          <div style="font-size:12px; color:#64748b;">Synonyms: <b>${w.syn}</b></div>
         </div>
       `).join('');
     }
 
-    function highlightVocabInText(spanId) {
-      const el = document.getElementById(spanId);
+    function spotVocabWord(id) {
+      const el = document.getElementById(id);
       if (!el) return;
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.style.backgroundColor = 'var(--amuro-gold)';
-      el.style.padding = '2px 6px';
+      el.style.backgroundColor = '#fde047';
+      el.style.padding = '2px 4px';
       el.style.borderRadius = '3px';
       setTimeout(() => { el.style.backgroundColor = 'transparent'; }, 2000);
     }
 
-    /* CHẠY PHÒNG THI READING */
+    /* ========================================================
+       INSPERA READING TEST ENVIRONMENT
+       ======================================================== */
     function launchReadingExam(examId) {
-      activeExam = localDB.readingExams.find(e => e.id === examId);
+      activeExam = db.readingExams.find(e => e.id === examId);
+      if (!activeExam) return;
+
+      activeExamType = 'reading';
+      activePartNum = 1;
       userAnswers = {};
-      timeLeft = activeExam.duration * 60;
+      flaggedQuestions.clear();
+      secondsRemaining = activeExam.duration * 60;
 
-      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('dashboardApp').style.display = 'none';
       document.getElementById('examShell').style.display = 'flex';
-      document.getElementById('shellExamTitle').textContent = activeExam.title;
+      document.getElementById('insperaExamTitle').textContent = activeExam.title;
 
-      const area = document.getElementById('examWorkspaceArea');
-      area.innerHTML = `
-        <div class="left-pane" id="passageDisplay">
-          <h2>${activeExam.passageTitle}</h2>
-          <div id="passageParagraphs">${activeExam.passageHtml}</div>
-        </div>
-        <div class="right-pane" id="questionsDisplay"></div>
-      `;
+      renderPartPills();
+      loadPassageWorkspace(activePartNum);
+      buildFooterNav();
+      setupResizer();
+      setupHighlight();
+      startTimer();
+    }
 
-      const qDisplay = document.getElementById('questionsDisplay');
-      
-      // Kéo thả Heading
-      if (activeExam.headingsGroup) {
-        const group = activeExam.headingsGroup;
-        qDisplay.innerHTML += `
-          <div class="card" style="margin-bottom: 20px;">
-            <b style="font-size: 13px; text-transform: uppercase;">${group.title}</b>
-            <div class="drag-pool" id="dragPool" ondragover="allowDrop(event)" ondrop="handleDropToPool(event)">
-              ${group.headings.map((h, i) => `
-                <div class="draggable-card" draggable="true" id="drag_h_${i}" ondragstart="handleDragStart(event, '${h.id}', '${h.text}')">
+    function renderPartPills() {
+      const nav = document.getElementById('insperaPartTabs');
+      nav.innerHTML = activeExam.passages.map(p => `
+        <button class="part-pill ${p.partNum === activePartNum ? 'active' : ''}" onclick="switchReadingPart(${p.partNum})">
+          Passage ${p.partNum}
+        </button>
+      `).join('');
+    }
+
+    function switchReadingPart(partNum) {
+      activePartNum = partNum;
+      renderPartPills();
+      loadPassageWorkspace(activePartNum);
+      updateFooterNav();
+    }
+
+    function loadPassageWorkspace(partNum) {
+      const passage = activeExam.passages.find(p => p.partNum === partNum) || activeExam.passages[0];
+      const left = document.getElementById('insperaLeftPane');
+      const right = document.getElementById('insperaRightPane');
+
+      // Left: Passage with Dropzones on Paragraph headers
+      let passageHtml = `<h2 style="font-size: 19px; font-weight: 800; margin-bottom: 14px;">${passage.title}</h2>`;
+      passage.paragraphs.forEach(p => {
+        const dropZone = p.headingQId ? `
+          <div class="para-dropzone" id="dz_${p.headingQId}" ondragover="allowDrop(event)" ondragleave="dragLeave(event)" ondrop="handleDropHeading(event, '${p.headingQId}')">
+            <span style="color: #94a3b8; font-size: 12px;" id="plh_${p.headingQId}">Drag corresponding Heading here...</span>
+          </div>
+        ` : '';
+        passageHtml += `
+          <div class="para-block" id="pb_${p.label ? p.label.replace(/\s+/g, '') : ''}">
+            ${p.label ? `<div class="para-header-label">${p.label}</div>` : ''}
+            ${dropZone}
+            <p>${p.text}</p>
+          </div>
+        `;
+      });
+      left.innerHTML = passageHtml;
+
+      // Right: Headings pool + Questions
+      let rightHtml = '';
+      if (passage.headingsPool && passage.headingsPool.length) {
+        rightHtml += `
+          <div class="q-box">
+            <b style="font-size: 13px; text-transform: uppercase;">List of Headings</b>
+            <p style="font-size: 12px; color: #64748b; margin: 4px 0 10px;">Drag the appropriate heading into the box over each paragraph.</p>
+            <div id="headingsPoolContainer" ondragover="allowDrop(event)" ondrop="handleReturnToPool(event)">
+              ${passage.headingsPool.map(h => `
+                <div class="heading-chip" draggable="true" id="hchip_${h.id}" ondragstart="handleDragStart(event, '${h.id}')">
                   <b>${h.id}.</b>${h.text}
                 </div>
               `).join('')}
             </div>
-            <div>
-              ${group.questions.map(q => `
-                <div style="margin-bottom: 12px;">
-                  <span style="font-size: 13px; font-weight: 700;">${q.label}:</span>
-                  <div class="drop-zone" id="drop_zone_${q.id}" ondragover="allowDrop(event)" ondrop="handleDropToQuestion(event, '${q.id}')">
-                    <span style="color: #94a3b8; font-size: 12px;" id="placeholder_${q.id}">Thả tiêu đề vào đây...</span>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
           </div>
         `;
       }
 
-      // Điền từ
-      if (activeExam.gapGroup) {
-        let filledText = activeExam.gapGroup.template;
-        activeExam.gapGroup.questions.forEach(q => {
-          const inp = `<input type="text" class="gap-input" placeholder="[${q.id}]" oninput="userAnswers['${q.id}'] = this.value.trim()">`;
-          filledText = filledText.replace(`[${q.id}]`, inp);
+      if (passage.questions) {
+        passage.questions.forEach(q => {
+          const isFlagged = flaggedQuestions.has(q.id);
+          rightHtml += `
+            <div class="q-box" id="qcard_${q.id}">
+              <div class="q-header-row">
+                <span style="font-weight: 800;">Question ${q.num}</span>
+                <button class="flag-btn ${isFlagged ? 'flagged' : ''}" onclick="toggleFlag('${q.id}')">
+                  ★ ${isFlagged ? 'Flagged' : 'Flag'}
+                </button>
+              </div>
+          `;
+          if (q.type === 'choice') {
+            rightHtml += `
+              <p style="margin-bottom: 10px; font-weight: 600;">${q.prompt}</p>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                ${q.options.map(opt => `
+                  <label class="opt-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="radio" name="opt_${q.id}" value="${opt}" ${userAnswers[q.id] === opt ? 'checked' : ''} onchange="saveAnswer('${q.id}', '${opt}')">
+                    <span>${opt}</span>
+                  </label>
+                `).join('')}
+              </div>
+            `;
+          } else if (q.type === 'gap') {
+            const filled = q.prompt.replace(`[${q.num}]`, `
+              <input type="text" class="gap-inline-input" value="${userAnswers[q.id] || ''}" placeholder="[${q.num}]" oninput="saveAnswer('${q.id}', this.value)">
+            `);
+            rightHtml += `<div style="line-height: 2;">${filled}</div>`;
+          }
+          rightHtml += `</div>`;
         });
-        qDisplay.innerHTML += `
-          <div class="card">
-            <b style="font-size: 13px; text-transform: uppercase;">${activeExam.gapGroup.title}</b>
-            <div style="line-height: 2.2; font-size: 14px; margin-top: 10px;">${filledText}</div>
-          </div>
-        `;
       }
-
-      startTimer();
+      right.innerHTML = rightHtml;
     }
 
-    // Drag Drop handlers
-    function allowDrop(e) { e.preventDefault(); }
-    function handleDragStart(e, id, text) {
-      e.dataTransfer.setData('headingId', id);
-      e.dataTransfer.setData('cardElementId', e.target.id);
+    /* Headings Drag & Drop */
+    function allowDrop(e) { e.preventDefault(); if (e.currentTarget.classList.contains('para-dropzone')) e.currentTarget.classList.add('dragover'); }
+    function dragLeave(e) { if (e.currentTarget.classList.contains('para-dropzone')) e.currentTarget.classList.remove('dragover'); }
+    function handleDragStart(e, hId) { e.dataTransfer.setData('hId', hId); e.dataTransfer.setData('chipId', e.target.id); }
+    function handleDropHeading(e, qId) {
+      e.preventDefault(); e.currentTarget.classList.remove('dragover');
+      const hId = e.dataTransfer.getData('hId');
+      const chipId = e.dataTransfer.getData('chipId');
+      const chip = document.getElementById(chipId);
+      const zone = document.getElementById(`dz_${qId}`);
+      document.getElementById(`plh_${qId}`).style.display = 'none';
+      zone.appendChild(chip);
+      userAnswers[qId] = hId;
+      updateFooterNav();
     }
-    function handleDropToQuestion(e, qId) {
+    function handleReturnToPool(e) {
       e.preventDefault();
-      const headingId = e.dataTransfer.getData('headingId');
-      const cardElId = e.dataTransfer.getData('cardElementId');
-      const card = document.getElementById(cardElId);
-      const zone = document.getElementById(`drop_zone_${qId}`);
-      document.getElementById(`placeholder_${qId}`).style.display = 'none';
-      zone.appendChild(card);
-      userAnswers[qId] = headingId;
-    }
-    function handleDropToPool(e) {
-      e.preventDefault();
-      const cardElId = e.dataTransfer.getData('cardElementId');
-      document.getElementById('dragPool').appendChild(document.getElementById(cardElId));
+      const chipId = e.dataTransfer.getData('chipId');
+      document.getElementById('headingsPoolContainer').appendChild(document.getElementById(chipId));
     }
 
-    /* CHẠY PHÒNG THI WRITING */
-    function launchWritingExam(examId) {
-      const we = localDB.writingExams.find(x => x.id === examId);
-      document.getElementById('dashboard').style.display = 'none';
-      document.getElementById('examShell').style.display = 'flex';
-      document.getElementById('shellExamTitle').textContent = we.title;
-
-      const area = document.getElementById('examWorkspaceArea');
-      area.innerHTML = `
-        <div class="left-pane">
-          <h2>${we.title}</h2>
-          <p style="margin: 12px 0; font-size: 14px; line-height: 1.6;">${we.prompt}</p>
-          ${we.image ? `<img src="${we.image}" class="passage-img">` : ''}
-        </div>
-        <div class="right-pane" style="display: flex; flex-direction: column;">
-          <textarea class="writing-editor" id="studentEssay" placeholder="Type your response here..." oninput="updateWordCount(this.value)"></textarea>
-          <div class="word-count-badge" id="wordCountLabel">Total Words: 0</div>
-        </div>
-      `;
-      startTimer();
+    function saveAnswer(qId, val) {
+      if (val && val.trim()) userAnswers[qId] = val.trim();
+      else delete userAnswers[qId];
+      updateFooterNav();
     }
 
-    function updateWordCount(text) {
-      const count = text.trim() ? text.trim().split(/\s+/).length : 0;
-      document.getElementById('wordCountLabel').textContent = `Total Words: ${count}`;
+    function toggleFlag(qId) {
+      if (flaggedQuestions.has(qId)) flaggedQuestions.delete(qId);
+      else flaggedQuestions.add(qId);
+      loadPassageWorkspace(activePartNum);
+      updateFooterNav();
     }
 
-    async function submitActiveExam() {
-      if (!confirm('Bạn có chắc chắn muốn nộp bài?')) return;
-      clearInterval(timerId);
+    function buildFooterNav() {
+      const container = document.getElementById('insperaFooterList');
+      container.innerHTML = '';
+      if (activeExamType === 'writing') return;
 
-      // Nếu đang nộp bài Writing
-      const essayEl = document.getElementById('studentEssay');
-      if (essayEl) {
-        await fetch('/api/writing/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            studentName: currentUser.name,
-            examTitle: document.getElementById('shellExamTitle').textContent,
-            essay: essayEl.value
-          })
+      activeExam.passages.forEach(p => {
+        const wrap = document.createElement('div');
+        wrap.style.display = 'flex'; wrap.style.alignItems = 'center'; wrap.style.gap = '4px';
+        const label = document.createElement('span');
+        label.style.fontSize = '11px'; label.style.fontWeight = '700'; label.style.color = '#64748b';
+        label.textContent = `P${p.partNum}:`;
+        wrap.appendChild(label);
+
+        p.paragraphs.forEach(para => {
+          if (para.headingQId) {
+            wrap.appendChild(createFooterBtn(para.headingQId, para.label.split(' ')[1], p.partNum));
+          }
         });
-        alert('Nộp bài Writing thành công!');
-        location.reload();
-        return;
-      }
-
-      // Nếu đang nộp Reading
-      let correct = 0;
-      let total = 0;
-
-      if (activeExam.headingsGroup) {
-        activeExam.headingsGroup.questions.forEach(q => {
-          total++;
-          if ((userAnswers[q.id] || '').toLowerCase() === q.answer.toLowerCase()) correct++;
-        });
-      }
-
-      if (activeExam.gapGroup) {
-        activeExam.gapGroup.questions.forEach(q => {
-          total++;
-          const u = (userAnswers[q.id] || '').toLowerCase();
-          if (q.acceptedAnswers.includes(u)) correct++;
-        });
-      }
-
-      await fetch('/api/reading/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          studentName: currentUser.name,
-          examTitle: activeExam.title,
-          correct,
-          total
-        })
+        if (p.questions) {
+          p.questions.forEach(q => wrap.appendChild(createFooterBtn(q.id, q.num, p.partNum)));
+        }
+        container.appendChild(wrap);
       });
-
-      alert(`Hoàn thành bài thi Reading!\nSố câu đúng: ${correct}/${total}`);
-      location.reload();
+      updateFooterNav();
     }
 
-    function exitShell() {
-      if (confirm('Thoát khỏi phòng thi?')) location.reload();
+    function createFooterBtn(qId, label, partNum) {
+      const btn = document.createElement('button');
+      btn.className = 'footer-q-btn';
+      btn.id = `fpill_${qId}`;
+      btn.textContent = label;
+      btn.onclick = () => {
+        if (activePartNum !== partNum) switchReadingPart(partNum);
+        setTimeout(() => {
+          const el = document.getElementById(`dz_${qId}`) || document.getElementById(`qcard_${qId}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      };
+      return btn;
+    }
+
+    function updateFooterNav() {
+      document.querySelectorAll('.footer-q-btn').forEach(btn => {
+        const qId = btn.id.replace('fpill_', '');
+        btn.classList.toggle('answered', Boolean(userAnswers[qId]));
+        btn.classList.toggle('flagged', flaggedQuestions.has(qId));
+      });
+    }
+
+    /* ========================================================
+       INSPERA WRITING TEST ENVIRONMENT (TASK 1 & TASK 2)
+       ======================================================== */
+    function launchWritingExam(examId) {
+      activeExam = db.writingExams.find(w => w.id === examId);
+      if (!activeExam) return;
+
+      activeExamType = 'writing';
+      activePartNum = 1; // 1 = Task 1, 2 = Task 2
+      writingAnswers = { task1: '', task2: '' };
+      secondsRemaining = activeExam.duration * 60;
+
+      document.getElementById('dashboardApp').style.display = 'none';
+      document.getElementById('examShell').style.display = 'flex';
+      document.getElementById('insperaExamTitle').textContent = activeExam.title;
+
+      renderWritingPartTabs();
+      loadWritingWorkspace(activePartNum);
+      setupResizer();
+      startTimer();
+    }
+
+    function renderWritingPartTabs() {
+      const nav = document.getElementById('insperaPartTabs');
+      nav.innerHTML = `
+        <button class="part-pill ${activePartNum === 1 ? 'active' : ''}" onclick="switchWritingTask(1)">Writing Task 1</button>
+        <button class="part-pill ${activePartNum === 2 ? 'active' : ''}" onclick="switchWritingTask(2)">Writing Task 2</button>
+      `;
+      document.getElementById('insperaFooterList').innerHTML = `<span style="font-size:12px;color:#64748b;">Writing Tasks in progress...</span>`;
+    }
+
+    function switchWritingTask(taskNum) {
+      // Save current
+      const editor = document.getElementById('writingEditor');
+      if (editor) {
+        if (activePartNum === 1) writingAnswers.task1 = editor.value;
+        else writingAnswers.task2 = editor.value;
+      }
+      activePartNum = taskNum;
+      renderWritingPartTabs();
+      loadWritingWorkspace(activePartNum);
+    }
+
+    function loadWritingWorkspace(taskNum) {
+      const left = document.getElementById('insperaLeftPane');
+      const right = document.getElementById('insperaRightPane');
+      const isTask1 = (taskNum === 1);
+      const taskData = isTask1 ? activeExam.task1 : activeExam.task2;
+      const currentText = isTask1 ? writingAnswers.task1 : writingAnswers.task2;
+
+      left.innerHTML = `
+        <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 12px;">Writing Task ${taskNum}</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin-bottom: 16px;">${taskData.prompt}</p>
+        ${taskData.image ? `<img src="${taskData.image}" style="max-width:100%; border-radius:6px; border:1px solid var(--inspera-border);">` : ''}
+      `;
+
+      right.innerHTML = `
+        <textarea class="writing-textarea" id="writingEditor" placeholder="Type your response here..." oninput="updateWordCount(this.value)">${currentText}</textarea>
+        <div class="word-count-badge" id="writingWordCount">Total Words: 0</div>
+      `;
+      updateWordCount(currentText);
+    }
+
+    function updateWordCount(str) {
+      const count = str.trim() ? str.trim().split(/\s+/).length : 0;
+      document.getElementById('writingWordCount').textContent = `Total Words: ${count}`;
+    }
+
+    /* ========================================================
+       RESIZER & HIGHLIGHT CORE
+       ======================================================== */
+    function setupResizer() {
+      const resizer = document.getElementById('insperaResizer');
+      const left = document.getElementById('insperaLeftPane');
+      const right = document.getElementById('insperaRightPane');
+      const container = document.getElementById('insperaSplitBox');
+
+      resizer.onmousedown = (e) => {
+        e.preventDefault();
+        const onMove = (moveEvt) => {
+          const rect = container.getBoundingClientRect();
+          const newLeftWidth = ((moveEvt.clientX - rect.left) / rect.width) * 100;
+          if (newLeftWidth > 20 && newLeftWidth < 80) {
+            left.style.width = `${newLeftWidth}%`;
+            right.style.width = `${100 - newLeftWidth}%`;
+          }
+        };
+        const onUp = () => {
+          window.removeEventListener('mousemove', onMove);
+          window.removeEventListener('mouseup', onUp);
+        };
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+      };
+    }
+
+    function setupHighlight() {
+      const left = document.getElementById('insperaLeftPane');
+      const menu = document.getElementById('textHighlightMenu');
+      left.onmouseup = () => {
+        const sel = window.getSelection();
+        if (!sel.isCollapsed && sel.toString().trim()) {
+          const rect = sel.getRangeAt(0).getBoundingClientRect();
+          menu.style.top = `${rect.top - 38}px`;
+          menu.style.left = `${rect.left}px`;
+          menu.style.display = 'flex';
+        } else {
+          menu.style.display = 'none';
+        }
+      };
+    }
+
+    function applySelectionHighlight() {
+      const sel = window.getSelection();
+      if (!sel.isCollapsed) {
+        const range = sel.getRangeAt(0);
+        const span = document.createElement('span');
+        span.style.backgroundColor = 'var(--highlight)';
+        span.style.padding = '1px 2px'; span.style.borderRadius = '2px';
+        range.surroundContents(span);
+      }
+      document.getElementById('textHighlightMenu').style.display = 'none';
+    }
+
+    function clearSelectionHighlight() {
+      document.execCommand('removeFormat');
+      document.getElementById('textHighlightMenu').style.display = 'none';
     }
 
     function startTimer() {
-      const timerEl = document.getElementById('shellTimer');
-      timerId = setInterval(() => {
-        if (timeLeft <= 0) {
-          clearInterval(timerId);
-          alert('Hết giờ làm bài!');
-          submitActiveExam();
+      clearInterval(examTimer);
+      const timerEl = document.getElementById('insperaTimer');
+      examTimer = setInterval(() => {
+        if (secondsRemaining <= 0) {
+          clearInterval(examTimer);
+          alert('Time has expired!');
+          submitExam();
           return;
         }
-        timeLeft--;
-        const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
-        const s = String(timeLeft % 60).padStart(2, '0');
+        secondsRemaining--;
+        const m = String(Math.floor(secondsRemaining / 60)).padStart(2, '0');
+        const s = String(secondsRemaining % 60).padStart(2, '0');
         timerEl.textContent = `${m}:${s}`;
       }, 1000);
     }
+
+    function exitExamShell() {
+      if (confirm('Exit assessment? Unsaved progress will be lost.')) {
+        clearInterval(examTimer);
+        document.getElementById('examShell').style.display = 'none';
+        document.getElementById('dashboardApp').style.display = 'flex';
+      }
+    }
+
+    /* ========================================================
+       ASSESSMENT SUBMISSION & REVIEW
+       ======================================================== */
+    function submitExam() {
+      if (!confirm('Are you sure you want to finish and submit your test?')) return;
+      clearInterval(examTimer);
+
+      if (activeExamType === 'writing') {
+        const editor = document.getElementById('writingEditor');
+        if (editor) {
+          if (activePartNum === 1) writingAnswers.task1 = editor.value;
+          else writingAnswers.task2 = editor.value;
+        }
+        alert('Writing submission completed! Teacher will grade and comment on your essay.');
+        document.getElementById('examShell').style.display = 'none';
+        document.getElementById('dashboardApp').style.display = 'flex';
+        renderDashboard();
+        return;
+      }
+
+      // Reading Grading
+      let correct = 0;
+      let total = 0;
+      let details = [];
+
+      activeExam.passages.forEach(passage => {
+        passage.paragraphs.forEach(p => {
+          if (p.headingQId) {
+            total++;
+            const u = (userAnswers[p.headingQId] || '').toLowerCase();
+            const r = p.correctHeading.toLowerCase();
+            const isRight = (u === r);
+            if (isRight) correct++;
+            details.push({
+              title: `Matching Heading: ${p.label}`,
+              userAns: u || '(Unanswered)',
+              correctAns: p.correctHeading,
+              isRight,
+              explanation: `Correct Heading is [${p.correctHeading}].`
+            });
+          }
+        });
+
+        if (passage.questions) {
+          passage.questions.forEach(q => {
+            total++;
+            const u = (userAnswers[q.id] || '').toLowerCase();
+            let isRight = false;
+            if (q.type === 'gap') {
+              const acc = q.answer.split(/[\/|]/).map(x => x.trim().toLowerCase());
+              isRight = acc.includes(u);
+            } else {
+              isRight = (u === q.answer.toLowerCase());
+            }
+            if (isRight) correct++;
+            details.push({
+              title: `Question ${q.num}`,
+              userAns: userAnswers[q.id] || '(Unanswered)',
+              correctAns: q.answer,
+              isRight,
+              explanation: q.explanation || 'No explanation provided.',
+              evidence: q.evidenceSnippet || ''
+            });
+          });
+        }
+      });
+
+      // Calculate IELTS Band Score
+      let band = '4.0';
+      const pct = correct / total;
+      if (pct >= 0.9) band = '9.0';
+      else if (pct >= 0.8) band = '8.0';
+      else if (pct >= 0.7) band = '7.0';
+      else if (pct >= 0.6) band = '6.5';
+      else if (pct >= 0.5) band = '6.0';
+      else if (pct >= 0.4) band = '5.0';
+
+      const res = {
+        id: 'res_' + Date.now(),
+        userName: activeUser.name,
+        examTitle: activeExam.title,
+        score: `${correct}/${total}`,
+        band,
+        details,
+        timestamp: new Date().toLocaleString()
+      };
+
+      db.results.push(res);
+      persist();
+
+      document.getElementById('examShell').style.display = 'none';
+      document.getElementById('dashboardApp').style.display = 'flex';
+      renderDashboard();
+      displayReviewModal(res);
+    }
+
+    function displayReviewModal(res) {
+      document.getElementById('revTitle').textContent = `Result: ${res.examTitle}`;
+      const body = document.getElementById('revBody');
+      body.innerHTML = `
+        <div style="text-align:center; padding:18px 0; border-bottom:1px solid #e2e8f0; margin-bottom:16px;">
+          <h2 style="color:var(--primary); font-size:26px;">Band Score: ${res.band}</h2>
+          <p style="font-weight:700; color:#475569;">Score: ${res.score}</p>
+        </div>
+        <div>
+          ${res.details.map(d => `
+            <div style="background:#f8fafc; border-left:4px solid ${d.isRight ? '#10b981' : '#ef4444'}; padding:12px; border-radius:4px; margin-bottom:10px;">
+              <div style="font-weight:700;">${d.title}:${d.isRight ? '✅ Correct' : '❌ Incorrect'}</div>
+              <div style="font-size:13px; margin:4px 0;">Your Answer: <b>${d.userAns}</b> | Key: <b style="color:#059669;">${d.correctAns}</b></div>
+              <div style="font-size:12px; color:#64748b; line-height:1.5;">${d.explanation}</div>${d.evidence ? `<div style="font-size:11px; color:var(--primary); margin-top:4px;"><b>Evidence text:</b> "${d.evidence}"</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      openModal('reviewModal');
+    }
+
+    function viewResultDetails(id) {
+      const res = db.results.find(r => r.id === id);
+      if (res) displayReviewModal(res);
+    }
+
+    /* ========================================================
+       MODULAR BUILDER HELPERS (READING, WRITING, USERS, CLASS)
+       ======================================================== */
+    let currentPassageDrafts = { 1: {}, 2: {}, 3: {} };
+    let currentActiveDraftPart = 1;
+
+    function openReadingEditorModal() {
+      currentPassageDrafts = { 1: {}, 2: {}, 3: {} };
+      document.getElementById('reTitle').value = '';
+      document.getElementById('reDuration').value = 60;
+      switchPassageBuilderTab(1);
+      openModal('readingEditorModal');
+    }
+
+    function switchPassageBuilderTab(pNum) {
+      savePassageDraft(currentActiveDraftPart);
+      currentActiveDraftPart = pNum;
+      [1, 2, 3].forEach(n => {
+        document.getElementById(`subtab-p${n}`).classList.toggle('active-subtab', n === pNum);
+      });
+      loadPassageDraft(pNum);
+    }
+
+    function savePassageDraft(pNum) {
+      currentPassageDrafts[pNum] = {
+        title: document.getElementById('rePTitle').value.trim(),
+        text: document.getElementById('rePText').value.trim(),
+        questions: document.getElementById('rePQuestions').value.trim(),
+        vocab: document.getElementById('rePVocab').value.trim()
+      };
+    }
+
+    function loadPassageDraft(pNum) {
+      const d = currentPassageDrafts[pNum] || {};
+      document.getElementById('rePTitle').value = d.title || `Passage ${pNum}`;
+      document.getElementById('rePText').value = d.text || '';
+      document.getElementById('rePQuestions').value = d.questions || '';
+      document.getElementById('rePVocab').value = d.vocab || '';
+    }
+
+    function saveModularReadingExam() {
+      savePassageDraft(currentActiveDraftPart);
+      const title = document.getElementById('reTitle').value.trim();
+      const duration = Number(document.getElementById('reDuration').value) || 60;
+      if (!title) return alert('Exam Title is required!');
+
+      const passages = [];
+      [1, 2, 3].forEach(pNum => {
+        const d = currentPassageDrafts[pNum];
+        if (d && d.text) {
+          const rawParas = d.text.split('\n\n').filter(Boolean);
+          const paragraphs = rawParas.map((pt, idx) => ({
+            label: `Paragraph ${String.fromCharCode(65 + idx)}`,
+            text: pt,
+            headingQId: null, correctHeading: ''
+          }));
+
+          // Simple question parser for demo
+          const questions = [];
+          if (d.questions) {
+            const lines = d.questions.split('\n').filter(Boolean);
+            lines.forEach((line, qIdx) => {
+              if (/^\d+\./.test(line)) {
+                questions.push({
+                  id: `q_p${pNum}_${qIdx}`,
+                  num: qIdx + 1,
+                  type: 'choice',
+                  prompt: line.replace(/^\d+\.\s*/, ''),
+                  options: ['TRUE', 'FALSE', 'NOT GIVEN'],
+                  answer: 'TRUE',
+                  explanation: 'From passage context.'
+                });
+              }
+            });
+          }
+
+          passages.push({
+            partNum: pNum,
+            title: d.title || `Passage ${pNum}`,
+            paragraphs,
+            headingsPool: [],
+            questions,
+            vocab: []
+          });
+        }
+      });
+
+      if (!passages.length) return alert('Please enter at least one passage text!');
+
+      db.readingExams.push({
+        id: 're_' + Date.now(),
+        title, duration, assignedClasses: [],
+        passages
+      });
+      persist();
+      closeModal('readingEditorModal');
+      renderDashboard();
+      alert('Reading exam created successfully!');
+    }
+
+    function openWritingEditorModal() {
+      document.getElementById('weTitle').value = '';
+      document.getElementById('weDuration').value = 60;
+      document.getElementById('weT1Prompt').value = '';
+      document.getElementById('weT1Image').value = '';
+      document.getElementById('weT2Prompt').value = '';
+      openModal('writingEditorModal');
+    }
+
+    function saveWritingExam() {
+      const title = document.getElementById('weTitle').value.trim();
+      const duration = Number(document.getElementById('weDuration').value) || 60;
+      const t1Prompt = document.getElementById('weT1Prompt').value.trim();
+      const t1Image = document.getElementById('weT1Image').value.trim();
+      const t2Prompt = document.getElementById('weT2Prompt').value.trim();
+
+      if (!title || !t1Prompt || !t2Prompt) return alert('Please complete title and both Task 1 & 2 prompts!');
+
+      db.writingExams.push({
+        id: 'we_' + Date.now(),
+        title, duration,
+        task1: { prompt: t1Prompt, image: t1Image },
+        task2: { prompt: t2Prompt }
+      });
+      persist();
+      closeModal('writingEditorModal');
+      renderDashboard();
+      alert('Writing assessment created!');
+    }
+
+    function openCreateClassModal() {
+      document.getElementById('newClassName').value = '';
+      openModal('classModal');
+    }
+    function saveNewClass() {
+      const name = document.getElementById('newClassName').value.trim();
+      if (!name) return;
+      db.classes.push({ id: 'c_' + Date.now(), name });
+      persist();
+      closeModal('classModal');
+      renderDashboard();
+    }
+
+    function openCreateStudentModal() {
+      document.getElementById('stuFullName').value = '';
+      document.getElementById('stuUsername').value = '';
+      document.getElementById('stuPassword').value = '123456';
+      const sel = document.getElementById('stuClassSelect');
+      sel.innerHTML = db.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      openModal('studentModal');
+    }
+    function saveNewStudent() {
+      const name = document.getElementById('stuFullName').value.trim();
+      const username = document.getElementById('stuUsername').value.trim();
+      const pass = document.getElementById('stuPassword').value.trim();
+      const classId = document.getElementById('stuClassSelect').value;
+      if (!name || !username || !pass) return alert('All fields are required!');
+
+      db.users.push({ id: 'u_' + Date.now(), name, username, pass, role: 'student', classId });
+      persist();
+      closeModal('studentModal');
+      renderDashboard();
+    }
+
+    function openAssignModal(examId) {
+      document.getElementById('assignExamId').value = examId;
+      const sel = document.getElementById('assignTargetClassSelect');
+      sel.innerHTML = db.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      openModal('assignModal');
+    }
+    function executeAssign() {
+      const examId = document.getElementById('assignExamId').value;
+      const classId = document.getElementById('assignTargetClassSelect').value;
+      const ex = db.readingExams.find(e => e.id === examId);
+      if (ex && !ex.assignedClasses.includes(classId)) {
+        ex.assignedClasses.push(classId);
+        persist();
+        renderDashboard();
+      }
+      closeModal('assignModal');
+    }
+
+    function deleteReadingExam(id) { if (confirm('Delete this exam?')) { db.readingExams = db.readingExams.filter(e => e.id !== id); persist(); renderDashboard(); } }
+    function deleteClass(id) { if (confirm('Delete this cohort?')) { db.classes = db.classes.filter(c => c.id !== id); persist(); renderDashboard(); } }
+    function deleteStudent(id) { if (confirm('Remove this student?')) { db.users = db.users.filter(u => u.id !== id); persist(); renderDashboard(); } }
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    // Initialize Application
+    checkSession();
   </script>
 </body>
 </html>
