@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IELTS WITH AMURO - Official Computer-Delivered Testing</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
       --mint-light: #f0fdf4;
@@ -129,43 +130,40 @@
     }
     .para-dropzone.dragover { border-color: var(--emerald-accent); background: #ecfdf5; }
     
-    .draggable-chip {
+    .drag-item, .draggable-chip {
       background: #fff; border: 1.5px solid #059669; border-radius: 6px;
       padding: 6px 12px; font-size: 13px; font-weight: 700; color: #064e3b;
       cursor: grab; user-select: none; box-shadow: 0 1px 3px rgba(0,0,0,0.06); display: inline-flex; align-items: center;
     }
-    .draggable-chip:active { cursor: grabbing; opacity: 0.5; }
+    .drag-item:active, .draggable-chip:active { cursor: grabbing; opacity: 0.5; }
+    .drag-item.used { opacity: 0.45; cursor: not-allowed; background: #e2e8f0; }
 
-    .drag-options-pool-box {
+    .drag-options, .drag-options-pool-box {
       background: #f8fafc; border: 1.5px dashed var(--inspera-border); border-radius: 8px;
       padding: 14px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px;
     }
 
-    .drag-slot-zone {
+    .drop-zone, .drag-slot-zone {
       display: inline-flex; align-items: center; justify-content: center;
-      min-width: 140px; height: 34px; border: 2px dashed #059669; border-radius: 6px;
+      min-width: 132px; min-height: 34px; border: 2px dashed #059669; border-radius: 6px;
       background: #ecfdf5; vertical-align: middle; margin: 0 4px; padding: 2px 6px;
+      font-weight: 700; color: #064e3b;
     }
-    .drag-slot-zone.dragover { background: #d1fae5; border-color: #047857; }
+    .drop-zone.over, .drag-slot-zone.dragover { background: #d1fae5; border-color: #047857; }
+    .drop-zone.filled { border-style: solid; border-color: #059669; background: #f0fdf4; }
 
-    /* Radio Matrix Table (Matching Features, Names, Information) */
-    table.radio-matrix {
-      width: 100%; border-collapse: collapse; margin: 16px 0; table-layout: fixed;
-    }
-    table.radio-matrix th, table.radio-matrix td {
-      border: 1px solid #cbd5e0; padding: 8px 10px; text-align: center; vertical-align: middle;
-    }
-    table.radio-matrix th:first-child, table.radio-matrix td:first-child {
-      text-align: left; width: 60%; font-weight: 500;
-    }
+    /* Radio Matrix Table */
+    table.radio-matrix { width: 100%; border-collapse: collapse; margin: 16px 0; table-layout: fixed; }
+    table.radio-matrix th, table.radio-matrix td { border: 1px solid #cbd5e0; padding: 8px 10px; text-align: center; vertical-align: middle; }
+    table.radio-matrix th:first-child, table.radio-matrix td:first-child { text-align: left; width: 60%; font-weight: 500; }
 
-    /* Inline Input for typing */
-    .inspera-inline-input {
-      display: inline-block; width: 145px; height: 32px; padding: 2px 8px;
-      border: 1.5px solid #059669; border-radius: 4px; font-weight: 700;
-      color: #064e3b; outline: none; margin: 0 4px; background: #f0fdf4; vertical-align: middle; font-size: 13.5px;
+    /* Inline Input for typing (ieltsmaterials style) */
+    .input-field.inline-input, .inspera-inline-input {
+      display: inline-block; width: 155px; height: 32px; padding: 2px 8px;
+      border: 1px solid #888; border-radius: 4px; font-weight: 700;
+      color: #000; outline: none; margin: 0 4px; background: #fff; vertical-align: baseline; font-size: 14px; text-align: center;
     }
-    .inspera-inline-input:focus { border-color: #047857; box-shadow: 0 0 0 2px rgba(5,150,105,0.25); background: #fff; }
+    .input-field.inline-input:focus, .inspera-inline-input:focus { border-color: var(--emerald-accent); box-shadow: 0 0 0 2px rgba(5,150,105,0.25); }
 
     .q-item-row { margin-bottom: 18px; }
     .q-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-weight: 800; font-size: 14px; }
@@ -199,44 +197,46 @@
       box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.4);
     }
 
-    /* Footer Nav */
-    .inspera-footer {
+    /* Footer Navigation (ieltsmaterials progress rail style) */
+    .progress-container {
       height: 56px; background: #fff; border-top: 1px solid var(--inspera-border);
       display: flex; align-items: center; justify-content: space-between; padding: 0 18px; flex-shrink: 0;
     }
-    .footer-q-list { display: flex; gap: 8px; overflow-x: auto; max-width: 80%; align-items: center; }
-    .footer-q-btn {
+    .progress-items { display: flex; gap: 8px; overflow-x: auto; max-width: 80%; align-items: center; }
+    .progress-item {
       min-width: 30px; height: 30px; border: 1px solid var(--inspera-border);
       border-radius: 4px; background: #fff; font-size: 12px; font-weight: 700;
       color: #374151; cursor: pointer; display: flex; align-items: center;
       justify-content: center; position: relative;
     }
-    .footer-q-btn.answered { background: #374151; color: #fff; border-color: #374151; }
-    .footer-q-btn.bookmarked::after {
+    .progress-item.answered { background: #374151; color: #fff; border-color: #374151; }
+    .progress-item.current { border: 2px solid var(--emerald-accent); }
+    .progress-item.correct { background: #48bb78; color: #fff; border-color: #38a169; }
+    .progress-item.incorrect { background: #fed7d7; color: #c53030; border-color: #feb2b2; }
+    .progress-item.bookmarked::after {
       content: ""; position: absolute; top: 0; right: 0;
       width: 0; height: 0; border-top: 8px solid var(--bookmark-gold); border-left: 8px solid transparent;
     }
-    .footer-q-btn.correct-eval { border-color: #10b981; background: #ecfdf5; color: #047857; }
-    .footer-q-btn.incorrect-eval { border-color: #ef4444; background: #fef2f2; color: #b91c1c; }
 
     /* Modals */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 7000; align-items: center; justify-content: center; }
     .modal-window {
-      background: #fff; width: 920px; max-width: 95vw; max-height: 90vh;
+      background: #fff; width: 940px; max-width: 95vw; max-height: 90vh;
       border-radius: 12px; display: flex; flex-direction: column; overflow: hidden;
     }
     .modal-header { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 16px; }
     .modal-body { padding: 20px; overflow-y: auto; flex: 1; font-size: 13px; }
     .modal-footer { padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc; }
 
-    .q-edit-card { background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    .q-edit-card { background: #f8fafc; border: 1.5px solid var(--inspera-border); border-radius: 8px; padding: 16px; margin-bottom: 16px; position: relative; }
+    .q-edit-card:hover { border-color: var(--emerald-accent); }
     .active-subtab { background: var(--emerald-accent) !important; color: #fff !important; border-color: var(--emerald-accent) !important; }
   </style>
 </head>
 <body>
 
   <!-- ========================================================
-       1. SPLIT LOGIN SCREEN
+       1. LOGIN SCREEN
        ======================================================== -->
   <div id="loginScreen">
     <div class="login-left-banner">
@@ -294,7 +294,7 @@
         <div class="card">
           <div class="card-title">
             <span>Reading Test Library</span>
-            <button class="btn btn-emerald teacher-item" onclick="openReadingEditorModal()">+ Create Reading Test (Auto-Parser & Editor)</button>
+            <button class="btn btn-emerald teacher-item" onclick="openReadingEditorModal()">+ Create Reading Test (Structured Engine)</button>
           </div>
           <table>
             <thead>
@@ -389,7 +389,7 @@
 
   <!-- ========================================================
        3. INSPERA REAL EXAM WORKSPACE
-       ======================================================== */
+       ======================================================== -->
   <div id="examShell">
     <div class="inspera-top">
       <span id="insperaExamTitle">IELTS Reading Exam</span>
@@ -400,20 +400,20 @@
       </div>
     </div>
 
-    <!-- Passage Tabs -->
+    <!-- Passage Tabs (Passage 1, Passage 2, Passage 3) -->
     <div class="inspera-part-tabs" id="insperaPartTabs"></div>
 
-    <!-- Split-view Workspace -->
+    <!-- Main Split-view Workspace -->
     <div class="inspera-workspace" id="insperaSplitBox">
       <div class="passage-col" id="insperaLeftPane"></div>
       <div class="resizer-bar" id="insperaResizer"></div>
       <div class="questions-col" id="insperaRightPane"></div>
     </div>
 
-    <!-- Footer Navigation (Exact numbers: 1, 2, 3...) -->
-    <div class="inspera-footer">
+    <!-- Footer Progress Container (ieltsmaterials style) -->
+    <div class="progress-container">
       <span style="font-size: 12px; font-weight: 700; color: #475569;">Question Navigation:</span>
-      <div class="footer-q-list" id="insperaFooterList"></div>
+      <div class="progress-items" id="insperaFooterList"></div>
       <button class="btn btn-emerald" id="btnSubmitBottom" onclick="submitExam()">Finish Assessment</button>
     </div>
   </div>
@@ -436,15 +436,15 @@
     </div>
   </div>
 
-  <!-- MODAL: AUTO-PARSER & LIVE QUESTION EDITOR -->
+  <!-- MODAL: ADVANCED STRUCTURED READING TEST BUILDER -->
   <div class="modal-overlay" id="readingEditorModal">
     <div class="modal-window">
-      <div class="modal-header">Reading Test Builder (Universal Auto-Parser & Editor)</div>
+      <div class="modal-header">Reading Test Builder (Structured Inspera / Jurabek Format)</div>
       <div class="modal-body">
         <input type="hidden" id="editingExamId">
         <div class="form-group">
           <label>Exam Title</label>
-          <input type="text" id="reTitle" class="form-input" placeholder="e.g. Cambridge 19 - Test 1 Academic Reading">
+          <input type="text" id="reTitle" class="form-input" placeholder="e.g. Reading Full 121 (Cambridge Standard)">
         </div>
         <div class="form-group">
           <label>Duration (Minutes)</label>
@@ -460,32 +460,39 @@
         <div>
           <div class="form-group">
             <label>Passage Title</label>
-            <input type="text" id="rePTitle" class="form-input" placeholder="e.g. The Transition to Industrial Energy">
+            <input type="text" id="rePTitle" class="form-input" placeholder="e.g. Sleep Study on Modern-Day Hunter-Gatherers">
           </div>
           <div class="form-group">
-            <label>Passage Content (Use Paragraph A, Paragraph B... for Headings)</label>
+            <label>Passage Text Content (Use Paragraph A, Paragraph B... for Headings)</label>
             <textarea id="rePText" class="form-input" style="height: 160px; font-family: monospace;" placeholder="Paste passage paragraphs here..."></textarea>
           </div>
           
+          <!-- BATCH AUTO-DETECT BOX -->
           <div class="form-group" style="background: #f8fafc; border: 1.5px dashed var(--inspera-border); border-radius: 8px; padding: 14px;">
-            <label style="font-weight: 800; color: var(--emerald-dark);">Raw Question Batch (Paste from Cambridge / Word)</label>
+            <label style="font-weight: 800; color: var(--emerald-dark);">Raw Question Batch (Paste directly from Cambridge / Jurabek file)</label>
             <p style="font-size: 11px; color: #64748b; margin-bottom: 6px;">
-              💡 Dán văn bản của từng dạng câu hỏi vào đây. Hệ thống sẽ tự nhận diện và nạp vào danh sách nhóm phía dưới!
+              💡 Dán văn bản câu hỏi vào đây. Hệ thống tự nhận diện các câu hỏi dạng <b>Điền từ</b>, <b>True/False/Not Given</b>, <b>Ma trận Radio Matrix</b>.
             </p>
-            <textarea id="rePRawQuestions" class="form-input" style="height: 150px; font-family: monospace;" placeholder="Paste raw questions directly from PDF/Word here..."></textarea>
+            <textarea id="rePRawQuestions" class="form-input" style="height: 120px; font-family: monospace;" placeholder="Paste questions here..."></textarea>
             <button class="btn btn-emerald" style="margin-top: 10px; font-size: 12px;" onclick="autoParseRawToLiveCards()">
-              ⚡ Auto-Detect & Append Question Group
+              ⚡ Auto-Detect & Add Question Cards
             </button>
           </div>
 
-          <!-- Live Generated Cards Container -->
-          <div style="margin-top: 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <label style="font-weight: 800; font-size: 14px;">Interactive Question Groups & Items</label>
-              <button class="btn btn-secondary" style="padding:3px 8px; font-size:11px;" onclick="clearAllDraftCards()">Clear Cards</button>
-            </div>
+          <!-- MANUAL ADD BUTTONS -->
+          <div style="display: flex; gap: 8px; margin: 14px 0 8px; flex-wrap: wrap;">
+            <button class="btn btn-secondary" onclick="addBlankQuestion('gap')">+ Add Inline Gap-Fill</button>
+            <button class="btn btn-secondary" onclick="addBlankQuestion('choice')">+ Add Multiple Choice</button>
+            <button class="btn btn-secondary" onclick="addBlankQuestion('tfng')">+ Add True/False/Not Given</button>
+            <button class="btn btn-secondary" onclick="addBlankQuestion('matrix')">+ Add Radio Matrix (Matching)</button>
+            <button class="btn btn-danger" style="margin-left: auto;" onclick="clearAllDraftCards()">Clear Cards</button>
+          </div>
+
+          <!-- CONFIGURED CARDS -->
+          <div style="margin-top: 14px;">
+            <label style="font-weight: 800; font-size: 14px; margin-bottom: 8px; display: block;">Configured Question Cards (Edit fields or switch format anytime)</label>
             <div id="liveQuestionCardsBox">
-              <p style="color: #64748b; font-style: italic;">No question cards generated yet. Paste text above and click Auto-Detect.</p>
+              <p style="color: #64748b; font-style: italic;">No question cards generated yet.</p>
             </div>
           </div>
         </div>
@@ -497,7 +504,28 @@
     </div>
   </div>
 
-  <!-- OTHER MANAGEMENT MODALS -->
+  <!-- WRITING MODAL -->
+  <div class="modal-overlay" id="writingEditorModal">
+    <div class="modal-window">
+      <div class="modal-header">Create Writing Assessment (Task 1 & Task 2)</div>
+      <div class="modal-body">
+        <div class="form-group"><label>Exam Title</label><input type="text" id="weTitle" class="form-input"></div>
+        <div class="form-group"><label>Duration (Minutes)</label><input type="number" id="weDuration" class="form-input" value="60"></div>
+        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 1</h4>
+          <div class="form-group"><label>Prompt</label><textarea id="weT1Prompt" class="form-input" style="height: 90px;"></textarea></div>
+          <div class="form-group"><label>Chart Image URL (Optional)</label><input type="text" id="weT1Image" class="form-input"></div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px;">
+          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 2</h4>
+          <div class="form-group"><label>Prompt</label><textarea id="weT2Prompt" class="form-input" style="height: 90px;"></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('writingEditorModal')">Cancel</button><button class="btn btn-emerald" onclick="saveWritingExam()">Save Writing Test</button></div>
+    </div>
+  </div>
+
+  <!-- MANAGEMENT MODALS -->
   <div class="modal-overlay" id="classModal">
     <div class="modal-window" style="width: 400px;">
       <div class="modal-header">Add Cohort / Class</div>
@@ -538,31 +566,11 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="writingEditorModal">
-    <div class="modal-window">
-      <div class="modal-header">Create Writing Assessment (Task 1 & Task 2)</div>
-      <div class="modal-body">
-        <div class="form-group"><label>Exam Title</label><input type="text" id="weTitle" class="form-input" placeholder="e.g. Writing Simulation 02"></div>
-        <div class="form-group"><label>Duration (Minutes)</label><input type="number" id="weDuration" class="form-input" value="60"></div>
-        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px; margin-bottom: 14px;">
-          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 1</h4>
-          <div class="form-group"><label>Prompt</label><textarea id="weT1Prompt" class="form-input" style="height: 90px;"></textarea></div>
-          <div class="form-group"><label>Chart Image URL (Optional)</label><input type="text" id="weT1Image" class="form-input"></div>
-        </div>
-        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px;">
-          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 2</h4>
-          <div class="form-group"><label>Prompt</label><textarea id="weT2Prompt" class="form-input" style="height: 90px;"></textarea></div>
-        </div>
-      </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('writingEditorModal')">Cancel</button><button class="btn btn-emerald" onclick="saveWritingExam()">Save Writing Test</button></div>
-    </div>
-  </div>
-
   <script>
     /* ========================================================
-       DATABASE CORE & FULL MOCK TESTS
+       DATABASE CORE & JURABEK SAMPLE INITIAL TEST (FULL 121)
        ======================================================== */
-    const DB_KEY = 'AMURO_OFFICIAL_IELTS_SUITE_V11';
+    const DB_KEY = 'AMURO_OFFICIAL_IELTS_SUITE_V13';
 
     let db = JSON.parse(localStorage.getItem(DB_KEY)) || {
       users: [
@@ -576,8 +584,8 @@
       savedVocab: {},
       readingExams: [
         {
-          id: 're_master_test_121',
-          title: 'IELTS Official Reading Practice (Hunter-Gatherers & Pines)',
+          id: 'reading_test_121',
+          title: 'Reading Full 121 | Sleep Study & Bristlecone Pines',
           duration: 60,
           assignedClasses: ['c1'],
           passages: [
@@ -585,58 +593,32 @@
               partNum: 1,
               title: 'Passage 1: Sleep Study on Modern-Day Hunter-Gatherers Dispels Popular Notions',
               paragraphs: [
-                { label: 'Paragraph A', text: 'The sleep troubles common in modern life have long been blamed on our industrial society, from city lights to long work hours. Sleep researchers often look back on a time when humans were able to get more rest by sleeping and waking to the rhythms of the sun. It turns out that this may not be quite right.' },
-                { label: 'Paragraph B', text: 'In a recent study, researchers traveled all over the world to examine sleep in some of the world\'s last remaining hunter-gatherer societies – the Hadza of Tanzania, the San of Namibia, and the Tsimane of Bolivia. Medical devices were used to record sleeping habits.' },
+                { label: 'Paragraph A', text: 'The sleep troubles common in modern life have long been blamed on our industrial society, from the city lights, long work hours and commutes, to caffeine and the Internet. Sleep researchers often look back on a time when humans were able to get more rest by sleeping and waking to the rhythms of the sun. It turns out that this may not be quite right. In fact, our ancestors may not have been getting the recommended eight hours of sleep, either.' },
+                { label: 'Paragraph B', text: 'In a recent study, researchers traveled all over the world to examine sleep in some of the world\'s last remaining hunter-gatherer societies – the Hadza of Tanzania, the San of Namibia, and the Tsimane of Bolivia. Cut off from media, electricity and other distractions, these pre-industrial societies are thought to sleep the way humans did more than 10,000 years ago. Traveling to where they lived, researchers used medical devices to record sleeping habits.' },
                 { label: 'Paragraph C', text: 'They found very similar sleep patterns despite their geographic isolation. On average, all three groups sleep a little less than 6.5 hours a night, do not take naps, and don\'t go to sleep when it gets dark.' }
               ],
-              groups: [
-                {
-                  id: 'grp_1',
-                  header: 'Questions 1-4',
-                  instructions: 'Choose TRUE if the statement agrees with the information, FALSE if the statement contradicts, or NOT GIVEN.',
-                  type: 'choice',
-                  questions: [
-                    { id: 'q1', num: 1, prompt: 'Scientists studied hunter-gatherer societies because their sleep patterns are assumed to be similar to humans 10,000 years ago.', options: ['TRUE', 'FALSE', 'NOT GIVEN'], answer: 'TRUE', explanation: 'Paragraph B states pre-industrial societies are thought to sleep the way humans did over 10,000 years ago.', evidenceSnippet: 'sleep the way humans did more than 10,000 years ago' },
-                    { id: 'q2', num: 2, prompt: 'The medical devices used in research were specially designed for humid conditions.', options: ['TRUE', 'FALSE', 'NOT GIVEN'], answer: 'NOT GIVEN', explanation: 'The text mentions humid locations, but not that devices were specially designed for them.', evidenceSnippet: '' }
-                  ]
-                },
-                {
-                  id: 'grp_2',
-                  header: 'Questions 5-7',
-                  instructions: 'Complete the notes below. Write ONE WORD ONLY from the passage for each answer.',
-                  type: 'summary_inline',
-                  summaryTemplate: 'Scientists recorded an afternoon drop in [5]. Studies of hunter-gatherers show napping was rare and occurred more often during the [6]. The devices may not have detected [7] naps.',
-                  questions: [
-                    { id: 'q5', num: 5, answer: 'energy', explanation: 'Text confirms scientists documented that people\'s energy falls in the mid-afternoon.', evidenceSnippet: 'people\'s energy often falls in the mid-afternoon' },
-                    { id: 'q6', num: 6, answer: 'summer', explanation: 'Naps occurred on up to 22 percent of summer days.', evidenceSnippet: '22 percent of summer days' },
-                    { id: 'q7', num: 7, answer: 'short', explanation: 'Some subjects took naps that were short, perhaps 15 minutes or less.', evidenceSnippet: 'naps that were short' }
-                  ]
-                }
+              questions: [
+                { id: 'q1', num: 1, type: 'choice', prompt: 'Scientists studied hunter-gatherer societies because their sleep patterns are assumed to be similar to those of humans more than 10,000 years ago.', options: ['TRUE', 'FALSE', 'NOT GIVEN'], answer: 'TRUE', explanation: 'Paragraph B states pre-industrial societies are thought to sleep the way humans did over 10,000 years ago.', evidenceSnippet: 'sleep the way humans did more than 10,000 years ago' },
+                { id: 'q2', num: 2, type: 'choice', prompt: 'The medical devices used in the research were specially designed for humid conditions.', options: ['TRUE', 'FALSE', 'NOT GIVEN'], answer: 'NOT GIVEN', explanation: 'The text notes humid locations, but nowhere states devices were specially designed for them.', evidenceSnippet: '' },
+                { id: 'q5', num: 5, type: 'gap', prompt: 'scientists have recorded an afternoon drop in', answer: 'energy', explanation: 'Paragraph D states scientists documented people\'s energy often falls in mid-afternoon.', evidenceSnippet: 'people\'s energy often falls in the mid-afternoon' },
+                { id: 'q6', num: 6, type: 'gap', prompt: 'studies show napping was rare and occurred more often during the', answer: 'summer', explanation: 'Paragraph E estimates naps occurred up to 22 percent of summer days.', evidenceSnippet: '22 percent of summer days' },
+                { id: 'q7', num: 7, type: 'gap', prompt: 'the devices may not have detected', answer: 'short', explanation: 'Paragraph E mentions study subjects might have taken naps that were short (15 mins or less).', evidenceSnippet: 'naps that were short' }
               ],
               vocab: [
-                { word: 'circadian', type: 'adj', mean: 'Chu kỳ sinh học hàng ngày', syn: 'daily, 24-hour cycle' },
-                { word: 'isolation', type: 'noun', mean: 'Sự cô lập, biệt lập', syn: 'seclusion, separation' }
+                { word: 'dispels', type: 'verb', mean: 'Xua tan, xóa bỏ', syn: 'banishes, eliminates' },
+                { word: 'isolation', type: 'noun', mean: 'Sự biệt lập, cô lập', syn: 'seclusion, remoteness' }
               ]
             },
             {
               partNum: 2,
-              title: 'Passage 2: Bristlecone Pines - Longevity in Harsh Environments',
+              title: 'Passage 2: Bristlecone Pines',
               paragraphs: [
-                { label: 'Paragraph A', text: 'On the dry, windswept mountain tops of the Great Basin in the western United States grow the bristlecone pines. What makes them remarkable is their longevity: their average age is over 1,000 years, with the oldest known as Methuselah dated at 4,723 years.' },
-                { label: 'Paragraph B', text: 'Douglass noted that wide rings were produced during wet years, and narrow rings during dry seasons. Patterns of ring variability allow precise dating of climatic conditions in the past.' }
+                { label: 'Paragraph A', text: 'On the dry, windswept mountain tops of the Great Basin in the western United States grow the bristlecone pines. What makes them truly remarkable is their longevity: their average age is over 1,000 years, with the oldest specimen dated at 4,723 years.' },
+                { label: 'Paragraph B', text: 'Douglass had noted that the wide rings of certain species of trees were produced during wet years and, inversely, narrow rings during dry seasons. Patterns of ring variability allow precise dating of past climate.' }
               ],
-              groups: [
-                {
-                  id: 'grp_3',
-                  header: 'Questions 8-9',
-                  instructions: 'Which paragraph contains the following information? Choose the correct letter, A-B.',
-                  type: 'radio_matrix',
-                  columns: ['A', 'B'],
-                  questions: [
-                    { id: 'q8', num: 8, prompt: 'An explanation of differences in tree ring patterns.', answer: 'B', explanation: 'Paragraph B explains wide rings during wet years and narrow rings during dry seasons.', evidenceSnippet: 'wide rings of certain species of trees were produced during wet years' },
-                    { id: 'q9', num: 9, prompt: 'Mention of the extreme longevity and name of the oldest specimen.', answer: 'A', explanation: 'Paragraph A mentions Methuselah dated at 4,723 years.', evidenceSnippet: 'oldest specimen - an individual known as Methuselah' }
-                  ]
-                }
+              questions: [
+                { id: 'q14', num: 14, type: 'matrix', prompt: 'an explanation of differences in ring patterns', options: ['A', 'B', 'C', 'D', 'E'], answer: 'B', explanation: 'Paragraph B details how wet and dry years produce wide and narrow rings.', evidenceSnippet: 'wide rings of certain species of trees were produced during wet years' },
+                { id: 'q18', num: 18, type: 'choice', prompt: 'According to the writer, the most interesting fact about bristlecone pines is their', options: ['A habitat', 'B height', 'C width', 'D age'], answer: 'D', explanation: 'Paragraph A highlights their longevity: average age over 1,000 years.', evidenceSnippet: 'What makes bristlecone pines truly remarkable is their longevity' }
               ],
               vocab: []
             }
@@ -645,7 +627,7 @@
       ],
       writingExams: [
         {
-          id: 'we_demo',
+          id: 'we_full_demo',
           title: 'IELTS Academic Writing Simulation - Full Test',
           duration: 60,
           task1: { prompt: 'The chart below shows global energy consumption by source between 1990 and 2020.', image: '' },
@@ -746,7 +728,7 @@
       tbody.innerHTML = '';
       let list = db.readingExams;
       if (activeUser.role === 'student') {
-        list = db.readingExams.filter(e => e.assignedClasses.includes(activeUser.classId));
+        list = db.readingExams.filter(e => (e.assignedClasses || []).includes(activeUser.classId));
       }
       list.forEach(e => {
         const clsNames = (e.assignedClasses || []).map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ') || 'All';
@@ -841,7 +823,6 @@
     }
 
     function renderVocabTab() { openVocabDirectly(db.readingExams[0]?.id); }
-
     function renderClassTable() {
       const tbody = document.getElementById('classTbody');
       tbody.innerHTML = '';
@@ -875,7 +856,7 @@
     }
 
     /* ========================================================
-       INSPERA EXAM ENGINE (FULL INTERACTIVE REAL SIMULATION)
+       INSPERA EXAM ENGINE (FULL JURABEK / CAMBRIDGE INTERACTION)
        ======================================================== */
     function launchExam(examId) {
       activeExam = db.readingExams.find(e => e.id === examId);
@@ -929,6 +910,7 @@
       const left = document.getElementById('insperaLeftPane');
       const right = document.getElementById('insperaRightPane');
 
+      // Left Panel: Passage Text
       let passageHtml = `<h2 style="font-size:19px; font-weight:800; margin-bottom:14px;">${passage.title}</h2>`;
       passage.paragraphs.forEach(p => {
         passageHtml += `
@@ -940,115 +922,91 @@
       });
       left.innerHTML = passageHtml;
 
+      // Right Panel: Questions
       let rightHtml = '';
-      (passage.groups || []).forEach(grp => {
+      (passage.questions || []).forEach(q => {
+        const uAns = (userAnswers[q.id] || '').trim();
+        const isBookmarked = bookmarkedQuestions.has(q.id);
+
         rightHtml += `
-          <div class="group-wrapper-box" id="grp_box_${grp.id}">
-            <div class="group-header-title">${grp.header}</div>
-            <div class="group-instruction-text">${grp.instructions}</div>
+          <div class="q-item-row" id="qitem_${q.id}" style="background:#fff; border:1px solid var(--inspera-border); border-radius:8px; padding:18px; margin-bottom:18px;">
+            <div class="q-item-header">
+              <span>Question ${q.num}</span>
+              ${!isReviewMode ? `
+                <button class="bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" onclick="toggleBookmark('${q.id}')">
+                  <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                  ${isBookmarked ? 'Bookmarked' : 'Bookmark'}
+                </button>
+              ` : ''}
+            </div>
         `;
 
-        // 1. SUMMARY INLINE COMPLETION
-        if (grp.type === 'summary_inline') {
-          let renderedSummary = grp.summaryTemplate;
-          grp.questions.forEach(q => {
-            const uAns = (userAnswers[q.id] || '').trim();
-            const inputHtml = `<input type="text" class="inspera-inline-input" value="${uAns}" placeholder="[${q.num}]" ${isReviewMode ? 'disabled' : ''} oninput="saveAnswer('${q.id}', this.value)">`;
-            renderedSummary = renderedSummary.replace(`[${q.num}]`, inputHtml);
-          });
-          rightHtml += `<div style="line-height:2.2; font-size:14.5px;">${renderedSummary}</div>`;
-
-          if (isReviewMode) {
-            rightHtml += `<div style="margin-top:12px; border-top:1px solid #e2e8f0; padding-top:10px;">`;
-            grp.questions.forEach(q => {
-              const uAns = (userAnswers[q.id] || '').trim();
-              const isRight = (uAns.toLowerCase() === q.answer.toLowerCase());
-              rightHtml += `
-                <div class="review-explanation-box" style="margin-bottom:8px;">
-                  <div style="font-weight:700; color:${isRight ? '#047857' : '#b91c1c'};">Question ${q.num}: ${isRight ? '✅ Correct' : '❌ Incorrect'} (Key: <b>${q.answer}</b>)</div>
-                  <div>Your answer: <b>${uAns || '(Unanswered)'}</b></div>
-                  <div style="font-size:12px; margin:4px 0;">${q.explanation}</div>
-                  ${q.evidenceSnippet ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(q.evidenceSnippet)}')">🔍 Locate Evidence</button>` : ''}
-                </div>
-              `;
-            });
-            rightHtml += `</div>`;
+        // 1. INLINE GAP-FILL (ieltsmaterials style)
+        if (q.type === 'gap') {
+          let prompt = q.prompt;
+          const inputTag = `<input type="text" name="q${q.num}" class="input-field inline-input" value="${uAns}" placeholder="${q.num}" ${isReviewMode ? 'disabled' : ''} oninput="saveAnswer('${q.id}', this.value)">`;
+          if (/\.{2,}|_{2,}|\[\d+\]/.test(prompt)) {
+            prompt = prompt.replace(/\.{2,}|_{2,}|\[\d+\]/, inputTag);
+          } else {
+            prompt += ' ' + inputTag;
           }
+          rightHtml += `<div style="line-height:2.2; font-size:14.5px;">${prompt}</div>`;
         }
-
-        // 2. RADIO MATRIX TABLE (MATCHING INFORMATION / NAMES / CLASSIFICATION)
-        else if (grp.type === 'radio_matrix') {
+        // 2. RADIO MATRIX (Matching features/information)
+        else if (q.type === 'matrix') {
           rightHtml += `
+            <p style="margin-bottom:8px; font-weight:600;">${q.prompt}</p>
             <table class="radio-matrix">
               <thead>
                 <tr>
-                  <th>Statement / Question</th>
-                  ${grp.columns.map(col => `<th>${col}</th>`).join('')}
+                  <th>Option</th>
+                  ${q.options.map(opt => `<th>${opt}</th>`).join('')}
                 </tr>
               </thead>
               <tbody>
-                ${grp.questions.map(q => {
-                  const uAns = userAnswers[q.id] || '';
-                  return `
-                    <tr id="qitem_${q.id}">
-                      <td><b>Question ${q.num}:</b> ${q.prompt}</td>${grp.columns.map(col => `
-                        <td>
-                          <input type="radio" name="matrix_${q.id}" value="${col}" ${uAns === col ? 'checked' : ''} ${isReviewMode ? 'disabled' : ''} onchange="saveAnswer('${q.id}', '${col}')">
-                        </td>
-                      `).join('')}
-                    </tr>
-                  `;
-                }).join('')}
+                <tr>
+                  <td>Select:</td>
+                  ${q.options.map(opt => `
+                    <td>
+                      <input type="radio" name="matrix_${q.id}" value="${opt}" ${uAns === opt ? 'checked' : ''} ${isReviewMode ? 'disabled' : ''} onchange="saveAnswer('${q.id}', '${opt}')">
+                    </td>
+                  `).join('')}
+                </tr>
               </tbody>
             </table>
           `;
-
-          if (isReviewMode) {
-            rightHtml += `<div style="margin-top:10px;">`;
-            grp.questions.forEach(q => {
-              const uAns = userAnswers[q.id] || '';
-              const isRight = (uAns === q.answer);
-              rightHtml += `
-                <div class="review-explanation-box" style="margin-bottom:8px;">
-                  <div style="font-weight:700; color:${isRight ? '#047857' : '#b91c1c'};">Question ${q.num}: ${isRight ? '✅ Correct' : '❌ Incorrect'} (Key: [${q.answer}])</div>
-                  <div>${q.explanation}</div>
-                  ${q.evidenceSnippet ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(q.evidenceSnippet)}')">🔍 Locate Evidence</button>` : ''}
-                </div>
-              `;
-            });
-            rightHtml += `</div>`;
-          }
+        }
+        // 3. MULTIPLE CHOICE / TFNG
+        else {
+          rightHtml += `
+            <p style="margin-bottom:8px; font-weight:600;">${q.prompt}</p>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              ${q.options.map(opt => `
+                <label class="option-row-label">
+                  <input type="radio" name="opt_${q.id}" value="${opt}" ${uAns === opt ? 'checked' : ''} ${isReviewMode ? 'disabled' : ''} onchange="saveAnswer('${q.id}', '${opt}')">
+                  <span>${opt}</span>
+                </label>
+              `).join('')}
+            </div>
+          `;
         }
 
-        // 3. STANDARD CHOICE / TFNG
-        else {
-          grp.questions.forEach(q => {
-            const uAns = userAnswers[q.id] || '';
-            const isRight = (uAns === q.answer);
-            rightHtml += `
-              <div class="q-item-row" id="qitem_${q.id}">
-                <div class="q-item-header"><span>Question ${q.num}</span></div>
-                <p style="margin-bottom:8px; font-weight:600;">${q.prompt}</p>
-                <div style="display:flex; flex-direction:column; gap:6px;">
-                  ${q.options.map(opt => `
-                    <label class="option-row-label">
-                      <input type="radio" name="opt_${q.id}" value="${opt}" ${uAns === opt ? 'checked' : ''} ${isReviewMode ? 'disabled' : ''} onchange="saveAnswer('${q.id}', '${opt}')">
-                      <span>${opt}</span>
-                    </label>
-                  `).join('')}
-                </div>
-            `;
-            if (isReviewMode) {
-              rightHtml += `
-                <div class="review-explanation-box">
-                  <div style="font-weight:700; color:${isRight ? '#047857' : '#b91c1c'};">Question ${q.num}: ${isRight ? '✅ Correct' : '❌ Incorrect'} (Key: <b>${q.answer}</b>)</div>
-                  <div>${q.explanation}</div>
-                  ${q.evidenceSnippet ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(q.evidenceSnippet)}')">🔍 Locate Evidence</button>` : ''}
-                </div>
-              `;
-            }
-            rightHtml += `</div>`;
-          });
+        // REVIEW EXPLANATION & LOCATE
+        if (isReviewMode) {
+          let isRight = false;
+          if (q.type === 'gap') {
+            isRight = q.answer.split(/[\/|]/).map(x => x.trim().toLowerCase()).includes(uAns.toLowerCase());
+          } else {
+            isRight = (uAns.toLowerCase() === q.answer.toLowerCase());
+          }
+          rightHtml += `
+            <div class="review-explanation-box">
+              <div style="font-weight:700; color:${isRight ? '#047857' : '#b91c1c'};">Question ${q.num}: ${isRight ? '✅ Correct' : '❌ Incorrect'} (Key: <b>${q.answer}</b>)</div>
+              <div>Your answer: <b>${uAns || '(No answer)'}</b></div>
+              <div style="font-size:12px; margin:4px 0;">${q.explanation || 'No explanation.'}</div>
+              ${q.evidenceSnippet ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(q.evidenceSnippet)}')">🔍 Locate Evidence</button>` : ''}
+            </div>
+          `;
         }
 
         rightHtml += `</div>`;
@@ -1063,25 +1021,27 @@
       updateFooterNav();
     }
 
+    function toggleBookmark(qId) {
+      if (bookmarkedQuestions.has(qId)) bookmarkedQuestions.delete(qId);
+      else bookmarkedQuestions.add(qId);
+      loadPassageView(activePartNum);
+      updateFooterNav();
+    }
+
     function buildFooterNav() {
       const container = document.getElementById('insperaFooterList');
       container.innerHTML = '';
       if (activeExamType === 'writing') return;
 
-      let allQuestionEntries = [];
+      let allQuestions = [];
       activeExam.passages.forEach(p => {
-        (p.groups || []).forEach(grp => {
-          grp.questions.forEach(q => {
-            allQuestionEntries.push({ id: q.id, num: q.num, partNum: p.partNum });
-          });
-        });
+        (p.questions || []).forEach(q => allQuestions.push({ id: q.id, num: q.num, partNum: p.partNum }));
       });
+      allQuestions.sort((a,b) => a.num - b.num);
 
-      allQuestionEntries.sort((a,b) => a.num - b.num);
-
-      allQuestionEntries.forEach(item => {
+      allQuestions.forEach(item => {
         const btn = document.createElement('button');
-        btn.className = 'footer-q-btn';
+        btn.className = 'progress-item';
         btn.id = `fpill_${item.id}`;
         btn.textContent = item.num;
         btn.onclick = () => {
@@ -1093,14 +1053,14 @@
         };
         container.appendChild(btn);
       });
-
       updateFooterNav();
     }
 
     function updateFooterNav() {
-      document.querySelectorAll('.footer-q-btn').forEach(btn => {
+      document.querySelectorAll('.progress-item').forEach(btn => {
         const qId = btn.id.replace('fpill_', '');
         btn.classList.toggle('answered', Boolean(userAnswers[qId]));
+        btn.classList.toggle('bookmarked', bookmarkedQuestions.has(qId));
       });
     }
 
@@ -1113,14 +1073,12 @@
       const snippet = decodeURIComponent(encodedSnippet);
       if (!snippet) return;
       clearExistingEvidenceHighlights();
-
       const leftPane = document.getElementById('insperaLeftPane');
       const rawText = leftPane.innerHTML;
       const regex = new RegExp(`(${snippet})`, 'gi');
       if (regex.test(rawText)) {
         leftPane.innerHTML = rawText.replace(regex, `<span class="evidence-highlight-active" id="activeLocateTarget">$1</span>`);
-        const target = document.getElementById('activeLocateTarget');
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document.getElementById('activeLocateTarget')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
 
@@ -1129,23 +1087,15 @@
       const left = document.getElementById('insperaLeftPane');
       const right = document.getElementById('insperaRightPane');
       const box = document.getElementById('insperaSplitBox');
-
       resizer.onmousedown = (e) => {
         e.preventDefault();
         const onMove = (moveEvt) => {
           const rect = box.getBoundingClientRect();
-          const newLeftPct = ((moveEvt.clientX - rect.left) / rect.width) * 100;
-          if (newLeftPct > 20 && newLeftPct < 80) {
-            left.style.width = `${newLeftPct}%`;
-            right.style.width = `${100 - newLeftPct}%`;
-          }
+          const w = ((moveEvt.clientX - rect.left) / rect.width) * 100;
+          if (w > 20 && w < 80) { left.style.width = `${w}%`; right.style.width = `${100 - w}%`; }
         };
-        const onUp = () => {
-          window.removeEventListener('mousemove', onMove);
-          window.removeEventListener('mouseup', onUp);
-        };
-        window.addEventListener('mousemove', onMove);
-        window.addEventListener('mouseup', onUp);
+        const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+        window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
       };
     }
 
@@ -1179,16 +1129,13 @@
     function launchWritingExam(examId) {
       activeExam = db.writingExams.find(w => w.id === examId);
       if (!activeExam) return;
-
       activeExamType = 'writing';
       activePartNum = 1;
       writingAnswers = { task1: '', task2: '' };
       secondsRemaining = activeExam.duration * 60;
-
       document.getElementById('dashboardApp').style.display = 'none';
       document.getElementById('examShell').style.display = 'flex';
       document.getElementById('insperaExamTitle').textContent = activeExam.title;
-
       renderPartPills();
       loadWritingWorkspace(activePartNum);
       setupResizer();
@@ -1206,23 +1153,8 @@
       const right = document.getElementById('insperaRightPane');
       const isTask1 = (taskNum === 1);
       const taskData = isTask1 ? activeExam.task1 : activeExam.task2;
-      const currentText = isTask1 ? writingAnswers.task1 : writingAnswers.task2;
-
-      left.innerHTML = `
-        <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 12px;">Writing Task ${taskNum}</h2>
-        <p style="font-size: 14px; line-height: 1.6; margin-bottom: 16px;">${taskData.prompt}</p>
-      `;
-
-      right.innerHTML = `
-        <textarea class="writing-editor" id="writingEditor" placeholder="Type your response here..." oninput="updateWordCount(this.value)">${currentText}</textarea>
-        <div class="word-count-badge" id="writingWordCount">Total Words: 0</div>
-      `;
-      updateWordCount(currentText);
-    }
-
-    function updateWordCount(str) {
-      const count = str.trim() ? str.trim().split(/\s+/).length : 0;
-      document.getElementById('writingWordCount').textContent = `Total Words: ${count}`;
+      left.innerHTML = `<h2 style="font-size:20px; font-weight:800; margin-bottom:12px;">Writing Task ${taskNum}</h2><p style="font-size:14px; line-height:1.6; margin-bottom:16px;">${taskData.prompt}</p>`;
+      right.innerHTML = `<textarea class="form-input" style="height:360px;" placeholder="Type your response here..."></textarea>`;
     }
 
     /* SUBMISSION */
@@ -1231,7 +1163,7 @@
       clearInterval(examTimer);
 
       if (activeExamType === 'writing') {
-        alert('Writing assessment submitted successfully!');
+        alert('Writing assessment submitted!');
         document.getElementById('examShell').style.display = 'none';
         document.getElementById('dashboardApp').style.display = 'flex';
         renderDashboard();
@@ -1240,14 +1172,15 @@
 
       let correct = 0;
       let total = 0;
-
       activeExam.passages.forEach(p => {
-        (p.groups || []).forEach(grp => {
-          grp.questions.forEach(q => {
-            total++;
-            const u = (userAnswers[q.id] || '').toLowerCase().trim();
+        (p.questions || []).forEach(q => {
+          total++;
+          const u = (userAnswers[q.id] || '').toLowerCase().trim();
+          if (q.type === 'gap') {
+            if (q.answer.split(/[\/|]/).map(x => x.trim().toLowerCase()).includes(u)) correct++;
+          } else {
             if (u === q.answer.toLowerCase()) correct++;
-          });
+          }
         });
       });
 
@@ -1303,13 +1236,15 @@
       enterReviewModeFromSummary();
     }
 
-    /* BUILDER / PARSER */
-    let passageDrafts = { 1: { groups: [] }, 2: { groups: [] }, 3: { groups: [] } };
+    /* ========================================================
+       STRUCTURED BUILDER CONTROLLER
+       ======================================================== */
+    let passageDrafts = { 1: { questions: [] }, 2: { questions: [] }, 3: { questions: [] } };
     let currentDraftTab = 1;
 
     function openReadingEditorModal() {
       document.getElementById('editingExamId').value = '';
-      passageDrafts = { 1: { groups: [] }, 2: { groups: [] }, 3: { groups: [] } };
+      passageDrafts = { 1: { questions: [] }, 2: { questions: [] }, 3: { questions: [] } };
       document.getElementById('reTitle').value = '';
       document.getElementById('reDuration').value = 60;
       switchPassageEditor(1);
@@ -1323,12 +1258,12 @@
       document.getElementById('reTitle').value = exam.title;
       document.getElementById('reDuration').value = exam.duration;
 
-      passageDrafts = { 1: { groups: [] }, 2: { groups: [] }, 3: { groups: [] } };
+      passageDrafts = { 1: { questions: [] }, 2: { questions: [] }, 3: { questions: [] } };
       exam.passages.forEach(p => {
         passageDrafts[p.partNum] = {
           title: p.title,
           text: p.paragraphs.map(pr => pr.text).join('\n\n'),
-          groups: p.groups ? JSON.parse(JSON.stringify(p.groups)) : []
+          questions: p.questions ? JSON.parse(JSON.stringify(p.questions)) : []
         };
       });
 
@@ -1337,89 +1272,123 @@
     }
 
     function switchPassageEditor(pNum) {
+      saveActiveDraftCards(currentDraftTab);
       currentDraftTab = pNum;
       [1, 2, 3].forEach(n => document.getElementById(`subtab-p${n}`).classList.toggle('active-subtab', n === pNum));
       loadDraftToEditor(pNum);
     }
 
+    function saveActiveDraftCards(pNum) {
+      const currentList = [];
+      document.querySelectorAll('.q-edit-card').forEach(card => {
+        const qid = card.id.replace('qcard_edit_', '');
+        const prompt = document.getElementById(`edit_prompt_${qid}`).value;
+        const type = document.getElementById(`edit_type_${qid}`).value;
+        const answer = document.getElementById(`edit_ans_${qid}`).value;
+        const explanation = document.getElementById(`edit_exp_${qid}`).value;
+        const evidenceSnippet = document.getElementById(`edit_evi_${qid}`).value;
+
+        let options = [];
+        if (type === 'choice' || type === 'matrix') {
+          const rawOpts = document.getElementById(`edit_opts_${qid}`) ? document.getElementById(`edit_opts_${qid}`).value : '';
+          options = rawOpts.split(',').map(x => x.trim()).filter(Boolean);
+        }
+
+        currentList.push({ id: qid, num: Number(card.dataset.qnum), type, prompt, options, answer, explanation, evidenceSnippet });
+      });
+
+      passageDrafts[pNum] = {
+        title: document.getElementById('rePTitle').value.trim(),
+        text: document.getElementById('rePText').value.trim(),
+        questions: currentList
+      };
+    }
+
     function loadDraftToEditor(pNum) {
-      const d = passageDrafts[pNum] || { groups: [] };
+      const d = passageDrafts[pNum] || { questions: [] };
       document.getElementById('rePTitle').value = d.title || `Passage ${pNum}`;
       document.getElementById('rePText').value = d.text || '';
-      renderLiveConfiguredGroups(d.groups || []);
+      renderLiveQuestionCards(d.questions || []);
     }
 
     function clearAllDraftCards() {
-      if (confirm('Clear all configured groups for this passage?')) {
-        passageDrafts[currentDraftTab].groups = [];
-        renderLiveConfiguredGroups([]);
+      if (confirm('Clear all question cards for this passage?')) {
+        passageDrafts[currentDraftTab].questions = [];
+        renderLiveQuestionCards([]);
       }
+    }
+
+    function addBlankQuestion(type) {
+      saveActiveDraftCards(currentDraftTab);
+      const list = passageDrafts[currentDraftTab].questions || [];
+      const newNum = list.length + 1;
+      let opts = [];
+      let defaultAns = '';
+      if (type === 'choice') { opts = ['A', 'B', 'C', 'D']; defaultAns = 'A'; }
+      if (type === 'tfng') { opts = ['TRUE', 'FALSE', 'NOT GIVEN']; defaultAns = 'TRUE'; type = 'choice'; }
+      if (type === 'matrix') { opts = ['A', 'B', 'C', 'D', 'E']; defaultAns = 'A'; }
+
+      list.push({
+        id: `q_card_${Date.now()}_${newNum}`,
+        num: newNum,
+        type: type,
+        prompt: type === 'gap' ? 'scientists recorded an afternoon drop in' : `Statement ${newNum}`,
+        options: opts,
+        answer: defaultAns,
+        explanation: '',
+        evidenceSnippet: ''
+      });
+      passageDrafts[currentDraftTab].questions = list;
+      renderLiveQuestionCards(list);
     }
 
     function autoParseRawToLiveCards() {
       const raw = document.getElementById('rePRawQuestions').value;
       if (!raw.trim()) return alert('Please paste question batch text into the box first!');
 
-      let header = 'Questions Group';
-      const headerMatch = raw.match(/questions\s+\d+[\s\-\–to]+\d+/i);
-      if (headerMatch) header = headerMatch[0];
+      const isTFNG = /true/i.test(raw) && /false/i.test(raw);
+      const isYesNo = /yes/i.test(raw) && /no/i.test(raw);
+      const isMatrix = /match\s+each|which\s+paragraph/i.test(raw);
 
       const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-      const isSummary = /summary|complete the notes/i.test(raw);
-      const gapMatches = [...raw.matchAll(/(?:\[(\d+)\]|(\d+)\s*[\.\_\-]{2,})/g)];
-
-      if (isSummary && gapMatches.length >= 1) {
-        let summaryText = raw.replace(/questions\s+\d+[\s\-\–to]+\d+/i, '').trim();
-        const questions = [];
-        gapMatches.forEach(m => {
-          const num = Number(m[1] || m[2]);
-          summaryText = summaryText.replace(m[0], `[${num}]`);
-          questions.push({
-            id: `q_sum_${num}_${Date.now()}`,
-            num: num,
-            type: 'gap',
-            answer: '',
-            explanation: '',
-            evidenceSnippet: ''
-          });
-        });
-
-        const newGroup = {
-          id: 'grp_' + Date.now(),
-          header: header,
-          instructions: 'Complete the summary below. Choose NO MORE THAN TWO WORDS from the passage for each answer.',
-          type: 'summary_inline',
-          summaryTemplate: summaryText,
-          questions: questions
-        };
-
-        if (!passageDrafts[currentDraftTab].groups) passageDrafts[currentDraftTab].groups = [];
-        passageDrafts[currentDraftTab].groups.push(newGroup);
-        document.getElementById('rePRawQuestions').value = '';
-        renderLiveConfiguredGroups(passageDrafts[currentDraftTab].groups);
-        alert('Added Summary Completion Group!');
-        return;
-      }
-
-      const qNumRegex = /^(?:question\s+)?(\d+)[\.\)\s\t]+(.*)$/i;
-      const questions = [];
+      const newlyDetected = [];
       let currentQ = null;
+      const qNumRegex = /^(?:question\s+)?(\d+)[\.\)\s\t]+(.*)$/i;
 
       lines.forEach(line => {
-        if (/^questions\s+\d+/i.test(line)) return;
+        if (/^questions\s+\d+/i.test(line) || /^in\s+boxes\s+\d+/i.test(line)) return;
+
         const match = line.match(qNumRegex);
         if (match && Number(match[1]) > 0 && Number(match[1]) < 100) {
-          if (currentQ) questions.push(currentQ);
+          if (currentQ) newlyDetected.push(currentQ);
           const qNum = Number(match[1]);
           const qPrompt = match[2].trim();
-          const isTFNG = /true/i.test(raw);
+
+          let type = 'choice';
+          let opts = [];
+          let ans = '';
+
+          if (qPrompt.includes('..') || qPrompt.includes('__') || qPrompt.includes('[')) {
+            type = 'gap';
+          } else if (isMatrix) {
+            type = 'matrix';
+            opts = ['A', 'B', 'C', 'D', 'E'];
+            ans = 'A';
+          } else if (isTFNG) {
+            opts = ['TRUE', 'FALSE', 'NOT GIVEN'];
+            ans = 'TRUE';
+          } else if (isYesNo) {
+            opts = ['YES', 'NO', 'NOT GIVEN'];
+            ans = 'YES';
+          }
+
           currentQ = {
-            id: `q_std_${qNum}_${Date.now()}`,
+            id: `q_auto_${currentDraftTab}_${qNum}_${Date.now()}`,
             num: qNum,
-            type: 'choice',
+            type: type,
             prompt: qPrompt,
-            options: isTFNG ? ['TRUE', 'FALSE', 'NOT GIVEN'] : [],
-            answer: isTFNG ? 'TRUE' : '',
+            options: opts,
+            answer: ans,
             explanation: '',
             evidenceSnippet: ''
           };
@@ -1430,69 +1399,104 @@
           const optMatch = line.match(/^([A-D])[\.\)]\s*(.*)$/i);
           if (optMatch) {
             currentQ.type = 'choice';
-            const optText = `${optMatch[1]}. ${optMatch[2].trim()}`;
+            const optText = optMatch[1];
             currentQ.options.push(optText);
             if (!currentQ.answer) currentQ.answer = optText;
+            return;
           }
+          if (line.startsWith('EXPLANATION:')) { currentQ.explanation = line.replace('EXPLANATION:', '').trim(); return; }
+          if (line.startsWith('EVIDENCE:')) { currentQ.evidenceSnippet = line.replace('EVIDENCE:', '').trim(); return; }
+          if (line.startsWith('ANS:')) { currentQ.answer = line.replace(/ANS:\s*(\d+=)?/, '').trim(); return; }
         }
       });
-      if (currentQ) questions.push(currentQ);
+      if (currentQ) newlyDetected.push(currentQ);
 
-      const newGroup = {
-        id: 'grp_' + Date.now(),
-        header: header,
-        instructions: 'Answer the questions below.',
-        type: 'standard',
-        questions: questions
-      };
+      if (!newlyDetected.length) return alert('Could not detect question numbers!');
 
-      if (!passageDrafts[currentDraftTab].groups) passageDrafts[currentDraftTab].groups = [];
-      passageDrafts[currentDraftTab].groups.push(newGroup);
+      saveActiveDraftCards(currentDraftTab);
+      const existing = passageDrafts[currentDraftTab].questions || [];
+      const merged = [...existing, ...newlyDetected];
+      passageDrafts[currentDraftTab].questions = merged;
       document.getElementById('rePRawQuestions').value = '';
-      renderLiveConfiguredGroups(passageDrafts[currentDraftTab].groups);
-      alert('Added Questions Group!');
+      renderLiveQuestionCards(merged);
+      alert(`Added ${newlyDetected.length} question cards! You can adjust their types and keys below.`);
     }
 
-    function renderLiveConfiguredGroups(groups) {
+    function renderLiveQuestionCards(cards) {
       const box = document.getElementById('liveQuestionCardsBox');
-      if (!groups.length) {
-        box.innerHTML = `<p style="color: #64748b; font-style: italic;">No question items generated yet. Paste text above and click Auto-Detect.</p>`;
+      if (!cards.length) {
+        box.innerHTML = `<p style="color: #64748b; font-style: italic;">No question cards generated yet.</p>`;
         return;
       }
 
-      box.innerHTML = groups.map((g, gIdx) => `
-        <div class="q-edit-card">
-          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:8px; margin-bottom:10px;">
-            <b style="font-size:15px; color:var(--emerald-dark);">${g.header} (${g.type.toUpperCase()})</b>
-            <button class="btn btn-danger" style="padding:2px 8px; font-size:11px;" onclick="passageDrafts[currentDraftTab].groups.splice(${gIdx}, 1); renderLiveConfiguredGroups(passageDrafts[currentDraftTab].groups);">Delete Group</button>
+      box.innerHTML = cards.map(c => `
+        <div class="q-edit-card" id="qcard_edit_${c.id}" data-qnum="${c.num}">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <b style="font-size:14px; color:var(--emerald-dark);">Question ${c.num}</b>
+            <button class="btn btn-danger" style="padding:2px 8px; font-size:11px;" onclick="document.getElementById('qcard_edit_${c.id}').remove()">Delete</button>
           </div>
+          
           <div class="form-group">
-            <label>Group Instructions</label>
-            <input type="text" class="form-input" value="${g.instructions}" oninput="g.instructions = this.value">
+            <label style="color:var(--emerald-accent);">Question Type (Select to switch format)</label>
+            <select class="form-input" id="edit_type_${c.id}" onchange="changeQuestionCardType('${c.id}', this.value)">
+              <option value="gap" ${c.type === 'gap' ? 'selected' : ''}>Inline Gap Fill (Điền từ vào dòng)</option>
+              <option value="choice" ${c.type === 'choice' ? 'selected' : ''}>Multiple Choice / True-False-Not Given (Trắc nghiệm)</option>
+              <option value="matrix" ${c.type === 'matrix' ? 'selected' : ''}>Radio Matrix Table (Bảng ma trận chọn A-E)</option>
+            </select>
           </div>
-          <div style="margin-top:10px;">
-            <b style="font-size:13px;">Questions in Group:</b>
-            ${g.questions.map(q => `
-              <div style="background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:10px; margin-top:8px;">
-                <div style="font-weight:700;">Question ${q.num}</div>
-                <div style="margin:4px 0;"><input type="text" class="form-input" value="${q.answer || ''}" placeholder="Correct key / Answer" oninput="q.answer = this.value"></div>
-                <div style="margin:4px 0;"><input type="text" class="form-input" value="${q.explanation || ''}" placeholder="Explanation" oninput="q.explanation = this.value"></div>
-                <div style="margin:4px 0;"><input type="text" class="form-input" value="${q.evidenceSnippet || ''}" placeholder="Evidence text in passage" oninput="q.evidenceSnippet = this.value"></div>
-              </div>
-            `).join('')}
+
+          <div class="form-group">
+            <label>Question Prompt / Text</label>
+            <input type="text" class="form-input" id="edit_prompt_${c.id}" value="${c.prompt}">
+          </div>
+
+          <div class="form-group" id="opt_box_${c.id}" style="${c.type === 'gap' ? 'display:none;' : ''}">
+            <label>Options List (Separated by commas, e.g. TRUE, FALSE, NOT GIVEN or A, B, C, D, E)</label>
+            <input type="text" class="form-input" id="edit_opts_${c.id}" value="${c.options.join(', ')}">
+          </div>
+
+          <div class="form-group">
+            <label>Correct Answer / Key</label>
+            <input type="text" class="form-input" id="edit_ans_${c.id}" value="${c.answer}">
+          </div>
+
+          <div class="form-group">
+            <label>Explanation</label>
+            <input type="text" class="form-input" id="edit_exp_${c.id}" value="${c.explanation || ''}" placeholder="Explanation...">
+          </div>
+
+          <div class="form-group">
+            <label>Evidence Snippet</label>
+            <input type="text" class="form-input" id="edit_evi_${c.id}" value="${c.evidenceSnippet || ''}" placeholder="Quote from passage...">
           </div>
         </div>
       `).join('');
     }
 
+    function changeQuestionCardType(qid, newType) {
+      const optBox = document.getElementById(`opt_box_${qid}`);
+      const optsInput = document.getElementById(`edit_opts_${qid}`);
+      const ansInput = document.getElementById(`edit_ans_${qid}`);
+
+      if (newType === 'gap') {
+        optBox.style.display = 'none';
+      } else if (newType === 'matrix') {
+        optBox.style.display = 'block';
+        optsInput.value = 'A, B, C, D, E';
+        ansInput.value = 'A';
+      } else {
+        optBox.style.display = 'block';
+        optsInput.value = 'TRUE, FALSE, NOT GIVEN';
+        ansInput.value = 'TRUE';
+      }
+    }
+
     function saveActiveExamFromCards() {
+      saveActiveDraftCards(currentDraftTab);
       const title = document.getElementById('reTitle').value.trim();
       const duration = Number(document.getElementById('reDuration').value) || 60;
       const editingId = document.getElementById('editingExamId').value;
       if (!title) return alert('Exam Title is required!');
-
-      passageDrafts[currentDraftTab].title = document.getElementById('rePTitle').value.trim();
-      passageDrafts[currentDraftTab].text = document.getElementById('rePText').value.trim();
 
       const passages = [];
       [1, 2, 3].forEach(pNum => {
@@ -1508,7 +1512,7 @@
             partNum: pNum,
             title: d.title || `Passage ${pNum}`,
             paragraphs,
-            groups: d.groups || [],
+            questions: d.questions || [],
             vocab: []
           });
         }
@@ -1533,7 +1537,7 @@
       alert('Exam saved successfully!');
     }
 
-    /* WRITING & HELPERS */
+    /* WRITING & GENERAL */
     function openWritingEditorModal() {
       document.getElementById('weTitle').value = '';
       document.getElementById('weDuration').value = 60;
@@ -1608,7 +1612,7 @@
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    // Start Session
+    // Initialize Session
     checkSession();
   </script>
 </body>
