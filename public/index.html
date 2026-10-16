@@ -126,7 +126,7 @@
     .resizer-bar:hover { background: #cbd5e1; }
     .questions-col { width: 50%; padding: 26px 30px; overflow-y: auto; background: #fff; font-size: 14px; user-select: text; }
 
-    /* IN-EXAM USER TEXT HIGHLIGHT */
+    /* IN-EXAM HIGHLIGHT TOOLTIP */
     #selectionTooltip {
       display: none; position: absolute; z-index: 99999; background: #1f2937; border-radius: 6px;
       padding: 4px 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); gap: 6px;
@@ -265,6 +265,8 @@
       <div class="dash-brand">IELTS WITH AMURO</div>
       <div class="dash-user-controls">
         <div class="dash-user-badge" onclick="openProfileModal()" id="userProfileLabel">👤 Account</div>
+        <button class="btn btn-secondary teacher-item" onclick="exportDatabaseFile()">💾 Backup Data</button>
+        <button class="btn btn-secondary teacher-item" onclick="importDatabasePrompt()">📂 Restore Data</button>
         <button class="btn btn-secondary" onclick="execLogout()">Sign Out</button>
       </div>
     </header>
@@ -322,7 +324,7 @@
           <div class="card-title"><span>Recent Assessment Submissions</span></div>
           <table>
             <thead>
-              <tr><th>Candidate</th><th>Assessment Title</th><th>Score</th><th>Band Score</th><th>Date & Time</th></tr>
+              <tr><th>Candidate</th><th>Assessment Title</th><th>Score / Status</th><th>Band Score</th><th>Date & Time</th></tr>
             </thead>
             <tbody id="homeRecentActivityTbody"></tbody>
           </table>
@@ -404,10 +406,10 @@
       <!-- TAB 7: ANALYTICS -->
       <div id="tab-analytics" class="dash-pane" style="display: none;">
         <div class="card">
-          <div class="card-title"><span>Student Performance History</span></div>
+          <div class="card-title"><span>Student Performance History & Writing Grading</span></div>
           <table>
             <thead>
-              <tr><th>Student Name</th><th>Exam Title</th><th>Score</th><th>Band</th><th>Submission Date</th><th>Action</th></tr>
+              <tr><th>Student Name</th><th>Exam Title</th><th>Score / Word Count</th><th>Band</th><th>Submission Date</th><th>Action</th></tr>
             </thead>
             <tbody id="analyticsTbody"></tbody>
           </table>
@@ -462,6 +464,42 @@
       <div class="modal-body" style="display:flex; gap:16px; padding:16px; overflow:hidden;">
         <div style="width: 60%; height: 100%; overflow-y: auto; padding: 20px; border: 1px solid var(--inspera-border); border-radius: 8px; line-height: 1.8;" id="modalVocabPassagePane"></div>
         <div style="width: 40%; height: 100%; overflow-y: auto; padding: 14px; background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px;" id="modalVocabCardsPane"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TEACHER GRADE WRITING SUBMISSION -->
+  <div class="modal-overlay" id="gradeWritingModal">
+    <div class="modal-window" style="width: 950px; height: 90vh;">
+      <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="gradeWritingTitle">Review & Grade Student Writing</span>
+        <button class="btn btn-secondary" onclick="closeModal('gradeWritingModal')">Close</button>
+      </div>
+      <div class="modal-body" style="display:flex; gap:20px; overflow-y:auto; padding:20px;">
+        <div style="flex:1; display:flex; flex-direction:column; gap:16px;">
+          <div style="background:#f8fafc; border:1px solid var(--inspera-border); border-radius:8px; padding:16px;">
+            <h4 style="color:var(--emerald-accent); margin-bottom:8px;">Task 1 Submission</h4>
+            <div id="gradeTask1Text" style="white-space:pre-wrap; line-height:1.7; font-size:14px; background:#fff; padding:12px; border-radius:6px; border:1px solid #e2e8f0; min-height:140px;"></div>
+          </div>
+          <div style="background:#f8fafc; border:1px solid var(--inspera-border); border-radius:8px; padding:16px;">
+            <h4 style="color:var(--emerald-accent); margin-bottom:8px;">Task 2 Submission</h4>
+            <div id="gradeTask2Text" style="white-space:pre-wrap; line-height:1.7; font-size:14px; background:#fff; padding:12px; border-radius:6px; border:1px solid #e2e8f0; min-height:180px;"></div>
+          </div>
+        </div>
+        <div style="width: 320px; background:#fafafa; border:1px solid var(--inspera-border); border-radius:8px; padding:18px; display:flex; flex-direction:column; gap:14px;">
+          <input type="hidden" id="gradeSubmissionId">
+          <div><b>Candidate:</b> <span id="gradeStudentName"></span></div>
+          <div><b>Assessment:</b> <span id="gradeExamTitle"></span></div>
+          <div class="form-group">
+            <label>Award Band Score (e.g. 6.5, 7.0, 7.5):</label>
+            <input type="text" id="gradeBandInput" class="form-input" placeholder="Band score...">
+          </div>
+          <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
+            <label>Teacher's Feedback & Corrections:</label>
+            <textarea id="gradeFeedbackInput" class="form-input" style="flex:1; min-height:160px; line-height:1.6;" placeholder="Provide feedback, lexical notes, grammar correction..."></textarea>
+          </div>
+          <button class="btn btn-emerald" style="width:100%; padding:10px;" onclick="saveWritingEvaluation()">Save Evaluation</button>
+        </div>
       </div>
     </div>
   </div>
@@ -634,36 +672,49 @@
     </div>
   </div>
 
+  <input type="file" id="dbFileInput" style="display:none;" accept=".json" onchange="processImportDatabase(event)">
+
   <script>
-    /* DATABASE CORE (V22) */
-    const DB_KEY = 'AMURO_JURABEK_SUITE_V22';
+    /* DATABASE CORE (V23) */
+    const DB_KEY = 'AMURO_JURABEK_SUITE_V23';
 
-    let db = JSON.parse(localStorage.getItem(DB_KEY)) || {
-      users: [
-        { id: 'u_admin', username: 'amuro', pass: 'amuro123', name: 'Teacher Amuro', role: 'teacher' },
-        { id: 'u_s1', username: 'student1', pass: '123456', name: 'Alex Johnson', role: 'student', classId: 'c1' }
-      ],
-      classes: [
-        { id: 'c1', name: 'IELTS Intensive 7.5+' },
-        { id: 'c2', name: 'Foundation Morning' }
-      ],
-      savedVocab: {},
-      readingExams: [],
-      writingExams: [
-        {
-          id: 'we_full_demo',
-          title: 'IELTS Academic Writing Simulation 01',
-          duration: 60,
-          task1: { prompt: 'The chart below shows global energy consumption by source between 1990 and 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.', image: '' },
-          task2: { prompt: 'Some people argue that technological progress increases the gap between rich and poor nations, while others believe it has the opposite effect. Discuss both views and give your own opinion.' }
-        }
-      ],
-      results: []
-    };
+    function getDB() {
+      const raw = localStorage.getItem(DB_KEY);
+      if (raw) {
+        try { return JSON.parse(raw); } catch (e) { }
+      }
+      return {
+        users: [
+          { id: 'u_admin', username: 'amuro', pass: 'amuro123', name: 'Teacher Amuro', role: 'teacher' },
+          { id: 'u_s1', username: 'student1', pass: '123456', name: 'Alex Johnson', role: 'student', classId: 'c1' }
+        ],
+        classes: [
+          { id: 'c1', name: 'IELTS Intensive 7.5+' },
+          { id: 'c2', name: 'Foundation Morning' }
+        ],
+        savedVocab: {},
+        readingExams: [],
+        writingExams: [
+          {
+            id: 'we_full_demo',
+            title: 'IELTS Academic Writing Simulation 01',
+            duration: 60,
+            task1: { prompt: 'The chart below shows global energy consumption by source between 1990 and 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.', image: '' },
+            task2: { prompt: 'Some people argue that technological progress increases the gap between rich and poor nations, while others believe it has the opposite effect. Discuss both views and give your own opinion.' }
+          }
+        ],
+        results: []
+      };
+    }
 
+    let db = getDB();
     function persist() { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
 
-    let activeUser = JSON.parse(localStorage.getItem('AMURO_CURRENT_USER')) || null;
+    let activeUser = null;
+    try {
+      activeUser = JSON.parse(localStorage.getItem('AMURO_CURRENT_USER'));
+    } catch(e) {}
+
     let activeExam = null;
     let activePartNum = 1;
     let activeExamType = 'reading';
@@ -674,14 +725,62 @@
     let examTimer = null;
     let secondsRemaining = 3600;
 
+    /* DATABASE EXPORT / IMPORT TO SYNC ACROSS INCOGNITO & DEVICES */
+    function exportDatabaseFile() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+      const a = document.createElement('a');
+      a.setAttribute("href", dataStr);
+      a.setAttribute("download", `amuro_ielts_data_${Date.now()}.json`);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function importDatabasePrompt() {
+      document.getElementById('dbFileInput').click();
+    }
+
+    function processImportDatabase(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported && imported.users && imported.readingExams) {
+            db = imported;
+            persist();
+            alert('Database imported successfully! Refreshing...');
+            location.reload();
+          } else {
+            alert('Invalid database JSON file format!');
+          }
+        } catch(err) {
+          alert('Failed to read database file: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
     /* AUTH CONTROLLER */
     function checkSession() {
+      db = getDB();
+      // Xác minh lại user đang active có thật sự tồn tại trong db hiện thời không
+      if (activeUser) {
+        const verified = db.users.find(u => u.username.toLowerCase() === activeUser.username.toLowerCase() && u.pass === activeUser.pass);
+        if (!verified) {
+          activeUser = null;
+          localStorage.removeItem('AMURO_CURRENT_USER');
+        } else {
+          activeUser = verified;
+        }
+      }
+
       if (activeUser) {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('dashboardApp').style.display = 'flex';
         document.getElementById('userProfileLabel').textContent = `👤 ${activeUser.name} (${activeUser.role.toUpperCase()})`;
         document.querySelectorAll('.teacher-item').forEach(el => el.style.display = activeUser.role === 'teacher' ? '' : 'none');
-        // MẶC ĐỊNH MỞ TRANG CHỦ
         switchDashTab('home');
         renderDashboard();
       } else {
@@ -691,12 +790,18 @@
     }
 
     function execLogin() {
+      db = getDB();
       const u = document.getElementById('logUser').value.trim();
       const p = document.getElementById('logPass').value.trim();
+      if (!u || !p) return alert('Please enter both username and password!');
+      
       const user = db.users.find(x => x.username.toLowerCase() === u.toLowerCase() && x.pass === p);
       if (!user) return alert('Invalid username or password!');
+      
       activeUser = user;
       localStorage.setItem('AMURO_CURRENT_USER', JSON.stringify(activeUser));
+      document.getElementById('logUser').value = '';
+      document.getElementById('logPass').value = '';
       checkSession();
     }
 
@@ -720,6 +825,7 @@
       const target = db.users.find(u => u.id === activeUser.id);
       if (target) { target.name = n; if (p) target.pass = p; }
       persist();
+      localStorage.setItem('AMURO_CURRENT_USER', JSON.stringify(activeUser));
       closeModal('profileModal');
       checkSession();
       alert('Profile updated!');
@@ -737,6 +843,9 @@
 
       if (tab === 'home') renderHomeTab();
       if (tab === 'myvocab') renderMySavedVocab();
+      if (tab === 'reading') renderReadingTable();
+      if (tab === 'writing') renderWritingTable();
+      if (tab === 'analytics') renderAnalyticsTable();
     }
 
     function renderDashboard() {
@@ -744,7 +853,7 @@
       renderReadingTable();
       renderWritingTable();
       renderMySavedVocab();
-      if (activeUser.role === 'teacher') {
+      if (activeUser && activeUser.role === 'teacher') {
         renderClassTable();
         renderStudentTable();
         renderAnalyticsTable();
@@ -752,6 +861,7 @@
     }
 
     function renderHomeTab() {
+      if (!activeUser) return;
       document.getElementById('homeWelcomeTitle').textContent = `Welcome back, ${activeUser.name}!`;
       document.getElementById('statReadingCount').textContent = db.readingExams.length;
       document.getElementById('statWritingCount').textContent = db.writingExams.length;
@@ -783,12 +893,17 @@
     function renderReadingTable() {
       const tbody = document.getElementById('readingTbody');
       tbody.innerHTML = '';
-      // HỌC SINH THẤY ĐƯỢC TOÀN BỘ ĐỀ ĐƯỢC CHIA HOẶC ĐỀ CHUNG
+      
+      // HỌC SINH THẤY TẤT CẢ CÁC BÀI ĐƯỢC CHIA HOẶC ĐỀ CHUNG
       let list = db.readingExams;
-      if (activeUser.role === 'student') {
-        list = db.readingExams.filter(e => !e.assignedClasses || e.assignedClasses.length === 0 || e.assignedClasses.includes(activeUser.classId));
+      if (activeUser && activeUser.role === 'student') {
+        list = db.readingExams.filter(e => {
+          if (!e.assignedClasses || e.assignedClasses.length === 0) return true;
+          return e.assignedClasses.includes(activeUser.classId);
+        });
       }
-      if (!list.length) {
+
+      if (!list || !list.length) {
         tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No tests available. Click "+ Import / Clone Web Test" to add one.</td></tr>`;
         return;
       }
@@ -829,7 +944,7 @@
       });
     }
 
-    /* MODAL STUDY VOCABULARY CHO TỪNG ĐỀ THI */
+    /* MODAL STUDY VOCABULARY */
     function openStudyVocabModal(examId) {
       const exam = db.readingExams.find(e => e.id === examId);
       if (!exam || !exam.passages || !exam.passages.length) return alert('No passage data found.');
@@ -860,7 +975,6 @@
 
     function spotVocabWordInModal(word) {
       const pPane = document.getElementById('modalVocabPassagePane');
-      // Gỡ highlight cũ
       pPane.querySelectorAll('.evidence-highlight-active').forEach(el => el.outerHTML = el.innerHTML);
 
       const regex = new RegExp(`(^|[^a-zA-Z0-9])(${escapeRegex(word)})([^a-zA-Z0-9]|$)`, 'i');
@@ -925,10 +1039,58 @@
       const tbody = document.getElementById('analyticsTbody');
       tbody.innerHTML = '';
       db.results.slice().reverse().forEach(r => {
+        const isWriting = r.writingSubmission ? true : false;
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><b>${r.userName}</b></td><td>${r.examTitle}</td><td>${r.score}</td><td><b style="color: var(--emerald-accent);">${r.band.startsWith('Band') ? r.band : 'Band ' + r.band}</b></td><td>${r.timestamp}</td><td><button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">Review</button></td>`;
+        tr.innerHTML = `
+          <td><b>${r.userName}</b></td>
+          <td>${r.examTitle}</td>
+          <td>${r.score}</td>
+          <td><b style="color: var(--emerald-accent);">${r.band.startsWith('Band') ? r.band : 'Band ' + r.band}</b></td>
+          <td>${r.timestamp}</td>
+          <td>
+            ${isWriting ? `
+              <button class="btn btn-emerald" onclick="openGradeWritingModal('${r.id}')">Review & Grade</button>
+            ` : `
+              <button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">Review Keys</button>
+            `}
+          </td>
+        `;
         tbody.appendChild(tr);
       });
+    }
+
+    /* TEACHER WRITING GRADING CONTROLLER */
+    function openGradeWritingModal(resId) {
+      const res = db.results.find(r => r.id === resId);
+      if (!res || !res.writingSubmission) return;
+
+      document.getElementById('gradeSubmissionId').value = res.id;
+      document.getElementById('gradeStudentName').textContent = res.userName;
+      document.getElementById('gradeExamTitle').textContent = res.examTitle;
+      document.getElementById('gradeTask1Text').textContent = res.writingSubmission.task1 || '(No response)';
+      document.getElementById('gradeTask2Text').textContent = res.writingSubmission.task2 || '(No response)';
+      document.getElementById('gradeBandInput').value = res.band === 'Submitted' ? '' : res.band;
+      document.getElementById('gradeFeedbackInput').value = res.teacherFeedback || '';
+
+      openModal('gradeWritingModal');
+    }
+
+    function saveWritingEvaluation() {
+      const resId = document.getElementById('gradeSubmissionId').value;
+      const res = db.results.find(r => r.id === resId);
+      if (!res) return;
+
+      const bandVal = document.getElementById('gradeBandInput').value.trim();
+      const fbVal = document.getElementById('gradeFeedbackInput').value.trim();
+
+      if (bandVal) res.band = bandVal.startsWith('Band') ? bandVal : `Band ${bandVal}`;
+      res.teacherFeedback = fbVal;
+
+      persist();
+      closeModal('gradeWritingModal');
+      renderAnalyticsTable();
+      renderHomeTab();
+      alert('Writing evaluation and feedback saved successfully!');
     }
 
     /* READING EXAM ENGINE */
@@ -1437,12 +1599,13 @@
           examTitle: activeExam.title,
           score: `T1: ${w1Count} words | T2: ${w2Count} words`,
           band: 'Submitted',
+          teacherFeedback: '',
           writingSubmission: { ...writingAnswers },
           timestamp: new Date().toLocaleString()
         });
         persist();
 
-        alert(`Writing submitted successfully!\n- Task 1: ${w1Count} words\n- Task 2: ${w2Count} words`);
+        alert(`Writing assessment submitted successfully!\n- Task 1: ${w1Count} words\n- Task 2: ${w2Count} words\nTeacher will review and evaluate your response.`);
         document.getElementById('examShell').style.display = 'none';
         document.getElementById('dashboardApp').style.display = 'flex';
         renderDashboard();
@@ -1663,6 +1826,9 @@
 
       if (!passages.length) return alert('Please enter at least one passage!');
 
+      // Cấp quyền cho toàn bộ các lớp để học sinh không bị ẩn đề
+      const allClassIds = db.classes.map(c => c.id);
+
       if (editingId) {
         const ex = db.readingExams.find(e => e.id === editingId);
         if (ex) {
@@ -1676,7 +1842,8 @@
       } else {
         db.readingExams.push({
           id: 're_' + Date.now(),
-          title, duration, assignedClasses: [], // Mặc định gán toàn bộ lớp
+          title, duration, 
+          assignedClasses: allClassIds,
           correctAnswers,
           explanations,
           evidences,
@@ -1746,7 +1913,7 @@
       persist(); 
       closeModal('studentModal'); 
       renderDashboard();
-      alert(`Student account "${u}" registered successfully!`);
+      alert(`Student account "${u}" registered successfully! Password: ${p}`);
     }
     function openAssignModal(eId) {
       document.getElementById('assignExamId').value = eId;
@@ -1779,7 +1946,7 @@
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    // Start Session
+    // Khởi động phiên làm việc
     checkSession();
   </script>
 </body>
