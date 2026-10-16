@@ -246,11 +246,11 @@
         <p>Access your practice account</p>
         <div class="form-group">
           <label>Username</label>
-          <input type="text" id="logUser" class="form-input" placeholder="Username">
+          <input type="text" id="logUser" class="form-input" placeholder="Username" autocomplete="off">
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="logPass" class="form-input" placeholder="Password">
+          <input type="password" id="logPass" class="form-input" placeholder="Password" autocomplete="off">
         </div>
         <button class="btn btn-emerald" style="width: 100%; padding: 11px; margin-top: 8px;" onclick="execLogin()">
           Enter Practice Room
@@ -655,10 +655,10 @@
     <div class="modal-window" style="width: 440px;">
       <div class="modal-header">Register Student Account</div>
       <div class="modal-body">
-        <div class="form-group"><label>Full Name</label><input type="text" id="stuFullName" class="form-input"></div>
-        <div class="form-group"><label>Username</label><input type="text" id="stuUsername" class="form-input"></div>
-        <div class="form-group"><label>Password</label><input type="text" id="stuPassword" class="form-input" value="123456"></div>
-        <div class="form-group"><label>Class</label><select id="stuClassSelect" class="form-input"></select></div>
+        <div class="form-group"><label>Full Name</label><input type="text" id="newStuFullName" class="form-input" autocomplete="off"></div>
+        <div class="form-group"><label>Username</label><input type="text" id="newStuUsername" class="form-input" autocomplete="off"></div>
+        <div class="form-group"><label>Password</label><input type="password" id="newStuPassword" class="form-input" value="123456" autocomplete="new-password"></div>
+        <div class="form-group"><label>Class</label><select id="newStuClassSelect" class="form-input"></select></div>
       </div>
       <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('studentModal')">Cancel</button><button class="btn btn-emerald" onclick="saveNewStudent()">Create Account</button></div>
     </div>
@@ -675,8 +675,8 @@
   <input type="file" id="dbFileInput" style="display:none;" accept=".json" onchange="processImportDatabase(event)">
 
   <script>
-    /* DATABASE CORE (V24) */
-    const DB_KEY = 'AMURO_JURABEK_SUITE_V24';
+    /* DATABASE CORE (V25) */
+    const DB_KEY = 'AMURO_JURABEK_SUITE_V25';
 
     function getDB() {
       const raw = localStorage.getItem(DB_KEY);
@@ -711,7 +711,7 @@
     let db = getDB();
     function persist() { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
 
-    // SỬ DỤNG SESSION STORAGE CHO TÀI KHOẢN ĐANG ĐĂNG NHẬP (KHÔNG LƯU CỐ ĐỊNH QUA CÁC TAB ẨN DANH KHÁC NHAU)
+    // Dùng sessionStorage để hoàn toàn tách biệt các tab, không tự động lưu phiên giữa các cửa sổ
     let activeUser = null;
     try {
       activeUser = JSON.parse(sessionStorage.getItem('AMURO_CURRENT_USER'));
@@ -727,7 +727,7 @@
     let examTimer = null;
     let secondsRemaining = 3600;
 
-    /* BACKUP VÀ RESTORE DATABASE */
+    /* DATABASE EXPORT / IMPORT */
     function exportDatabaseFile() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
       const a = document.createElement('a');
@@ -768,7 +768,7 @@
     function checkSession() {
       db = getDB();
       if (activeUser) {
-        const verified = db.users.find(u => u.username.toLowerCase() === activeUser.username.toLowerCase() && u.pass === activeUser.pass);
+        const verified = db.users.find(u => u.username.toLowerCase() === activeUser.username.toLowerCase() && String(u.pass).trim() === String(activeUser.pass).trim());
         if (!verified) {
           activeUser = null;
           sessionStorage.removeItem('AMURO_CURRENT_USER');
@@ -796,11 +796,10 @@
       const p = document.getElementById('logPass').value.trim();
       if (!u || !p) return alert('Please enter both username and password!');
       
-      const user = db.users.find(x => x.username.toLowerCase() === u.toLowerCase() && x.pass === p);
+      const user = db.users.find(x => x.username.toLowerCase() === u.toLowerCase() && String(x.pass).trim() === p);
       if (!user) return alert('Invalid username or password!');
       
       activeUser = user;
-      // Lưu vào sessionStorage (mỗi cửa sổ/tab trình duyệt sẽ hoàn toàn độc lập, tắt tab là tự đăng xuất)
       sessionStorage.setItem('AMURO_CURRENT_USER', JSON.stringify(activeUser));
       document.getElementById('logUser').value = '';
       document.getElementById('logPass').value = '';
@@ -896,7 +895,8 @@
       const tbody = document.getElementById('readingTbody');
       tbody.innerHTML = '';
       
-      let list = db.readingExams;
+      // Hiển thị tất cả đề đối với học sinh nếu không gắn lớp hoặc trùng lớp
+      let list = db.readingExams || [];
       if (activeUser && activeUser.role === 'student') {
         list = db.readingExams.filter(e => {
           if (!e.assignedClasses || e.assignedClasses.length === 0) return true;
@@ -914,7 +914,7 @@
         tr.innerHTML = `
           <td><b>${e.title}</b></td>
           <td>${e.duration} mins</td>
-          <td>${e.passages.length} Passage(s)</td>
+          <td>${e.passages ? e.passages.length : 1} Passage(s)</td>
           <td><span style="color: #64748b;">${clsNames}</span></td>
           <td>
             <button class="btn btn-emerald" onclick="launchExam('${e.id}')">Start Test</button>
@@ -1840,7 +1840,7 @@
         db.readingExams.push({
           id: 're_' + Date.now(),
           title, duration, 
-          assignedClasses: [], // Mảng rỗng = Cho phép tất cả các học sinh thấy đề
+          assignedClasses: [],
           correctAnswers,
           explanations,
           evidences,
@@ -1891,18 +1891,18 @@
       persist(); closeModal('classModal'); renderDashboard();
     }
     function openCreateStudentModal() {
-      document.getElementById('stuFullName').value = '';
-      document.getElementById('stuUsername').value = '';
-      document.getElementById('stuPassword').value = '123456';
-      const sel = document.getElementById('stuClassSelect');
+      document.getElementById('newStuFullName').value = '';
+      document.getElementById('newStuUsername').value = '';
+      document.getElementById('newStuPassword').value = '123456';
+      const sel = document.getElementById('newStuClassSelect');
       sel.innerHTML = db.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
       openModal('studentModal');
     }
     function saveNewStudent() {
-      const n = document.getElementById('stuFullName').value.trim();
-      const u = document.getElementById('stuUsername').value.trim();
-      const p = document.getElementById('stuPassword').value.trim();
-      const c = document.getElementById('stuClassSelect').value;
+      const n = document.getElementById('newStuFullName').value.trim();
+      const u = document.getElementById('newStuUsername').value.trim();
+      const p = document.getElementById('newStuPassword').value.trim();
+      const c = document.getElementById('newStuClassSelect').value;
       if (!n || !u || !p) return alert('All fields required!');
       if (db.users.some(x => x.username.toLowerCase() === u.toLowerCase())) return alert('Username already exists!');
       
