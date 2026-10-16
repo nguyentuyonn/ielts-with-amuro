@@ -162,12 +162,20 @@
     table.radio-matrix th:first-child, table.radio-matrix td:first-child { width: 60%; text-align: left; font-weight: 500; }
     table.radio-matrix input[type="radio"] { width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer; }
 
+    /* DRAG & DROP WITH OPACITY / HIDE WHEN USED */
     .drag-options { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 16px; }
     .drag-item {
       padding: 6px 12px; border: 1px solid #b9c7d8; border-radius: 6px; background: #f8fafc;
-      font-size: 13.5px; font-weight: 600; cursor: grab; user-select: none;
+      font-size: 13.5px; font-weight: 600; cursor: grab; user-select: none; transition: 0.15s ease;
     }
     .drag-item:active { cursor: grabbing; transform: scale(0.97); }
+    .drag-item.used {
+      opacity: 0.25;
+      pointer-events: none;
+      background: #e2e8f0;
+      border-style: dashed;
+      text-decoration: line-through;
+    }
 
     .drop-zone {
       display: inline-flex; align-items: center; justify-content: center;
@@ -676,10 +684,11 @@
 
   <script>
     /* ========================================================
-       DATABASE CORE (V26 - TÍCH HỢP SẴN ĐỀ THẬT VÀ TÀI KHOẢN MẶC ĐỊNH)
+       DATABASE CORE (V27)
        ======================================================== */
-    const DB_KEY = 'AMURO_JURABEK_SUITE_V26';
+    const DB_KEY = 'AMURO_JURABEK_SUITE_V27';
 
+    // Đề thi chuẩn được nhúng sẵn vào mã nguồn
     const defaultShoppingExam = {
       id: 'reading_science_of_shopping',
       title: 'Passage: The Science of Shopping (Questions 27-40)',
@@ -879,37 +888,57 @@
       ]
     };
 
+    // Tự động nạp tài khoản và gộp các đề thi sẵn có
     function getDB() {
       const raw = localStorage.getItem(DB_KEY);
+      let parsed = null;
       if (raw) {
-        try { 
-          const parsed = JSON.parse(raw);
-          if (parsed && parsed.users) return parsed;
-        } catch (e) { }
+        try { parsed = JSON.parse(raw); } catch (e) { }
       }
-      return {
-        users: [
-          { id: 'u_admin', username: 'amuro', pass: 'amuro123', name: 'Teacher Amuro', role: 'teacher' },
-          { id: 'u_s1', username: 'student1', pass: '123456', name: 'Alex Johnson', role: 'student', classId: 'c1' },
-          { id: 'u_s2', username: 'hocsinh1', pass: '123456', name: 'Nguyen Van A', role: 'student', classId: 'c1' }
-        ],
-        classes: [
-          { id: 'c1', name: 'IELTS Intensive 7.5+' },
-          { id: 'c2', name: 'Foundation Morning' }
-        ],
-        savedVocab: {},
-        readingExams: [ defaultShoppingExam ],
-        writingExams: [
-          {
-            id: 'we_full_demo',
-            title: 'IELTS Academic Writing Simulation 01',
-            duration: 60,
-            task1: { prompt: 'The chart below shows global energy consumption by source between 1990 and 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.', image: '' },
-            task2: { prompt: 'Some people argue that technological progress increases the gap between rich and poor nations, while others believe it has the opposite effect. Discuss both views and give your own opinion.' }
-          }
-        ],
-        results: []
-      };
+
+      const defaultUsers = [
+        { id: 'u_admin', username: 'amuro', pass: 'amuro123', name: 'Teacher Amuro', role: 'teacher' },
+        { id: 'u_s1', username: 'student1', pass: '123456', name: 'Alex Johnson', role: 'student', classId: 'c1' },
+        { id: 'u_s2', username: 'hocsinh1', pass: '123456', name: 'Nguyen Van A', role: 'student', classId: 'c1' },
+        { id: 'u_s3', username: 'hocsinh2', pass: '123456', name: 'Tran Thi B', role: 'student', classId: 'c1' }
+      ];
+
+      if (!parsed) {
+        return {
+          users: defaultUsers,
+          classes: [
+            { id: 'c1', name: 'IELTS Intensive 7.5+' },
+            { id: 'c2', name: 'Foundation Morning' }
+          ],
+          savedVocab: {},
+          readingExams: [ defaultShoppingExam ],
+          writingExams: [
+            {
+              id: 'we_full_demo',
+              title: 'IELTS Academic Writing Simulation 01',
+              duration: 60,
+              task1: { prompt: 'The chart below shows global energy consumption by source between 1990 and 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.', image: '' },
+              task2: { prompt: 'Some people argue that technological progress increases the gap between rich and poor nations, while others believe it has the opposite effect. Discuss both views and give your own opinion.' }
+            }
+          ],
+          results: []
+        };
+      }
+
+      // Đảm bảo luôn đủ các tài khoản mặc định
+      defaultUsers.forEach(du => {
+        if (!parsed.users.some(u => u.username.toLowerCase() === du.username.toLowerCase())) {
+          parsed.users.push(du);
+        }
+      });
+
+      // Đảm bảo đề Science of Shopping luôn có mặt
+      if (!parsed.readingExams || !parsed.readingExams.some(e => e.id === defaultShoppingExam.id)) {
+        if (!parsed.readingExams) parsed.readingExams = [];
+        parsed.readingExams.unshift(defaultShoppingExam);
+      }
+
+      return parsed;
     }
 
     let db = getDB();
@@ -1446,11 +1475,12 @@
           const item = document.querySelector(`.drag-item[data-answer="${val}"]`);
           zone.textContent = item ? item.textContent.trim() : val;
           zone.classList.add('filled');
+          if (item) item.classList.add('used');
         }
       });
     }
 
-    /* SỬA LỖI KÉO THẢ: KHÔNG HỦY ĐÁP ÁN KHI ĐANG REVIEW */
+    /* DRAG & DROP ENGINE: TỰ ĐỘNG ẨN THẺ ĐÃ DÙNG VÀ HOÀN TRẢ KHI HỦY */
     function setupDragDropEngine() {
       const items = document.querySelectorAll('#insperaSplitBox .drag-item');
       const zones = document.querySelectorAll('#insperaSplitBox .drop-zone');
@@ -1478,18 +1508,39 @@
           zone.classList.remove('over');
           const ans = e.dataTransfer.getData('ans');
           const lbl = e.dataTransfer.getData('label');
+
           if (ans) {
+            // Nếu ô này trước đó đã có đáp án khác, trả lại thẻ cũ
+            const oldAns = userAnswers[zone.dataset.target];
+            if (oldAns) {
+              const oldItem = document.querySelector(`.drag-item[data-answer="${oldAns}"]`);
+              if (oldItem) oldItem.classList.remove('used');
+            }
+
+            // Gán đáp án mới và ẩn thẻ vừa kéo
             zone.textContent = lbl || ans;
             zone.classList.add('filled');
             const qName = zone.dataset.target;
             userAnswers[qName] = ans;
+
+            const currentItem = document.querySelector(`.drag-item[data-answer="${ans}"]`);
+            if (currentItem) currentItem.classList.add('used');
+
             updateFooterNav();
           }
         };
+
         zone.onclick = () => {
           // Khóa không cho xóa khi đang ở chế độ xem lại đáp án
           if (isReviewMode) return;
           if (zone.classList.contains('filled')) {
+            const oldAns = userAnswers[zone.dataset.target];
+            if (oldAns) {
+              // Hoàn trả lại thẻ kéo về danh sách ban đầu
+              const oldItem = document.querySelector(`.drag-item[data-answer="${oldAns}"]`);
+              if (oldItem) oldItem.classList.remove('used');
+            }
+
             zone.textContent = zone.dataset.placeholder || '';
             zone.classList.remove('filled');
             delete userAnswers[zone.dataset.target];
@@ -1545,11 +1596,9 @@
         // 2. Nếu là dạng kéo thả (.drop-zone)
         const zone = scope.querySelector(`.drop-zone[data-target="${k}"]`);
         if (zone) {
-          // Đổi màu viền xanh/đỏ cho ô kéo thả
           zone.style.borderColor = isRight ? '#22c55e' : '#ef4444';
           zone.style.background = isRight ? '#dcfce7' : '#fee2e2';
 
-          // Chèn khung giải thích ngay dưới đoạn tóm tắt
           const parentGroup = zone.closest('.question-group');
           if (parentGroup && !parentGroup.querySelector(`.answer-indicator[data-ind="${k}"]`)) {
             const div = document.createElement('div');
@@ -1761,418 +1810,4 @@
 
     function loadWritingWorkspace(taskNum) {
       const left = document.getElementById('insperaLeftPane');
-      const right = document.getElementById('insperaRightPane');
-      const isTask1 = (taskNum === 1);
-      const taskData = isTask1 ? activeExam.task1 : activeExam.task2;
-      const savedText = isTask1 ? writingAnswers.task1 : writingAnswers.task2;
-
-      left.innerHTML = `
-        <h2 class="section-title">Writing Task ${taskNum}</h2>
-        <div style="font-size: 15px; line-height: 1.6; margin-bottom: 18px; color: #1f2937;">
-          ${taskData.prompt}
-        </div>
-        ${isTask1 && taskData.image ? `
-          <div style="margin-top: 14px; text-align: center;">
-            <img src="${taskData.image}" style="max-width: 100%; border: 1px solid var(--inspera-border); border-radius: 6px;" alt="Task 1 Chart">
-          </div>
-        ` : ''}
-      `;
-
-      right.innerHTML = `
-        <textarea 
-          id="writingEditor" 
-          class="form-input" 
-          style="width: 100%; height: calc(100vh - 170px); font-size: 15px; line-height: 1.7; padding: 16px; resize: none; outline: none; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;"
-          placeholder="Type your response here..."
-          oninput="handleWritingInput(this.value)"
-        >${savedText}</textarea>
-      `;
-
-      updateWordCountDisplay(savedText);
-    }
-
-    function handleWritingInput(text) {
-      if (activePartNum === 1) writingAnswers.task1 = text;
-      else writingAnswers.task2 = text;
-      updateWordCountDisplay(text);
-    }
-
-    function updateWordCountDisplay(text) {
-      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-      const display = document.getElementById('writingWordCountDisplay');
-      if (display) {
-        display.textContent = `Word Count: ${words}`;
-      }
-    }
-
-    /* SUBMISSION */
-    function submitExam() {
-      if (!confirm('Are you sure you want to finish the exam?')) return;
-      clearInterval(examTimer);
-
-      if (activeExamType === 'writing') {
-        const currentEditor = document.getElementById('writingEditor');
-        if (currentEditor) {
-          if (activePartNum === 1) writingAnswers.task1 = currentEditor.value;
-          else writingAnswers.task2 = currentEditor.value;
-        }
-
-        const w1Count = writingAnswers.task1.trim() ? writingAnswers.task1.trim().split(/\s+/).length : 0;
-        const w2Count = writingAnswers.task2.trim() ? writingAnswers.task2.trim().split(/\s+/).length : 0;
-
-        db.results.push({
-          id: 'res_w_' + Date.now(),
-          examId: activeExam.id,
-          userName: activeUser.name,
-          examTitle: activeExam.title,
-          score: `T1: ${w1Count} words | T2: ${w2Count} words`,
-          band: 'Submitted',
-          teacherFeedback: '',
-          writingSubmission: { ...writingAnswers },
-          timestamp: new Date().toLocaleString()
-        });
-        persist();
-
-        alert(`Writing assessment submitted successfully!\n- Task 1: ${w1Count} words\n- Task 2: ${w2Count} words\nTeacher will review and evaluate your response.`);
-        document.getElementById('examShell').style.display = 'none';
-        document.getElementById('dashboardApp').style.display = 'flex';
-        renderDashboard();
-        return;
-      }
-
-      let correct = 0;
-      let total = 0;
-      const keys = Object.keys(activeExam.correctAnswers || {});
-
-      keys.forEach(k => {
-        total++;
-        const user = String(userAnswers[k] || '').trim().toLowerCase();
-        const ans = String(activeExam.correctAnswers[k] || '').trim().toLowerCase();
-        if (ans.includes('|')) {
-          if (ans.split('|').map(x => x.trim()).includes(user)) correct++;
-        } else {
-          if (user === ans) correct++;
-        }
-      });
-
-      let band = '5.0';
-      const pct = total > 0 ? correct / total : 0;
-      if (pct >= 0.9) band = '9.0';
-      else if (pct >= 0.85) band = '8.5';
-      else if (pct >= 0.8) band = '8.0';
-      else if (pct >= 0.75) band = '7.5';
-      else if (pct >= 0.7) band = '7.0';
-      else if (pct >= 0.6) band = '6.5';
-      else if (pct >= 0.5) band = '6.0';
-
-      const res = {
-        id: 'res_' + Date.now(),
-        examId: activeExam.id,
-        userName: activeUser.name,
-        examTitle: activeExam.title,
-        score: `${correct}/${total}`,
-        band,
-        userAnswersCopy: JSON.parse(JSON.stringify(userAnswers)),
-        timestamp: new Date().toLocaleString()
-      };
-
-      db.results.push(res);
-      persist();
-
-      document.getElementById('summaryBandDisplay').textContent = `Band ${band}`;
-      document.getElementById('summaryScoreDisplay').textContent = `Correct: ${correct} / ${total} questions`;
-      openModal('scoreSummaryModal');
-    }
-
-    function closeScoreSummaryToDashboard() {
-      closeModal('scoreSummaryModal');
-      document.getElementById('examShell').style.display = 'none';
-      document.getElementById('dashboardApp').style.display = 'flex';
-      renderDashboard();
-    }
-
-    function enterReviewModeFromSummary() {
-      closeModal('scoreSummaryModal');
-      isReviewMode = true;
-      document.getElementById('btnSubmitExam').style.display = 'none';
-      document.getElementById('btnSubmitBottom').style.display = 'none';
-      document.getElementById('insperaTimer').textContent = 'REVIEW MODE';
-
-      loadPassageView(activePartNum);
-
-      Object.keys(activeExam.correctAnswers || {}).forEach(k => {
-        const btn = document.getElementById(`fpill_${k}`);
-        if (btn) {
-          const user = String(userAnswers[k] || '').trim().toLowerCase();
-          const ans = String(activeExam.correctAnswers[k] || '').trim().toLowerCase();
-          const isRight = (user === ans);
-          btn.classList.add(isRight ? 'correct' : 'incorrect');
-        }
-      });
-    }
-
-    function reopenReviewFromHistory(resId) {
-      const res = db.results.find(r => r.id === resId);
-      if (!res) return;
-      activeExam = db.readingExams.find(e => e.id === res.examId) || db.readingExams[0];
-      userAnswers = res.userAnswersCopy || {};
-      launchExam(activeExam.id);
-      enterReviewModeFromSummary();
-    }
-
-    /* BUILDER CONTROLLER */
-    let passageDrafts = { 1: {}, 2: {}, 3: {} };
-    let currentDraftTab = 1;
-
-    function openReadingEditorModal() {
-      document.getElementById('editingExamId').value = '';
-      passageDrafts = { 1: {}, 2: {}, 3: {} };
-      document.getElementById('reTitle').value = '';
-      document.getElementById('reDuration').value = 60;
-      document.getElementById('rePKeys').value = '';
-      document.getElementById('rePExps').value = '';
-      document.getElementById('rePEvis').value = '';
-      document.getElementById('rePVocab').value = '';
-      switchPassageEditor(1);
-      openModal('readingEditorModal');
-    }
-
-    function openEditExamModal(examId) {
-      const exam = db.readingExams.find(e => e.id === examId);
-      if (!exam) return;
-      document.getElementById('editingExamId').value = exam.id;
-      document.getElementById('reTitle').value = exam.title;
-      document.getElementById('reDuration').value = exam.duration;
-
-      passageDrafts = { 1: {}, 2: {}, 3: {} };
-      exam.passages.forEach(p => {
-        const vocabStr = (p.vocab || []).map(v => `${v.word} | ${v.type} | ${v.mean} | ${v.syn || ''}`).join('\n');
-        passageDrafts[p.partNum] = {
-          title: p.title,
-          passageHtml: p.passageHtml,
-          questionsHtml: p.questionsHtml,
-          vocabText: vocabStr
-        };
-      });
-
-      const keysStr = Object.keys(exam.correctAnswers || {}).map(k => `${k}=${exam.correctAnswers[k]}`).join('\n');
-      const expsStr = Object.keys(exam.explanations || {}).map(k => `${k}=${exam.explanations[k]}`).join('\n');
-      const evisStr = Object.keys(exam.evidences || {}).map(k => `${k}=${exam.evidences[k]}`).join('\n');
-
-      document.getElementById('rePKeys').value = keysStr;
-      document.getElementById('rePExps').value = expsStr;
-      document.getElementById('rePEvis').value = evisStr;
-
-      switchPassageEditor(1);
-      openModal('readingEditorModal');
-    }
-
-    function switchPassageEditor(pNum) {
-      saveActiveDraftCards(currentDraftTab);
-      currentDraftTab = pNum;
-      [1, 2, 3].forEach(n => document.getElementById(`subtab-p${n}`).classList.toggle('active-subtab', n === pNum));
-      loadDraftToEditor(pNum);
-    }
-
-    function saveActiveDraftCards(pNum) {
-      passageDrafts[pNum] = {
-        title: document.getElementById('rePTitle').value.trim(),
-        passageHtml: document.getElementById('rePText').value.trim(),
-        questionsHtml: document.getElementById('rePQuestionsHtml').value.trim(),
-        vocabText: document.getElementById('rePVocab').value.trim()
-      };
-    }
-
-    function loadDraftToEditor(pNum) {
-      const d = passageDrafts[pNum] || {};
-      document.getElementById('rePTitle').value = d.title || `Passage ${pNum}`;
-      document.getElementById('rePText').value = d.passageHtml || '';
-      document.getElementById('rePQuestionsHtml').value = d.questionsHtml || '';
-      document.getElementById('rePVocab').value = d.vocabText || '';
-    }
-
-    function parseVocabText(text) {
-      if (!text || !text.trim()) return [];
-      const lines = text.trim().split(/\r?\n/);
-      const list = [];
-      lines.forEach(line => {
-        const parts = line.split(/[|:]/).map(p => p.trim());
-        if (parts.length >= 3) {
-          list.push({
-            word: parts[0],
-            type: parts[1],
-            mean: parts[2],
-            syn: parts[3] || ''
-          });
-        }
-      });
-      return list;
-    }
-
-    function saveActiveExamFromEditor() {
-      saveActiveDraftCards(currentDraftTab);
-      const title = document.getElementById('reTitle').value.trim();
-      const duration = Number(document.getElementById('reDuration').value) || 60;
-      const rawKeys = document.getElementById('rePKeys').value.trim();
-      const rawExps = document.getElementById('rePExps').value.trim();
-      const rawEvis = document.getElementById('rePEvis').value.trim();
-      const editingId = document.getElementById('editingExamId').value;
-      if (!title) return alert('Exam Title is required!');
-
-      const correctAnswers = {};
-      const explanations = {};
-      const evidences = {};
-
-      rawKeys.split('\n').forEach(line => {
-        const parts = line.split(/[:=]/);
-        if (parts.length >= 2) correctAnswers[parts[0].trim()] = parts[1].trim();
-      });
-
-      rawExps.split('\n').forEach(line => {
-        const parts = line.split(/[:=]/);
-        if (parts.length >= 2) explanations[parts[0].trim()] = parts.slice(1).join('=').trim();
-      });
-
-      rawEvis.split('\n').forEach(line => {
-        const parts = line.split(/[:=]/);
-        if (parts.length >= 2) evidences[parts[0].trim()] = parts.slice(1).join('=').trim();
-      });
-
-      const passages = [];
-      [1, 2, 3].forEach(pNum => {
-        const d = passageDrafts[pNum];
-        if (d && d.passageHtml) {
-          passages.push({
-            partNum: pNum,
-            title: d.title || `Passage ${pNum}`,
-            passageHtml: d.passageHtml,
-            questionsHtml: d.questionsHtml,
-            vocab: parseVocabText(d.vocabText)
-          });
-        }
-      });
-
-      if (!passages.length) return alert('Please enter at least one passage!');
-
-      if (editingId) {
-        const ex = db.readingExams.find(e => e.id === editingId);
-        if (ex) {
-          ex.title = title;
-          ex.duration = duration;
-          ex.passages = passages;
-          if (Object.keys(correctAnswers).length) ex.correctAnswers = correctAnswers;
-          if (Object.keys(explanations).length) ex.explanations = explanations;
-          if (Object.keys(evidences).length) ex.evidences = evidences;
-        }
-      } else {
-        db.readingExams.push({
-          id: 're_' + Date.now(),
-          title, duration, 
-          assignedClasses: [],
-          correctAnswers,
-          explanations,
-          evidences,
-          passages
-        });
-      }
-
-      persist();
-      closeModal('readingEditorModal');
-      renderDashboard();
-      alert('Exam saved successfully!');
-    }
-
-    /* WRITING & MANAGEMENT */
-    function openWritingEditorModal() {
-      document.getElementById('weTitle').value = '';
-      document.getElementById('weDuration').value = 60;
-      document.getElementById('weT1Prompt').value = '';
-      document.getElementById('weT1Image').value = '';
-      document.getElementById('weT2Prompt').value = '';
-      openModal('writingEditorModal');
-    }
-    function saveWritingExam() {
-      const title = document.getElementById('weTitle').value.trim();
-      const duration = Number(document.getElementById('weDuration').value) || 60;
-      const t1Prompt = document.getElementById('weT1Prompt').value.trim();
-      const t1Image = document.getElementById('weT1Image').value.trim();
-      const t2Prompt = document.getElementById('weT2Prompt').value.trim();
-      if (!title || !t1Prompt || !t2Prompt) return alert('Fill in all prompts!');
-
-      db.writingExams.push({
-        id: 'we_' + Date.now(),
-        title, duration,
-        task1: { prompt: t1Prompt, image: t1Image },
-        task2: { prompt: t2Prompt }
-      });
-      persist();
-      closeModal('writingEditorModal');
-      renderDashboard();
-      alert('Writing assessment saved!');
-    }
-
-    function openCreateClassModal() { document.getElementById('newClassName').value = ''; openModal('classModal'); }
-    function saveNewClass() {
-      const name = document.getElementById('newClassName').value.trim();
-      if (!name) return;
-      db.classes.push({ id: 'c_' + Date.now(), name });
-      persist(); closeModal('classModal'); renderDashboard();
-    }
-    function openCreateStudentModal() {
-      document.getElementById('newStuFullName').value = '';
-      document.getElementById('newStuUsername').value = '';
-      document.getElementById('newStuPassword').value = '123456';
-      const sel = document.getElementById('newStuClassSelect');
-      sel.innerHTML = db.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-      openModal('studentModal');
-    }
-    function saveNewStudent() {
-      const n = document.getElementById('newStuFullName').value.trim();
-      const u = document.getElementById('newStuUsername').value.trim();
-      const p = document.getElementById('newStuPassword').value.trim();
-      const c = document.getElementById('newStuClassSelect').value;
-      if (!n || !u || !p) return alert('All fields required!');
-      if (db.users.some(x => x.username.toLowerCase() === u.toLowerCase())) return alert('Username already exists!');
-      
-      db.users.push({ id: 'u_' + Date.now(), name: n, username: u, pass: p, role: 'student', classId: c });
-      persist(); 
-      closeModal('studentModal'); 
-      renderDashboard();
-      alert(`Student account "${u}" registered successfully! Password: ${p}`);
-    }
-    function openAssignModal(eId) {
-      document.getElementById('assignExamId').value = eId;
-      const sel = document.getElementById('assignCohortSelect');
-      sel.innerHTML = db.classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-      openModal('assignModal');
-    }
-    function executeAssign() {
-      const eId = document.getElementById('assignExamId').value;
-      const cId = document.getElementById('assignCohortSelect').value;
-      const ex = db.readingExams.find(e => e.id === eId);
-      if (ex) {
-        if (!ex.assignedClasses) ex.assignedClasses = [];
-        if (!ex.assignedClasses.includes(cId)) {
-          ex.assignedClasses.push(cId);
-          persist(); renderDashboard();
-        }
-      }
-      closeModal('assignModal');
-    }
-    function deleteExam(id) { 
-      if (confirm('Delete exam?')) { 
-        db.readingExams = db.readingExams.filter(e => e.id !== id); 
-        persist(); 
-        renderDashboard(); 
-      } 
-    }
-    function deleteClass(id) { if (confirm('Delete class?')) { db.classes = db.classes.filter(c => c.id !== id); persist(); renderDashboard(); } }
-    function deleteUser(id) { if (confirm('Remove user?')) { db.users = db.users.filter(u => u.id !== id); persist(); renderDashboard(); } }
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-    // Khởi động phiên làm việc
-    checkSession();
-  </script>
-</body>
-</html>
+      const right
