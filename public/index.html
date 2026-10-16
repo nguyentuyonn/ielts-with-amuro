@@ -675,8 +675,8 @@
   <input type="file" id="dbFileInput" style="display:none;" accept=".json" onchange="processImportDatabase(event)">
 
   <script>
-    /* DATABASE CORE (V23) */
-    const DB_KEY = 'AMURO_JURABEK_SUITE_V23';
+    /* DATABASE CORE (V24) */
+    const DB_KEY = 'AMURO_JURABEK_SUITE_V24';
 
     function getDB() {
       const raw = localStorage.getItem(DB_KEY);
@@ -686,7 +686,8 @@
       return {
         users: [
           { id: 'u_admin', username: 'amuro', pass: 'amuro123', name: 'Teacher Amuro', role: 'teacher' },
-          { id: 'u_s1', username: 'student1', pass: '123456', name: 'Alex Johnson', role: 'student', classId: 'c1' }
+          { id: 'u_s1', username: 'student1', pass: '123456', name: 'Alex Johnson', role: 'student', classId: 'c1' },
+          { id: 'u_s2', username: 'hocsinh1', pass: '123456', name: 'Nguyen Van A', role: 'student', classId: 'c1' }
         ],
         classes: [
           { id: 'c1', name: 'IELTS Intensive 7.5+' },
@@ -710,9 +711,10 @@
     let db = getDB();
     function persist() { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
 
+    // SỬ DỤNG SESSION STORAGE CHO TÀI KHOẢN ĐANG ĐĂNG NHẬP (KHÔNG LƯU CỐ ĐỊNH QUA CÁC TAB ẨN DANH KHÁC NHAU)
     let activeUser = null;
     try {
-      activeUser = JSON.parse(localStorage.getItem('AMURO_CURRENT_USER'));
+      activeUser = JSON.parse(sessionStorage.getItem('AMURO_CURRENT_USER'));
     } catch(e) {}
 
     let activeExam = null;
@@ -725,7 +727,7 @@
     let examTimer = null;
     let secondsRemaining = 3600;
 
-    /* DATABASE EXPORT / IMPORT TO SYNC ACROSS INCOGNITO & DEVICES */
+    /* BACKUP VÀ RESTORE DATABASE */
     function exportDatabaseFile() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
       const a = document.createElement('a');
@@ -750,7 +752,7 @@
           if (imported && imported.users && imported.readingExams) {
             db = imported;
             persist();
-            alert('Database imported successfully! Refreshing...');
+            alert('Database synchronized successfully! Refreshing...');
             location.reload();
           } else {
             alert('Invalid database JSON file format!');
@@ -765,12 +767,11 @@
     /* AUTH CONTROLLER */
     function checkSession() {
       db = getDB();
-      // Xác minh lại user đang active có thật sự tồn tại trong db hiện thời không
       if (activeUser) {
         const verified = db.users.find(u => u.username.toLowerCase() === activeUser.username.toLowerCase() && u.pass === activeUser.pass);
         if (!verified) {
           activeUser = null;
-          localStorage.removeItem('AMURO_CURRENT_USER');
+          sessionStorage.removeItem('AMURO_CURRENT_USER');
         } else {
           activeUser = verified;
         }
@@ -799,7 +800,8 @@
       if (!user) return alert('Invalid username or password!');
       
       activeUser = user;
-      localStorage.setItem('AMURO_CURRENT_USER', JSON.stringify(activeUser));
+      // Lưu vào sessionStorage (mỗi cửa sổ/tab trình duyệt sẽ hoàn toàn độc lập, tắt tab là tự đăng xuất)
+      sessionStorage.setItem('AMURO_CURRENT_USER', JSON.stringify(activeUser));
       document.getElementById('logUser').value = '';
       document.getElementById('logPass').value = '';
       checkSession();
@@ -807,7 +809,7 @@
 
     function execLogout() {
       activeUser = null;
-      localStorage.removeItem('AMURO_CURRENT_USER');
+      sessionStorage.removeItem('AMURO_CURRENT_USER');
       checkSession();
     }
 
@@ -825,7 +827,7 @@
       const target = db.users.find(u => u.id === activeUser.id);
       if (target) { target.name = n; if (p) target.pass = p; }
       persist();
-      localStorage.setItem('AMURO_CURRENT_USER', JSON.stringify(activeUser));
+      sessionStorage.setItem('AMURO_CURRENT_USER', JSON.stringify(activeUser));
       closeModal('profileModal');
       checkSession();
       alert('Profile updated!');
@@ -894,7 +896,6 @@
       const tbody = document.getElementById('readingTbody');
       tbody.innerHTML = '';
       
-      // HỌC SINH THẤY TẤT CẢ CÁC BÀI ĐƯỢC CHIA HOẶC ĐỀ CHUNG
       let list = db.readingExams;
       if (activeUser && activeUser.role === 'student') {
         list = db.readingExams.filter(e => {
@@ -1059,7 +1060,7 @@
       });
     }
 
-    /* TEACHER WRITING GRADING CONTROLLER */
+    /* WRITING GRADING CONTROLLER */
     function openGradeWritingModal(resId) {
       const res = db.results.find(r => r.id === resId);
       if (!res || !res.writingSubmission) return;
@@ -1158,7 +1159,7 @@
       }
     }
 
-    /* IN-EXAM USER TEXT HIGHLIGHT SYSTEM */
+    /* IN-EXAM HIGHLIGHT ENGINE */
     let currentSelectedRange = null;
 
     function setupInExamHighlightEngine() {
@@ -1254,7 +1255,6 @@
       });
     }
 
-    /* GLOBAL DRAG AND DROP HANDLER */
     function setupDragDropEngine() {
       const items = document.querySelectorAll('#insperaSplitBox .drag-item');
       const zones = document.querySelectorAll('#insperaSplitBox .drop-zone');
@@ -1331,7 +1331,7 @@
       });
     }
 
-    /* REVIEW & EXPLANATIONS WITH EVIDENCE HIGHLIGHT */
+    /* REVIEW & EXPLANATIONS */
     function showReviewAnswersInDOM(scope) {
       Object.keys(activeExam.correctAnswers || {}).forEach(k => {
         const keyVal = activeExam.correctAnswers[k];
@@ -1379,7 +1379,7 @@
       }
     }
 
-    /* TEACHER LIVE EDIT EXPLANATIONS */
+    /* TEACHER LIVE EDIT */
     function toggleTeacherEditMode() {
       isTeacherEditMode = !isTeacherEditMode;
       const btn = document.getElementById('btnToggleTeacherMode');
@@ -1826,9 +1826,6 @@
 
       if (!passages.length) return alert('Please enter at least one passage!');
 
-      // Cấp quyền cho toàn bộ các lớp để học sinh không bị ẩn đề
-      const allClassIds = db.classes.map(c => c.id);
-
       if (editingId) {
         const ex = db.readingExams.find(e => e.id === editingId);
         if (ex) {
@@ -1843,7 +1840,7 @@
         db.readingExams.push({
           id: 're_' + Date.now(),
           title, duration, 
-          assignedClasses: allClassIds,
+          assignedClasses: [], // Mảng rỗng = Cho phép tất cả các học sinh thấy đề
           correctAnswers,
           explanations,
           evidences,
