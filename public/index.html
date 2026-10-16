@@ -675,13 +675,217 @@
   <input type="file" id="dbFileInput" style="display:none;" accept=".json" onchange="processImportDatabase(event)">
 
   <script>
-    /* DATABASE CORE (V25) */
-    const DB_KEY = 'AMURO_JURABEK_SUITE_V25';
+    /* ========================================================
+       DATABASE CORE (V26 - TÍCH HỢP SẴN ĐỀ THẬT VÀ TÀI KHOẢN MẶC ĐỊNH)
+       ======================================================== */
+    const DB_KEY = 'AMURO_JURABEK_SUITE_V26';
+
+    const defaultShoppingExam = {
+      id: 'reading_science_of_shopping',
+      title: 'Passage: The Science of Shopping (Questions 27-40)',
+      duration: 20,
+      assignedClasses: [],
+      correctAnswers: {
+        q27: 'B', q28: 'D', q29: 'A', q30: 'C',
+        q31: 'YES', q32: 'YES', q33: 'NO', q34: 'NOT GIVEN', q35: 'NO',
+        q36: 'G', q37: 'C', q38: 'A', q39: 'H', q40: 'E'
+      },
+      explanations: {
+        q27: 'Tác giả giải thích lý do các siêu thị giống nhau là vì am hiểu tâm lý người tiêu dùng ("khoa học thuyết phục người tiêu dùng mua hàng").',
+        q28: 'Khu vực chill zone để người mua có khởi đầu nhẹ nhàng và dần đưa tâm trí vào trạng thái sẵn sàng mua sắm.',
+        q29: 'Việc chọn lựa thực phẩm tươi lành ngay khi bắt đầu mua sắm giúp người mua cảm thấy phấn chấn (uplifting) và có tâm lý dễ chịu.',
+        q30: 'Cụm từ "Shoppers have worked out that..." thể hiện người đi siêu thị đã nhận ra một số thủ thuật của cửa hàng.',
+        q31: 'Bài đọc chỉ ra các cửa hàng xếp sản phẩm rẻ hơn ở kệ thấp để kích thích khách mua sản phẩm đắt tiền đặt ngang tầm mắt.',
+        q32: 'Tác giả nêu rõ quy định từ trụ sở chính gây ra nhiều tranh cãi và các nhà bán lẻ có quan điểm riêng.',
+        q33: 'Bài viết khẳng định việc sắp xếp kệ hàng cực kỳ gây tranh cãi và không có sự đồng thuận chung.',
+        q34: 'Bài viết chỉ đề cập camera an ninh dùng để phân tích hành vi, không bàn luận về mối đe dọa quyền riêng tư.',
+        q35: 'Dữ liệu điện tử nói lên rất ít lý do khách rời đi; phỏng vấn trực tiếp mới mang lại thông tin chi tiết và giá trị hơn.',
+        q36: 'Mọi người đưa ra quyết định mua sắm dựa trên logic và ý thức chung (G. rational decisions).',
+        q37: 'Nghiên cứu cho thấy có các yếu tố cảm xúc và ký ức mà cá nhân không hoàn toàn nhận thức được (C. unconscious factors).',
+        q38: 'Nghiên cứu sử dụng máy quét fMRI để theo dõi hoạt động não bộ của người tham gia (A. brain scans).',
+        q39: 'Kết quả quét não cho thấy sự mâu thuẫn lớn giữa lời nói và cảm xúc thực sự trong não (H. emotional reaction).',
+        q40: 'Tỷ lệ thất bại của các sản phẩm mới tung ra thị trường là rất cao (8 trên 10 sản phẩm không thành công) (E. failures).'
+      },
+      evidences: {
+        q27: 'It is more that they are all well-versed in the science of persuading people to buy things',
+        q28: 'It takes a while for the mind to get into a shopping mode. People need to make a gentle start and take stock of the surroundings',
+        q29: 'selecting wholesome fresh food is an uplifting way to start shopping, and it makes people feel less guilty',
+        q30: 'Shoppers have worked out that everyday items, like milk, will invariably be placed in an aisle towards the back of a store',
+        q31: 'stores encourage customers to buy expensive branded products by arranging them at eye-level, with cheaper ones lower down',
+        q32: 'Often head offices specify where everything has to be placed and spot-checks are carried out to make sure instructions are followed to the letter. But shelf-positioning is extremely controversial.',
+        q33: 'Despite all the academic papers written on how best to stack shelves, retailers have their own views. While many stores consider eye-level to be the top spot, others think a little higher is better.',
+        q34: 'Pictures showing shoppers while they are making their selections can now be analysed',
+        q35: 'This low-tech approach has become widespread following comments from stores that data collected electronically tells them little about why so many customers leave without making a purchase',
+        q36: 'People tell market researchers that they make decisions about what to buy based on logic and common sense',
+        q37: 'there are clearly other factors which play a role, such as certain feelings and memories which individuals are not fully aware of',
+        q38: 'scanners reveal their brain activity as they respond',
+        q39: 'major contradictions are apparent between what they say and what they are thinking',
+        q40: 'Eight out of ten new consumer products launched on the market do not succeed'
+      },
+      passages: [
+        {
+          partNum: 1,
+          title: 'Passage: The Science of Shopping',
+          passageHtml: `
+            <p>You may have wondered why so many supermarkets are virtually indistinguishable from each other. It is not, as some might suspect, that the companies operating them lack imagination. It is more that they are all well-versed in the science of persuading people to buy things - a science that, thanks to technological advances, is beginning to understand what motivates consumers when they make decisions on what to purchase.</p>
+            <p>It takes a while for the mind to get into a shopping mode. People need to make a gentle start and take stock of the surroundings. This is why some supermarkets have a so-called chill zone for browsing magazines, books and DVDs, an area which is also designed to catch the customer's eye and tempt them to make impulsive purchases. But many will ignore it, in which case the first thing they encounter is the fresh fruit and vegetables section. For shoppers, this makes no sense. Fruit in particular can be easily bruised, so ideally should be bought at the end, not the beginning, of a shopping trip. But psychology is at work here: selecting wholesome fresh food is an uplifting way to start shopping, and it makes people feel less guilty about reaching for the less nutritious stuff later on.</p>
+            <p>Shoppers have worked out that everyday items, like milk, will invariably be placed in an aisle towards the back of a store to provide more opportunity to tempt customers on their way there. This is also why pharmacies are generally at the rear, even in convenience stores. But supermarkets know shoppers know this, so they use other tricks, like placing popular items halfway along a section, thereby forcing people to walk along the aisle looking for them. The idea is to boost the length of time shoppers spend in a store.</p>
+            <p>Having walked to the end of the fruit and vegetable aisle, shoppers arrive at counters of prepared food, the fishmonger and the butcher. Then there is the in-store bakery, which can be smelt before being seen. Even small supermarkets now use in-store bakeries. Mostly these bake pre-prepared items, and they have boomed, although central bakeries that deliver to many stores are more efficient. The smell of freshly baked bread can make people hungry, encouraging them to buy not just bread but other food.</p>
+            <p>There are also numerous ways stores get shoppers to choose particular products. For example, stores encourage customers to buy expensive branded products by arranging them at eye-level, with cheaper ones lower down. Often head offices specify where everything has to be placed and spot-checks are carried out to make sure instructions are followed to the letter. But shelf-positioning is extremely controversial. Despite all the academic papers written on how best to stack shelves, retailers have their own views. While many stores consider eye-level to be the top spot, others think a little higher is better.</p>
+            <p>Technology is making the process of monitoring shopper behaviour easier, which is why the security cameras in stores may be doing considerably more than watching out for theft. Pictures showing shoppers while they are making their selections can now be analysed. It is possible to see how many shoppers went straight to one brand, the number that hesitated, and those that compared several brands. However, despite the availability of sophisticated technology, researchers have found that simply talking to consumers as they exit the store can yield valuable insights. This low-tech approach has become widespread following comments from stores that data collected electronically tells them little about why so many customers leave without making a purchase. Face-to-face interviews reveal that customers leave shops empty-handed more often because they are unable to decide than because prices are too high.</p>
+            <p>People tell market researchers that they make decisions about what to buy based on logic and common sense, considering issues such as price, quality or convenience. But there are clearly other factors which play a role, such as certain feelings and memories which individuals are not fully aware of. Researchers hired by big stores are now conducting studies using functional magnetic resonance imaging (fMRI), which detects changes in the brain corresponding to increases or decreases in mental activity. Research participants are shown different products and asked questions about them, while scanners reveal their brain activity as they respond. Often, major contradictions are apparent between what they say and what they are thinking. This is immensely valuable information. Eight out of ten new consumer products launched on the market do not succeed, despite having been tested on people who insist they would buy them but who, deep down, may have reservations about the desirability of these products.</p>
+            <p>This shopping science probably has its limits, however. Dr Eric Spangenberg of the University of Washington argues that while it is unlikely that someone could be persuaded to buy something they do not need, they might be convinced to choose one brand in preference to another without being aware that this is happening. This claim is also borne out by numerous research findings. But if consumers were to realise quite how much research is being done into the many psychological factors influencing their choices, they might be much more wary of making purchases in the future.</p>
+          `,
+          questionsHtml: `
+            <div class="question-group">
+              <div class="question-group-title">Questions 27-30</div>
+              <p>Choose the correct answer.</p>
+              
+              <div class="question" data-question="27">
+                <div class="question-text">27 What does the writer suggest about supermarkets in the first paragraph?</div>
+                <div class="options">
+                  <label><input type="radio" name="q27" value="A"> A They need to try harder to be different from one another.</label>
+                  <label><input type="radio" name="q27" value="B"> B They share a similar understanding of consumer psychology.</label>
+                  <label><input type="radio" name="q27" value="C"> C They depend too much on the latest technology.</label>
+                  <label><input type="radio" name="q27" value="D"> D They should do more to analyse how consumers think.</label>
+                </div>
+              </div>
+
+              <div class="question" data-question="28">
+                <div class="question-text">28 The writer says the function of the chill zone in supermarkets is</div>
+                <div class="options">
+                  <label><input type="radio" name="q28" value="A"> A to give customers time to decide what they want to buy.</label>
+                  <label><input type="radio" name="q28" value="B"> B to present customers with a range of interesting bargains.</label>
+                  <label><input type="radio" name="q28" value="C"> C to ensure customers feel under no pressure to buy anything.</label>
+                  <label><input type="radio" name="q28" value="D"> D to help customers slowly prepare themselves to go shopping.</label>
+                </div>
+              </div>
+
+              <div class="question" data-question="29">
+                <div class="question-text">29 According to the writer, placing fruit and vegetables near the front of the store</div>
+                <div class="options">
+                  <label><input type="radio" name="q29" value="A"> A ensures the customers will feel good about the first products they buy.</label>
+                  <label><input type="radio" name="q29" value="B"> B reduces the risk of customers damaging these products later on.</label>
+                  <label><input type="radio" name="q29" value="C"> C encourages customers to buy more of these products than they intended.</label>
+                  <label><input type="radio" name="q29" value="D"> D makes customers consider healthier options in other sections they visit.</label>
+                </div>
+              </div>
+
+              <div class="question" data-question="30">
+                <div class="question-text">30 What point does the writer make about shoppers in the third paragraph?</div>
+                <div class="options">
+                  <label><input type="radio" name="q30" value="A"> A They spend more time in stores than they realise.</label>
+                  <label><input type="radio" name="q30" value="B"> B They believe stores make life unnecessarily difficult for them.</label>
+                  <label><input type="radio" name="q30" value="C"> C They are aware of some of the techniques used by stores.</label>
+                  <label><input type="radio" name="q30" value="D"> D They are confused by frequent changes in the layout of stores.</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="question-group">
+              <div class="question-group-title">Questions 31-35</div>
+              <p>Choose <strong>YES</strong> if the statement agrees with the writer’s claims, <strong>NO</strong> if the statement contradicts the claims, or <strong>NOT GIVEN</strong> if it is impossible to say what the writer thinks about this.</p>
+              
+              <div class="question" data-question="31">
+                <div class="question-text">31 Cheaper products are placed on lower shelves to minimise the likelihood that they will be bought.</div>
+                <div class="options">
+                  <label><input type="radio" name="q31" value="YES"> YES</label>
+                  <label><input type="radio" name="q31" value="NO"> NO</label>
+                  <label><input type="radio" name="q31" value="NOT GIVEN"> NOT GIVEN</label>
+                </div>
+              </div>
+
+              <div class="question" data-question="32">
+                <div class="question-text">32 Head offices should be more flexible about how products are arranged by supermarkets.</div>
+                <div class="options">
+                  <label><input type="radio" name="q32" value="YES"> YES</label>
+                  <label><input type="radio" name="q32" value="NO"> NO</label>
+                  <label><input type="radio" name="q32" value="NOT GIVEN"> NOT GIVEN</label>
+                </div>
+              </div>
+
+              <div class="question" data-question="33">
+                <div class="question-text">33 There is widespread agreement on how products should be arranged on shelves.</div>
+                <div class="options">
+                  <label><input type="radio" name="q33" value="YES"> YES</label>
+                  <label><input type="radio" name="q33" value="NO"> NO</label>
+                  <label><input type="radio" name="q33" value="NOT GIVEN"> NOT GIVEN</label>
+                </div>
+              </div>
+
+              <div class="question" data-question="34">
+                <div class="question-text">34 Security cameras are a serious threat to customers' privacy.</div>
+                <div class="options">
+                  <label><input type="radio" name="q34" value="YES"> YES</label>
+                  <label><input type="radio" name="q34" value="NO"> NO</label>
+                  <label><input type="radio" name="q34" value="NOT GIVEN"> NOT GIVEN</label>
+                </div>
+              </div>
+
+              <div class="question" data-question="35">
+                <div class="question-text">35 Technology is the best tool for determining why shoppers fail to make purchases.</div>
+                <div class="options">
+                  <label><input type="radio" name="q35" value="YES"> YES</label>
+                  <label><input type="radio" name="q35" value="NO"> NO</label>
+                  <label><input type="radio" name="q35" value="NOT GIVEN"> NOT GIVEN</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="question-group">
+              <div class="question-group-title">Questions 36-40</div>
+              <p>Complete the summary using the list of words and phrases, A-I, below.</p>
+              <div class="drag-options">
+                <div class="drag-item" draggable="true" data-answer="A">A brain scans</div>
+                <div class="drag-item" draggable="true" data-answer="B">B purpose</div>
+                <div class="drag-item" draggable="true" data-answer="C">C unconscious factors</div>
+                <div class="drag-item" draggable="true" data-answer="D">D shelf placement</div>
+                <div class="drag-item" draggable="true" data-answer="E">E failures</div>
+                <div class="drag-item" draggable="true" data-answer="F">F social pressure</div>
+                <div class="drag-item" draggable="true" data-answer="G">G rational decisions</div>
+                <div class="drag-item" draggable="true" data-answer="H">H emotional reaction</div>
+                <div class="drag-item" draggable="true" data-answer="I">I shopping habits</div>
+              </div>
+              <p><strong>New technology could help retailers sell more</strong></p>
+              <p style="line-height: 2.2; margin-top: 10px;">
+                Research is providing insights into what makes people purchase particular products. Most shoppers believe that their choices are the result of 
+                <span class="drop-zone" data-target="q36" data-placeholder="36">36</span>. 
+                Research involving fMRI scanners, however, has revealed that certain 
+                <span class="drop-zone" data-target="q37" data-placeholder="37">37</span> 
+                influence shoppers' decisions to a significant extent. In the research, a comparison was made between participants' stated opinions of a product and data from 
+                <span class="drop-zone" data-target="q38" data-placeholder="38">38</span>, 
+                which often indicated a radically different 
+                <span class="drop-zone" data-target="q39" data-placeholder="39">39</span>. 
+                As most new products are 
+                <span class="drop-zone" data-target="q40" data-placeholder="40">40</span>, 
+                this data could be extremely valuable for marketing departments.
+              </p>
+            </div>
+          `,
+          vocab: [
+            { word: 'indistinguishable', type: 'adj', mean: 'Khó phân biệt, giống hệt nhau', syn: 'identical, similar, alike' },
+            { word: 'well-versed', type: 'adj', mean: 'Am hiểu, thông thạo', syn: 'knowledgeable, proficient' },
+            { word: 'motivate', type: 'verb', mean: 'Thúc đẩy, tạo động lực', syn: 'encourage, stimulate' },
+            { word: 'impulsive', type: 'adj', mean: 'Bốc đồng, ngẫu hứng', syn: 'spontaneous, rash' },
+            { word: 'bruised', type: 'adj', mean: 'Bị dập, thâm tím', syn: 'damaged, harmed' },
+            { word: 'wholesome', type: 'adj', mean: 'Lành mạnh, bổ dưỡng', syn: 'healthy, nourishing' },
+            { word: 'controversial', type: 'adj', mean: 'Gây tranh cãi', syn: 'debatable, contentious' },
+            { word: 'sophisticated', type: 'adj', mean: 'Tinh vi, hiện đại', syn: 'advanced, complex' },
+            { word: 'valuable', type: 'adj', mean: 'Có giá trị, hữu ích', syn: 'precious, useful' },
+            { word: 'contradiction', type: 'noun', mean: 'Sự mâu thuẫn', syn: 'inconsistency, discrepancy' },
+            { word: 'preference', type: 'noun', mean: 'Sự ưu tiên, sở thích', syn: 'priority, choice' }
+          ]
+        }
+      ]
+    };
 
     function getDB() {
       const raw = localStorage.getItem(DB_KEY);
       if (raw) {
-        try { return JSON.parse(raw); } catch (e) { }
+        try { 
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.users) return parsed;
+        } catch (e) { }
       }
       return {
         users: [
@@ -694,7 +898,7 @@
           { id: 'c2', name: 'Foundation Morning' }
         ],
         savedVocab: {},
-        readingExams: [],
+        readingExams: [ defaultShoppingExam ],
         writingExams: [
           {
             id: 'we_full_demo',
@@ -711,7 +915,6 @@
     let db = getDB();
     function persist() { localStorage.setItem(DB_KEY, JSON.stringify(db)); }
 
-    // Dùng sessionStorage để hoàn toàn tách biệt các tab, không tự động lưu phiên giữa các cửa sổ
     let activeUser = null;
     try {
       activeUser = JSON.parse(sessionStorage.getItem('AMURO_CURRENT_USER'));
@@ -727,7 +930,7 @@
     let examTimer = null;
     let secondsRemaining = 3600;
 
-    /* DATABASE EXPORT / IMPORT */
+    /* BACKUP VÀ RESTORE DATABASE */
     function exportDatabaseFile() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
       const a = document.createElement('a');
@@ -895,16 +1098,8 @@
       const tbody = document.getElementById('readingTbody');
       tbody.innerHTML = '';
       
-      // Hiển thị tất cả đề đối với học sinh nếu không gắn lớp hoặc trùng lớp
       let list = db.readingExams || [];
-      if (activeUser && activeUser.role === 'student') {
-        list = db.readingExams.filter(e => {
-          if (!e.assignedClasses || e.assignedClasses.length === 0) return true;
-          return e.assignedClasses.includes(activeUser.classId);
-        });
-      }
-
-      if (!list || !list.length) {
+      if (!list.length) {
         tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No tests available. Click "+ Import / Clone Web Test" to add one.</td></tr>`;
         return;
       }
@@ -919,7 +1114,7 @@
           <td>
             <button class="btn btn-emerald" onclick="launchExam('${e.id}')">Start Test</button>
             <button class="btn btn-secondary" onclick="openStudyVocabModal('${e.id}')">Study Vocabulary</button>
-            ${activeUser.role === 'teacher' ? `
+            ${activeUser && activeUser.role === 'teacher' ? `
               <button class="btn btn-secondary" onclick="openEditExamModal('${e.id}')">Edit</button>
               <button class="btn btn-secondary" onclick="openAssignModal('${e.id}')">Assign</button>
               <button class="btn btn-danger" onclick="deleteExam('${e.id}')">Delete</button>
@@ -1255,12 +1450,14 @@
       });
     }
 
+    /* SỬA LỖI KÉO THẢ: KHÔNG HỦY ĐÁP ÁN KHI ĐANG REVIEW */
     function setupDragDropEngine() {
       const items = document.querySelectorAll('#insperaSplitBox .drag-item');
       const zones = document.querySelectorAll('#insperaSplitBox .drop-zone');
 
       items.forEach(item => {
         item.ondragstart = (e) => {
+          if (isReviewMode) return;
           e.dataTransfer.setData('ans', item.dataset.answer || '');
           e.dataTransfer.setData('label', item.textContent.trim());
         };
@@ -1268,6 +1465,7 @@
 
       zones.forEach(zone => {
         zone.ondragover = (e) => {
+          if (isReviewMode) return;
           e.preventDefault();
           zone.classList.add('over');
         };
@@ -1275,6 +1473,7 @@
           zone.classList.remove('over');
         };
         zone.ondrop = (e) => {
+          if (isReviewMode) return;
           e.preventDefault();
           zone.classList.remove('over');
           const ans = e.dataTransfer.getData('ans');
@@ -1288,6 +1487,8 @@
           }
         };
         zone.onclick = () => {
+          // Khóa không cho xóa khi đang ở chế độ xem lại đáp án
+          if (isReviewMode) return;
           if (zone.classList.contains('filled')) {
             zone.textContent = zone.dataset.placeholder || '';
             zone.classList.remove('filled');
@@ -1331,17 +1532,44 @@
       });
     }
 
-    /* REVIEW & EXPLANATIONS */
+    /* HIỂN THỊ ĐẦY ĐỦ GIẢI THÍCH CHO CẢ DẠNG MULTIPLE CHOICE LẪN KÉO THẢ */
     function showReviewAnswersInDOM(scope) {
       Object.keys(activeExam.correctAnswers || {}).forEach(k => {
         const keyVal = activeExam.correctAnswers[k];
         const userVal = userAnswers[k] || '';
         const isRight = String(userVal).trim().toLowerCase() === String(keyVal).trim().toLowerCase();
 
-        const target = scope.querySelector(`[data-question="${k.replace('q','')}"]`) || scope.querySelector(`input[name="${k}"]`)?.parentNode;
-        if (target && !target.querySelector('.answer-indicator')) {
+        // 1. Tìm container câu hỏi trắc nghiệm hoặc nhóm input thông thường
+        let target = scope.querySelector(`[data-question="${k.replace('q','')}"]`) || scope.querySelector(`input[name="${k}"]`)?.closest('.question');
+        
+        // 2. Nếu là dạng kéo thả (.drop-zone)
+        const zone = scope.querySelector(`.drop-zone[data-target="${k}"]`);
+        if (zone) {
+          // Đổi màu viền xanh/đỏ cho ô kéo thả
+          zone.style.borderColor = isRight ? '#22c55e' : '#ef4444';
+          zone.style.background = isRight ? '#dcfce7' : '#fee2e2';
+
+          // Chèn khung giải thích ngay dưới đoạn tóm tắt
+          const parentGroup = zone.closest('.question-group');
+          if (parentGroup && !parentGroup.querySelector(`.answer-indicator[data-ind="${k}"]`)) {
+            const div = document.createElement('div');
+            div.className = `answer-indicator ${isRight ? 'correct' : 'incorrect'}`;
+            div.setAttribute('data-ind', k);
+            div.innerHTML = `
+              <b>Question ${k.replace('q','')}:</b> ${isRight ? '✅ Correct!' : '❌ Incorrect.'} Your answer: <b>${userVal || '(No answer)'}</b> | Key: <b>${keyVal}</b>
+              ${activeExam.explanations && activeExam.explanations[k] ? `<div style="font-size:12px; margin-top:4px; font-weight:normal;">${activeExam.explanations[k]}</div>` : ''}
+              ${activeExam.evidences && activeExam.evidences[k] ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(activeExam.evidences[k])}')">🔍 Locate in Passage</button>` : ''}
+            `;
+            parentGroup.appendChild(div);
+          }
+          return;
+        }
+
+        // 3. Nếu là dạng trắc nghiệm / điền từ thông thường
+        if (target && !target.querySelector(`.answer-indicator[data-ind="${k}"]`)) {
           const div = document.createElement('div');
           div.className = `answer-indicator ${isRight ? 'correct' : 'incorrect'}`;
+          div.setAttribute('data-ind', k);
           div.innerHTML = `
             ${isRight ? '✅ Correct!' : '❌ Incorrect.'} Your answer: <b>${userVal || '(No answer)'}</b> | Key: <b>${keyVal}</b>
             ${activeExam.explanations && activeExam.explanations[k] ? `<div style="font-size:12px; margin-top:4px; font-weight:normal;">${activeExam.explanations[k]}</div>` : ''}
