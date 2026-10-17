@@ -404,7 +404,7 @@
           <div class="card-title"><span>Recent Assessment Submissions</span></div>
           <table>
             <thead>
-              <tr><th>Candidate</th><th>Assessment Title</th><th>Score / Status</th><th>Band Score</th><th>Date & Time</th></tr>
+              <tr><th>Candidate</th><th>Assessment Title</th><th>Score / Status</th><th>Band Score</th><th>Date & Time</th><th>Action / Feedback</th></tr>
             </thead>
             <tbody id="homeRecentActivityTbody"></tbody>
           </table>
@@ -1466,6 +1466,19 @@
         return;
       }
       recents.forEach(r => {
+        const isWriting = r.writingSubmission ? true : false;
+        let actionBtn = '';
+        if (isWriting) {
+          if (activeUser.role === 'teacher') {
+            actionBtn = `<button class="btn btn-emerald" onclick="openGradeWritingModal('${r.id}')">✏️ Chấm bài</button>`;
+          } else {
+            const hasFb = r.teacherFeedback && r.teacherFeedback.trim() !== '';
+            actionBtn = `<button class="btn ${hasFb ? 'btn-emerald' : 'btn-secondary'}" onclick="openStudentViewWritingModal('${r.id}')">${hasFb ? '💬 Xem Feedback' : '👁️ Xem bài làm'}</button>`;
+          }
+        } else {
+          actionBtn = `<button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">🔍 Xem đáp án</button>`;
+        }
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><b>${r.userName}</b></td>
@@ -1473,6 +1486,7 @@
           <td>${r.score}</td>
           <td><b style="color:var(--emerald-accent);">${String(r.band).startsWith('Band') ? r.band : 'Band ' + r.band}</b></td>
           <td><span style="color:#64748b; font-size:12px;">${r.timestamp}</span></td>
+          <td>${actionBtn}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -1772,7 +1786,24 @@
       document.getElementById('gradeTask2Text').textContent = res.writingSubmission.task2 || '(No response)';
       document.getElementById('gradeBandInput').value = res.band === 'Submitted' ? '' : res.band;
       document.getElementById('gradeFeedbackInput').value = res.teacherFeedback || '';
+
+      document.getElementById('gradeWritingTitle').textContent = 'Review & Grade Student Writing';
+      document.getElementById('gradeBandInput').readOnly = false;
+      document.getElementById('gradeFeedbackInput').readOnly = false;
+      const saveBtn = document.querySelector('#gradeWritingModal .btn-emerald');
+      if (saveBtn) saveBtn.style.display = 'block';
+
       openModal('gradeWritingModal');
+    }
+
+    function openStudentViewWritingModal(resId) {
+      openGradeWritingModal(resId);
+      const isTeacher = activeUser && activeUser.role === 'teacher';
+      document.getElementById('gradeWritingTitle').textContent = isTeacher ? 'Review & Grade Student Writing' : 'Bài làm Writing & Nhận xét của Giáo viên';
+      document.getElementById('gradeBandInput').readOnly = !isTeacher;
+      document.getElementById('gradeFeedbackInput').readOnly = !isTeacher;
+      const saveBtn = document.querySelector('#gradeWritingModal .btn-emerald');
+      if (saveBtn) saveBtn.style.display = isTeacher ? 'block' : 'none';
     }
 
     function saveWritingEvaluation() {
