@@ -139,7 +139,7 @@
     .stat-value { font-size: 22px; font-weight: 900; color: #0f172a; }
     .stat-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; }
 
-    /* 3. INSPERA EXAM WORKSPACE (IELTSMATERIALS.UZ STYLE) */
+    /* 3. INSPERA EXAM WORKSPACE */
     #examShell { display: none; position: fixed; inset: 0; background: #fff; z-index: 5000; flex-direction: column; overflow: hidden; }
     .inspera-top {
       background: var(--inspera-dark); color: #fff; height: 48px;
@@ -148,7 +148,6 @@
     }
     .inspera-timer { background: #111827; padding: 4px 12px; border-radius: 4px; font-family: monospace; font-size: 15px; font-weight: 700; color: #fbbf24; border: 1px solid #374151; }
     
-    /* INSTRUCTION BANNER LIKE IELTSMATERIALS.UZ */
     .inspera-instruction-banner {
       background: #f1f5f9; border-bottom: 1px solid var(--inspera-border);
       padding: 8px 20px; font-size: 13px; color: #1e293b; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
@@ -181,7 +180,7 @@
     #selectionTooltip button.btn-hl-yellow { color: #fde047; }
     .user-highlight-span { background-color: #fde047 !important; color: #111827 !important; border-radius: 2px; }
 
-    /* QUESTION STYLES (IELTSMATERIALS.UZ / INSPERA FORMATS) */
+    /* QUESTION STYLES */
     .section-title { font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 18px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
     .question-group { background: transparent; padding: 0; margin-bottom: 32px; }
     .question-group-title { font-weight: 700; margin-bottom: 8px; color: #111827; font-size: 1.05rem; }
@@ -200,52 +199,12 @@
     .options label:hover { background: rgba(0,0,0,0.035); }
     .options input[type="radio"], .options input[type="checkbox"] { width: 17px; height: 17px; accent-color: #2563eb; cursor: pointer; }
 
-    /* INLINE GAP-FILL INPUT & SELECT (CD-IELTS STYLE) */
     .input-field.inline-input {
       display: inline-block; width: 145px; border: 1.5px solid #64748b;
       border-radius: 4px; padding: 3px 8px; background: #fff; color: #000;
       font-size: 14px; text-align: center; font-weight: 700; margin: 2px 4px; vertical-align: baseline; outline: none;
     }
     .input-field.inline-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.2); }
-    .inline-select {
-      display: inline-block; min-width: 90px; border: 1.5px solid #64748b;
-      border-radius: 4px; padding: 3px 8px; background: #fff; font-size: 14px; font-weight: 700; margin: 2px 4px; outline: none; cursor: pointer;
-    }
-
-    /* MATRIX TABLE FOR MATCHING INFORMATION / FEATURES */
-    .matrix-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13.5px; }
-    .matrix-table th, .matrix-table td { border: 1px solid #cbd5e1; padding: 10px; text-align: center; }
-    .matrix-table th { background: #f1f5f9; font-weight: 700; color: #1e293b; }
-    .matrix-table td.matrix-statement { text-align: left; font-weight: 500; width: 55%; }
-    .matrix-table tr:hover { background: rgba(59, 130, 246, 0.04); }
-
-    /* DRAG & DROP (SUMMARY & MATCHING HEADINGS IN PASSAGE) */
-    .drag-options { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; padding: 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; }
-    .drag-options.headings-bank { flex-direction: column; align-items: flex-start; }
-    .drag-item {
-      padding: 6px 12px; border: 1px solid #94a3b8; border-radius: 5px; background: #fff;
-      font-size: 13.5px; font-weight: 600; cursor: grab; user-select: none; transition: 0.15s ease;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05); color: #1e293b;
-    }
-    .drag-item:hover { border-color: #2563eb; background: #eff6ff; }
-    .drag-item:active { cursor: grabbing; transform: scale(0.98); }
-    .drag-item.used {
-      opacity: 0.3; pointer-events: none; background: #e2e8f0; border-style: dashed; text-decoration: line-through;
-    }
-
-    .drop-zone {
-      display: inline-flex; align-items: center; justify-content: center;
-      min-width: 90px; min-height: 30px; padding: 2px 12px;
-      border: 2px dashed #64748b; border-radius: 5px; background: #f8fafc;
-      font-weight: 700; color: #475569; margin: 2px 4px; vertical-align: middle;
-      line-height: normal; transition: all 0.15s ease; cursor: pointer; font-size: 13.5px;
-    }
-    .drop-zone.heading-drop {
-      display: flex; width: 100%; justify-content: flex-start; padding: 8px 14px;
-      margin: 10px 0 6px 0; background: #f1f5f9; border-color: #3b82f6; color: #1d4ed8;
-    }
-    .drop-zone.over { border-color: #2563eb; background: #dbeafe; transform: scale(1.01); }
-    .drop-zone.filled { border-style: solid; border-color: #059669; background: #ecfdf5; color: #065f46; }
 
     .answer-indicator {
       display: block; margin-top: 8px; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 600;
@@ -253,16 +212,7 @@
     .answer-indicator.correct { background: #dcfce7; border: 1px solid #22c55e; color: #14532d; }
     .answer-indicator.incorrect { background: #fee2e2; border: 1px solid #ef4444; color: #7f1d1d; }
 
-    .btn-locate {
-      background: #eff6ff; border: 1px solid #3b82f6; color: #1d4ed8;
-      padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;
-    }
-    .evidence-highlight-active {
-      background-color: #fef08a !important; color: #000 !important; padding: 2px 4px; border-radius: 3px;
-      box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.4);
-    }
-
-    /* FOOTER NAV (INSPERA PALETTE) */
+    /* FOOTER NAV */
     .progress-container {
       height: 54px; background: #fff; border-top: 1px solid var(--inspera-border);
       display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0;
@@ -273,17 +223,10 @@
       background: #f1f5f9; font-size: 12.5px; font-weight: 700; color: #475569;
       cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.1s;
     }
-    .progress-item:hover { border-color: #3b82f6; }
     .progress-item.answered { background: #1e293b; color: #fff; border-color: #0f172a; }
     .progress-item.current { outline: 2px solid #2563eb; outline-offset: 1px; }
     .progress-item.correct { background: #16a34a !important; color: #fff !important; border-color: #15803d !important; }
     .progress-item.incorrect { background: #dc2626 !important; color: #fff !important; border-color: #b91c1c !important; }
-
-    .teacher-edit-badge {
-      display: inline-block; background: #fef3c7; border: 1px solid #f59e0b; color: #b45309;
-      font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; cursor: pointer; margin-left: 6px;
-    }
-    .teacher-edit-badge:hover { background: #fde68a; }
 
     /* MODALS */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 7000; align-items: center; justify-content: center; }
@@ -295,7 +238,6 @@
     .modal-body { padding: 20px; overflow-y: auto; flex: 1; font-size: 13px; }
     .modal-footer { padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc; }
     .active-subtab { background: var(--emerald-accent) !important; color: #fff !important; border-color: var(--emerald-accent) !important; }
-    .template-toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; margin-bottom: 12px; }
   </style>
 </head>
 <body>
@@ -305,9 +247,7 @@
     <div class="login-left-banner">
       <div class="login-brand-tag">IELTS READING & WRITING SYSTEM</div>
       <div class="login-hero-logo">IELTS WITH <span>AMURO</span></div>
-      <div class="login-hero-desc">
-        Practice better, one passage at a time. A focused exam environment equipped with texts, questions, real-time timer, and instant evidence review.
-      </div>
+      <div class="login-hero-desc">Practice better, one passage at a time. A focused exam environment equipped with texts, questions, real-time timer, and instant review.</div>
       <div class="login-motto-badge">"Let justice be done though the heavens fall"</div>
     </div>
     <div class="login-right-area">
@@ -322,9 +262,7 @@
           <label>Password</label>
           <input type="password" id="logPass" class="form-input" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter') execLogin()">
         </div>
-        <button class="btn btn-emerald" style="width: 100%; padding: 11px; margin-top: 8px;" onclick="execLogin()">
-          Enter Practice Room
-        </button>
+        <button class="btn btn-emerald" style="width: 100%; padding: 11px; margin-top: 8px;" onclick="execLogin()">Enter Practice Room</button>
       </div>
     </div>
   </div>
@@ -336,7 +274,7 @@
         <span>IELTS WITH AMURO</span>
         <span class="sync-badge" id="realtimeSyncBadge">
           <span class="sync-dot" id="realtimeSyncDot"></span>
-          <span id="realtimeSyncText">Connecting Cloud...</span>
+          <span id="realtimeSyncText">Cloud Synced</span>
         </span>
       </div>
       <div class="dash-user-controls">
@@ -351,17 +289,17 @@
         <button class="dash-tab-btn" id="tabbtn-reading" onclick="switchDashTab('reading')">📖 Reading Tests</button>
         <button class="dash-tab-btn" id="tabbtn-writing" onclick="switchDashTab('writing')">✍️ Writing Tests</button>
         <button class="dash-tab-btn" id="tabbtn-listening" onclick="switchDashTab('listening')">🎧 Listening Tests</button>
-        <button class="dash-tab-btn" id="tabbtn-myvocab" onclick="switchDashTab('myvocab')">⭐ My Saved Vocabulary</button>
-        <button class="dash-tab-btn teacher-item" id="tabbtn-classes" onclick="switchDashTab('classes')">🏫 Class Management</button>
-        <button class="dash-tab-btn teacher-item" id="tabbtn-students" onclick="switchDashTab('students')">👤 Students & Accounts</button>
-        <button class="dash-tab-btn teacher-item" id="tabbtn-analytics" onclick="switchDashTab('analytics')">📊 Submissions & Scores</button>
+        <button class="dash-tab-btn" id="tabbtn-myvocab" onclick="switchDashTab('myvocab')">⭐ My Vocabulary</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-classes" onclick="switchDashTab('classes')">🏫 Classes</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-students" onclick="switchDashTab('students')">👤 Students</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-analytics" onclick="switchDashTab('analytics')">📊 Submissions</button>
       </div>
 
       <!-- TAB 0: HOME -->
       <div id="tab-home" class="dash-pane">
         <div class="home-hero-banner">
           <div class="home-hero-title" id="homeWelcomeTitle">Welcome to IELTS WITH AMURO</div>
-          <div class="home-hero-sub">An authentic Computer-Delivered IELTS preparation environment featuring real-time cloud synchronization, multi-format question interfaces, evidence localization, and vocabulary retention.</div>
+          <div class="home-hero-sub">An authentic Computer-Delivered IELTS preparation environment featuring real-time synchronization, multi-format question interfaces, and vocabulary retention.</div>
         </div>
 
         <div class="stat-grid">
@@ -411,7 +349,7 @@
         <div class="card">
           <div class="card-title">
             <span>Reading Test Library</span>
-            <button class="btn btn-emerald teacher-item" onclick="openReadingEditorModal()">+ Create / Import Reading Test</button>
+            <button class="btn btn-emerald teacher-item" onclick="openReadingEditorModal()">+ Create Reading Test</button>
           </div>
           <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:14px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
             <input type="text" id="filterReadingSearch" class="form-input" placeholder="🔍 Tìm tên đề Reading..." oninput="renderReadingTable()">
@@ -437,7 +375,7 @@
       <div id="tab-writing" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title">
-            <span>Writing Assessment Library (Task 1 & Task 2)</span>
+            <span>Writing Assessment Library</span>
             <button class="btn btn-emerald teacher-item" onclick="openWritingEditorModal()">+ Create Writing Test</button>
           </div>
           <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:14px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
@@ -448,7 +386,7 @@
               <option value="Task 2 Only">Chỉ làm Task 2 (40p)</option>
               <option value="Full Writing">Full Writing (Task 1 & 2)</option>
             </select>
-            <input type="text" id="filterWritingTopic" class="form-input" placeholder="🏷️ Lọc dạng/chủ đề (VD: Bar Chart, Opinion...)" oninput="renderWritingTable()">
+            <input type="text" id="filterWritingTopic" class="form-input" placeholder="🏷️ Lọc dạng/chủ đề..." oninput="renderWritingTable()">
           </div>
           <table>
             <thead>
@@ -517,7 +455,7 @@
           <div class="card-title">
             <span>Student Accounts & Real-Time Provisioning</span>
             <div style="display:flex; gap:8px;">
-              <button class="btn btn-secondary" onclick="openBulkStudentModal()">⚡ Bulk Add Students</button>
+              <button class="btn btn-secondary" onclick="openBulkStudentModal()">⚡ Bulk Add</button>
               <button class="btn btn-emerald" onclick="openCreateStudentModal()">+ Register Student</button>
             </div>
           </div>
@@ -585,9 +523,9 @@
     <div class="inspera-part-tabs" id="insperaPartTabs"></div>
 
     <div class="inspera-workspace" id="insperaSplitBox">
-      <div class="passage-col" id="insperaLeftPane"></div>
-      <div class="resizer-bar" id="insperaResizer"></div>
-      <div class="questions-col" id="insperaRightPane"></div>
+      <div class="passage-col" id="insperaLeftPane" style="display: none;"></div>
+      <div class="resizer-bar" id="insperaResizer" style="display: none;"></div>
+      <div class="questions-col" id="insperaRightPane" style="width: 100%;"></div>
     </div>
 
     <div id="selectionTooltip">
@@ -638,14 +576,8 @@
           <input type="hidden" id="gradeSubmissionId">
           <div><b>Candidate:</b> <span id="gradeStudentName"></span></div>
           <div><b>Assessment:</b> <span id="gradeExamTitle"></span></div>
-          <div class="form-group">
-            <label>Award Band Score:</label>
-            <input type="text" id="gradeBandInput" class="form-input" placeholder="Band score...">
-          </div>
-          <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
-            <label>Teacher's Feedback:</label>
-            <textarea id="gradeFeedbackInput" class="form-input" style="flex:1; min-height:160px; line-height:1.6;" placeholder="Feedback..."></textarea>
-          </div>
+          <div class="form-group"><label>Award Band Score:</label><input type="text" id="gradeBandInput" class="form-input" placeholder="Band score..."></div>
+          <div class="form-group" style="flex:1; display:flex; flex-direction:column;"><label>Teacher's Feedback:</label><textarea id="gradeFeedbackInput" class="form-input" style="flex:1; min-height:160px; line-height:1.6;" placeholder="Feedback..."></textarea></div>
           <button class="btn btn-emerald" style="width:100%; padding:10px;" onclick="saveWritingEvaluation()">Save Evaluation</button>
         </div>
       </div>
@@ -720,13 +652,6 @@
           <button class="btn btn-secondary" id="subtab-p3" onclick="switchPassageEditor(3)">Passage 3</button>
         </div>
 
-        <div class="template-toolbar">
-          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('tfng')">+ TFNG</button>
-          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq1')">+ MCQ</button>
-          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('gapfill')">+ Gap-Fill</button>
-          <button type="button" class="btn btn-emerald" onclick="autoGenerateKeysFromHtml()">🔍 Auto-Detect Keys</button>
-        </div>
-
         <div class="form-group"><label>Passage Title</label><input type="text" id="rePTitle" class="form-input"></div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
           <div class="form-group"><label>Passage HTML</label><textarea id="rePText" class="form-input" style="height: 150px; font-family: monospace; font-size:12px;"></textarea></div>
@@ -760,9 +685,9 @@
         </div>
         <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px;">
           <div class="form-group">
-            <label>Link Audio MP3 (Direct link file .mp3 hoặc link Google Drive chuẩn)</label>
-            <input type="text" id="leAudioUrl" class="form-input" placeholder="https://domain.com/audio.mp3 hoặc https://docs.google.com/uc?export=download&id=FILE_ID">
-            <small style="color:#64748b; font-size:11px;">Mẹo Google Drive: Dùng dạng `https://docs.google.com/uc?export=download&id=MÃ_FILE_ID` để phát trực tiếp không bị lỗi chặn.</small>
+            <label>Link Audio MP3 (Dán trực tiếp link file .mp3 hoặc link Google Drive)</label>
+            <input type="text" id="leAudioUrl" class="form-input" placeholder="https://... hoặc https://docs.google.com/file/d/...">
+            <small style="color:#64748b; font-size:11px;">Hệ thống tự động chuyển đổi link Google Drive sang dạng phát trực tiếp (Stream MP3).</small>
           </div>
           <div class="form-group">
             <label>Listening Part</label>
@@ -777,7 +702,7 @@
         </div>
         <div class="form-group"><label>Topic / Nguồn đề</label><input type="text" id="leTopic" class="form-input" placeholder="e.g. Cam 19 Test 1"></div>
         <div class="form-group"><label>Transcript HTML (Hiển thị ở cột trái khi học sinh bấm Review sau khi nộp)</label><textarea id="leTranscript" class="form-input" style="height: 120px; font-family: monospace;" placeholder="<p><b>Speaker 1:</b> Hello...</p>"></textarea></div>
-        <div class="form-group"><label>Questions HTML (Cột phải)</label><textarea id="leQuestions" class="form-input" style="height: 140px; font-family: monospace;"></textarea></div>
+        <div class="form-group"><label>Questions HTML (Hiển thị toàn trang khi làm bài)</label><textarea id="leQuestions" class="form-input" style="height: 140px; font-family: monospace;" placeholder="Nhập các câu hỏi Listening vào đây..."></textarea></div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
           <div class="form-group"><label>Correct Keys (q1=answer)</label><textarea id="leKeys" class="form-input" style="height: 80px; font-family: monospace;"></textarea></div>
           <div class="form-group"><label>Explanations</label><textarea id="leExps" class="form-input" style="height: 80px; font-family: monospace;"></textarea></div>
@@ -785,7 +710,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('listeningEditorModal')">Cancel</button>
-        <button class="btn btn-emerald" onclick="saveListeningExam()">Save & Publish Real-Time</button>
+        <button class="btn btn-emerald" onclick="saveListeningExam()">Save Listening Test</button>
       </div>
     </div>
   </div>
@@ -832,10 +757,7 @@
         <div class="form-group"><label>Full Name</label><input type="text" id="profNameInput" class="form-input"></div>
         <div class="form-group"><label>New Password</label><input type="password" id="profPassInput" class="form-input"></div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('profileModal')">Cancel</button>
-        <button class="btn btn-emerald" onclick="saveProfileChanges()">Save</button>
-      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('profileModal')">Cancel</button><button class="btn btn-emerald" onclick="saveProfileChanges()">Save</button></div>
     </div>
   </div>
 
@@ -919,7 +841,7 @@
       correctAnswers: { q27: 'B', q28: 'D', q29: 'A', q30: 'C', q31: 'YES', q32: 'YES', q33: 'NO', q34: 'NOT GIVEN', q35: 'NO', q36: 'G', q37: 'C', q38: 'A', q39: 'H', q40: 'E' },
       explanations: { q27: 'Tác giả giải thích lý do các siêu thị giống nhau.' },
       evidences: { q27: 'It is more that they are all well-versed' },
-      passages: [{ partNum: 1, title: 'Passage: The Science of Shopping', passageHtml: '<p>You may have wondered why so many supermarkets are virtually indistinguishable from each other...</p>', questionsHtml: '<div class="question" data-question="27"><div class="question-text">27 What does the writer suggest?</div><div class="options"><label><input type="radio" name="q27" value="A"> A</label><label><input type="radio" name="q27" value="B"> B</label></div></div>' }]
+      passages: [{ partNum: 1, title: 'Passage: The Science of Shopping', passageHtml: '<p>You may have wondered why so many supermarkets are virtually indistinguishable from each other...</p>', questionsHtml: '<div class="question" data-question="27"><div class="question-text">27 What does the writer suggest?</div><div class="options"><label><input type="radio" name="q27" value="A"> A</label><label><input type="radio" name="q27" value="B"> B</label></div></div>', vocab: [{ word: 'indistinguishable', type: 'adj', mean: 'Khó phân biệt', syn: 'identical' }] }]
     };
 
     let db = {
@@ -976,7 +898,7 @@
         if (e.key === 'AMURO_IELTS_DB_BACKUP' && e.newValue) {
           try {
             db = JSON.parse(e.newValue);
-            if (activeUser) renderDashboard();
+            renderDashboard();
           } catch (err) {}
         }
       });
@@ -991,21 +913,14 @@
               if (!db.writingExams) db.writingExams = [];
               if (!db.listeningExams) db.listeningExams = [];
               localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
-              setSyncStatus('Cloud Real-Time Active', true);
-              if (activeUser) {
-                const updatedMe = db.users.find(u => u.id === activeUser.id || u.username === activeUser.username);
-                if (updatedMe) {
-                  activeUser = updatedMe;
-                  sessionStorage.setItem('AMURO_CURRENT_USER', JSON.stringify(activeUser));
-                }
-                renderDashboard();
-              }
+              setSyncStatus('Cloud Synced', true);
+              renderDashboard();
             }
           } else {
             persist();
           }
         }, (err) => {
-          setSyncStatus('Local Sync Active', false);
+          setSyncStatus('Local Mode', false);
         });
       }
     }
@@ -1016,12 +931,12 @@
       } catch (e) {}
 
       if (CLOUD_DOC) {
-        setSyncStatus('Syncing changes...', true);
+        setSyncStatus('Syncing...', true);
         const cleanData = JSON.parse(JSON.stringify(db));
         CLOUD_DOC.set(cleanData).then(() => {
-          setSyncStatus('Cloud Real-Time Active', true);
+          setSyncStatus('Cloud Synced', true);
         }).catch(err => {
-          setSyncStatus('Saved Locally', false);
+          setSyncStatus('Local Mode', false);
         });
       }
     }
@@ -1308,7 +1223,7 @@
       });
     }
 
-    /* VOCABULARY & DASHBOARD HELPERS */
+    /* VOCABULARY STUDY MODAL (FIXED HIGHLIGHT) */
     function openStudyVocabModal(examId) {
       const exam = db.readingExams.find(e => e.id === examId);
       if (!exam || !exam.passages || !exam.passages.length) return alert('No passage data found.');
@@ -1319,7 +1234,7 @@
       const cardsPane = document.getElementById('modalVocabCardsPane');
       const vocabList = p.vocab || [];
       if (!vocabList.length) {
-        cardsPane.innerHTML = `<p style="color:#64748b; font-style:italic;">No vocabulary entries recorded.</p>`;
+        cardsPane.innerHTML = `<p style="color:#64748b; font-style:italic;">No vocabulary entries recorded for this passage.</p>`;
       } else {
         cardsPane.innerHTML = vocabList.map(v => `
           <div style="background:#fff; border:1px solid var(--inspera-border); border-radius:8px; padding:12px; margin-bottom:10px;">
@@ -1328,11 +1243,27 @@
               <button class="btn btn-secondary" style="padding:2px 8px; font-size:11px;" onclick="saveToMyVault('${v.word.replace(/'/g,"")}', '${v.mean.replace(/'/g,"")}', '${(v.syn||'').replace(/'/g,"")}', '${exam.title.replace(/'/g,"")}')">⭐ Save</button>
             </div>
             <div style="font-size:13px; margin:4px 0;">${v.mean}</div>
-            <div style="font-size:11.5px; color:#64748b;">Synonyms: <b>${v.syn || 'N/A'}</b></div>
+            <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">Synonyms: <b>${v.syn || 'N/A'}</b></div>
+            <button class="btn btn-emerald" style="padding:3px 8px; font-size:11px; width:100%;" onclick="spotVocabWordInModal('${v.word.replace(/'/g,"")}')">🔍 Highlight in Passage</button>
           </div>
         `).join('');
       }
       openModal('studyVocabModal');
+    }
+
+    function spotVocabWordInModal(word) {
+      const pPane = document.getElementById('modalVocabPassagePane');
+      pPane.querySelectorAll('.evidence-highlight-active').forEach(el => el.outerHTML = el.innerHTML);
+
+      const safeWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(^|[^a-zA-Z0-9])(${safeWord})([^a-zA-Z0-9]|$)`, 'gi');
+      
+      if (regex.test(pPane.innerHTML)) {
+        pPane.innerHTML = pPane.innerHTML.replace(regex, `$1<span class="evidence-highlight-active" id="activeModalVocabSpot">$2</span>$3`);
+        document.getElementById('activeModalVocabSpot')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        alert(`Word "${word}" could not be matched directly in the passage text.`);
+      }
     }
 
     function saveToMyVault(word, mean, syn, passageTitle) {
@@ -1529,18 +1460,19 @@
       const passage = (activeExam.passages || [])[partNum - 1] || (activeExam.passages || [])[0] || { title: '', passageHtml: '', questionsHtml: '' };
       const left = document.getElementById('insperaLeftPane');
       const right = document.getElementById('insperaRightPane');
+      const resizer = document.getElementById('insperaResizer');
       const audioContainer = document.getElementById('listeningAudioHeaderContainer');
 
       document.getElementById('insperaPartInstructionText').innerHTML = activeExamType === 'listening'
-        ? `<b>IELTS Listening</b> — Listen to the audio and answer the questions on the right.`
+        ? `<b>IELTS Listening</b> — Listen to the audio and answer the questions.`
         : `<b>Part ${partNum}</b> — Read the text and answer questions on the right.`;
 
+      // Xử lý hiển thị Audio Player trên Header và chuyển đổi link Google Drive trực tiếp
       if (activeExamType === 'listening') {
         audioContainer.style.display = 'flex';
         const audioEl = document.getElementById('examAudioPlayer');
         if (audioEl && activeExam.audioUrl) {
-          let directUrl = activeExam.audioUrl;
-          // Xử lý tự động link Google Drive thành link stream trực tiếp
+          let directUrl = activeExam.audioUrl.trim();
           if (directUrl.includes('drive.google.com') && !directUrl.includes('export=download')) {
             const matchId = directUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || directUrl.match(/id=([a-zA-Z0-9_-]+)/);
             if (matchId && matchId[1]) {
@@ -1549,23 +1481,23 @@
           }
           if (audioEl.src !== directUrl) {
             audioEl.src = directUrl;
+            audioEl.load();
           }
         }
       } else {
         audioContainer.style.display = 'none';
       }
 
+      // LUẬT HIỂN THỊ LISTENING: LÚC LÀM BÀI FULL TRANG (ẨN CỘT TRÁI), LÚC REVIEW MỚI HIỆN CỘT TRÁI (TRANSCRIPT)
       if (activeExamType === 'listening' && !isReviewMode) {
-        left.innerHTML = `
-          <div style="text-align: center; padding: 50px 20px;">
-            <div style="font-size: 56px; color: var(--emerald-accent); margin-bottom: 16px;"><i class="fas fa-headphones-alt"></i></div>
-            <h3 style="font-size: 22px; font-weight: 800; color: #1e293b; margin-bottom: 10px;">Listening Examination Room</h3>
-            <p style="color: #64748b; max-width: 420px; margin: 0 auto; line-height: 1.6;">
-              Use the audio player located on the top header to play the recording. Answer all questions on the right panel. Transcript will be available after submission.
-            </p>
-          </div>
-        `;
+        left.style.display = 'none';
+        resizer.style.display = 'none';
+        right.style.width = '100%';
       } else {
+        left.style.display = 'block';
+        resizer.style.display = 'flex';
+        left.style.width = '50%';
+        right.style.width = '50%';
         left.innerHTML = `<h2 class="section-title">${isReviewMode && activeExamType === 'listening' ? '🎧 Transcript - ' : ''}${passage.title || 'PASSAGE ' + partNum}</h2><div class="passage-content">${passage.passageHtml}</div>`;
       }
 
@@ -1815,7 +1747,6 @@
     function exitExamShell() {
       if (confirm('Exit exam room?')) {
         clearInterval(examTimer);
-        // Dừng audio nếu đang chạy
         const audioEl = document.getElementById('examAudioPlayer');
         if (audioEl) audioEl.pause();
         document.getElementById('examShell').style.display = 'none';
@@ -1878,9 +1809,15 @@
     function loadWritingWorkspace(taskNum) {
       const left = document.getElementById('insperaLeftPane');
       const right = document.getElementById('insperaRightPane');
+      const resizer = document.getElementById('insperaResizer');
       const isTask1 = (taskNum === 1);
       const taskData = isTask1 ? activeExam.task1 : activeExam.task2;
       const savedText = isTask1 ? writingAnswers.task1 : writingAnswers.task2;
+
+      left.style.display = 'block';
+      resizer.style.display = 'flex';
+      left.style.width = '50%';
+      right.style.width = '50%';
 
       document.getElementById('insperaPartInstructionText').innerHTML = `<b>Writing Task ${taskNum}</b> — Write at least ${isTask1 ? '150' : '250'} words.`;
       left.innerHTML = `<h2 class="section-title">Task ${taskNum} Prompt</h2><div style="font-size:15px; line-height:1.7;">${taskData.prompt}</div>`;
@@ -1921,7 +1858,6 @@
         return;
       }
 
-      // Đóng audio nếu là listening
       const audioEl = document.getElementById('examAudioPlayer');
       if (audioEl) audioEl.pause();
 
@@ -2205,6 +2141,7 @@
       const pass = document.getElementById('newStuPassword').value.trim() || '123456';
       const classId = document.getElementById('newStuClassSelect').value;
       if (!name || !username) return alert('Required fields missing!');
+      if (!db.users) db.users = [];
       db.users.push({ id: 'u_' + Date.now(), username, pass, name, role: 'student', classId });
       persist(); closeModal('studentModal'); renderDashboard(); alert('Student registered!');
     }
@@ -2214,6 +2151,7 @@
       const classId = document.getElementById('bulkStuClassSelect').value;
       const defaultPass = document.getElementById('bulkStuDefaultPass').value.trim() || '123456';
       if (!raw) return;
+      if (!db.users) db.users = [];
       raw.split(/\r?\n/).forEach((l, i) => {
         const p = l.split('|').map(x => x.trim());
         if (p[0]) db.users.push({ id: 'u_' + Date.now() + '_' + i, username: p[1] || p[0].toLowerCase().replace(/\s+/g,''), pass: p[2] || defaultPass, name: p[0], role: 'student', classId });
@@ -2257,5 +2195,3 @@
   </script>
 </body>
 </html>
-
-```
