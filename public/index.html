@@ -127,7 +127,7 @@
     }
     .home-hero-title { font-size: 26px; font-weight: 900; margin-bottom: 8px; }
     .home-hero-sub { font-size: 14px; color: #d1fae5; line-height: 1.6; max-width: 680px; }
-    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .stat-card {
       background: #fff; border: 1px solid var(--inspera-border); border-radius: 10px;
       padding: 20px; display: flex; align-items: center; gap: 16px;
@@ -142,9 +142,9 @@
     /* 3. INSPERA EXAM WORKSPACE */
     #examShell { display: none; position: fixed; inset: 0; background: #fff; z-index: 5000; flex-direction: column; overflow: hidden; }
     .inspera-top {
-      background: var(--inspera-dark); color: #fff; height: 48px;
+      background: var(--inspera-dark); color: #fff; min-height: 52px;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 18px; font-size: 13px; font-weight: 600; flex-shrink: 0;
+      padding: 6px 18px; font-size: 13px; font-weight: 600; flex-shrink: 0; flex-wrap: wrap; gap: 10px;
     }
     .inspera-timer { background: #111827; padding: 4px 12px; border-radius: 4px; font-family: monospace; font-size: 15px; font-weight: 700; color: #fbbf24; border: 1px solid #374151; }
     
@@ -205,12 +205,60 @@
       font-size: 14px; text-align: center; font-weight: 700; margin: 2px 4px; vertical-align: baseline; outline: none;
     }
     .input-field.inline-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.2); }
+    .inline-select {
+      display: inline-block; min-width: 90px; border: 1.5px solid #64748b;
+      border-radius: 4px; padding: 3px 8px; background: #fff; font-size: 14px; font-weight: 700; margin: 2px 4px; outline: none; cursor: pointer;
+    }
+
+    /* MATRIX TABLE */
+    .matrix-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13.5px; }
+    .matrix-table th, .matrix-table td { border: 1px solid #cbd5e1; padding: 10px; text-align: center; }
+    .matrix-table th { background: #f1f5f9; font-weight: 700; color: #1e293b; }
+    .matrix-table td.matrix-statement { text-align: left; font-weight: 500; width: 55%; }
+    .matrix-table tr:hover { background: rgba(59, 130, 246, 0.04); }
+
+    /* DRAG & DROP */
+    .drag-options { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; padding: 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; }
+    .drag-options.headings-bank { flex-direction: column; align-items: flex-start; }
+    .drag-item {
+      padding: 6px 12px; border: 1px solid #94a3b8; border-radius: 5px; background: #fff;
+      font-size: 13.5px; font-weight: 600; cursor: grab; user-select: none; transition: 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05); color: #1e293b;
+    }
+    .drag-item:hover { border-color: #2563eb; background: #eff6ff; }
+    .drag-item:active { cursor: grabbing; transform: scale(0.98); }
+    .drag-item.used {
+      opacity: 0.3; pointer-events: none; background: #e2e8f0; border-style: dashed; text-decoration: line-through;
+    }
+
+    .drop-zone {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 90px; min-height: 30px; padding: 2px 12px;
+      border: 2px dashed #64748b; border-radius: 5px; background: #f8fafc;
+      font-weight: 700; color: #475569; margin: 2px 4px; vertical-align: middle;
+      line-height: normal; transition: all 0.15s ease; cursor: pointer; font-size: 13.5px;
+    }
+    .drop-zone.heading-drop {
+      display: flex; width: 100%; justify-content: flex-start; padding: 8px 14px;
+      margin: 10px 0 6px 0; background: #f1f5f9; border-color: #3b82f6; color: #1d4ed8;
+    }
+    .drop-zone.over { border-color: #2563eb; background: #dbeafe; transform: scale(1.01); }
+    .drop-zone.filled { border-style: solid; border-color: #059669; background: #ecfdf5; color: #065f46; }
 
     .answer-indicator {
       display: block; margin-top: 8px; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 600;
     }
     .answer-indicator.correct { background: #dcfce7; border: 1px solid #22c55e; color: #14532d; }
     .answer-indicator.incorrect { background: #fee2e2; border: 1px solid #ef4444; color: #7f1d1d; }
+
+    .btn-locate {
+      background: #eff6ff; border: 1px solid #3b82f6; color: #1d4ed8;
+      padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .evidence-highlight-active {
+      background-color: #fef08a !important; color: #000 !important; padding: 2px 4px; border-radius: 3px;
+      box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.4);
+    }
 
     /* FOOTER NAV */
     .progress-container {
@@ -223,10 +271,17 @@
       background: #f1f5f9; font-size: 12.5px; font-weight: 700; color: #475569;
       cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.1s;
     }
+    .progress-item:hover { border-color: #3b82f6; }
     .progress-item.answered { background: #1e293b; color: #fff; border-color: #0f172a; }
     .progress-item.current { outline: 2px solid #2563eb; outline-offset: 1px; }
     .progress-item.correct { background: #16a34a !important; color: #fff !important; border-color: #15803d !important; }
     .progress-item.incorrect { background: #dc2626 !important; color: #fff !important; border-color: #b91c1c !important; }
+
+    .teacher-edit-badge {
+      display: inline-block; background: #fef3c7; border: 1px solid #f59e0b; color: #b45309;
+      font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; cursor: pointer; margin-left: 6px;
+    }
+    .teacher-edit-badge:hover { background: #fde68a; }
 
     /* MODALS */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 7000; align-items: center; justify-content: center; }
@@ -238,6 +293,7 @@
     .modal-body { padding: 20px; overflow-y: auto; flex: 1; font-size: 13px; }
     .modal-footer { padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc; }
     .active-subtab { background: var(--emerald-accent) !important; color: #fff !important; border-color: var(--emerald-accent) !important; }
+    .template-toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; margin-bottom: 12px; }
   </style>
 </head>
 <body>
@@ -245,9 +301,11 @@
   <!-- 1. LOGIN SCREEN -->
   <div id="loginScreen">
     <div class="login-left-banner">
-      <div class="login-brand-tag">IELTS READING & WRITING SYSTEM</div>
+      <div class="login-brand-tag">IELTS READING, LISTENING & WRITING SYSTEM</div>
       <div class="login-hero-logo">IELTS WITH <span>AMURO</span></div>
-      <div class="login-hero-desc">Practice better, one passage at a time. A focused exam environment equipped with texts, questions, real-time timer, and instant review.</div>
+      <div class="login-hero-desc">
+        Practice better, one passage at a time. A focused exam environment equipped with texts, questions, real-time timer, and instant evidence review.
+      </div>
       <div class="login-motto-badge">"Let justice be done though the heavens fall"</div>
     </div>
     <div class="login-right-area">
@@ -262,7 +320,9 @@
           <label>Password</label>
           <input type="password" id="logPass" class="form-input" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter') execLogin()">
         </div>
-        <button class="btn btn-emerald" style="width: 100%; padding: 11px; margin-top: 8px;" onclick="execLogin()">Enter Practice Room</button>
+        <button class="btn btn-emerald" style="width: 100%; padding: 11px; margin-top: 8px;" onclick="execLogin()">
+          Enter Practice Room
+        </button>
       </div>
     </div>
   </div>
@@ -274,7 +334,7 @@
         <span>IELTS WITH AMURO</span>
         <span class="sync-badge" id="realtimeSyncBadge">
           <span class="sync-dot" id="realtimeSyncDot"></span>
-          <span id="realtimeSyncText">Cloud Synced</span>
+          <span id="realtimeSyncText">Connecting Cloud...</span>
         </span>
       </div>
       <div class="dash-user-controls">
@@ -287,19 +347,19 @@
       <div class="dash-tabs">
         <button class="dash-tab-btn active" id="tabbtn-home" onclick="switchDashTab('home')">🏠 Home</button>
         <button class="dash-tab-btn" id="tabbtn-reading" onclick="switchDashTab('reading')">📖 Reading Tests</button>
-        <button class="dash-tab-btn" id="tabbtn-writing" onclick="switchDashTab('writing')">✍️ Writing Tests</button>
         <button class="dash-tab-btn" id="tabbtn-listening" onclick="switchDashTab('listening')">🎧 Listening Tests</button>
-        <button class="dash-tab-btn" id="tabbtn-myvocab" onclick="switchDashTab('myvocab')">⭐ My Vocabulary</button>
-        <button class="dash-tab-btn teacher-item" id="tabbtn-classes" onclick="switchDashTab('classes')">🏫 Classes</button>
-        <button class="dash-tab-btn teacher-item" id="tabbtn-students" onclick="switchDashTab('students')">👤 Students</button>
-        <button class="dash-tab-btn teacher-item" id="tabbtn-analytics" onclick="switchDashTab('analytics')">📊 Submissions</button>
+        <button class="dash-tab-btn" id="tabbtn-writing" onclick="switchDashTab('writing')">✍️ Writing Tests</button>
+        <button class="dash-tab-btn" id="tabbtn-myvocab" onclick="switchDashTab('myvocab')">⭐ My Saved Vocabulary</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-classes" onclick="switchDashTab('classes')">🏫 Class Management</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-students" onclick="switchDashTab('students')">👤 Students & Accounts</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-analytics" onclick="switchDashTab('analytics')">📊 Submissions & Scores</button>
       </div>
 
       <!-- TAB 0: HOME -->
       <div id="tab-home" class="dash-pane">
         <div class="home-hero-banner">
           <div class="home-hero-title" id="homeWelcomeTitle">Welcome to IELTS WITH AMURO</div>
-          <div class="home-hero-sub">An authentic Computer-Delivered IELTS preparation environment featuring real-time synchronization, multi-format question interfaces, and vocabulary retention.</div>
+          <div class="home-hero-sub">An authentic Computer-Delivered IELTS preparation environment featuring real-time cloud synchronization, multi-format question interfaces, evidence localization, and vocabulary retention.</div>
         </div>
 
         <div class="stat-grid">
@@ -311,6 +371,13 @@
             </div>
           </div>
           <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-headphones"></i></div>
+            <div>
+              <div class="stat-value" id="statListeningCount">0</div>
+              <div class="stat-label">Listening Tests</div>
+            </div>
+          </div>
+          <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-pen-nib"></i></div>
             <div>
               <div class="stat-value" id="statWritingCount">0</div>
@@ -318,10 +385,10 @@
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-headphones"></i></div>
+            <div class="stat-icon"><i class="fas fa-spell-check"></i></div>
             <div>
-              <div class="stat-value" id="statListeningCount">0</div>
-              <div class="stat-label">Listening Tests</div>
+              <div class="stat-value" id="statVocabCount">0</div>
+              <div class="stat-label">Saved Words</div>
             </div>
           </div>
           <div class="stat-card">
@@ -349,7 +416,7 @@
         <div class="card">
           <div class="card-title">
             <span>Reading Test Library</span>
-            <button class="btn btn-emerald teacher-item" onclick="openReadingEditorModal()">+ Create Reading Test</button>
+            <button class="btn btn-emerald teacher-item" onclick="openReadingEditorModal()">+ Create / Import Reading Test</button>
           </div>
           <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:14px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
             <input type="text" id="filterReadingSearch" class="form-input" placeholder="🔍 Tìm tên đề Reading..." oninput="renderReadingTable()">
@@ -360,7 +427,7 @@
               <option value="Passage 2">Passage 2</option>
               <option value="Passage 3">Passage 3</option>
             </select>
-            <input type="text" id="filterReadingTopic" class="form-input" placeholder="🏷️ Lọc theo Chủ đề..." oninput="renderReadingTable()">
+            <input type="text" id="filterReadingTopic" class="form-input" placeholder="🏷️ Lọc theo Chủ đề (VD: Environment, Cam 19...)" oninput="renderReadingTable()">
           </div>
           <table>
             <thead>
@@ -371,33 +438,7 @@
         </div>
       </div>
 
-      <!-- TAB 2: WRITING -->
-      <div id="tab-writing" class="dash-pane" style="display: none;">
-        <div class="card">
-          <div class="card-title">
-            <span>Writing Assessment Library</span>
-            <button class="btn btn-emerald teacher-item" onclick="openWritingEditorModal()">+ Create Writing Test</button>
-          </div>
-          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:14px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-            <input type="text" id="filterWritingSearch" class="form-input" placeholder="🔍 Tìm tên đề Writing..." oninput="renderWritingTable()">
-            <select id="filterWritingPart" class="form-input" onchange="renderWritingTable()">
-              <option value="ALL">📂 Tất cả các phần</option>
-              <option value="Task 1 Only">Chỉ làm Task 1 (20p)</option>
-              <option value="Task 2 Only">Chỉ làm Task 2 (40p)</option>
-              <option value="Full Writing">Full Writing (Task 1 & 2)</option>
-            </select>
-            <input type="text" id="filterWritingTopic" class="form-input" placeholder="🏷️ Lọc dạng/chủ đề..." oninput="renderWritingTable()">
-          </div>
-          <table>
-            <thead>
-              <tr><th>Test Title</th><th>Duration</th><th>Tasks</th><th>Assigned Cohort</th><th>Action</th></tr>
-            </thead>
-            <tbody id="writingTbody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- TAB 3: LISTENING -->
+      <!-- TAB 2: LISTENING -->
       <div id="tab-listening" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title">
@@ -408,11 +449,11 @@
             <input type="text" id="filterListeningSearch" class="form-input" placeholder="🔍 Tìm tên đề Listening..." oninput="renderListeningTable()">
             <select id="filterListeningPart" class="form-input" onchange="renderListeningTable()">
               <option value="ALL">📂 Tất cả các Part</option>
+              <option value="Listening Full">Full Test (Part 1-4)</option>
               <option value="Listening Part 1">Part 1</option>
               <option value="Listening Part 2">Part 2</option>
               <option value="Listening Part 3">Part 3</option>
               <option value="Listening Part 4">Part 4</option>
-              <option value="Listening Full">Full Test (Part 1-4)</option>
             </select>
             <input type="text" id="filterListeningTopic" class="form-input" placeholder="🏷️ Lọc chủ đề..." oninput="renderListeningTable()">
           </div>
@@ -421,6 +462,32 @@
               <tr><th>Test Title</th><th>Duration</th><th>Parts</th><th>Assigned Cohort</th><th>Actions</th></tr>
             </thead>
             <tbody id="listeningTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 3: WRITING -->
+      <div id="tab-writing" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Writing Assessment Library (Task 1 & Task 2)</span>
+            <button class="btn btn-emerald teacher-item" onclick="openWritingEditorModal()">+ Create Writing Test</button>
+          </div>
+          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:14px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+            <input type="text" id="filterWritingSearch" class="form-input" placeholder="🔍 Tìm tên đề Writing..." oninput="renderWritingTable()">
+            <select id="filterWritingPart" class="form-input" onchange="renderWritingTable()">
+              <option value="ALL">📂 Tất cả các phần</option>
+              <option value="Task 1 Only">Chỉ làm Task 1 (20p)</option>
+              <option value="Task 2 Only">Chỉ làm Task 2 (40p)</option>
+              <option value="Full Writing">Full Writing (Task 1 & 2)</option>
+            </select>
+            <input type="text" id="filterWritingTopic" class="form-input" placeholder="🏷️ Lọc dạng/chủ đề (VD: Bar Chart, Opinion...)" oninput="renderWritingTable()">
+          </div>
+          <table>
+            <thead>
+              <tr><th>Test Title</th><th>Duration</th><th>Tasks</th><th>Assigned Cohort</th><th>Action</th></tr>
+            </thead>
+            <tbody id="writingTbody"></tbody>
           </table>
         </div>
       </div>
@@ -455,8 +522,8 @@
           <div class="card-title">
             <span>Student Accounts & Real-Time Provisioning</span>
             <div style="display:flex; gap:8px;">
-              <button class="btn btn-secondary" onclick="openBulkStudentModal()">⚡ Bulk Add</button>
-              <button class="btn btn-emerald" onclick="openCreateStudentModal()">+ Register Student</button>
+              <button class="btn btn-secondary" onclick="openBulkStudentModal()">⚡ Bulk Add Students (Auto-Generate)</button>
+              <button class="btn btn-emerald" onclick="openCreateStudentModal()">+ Register Single Student</button>
             </div>
           </div>
           <table>
@@ -485,16 +552,18 @@
 
   <!-- 3. INSPERA REAL EXAM WORKSPACE -->
   <div id="examShell">
-    <div class="inspera-top" style="flex-wrap: wrap; height: auto; padding: 6px 18px;">
+    <div class="inspera-top">
       <div style="display:flex; align-items:center; gap:14px;">
         <span id="insperaExamTitle" style="font-weight:800;">IELTS Exam</span>
         <span id="insperaCandidateTag" style="font-size:12px; color:#9ca3af;"></span>
       </div>
       
-      <!-- AUDIO PLAYER HEADER (Hiển thị khi làm bài Listening) -->
-      <div id="listeningAudioHeaderContainer" style="display: none; align-items: center; gap: 8px; background: #111827; padding: 4px 12px; border-radius: 6px; border: 1px solid #374151;">
+      <!-- THANH AUDIO GHIM TRÊN HEADER (Tự động hỗ trợ cả Google Drive Iframe & MP3 trực tiếp) -->
+      <div id="listeningAudioHeaderContainer" style="display: none; align-items: center; gap: 10px; background: #111827; padding: 4px 12px; border-radius: 6px; border: 1px solid #374151;">
         <span style="font-size: 12px; color: #34d399; font-weight: 700;"><i class="fas fa-headphones"></i> Audio:</span>
         <audio id="examAudioPlayer" controls preload="auto" style="height: 32px; width: 320px;"></audio>
+        <iframe id="examDriveAudioIframe" allow="autoplay" style="display:none; width: 340px; height: 42px; border: none; border-radius: 4px; background: #1f2937;"></iframe>
+        <a id="examAudioFallbackLink" href="#" target="_blank" style="font-size: 11px; color: #93c5fd; text-decoration: underline; display: none;">Mở tab phụ nếu trình duyệt chặn</a>
       </div>
 
       <div style="display: flex; align-items: center; gap: 10px;">
@@ -523,9 +592,9 @@
     <div class="inspera-part-tabs" id="insperaPartTabs"></div>
 
     <div class="inspera-workspace" id="insperaSplitBox">
-      <div class="passage-col" id="insperaLeftPane" style="display: none;"></div>
-      <div class="resizer-bar" id="insperaResizer" style="display: none;"></div>
-      <div class="questions-col" id="insperaRightPane" style="width: 100%;"></div>
+      <div class="passage-col" id="insperaLeftPane"></div>
+      <div class="resizer-bar" id="insperaResizer"></div>
+      <div class="questions-col" id="insperaRightPane"></div>
     </div>
 
     <div id="selectionTooltip">
@@ -576,9 +645,15 @@
           <input type="hidden" id="gradeSubmissionId">
           <div><b>Candidate:</b> <span id="gradeStudentName"></span></div>
           <div><b>Assessment:</b> <span id="gradeExamTitle"></span></div>
-          <div class="form-group"><label>Award Band Score:</label><input type="text" id="gradeBandInput" class="form-input" placeholder="Band score..."></div>
-          <div class="form-group" style="flex:1; display:flex; flex-direction:column;"><label>Teacher's Feedback:</label><textarea id="gradeFeedbackInput" class="form-input" style="flex:1; min-height:160px; line-height:1.6;" placeholder="Feedback..."></textarea></div>
-          <button class="btn btn-emerald" style="width:100%; padding:10px;" onclick="saveWritingEvaluation()">Save Evaluation</button>
+          <div class="form-group">
+            <label>Award Band Score (e.g. 6.5, 7.0, 7.5):</label>
+            <input type="text" id="gradeBandInput" class="form-input" placeholder="Band score...">
+          </div>
+          <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
+            <label>Teacher's Feedback & Corrections:</label>
+            <textarea id="gradeFeedbackInput" class="form-input" style="flex:1; min-height:160px; line-height:1.6;" placeholder="Provide feedback, lexical notes, grammar correction..."></textarea>
+          </div>
+          <button class="btn btn-emerald" style="width:100%; padding:10px;" onclick="saveWritingEvaluation()">Save Evaluation (Real-Time)</button>
         </div>
       </div>
     </div>
@@ -591,11 +666,13 @@
       <div class="modal-body" style="padding: 30px 20px;">
         <div style="font-size: 48px; font-weight: 900; color: var(--emerald-accent);" id="summaryBandDisplay">Band 7.5</div>
         <p style="font-size: 16px; font-weight: 700; color: #374151; margin-top: 8px;" id="summaryScoreDisplay">Correct: 32 / 40</p>
-        <p style="font-size: 13px; color: #64748b; margin-top: 14px;">Your responses have been saved.</p>
+        <p style="font-size: 13px; color: #64748b; margin-top: 14px;">
+          Your responses have been saved to the cloud. Click below to review answers, explanations, and transcript/passage evidence.
+        </p>
       </div>
       <div class="modal-footer" style="justify-content: center; gap: 12px;">
         <button class="btn btn-secondary" onclick="closeScoreSummaryToDashboard()">Dashboard</button>
-        <button class="btn btn-emerald" onclick="enterReviewModeFromSummary()">Review Answers</button>
+        <button class="btn btn-emerald" onclick="enterReviewModeFromSummary()">Review Answers & Explanations</button>
       </div>
     </div>
   </div>
@@ -604,34 +681,49 @@
   <div class="modal-overlay" id="teacherEditModal">
     <div class="modal-window" style="width: 500px;">
       <div class="modal-header">
-        <span id="teacherEditTitle">Edit Explanation</span>
+        <span id="teacherEditTitle">Edit Explanation & Locate</span>
         <button class="btn btn-secondary" onclick="closeModal('teacherEditModal')">✕</button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="editKeyName">
-        <div class="form-group"><label>Correct Key:</label><input type="text" id="editKeyVal" class="form-input"></div>
-        <div class="form-group"><label>Explanation:</label><textarea id="editKeyExp" class="form-input" style="height: 90px;"></textarea></div>
-        <div class="form-group"><label>Evidence Quote:</label><input type="text" id="editKeyEvi" class="form-input"></div>
+        <div class="form-group">
+          <label>Correct Key / Answer (Use | for multiple valid answers, e.g., color|colour):</label>
+          <input type="text" id="editKeyVal" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Explanation:</label>
+          <textarea id="editKeyExp" class="form-input" style="height: 90px;"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Evidence Snippet (Exact quote from passage to highlight on click):</label>
+          <input type="text" id="editKeyEvi" class="form-input">
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('teacherEditModal')">Cancel</button>
-        <button class="btn btn-emerald" onclick="saveTeacherKeyUpdate()">Save</button>
+        <button class="btn btn-emerald" onclick="saveTeacherKeyUpdate()">Save Explanation</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: READING TEST EDITOR -->
+  <!-- MODAL: IMPORT / CREATE MULTI-FORMAT READING TEST -->
   <div class="modal-overlay" id="readingEditorModal">
     <div class="modal-window" style="width: 1060px;">
       <div class="modal-header">
-        <span>Create / Edit Reading Test</span>
+        <span>Create / Edit Multi-Format Reading Test (ieltsmaterials.uz Compatible)</span>
         <button class="btn btn-secondary" onclick="closeModal('readingEditorModal')">✕</button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="editingExamId">
         <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px;">
-          <div class="form-group"><label>Exam Title</label><input type="text" id="reTitle" class="form-input" placeholder="e.g. Cambridge 19 Test 1"></div>
-          <div class="form-group"><label>Duration (Minutes)</label><input type="number" id="reDuration" class="form-input" value="60"></div>
+          <div class="form-group">
+            <label>Exam Title</label>
+            <input type="text" id="reTitle" class="form-input" placeholder="e.g. Cambridge 19 Test 1 - Reading Full">
+          </div>
+          <div class="form-group">
+            <label>Duration (Minutes)</label>
+            <input type="number" id="reDuration" class="form-input" value="60">
+          </div>
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
           <div class="form-group">
@@ -643,7 +735,10 @@
               <option value="Passage 3">Passage 3</option>
             </select>
           </div>
-          <div class="form-group"><label>Chủ đề (Topic)</label><input type="text" id="reTopic" class="form-input" placeholder="e.g. Environment"></div>
+          <div class="form-group">
+            <label>Chủ đề / Nguồn đề (Topic - VD: Environment, Technology, Cam 19...)</label>
+            <input type="text" id="reTopic" class="form-input" placeholder="e.g. Environment / Cambridge 19">
+          </div>
         </div>
 
         <div style="display: flex; gap: 8px; margin: 8px 0 12px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
@@ -652,47 +747,84 @@
           <button class="btn btn-secondary" id="subtab-p3" onclick="switchPassageEditor(3)">Passage 3</button>
         </div>
 
-        <div class="form-group"><label>Passage Title</label><input type="text" id="rePTitle" class="form-input"></div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
-          <div class="form-group"><label>Passage HTML</label><textarea id="rePText" class="form-input" style="height: 150px; font-family: monospace; font-size:12px;"></textarea></div>
-          <div class="form-group"><label>Questions HTML</label><textarea id="rePQuestionsHtml" class="form-input" style="height: 150px; font-family: monospace; font-size:12px;"></textarea></div>
+        <div class="template-toolbar">
+          <span style="font-size:12px; font-weight:800; color:#065f46; width:100%; margin-bottom:2px;">
+            ⚡ Quick Insert CD-IELTS Question Type Template (ieltsmaterials.uz Layouts):
+          </span>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('tfng', 're')">+ TFNG / YNNG</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq1', 're')">+ Multiple Choice (1 Ans)</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq2', 're')">+ Multiple Choice (Choose TWO)</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('gapfill', 're')">+ Note / Summary Inline Gap-Fill</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('summary_drag', 're')">+ Summary Drag & Drop Bank</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('headings', 're')">+ Matching Headings (Drag to Passage)</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('matrix', 're')">+ Matching Information Matrix Table</button>
+          <button type="button" class="btn btn-emerald" onclick="autoGenerateKeysFromHtml('re')">🔍 Auto-Detect Question Numbers</button>
         </div>
+
+        <div class="form-group">
+          <label>Passage Title</label>
+          <input type="text" id="rePTitle" class="form-input" placeholder="Passage Title...">
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label>Passage HTML (Left Pane - Supports Heading Drop-zones)</label>
+            <textarea id="rePText" class="form-input" style="height: 170px; font-family: monospace; font-size:12px;"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Questions HTML (Right Pane - Multi-Format Support)</label>
+            <textarea id="rePQuestionsHtml" class="form-input" style="height: 170px; font-family: monospace; font-size:12px;"></textarea>
+          </div>
+        </div>
+
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
-          <div class="form-group"><label>Correct Keys</label><textarea id="rePKeys" class="form-input" style="height: 80px; font-family: monospace; font-size:12px;" placeholder="q1=TRUE"></textarea></div>
-          <div class="form-group"><label>Explanations</label><textarea id="rePExps" class="form-input" style="height: 80px; font-family: monospace; font-size:12px;"></textarea></div>
-          <div class="form-group"><label>Evidence Quotes</label><textarea id="rePEvis" class="form-input" style="height: 80px; font-family: monospace; font-size:12px;"></textarea></div>
+          <div class="form-group">
+            <label>Correct Keys (One per line: q1=TRUE)</label>
+            <textarea id="rePKeys" class="form-input" style="height: 90px; font-family: monospace; font-size:12px;" placeholder="q1=TRUE&#10;q2=FALSE&#10;q3=canopy"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Explanations (One per line: q1=Giải thích...)</label>
+            <textarea id="rePExps" class="form-input" style="height: 90px; font-family: monospace; font-size:12px;" placeholder="q1=Đoạn 1 nêu rõ..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Evidence Quotes (One per line: q1=Exact quote)</label>
+            <textarea id="rePEvis" class="form-input" style="height: 90px; font-family: monospace; font-size:12px;" placeholder="q1=it takes a while for the mind"></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Vocabulary List (One per line: word | part of speech | Vietnamese meaning | synonyms)</label>
+          <textarea id="rePVocab" class="form-input" style="height: 65px; font-family: monospace; font-size:12px;" placeholder="indistinguishable | adj | Khó phân biệt | identical, similar"></textarea>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('readingEditorModal')">Cancel</button>
-        <button class="btn btn-emerald" onclick="saveActiveExamFromEditor()">Save Exam</button>
+        <button class="btn btn-emerald" onclick="saveActiveExamFromEditor()">Save & Publish Real-Time</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL: CREATE LISTENING TEST -->
   <div class="modal-overlay" id="listeningEditorModal">
-    <div class="modal-window" style="width: 960px;">
+    <div class="modal-window" style="width: 1020px;">
       <div class="modal-header">
-        <span>Create / Edit Listening Test</span>
+        <span>Create / Edit Listening Test (Full-Screen Questions + Review Transcript)</span>
         <button class="btn btn-secondary" onclick="closeModal('listeningEditorModal')">✕</button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="editingListeningId">
         <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px;">
-          <div class="form-group"><label>Exam Title</label><input type="text" id="leTitle" class="form-input" placeholder="e.g. Cambridge 19 Listening Test 1"></div>
+          <div class="form-group"><label>Exam Title</label><input type="text" id="leTitle" class="form-input" placeholder="e.g. Cambridge 19 Listening Test 1 - Part 3"></div>
           <div class="form-group"><label>Duration (Minutes)</label><input type="number" id="leDuration" class="form-input" value="30"></div>
         </div>
         <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px;">
           <div class="form-group">
-            <label>Link Audio MP3 (Dán trực tiếp link file .mp3 hoặc link Google Drive)</label>
-            <input type="text" id="leAudioUrl" class="form-input" placeholder="https://... hoặc https://docs.google.com/file/d/...">
-            <small style="color:#64748b; font-size:11px;">Hệ thống tự động chuyển đổi link Google Drive sang dạng phát trực tiếp (Stream MP3).</small>
+            <label>Audio MP3 URL (Dán link Share Google Drive bất kỳ hoặc link .mp3 trực tiếp)</label>
+            <input type="text" id="leAudioUrl" class="form-input" placeholder="https://drive.google.com/file/d/.../view?usp=sharing">
+            <small style="color:#059669; font-size:11.5px; font-weight:600;">✔ Hỗ trợ trực tiếp link Google Drive (Nhớ bật quyền "Anyone with the link" trên Drive). Hệ thống sẽ nhúng trình phát Google Drive chính chủ không bao giờ bị lỗi 0:00!</small>
           </div>
           <div class="form-group">
-            <label>Listening Part</label>
+            <label>Listening Part Category</label>
             <select id="leCategory" class="form-input">
-              <option value="Listening Full">Full Test (Part 1-4)</option>
+              <option value="Listening Full">Full Listening Test (Part 1-4)</option>
               <option value="Listening Part 1">Listening Part 1</option>
               <option value="Listening Part 2">Listening Part 2</option>
               <option value="Listening Part 3">Listening Part 3</option>
@@ -700,107 +832,155 @@
             </select>
           </div>
         </div>
-        <div class="form-group"><label>Topic / Nguồn đề</label><input type="text" id="leTopic" class="form-input" placeholder="e.g. Cam 19 Test 1"></div>
-        <div class="form-group"><label>Transcript HTML (Hiển thị ở cột trái khi học sinh bấm Review sau khi nộp)</label><textarea id="leTranscript" class="form-input" style="height: 120px; font-family: monospace;" placeholder="<p><b>Speaker 1:</b> Hello...</p>"></textarea></div>
-        <div class="form-group"><label>Questions HTML (Hiển thị toàn trang khi làm bài)</label><textarea id="leQuestions" class="form-input" style="height: 140px; font-family: monospace;" placeholder="Nhập các câu hỏi Listening vào đây..."></textarea></div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-          <div class="form-group"><label>Correct Keys (q1=answer)</label><textarea id="leKeys" class="form-input" style="height: 80px; font-family: monospace;"></textarea></div>
-          <div class="form-group"><label>Explanations</label><textarea id="leExps" class="form-input" style="height: 80px; font-family: monospace;"></textarea></div>
+        <div class="form-group"><label>Topic / Source (Tag)</label><input type="text" id="leTopic" class="form-input" placeholder="e.g. Cam 19 Test 1 / Education"></div>
+
+        <!-- THANH CÔNG CỤ CHÈN MẪU CÂU HỎI CHO LISTENING -->
+        <div class="template-toolbar">
+          <span style="font-size:12px; font-weight:800; color:#065f46; width:100%; margin-bottom:2px;">
+            ⚡ Quick Insert Listening Question Templates:
+          </span>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('gapfill', 'le')">+ Note / Form Completion (Inline Gap-Fill)</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq1', 'le')">+ Multiple Choice (A, B, C)</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq2', 'le')">+ Choose TWO Letters (A-E)</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('summary_drag', 'le')">+ Matching / Drag & Drop Box</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('matrix', 'le')">+ Matrix Table</button>
+          <button type="button" class="btn btn-emerald" onclick="autoGenerateKeysFromHtml('le')">🔍 Auto-Detect Question Numbers</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label>Transcript HTML (Ẩn khi đang thi — Chỉ hiện ở cột trái khi học sinh bấm Review đáp án)</label>
+            <textarea id="leTranscript" class="form-input" style="height: 150px; font-family: monospace; font-size:12px;" placeholder="<p><b>Tutor:</b> So, Sally, how did you find the peer assessment project?</p>"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Questions HTML (Hiển thị TOÀN TRANG 100% khi làm bài)</label>
+            <textarea id="leQuestions" class="form-input" style="height: 150px; font-family: monospace; font-size:12px;" placeholder="Bấm các nút mẫu phía trên hoặc dán HTML câu hỏi vào đây..."></textarea>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+          <div class="form-group"><label>Correct Keys (q1=answer)</label><textarea id="leKeys" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;" placeholder="q21=B&#10;q22=A"></textarea></div>
+          <div class="form-group"><label>Explanations (Giải thích)</label><textarea id="leExps" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;" placeholder="q21=Sally nói rằng..."></textarea></div>
+          <div class="form-group"><label>Evidence Quotes (Câu trích trong Transcript để bấm Locate)</label><textarea id="leEvis" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;" placeholder="q21=students see it as a useful learning tool"></textarea></div>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('listeningEditorModal')">Cancel</button>
-        <button class="btn btn-emerald" onclick="saveListeningExam()">Save Listening Test</button>
+        <button class="btn btn-emerald" onclick="saveListeningExam()">Save & Publish Real-Time</button>
       </div>
     </div>
   </div>
-
-  <!-- MODAL: WRITING TEST EDITOR -->
+  
+  <!-- WRITING MODAL -->
   <div class="modal-overlay" id="writingEditorModal">
     <div class="modal-window" style="width: 720px;">
       <div class="modal-header">
-        <span>Create / Edit Writing Test</span>
+        <span>Create / Edit Writing Assessment (Task 1 & Task 2)</span>
         <button class="btn btn-secondary" onclick="closeModal('writingEditorModal')">✕</button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="editingWritingId">
         <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px;">
-          <div class="form-group"><label>Exam Title</label><input type="text" id="weTitle" class="form-input" placeholder="e.g. Academic Writing Test 01"></div>
+          <div class="form-group"><label>Exam Title</label><input type="text" id="weTitle" class="form-input" placeholder="e.g. IELTS Academic Writing Test 02"></div>
           <div class="form-group"><label>Duration (Minutes)</label><input type="number" id="weDuration" class="form-input" value="60"></div>
         </div>
         <div class="form-group">
-          <label>Chủ đề / Dạng bài (Topic / Type - VD: Bar Chart, Opinion, Map, Discussion...)</label>
+          <label>Chủ đề / Dạng bài (VD: Line Graph, Bar Chart, Map, Process, Opinion, Discussion...)</label>
           <input type="text" id="weTopic" class="form-input" placeholder="e.g. Bar Chart / Education">
         </div>
         <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px; margin-bottom: 14px;">
-          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 1 (Optional)</h4>
-          <div class="form-group"><label>Task 1 Prompt</label><textarea id="weT1Prompt" class="form-input" style="height: 75px;"></textarea></div>
-          <div class="form-group"><label>Chart Image URL</label><input type="text" id="weT1Image" class="form-input"></div>
+          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 1 (Để trống nếu chỉ tạo đề lẻ Task 2)</h4>
+          <div class="form-group"><label>Task 1 Prompt</label><textarea id="weT1Prompt" class="form-input" style="height: 85px;"></textarea></div>
+          <div class="form-group"><label>Chart / Diagram Image URL (Optional)</label><input type="text" id="weT1Image" class="form-input" placeholder="https://..."></div>
         </div>
         <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px;">
-          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 2 (Optional)</h4>
-          <div class="form-group"><label>Task 2 Prompt</label><textarea id="weT2Prompt" class="form-input" style="height: 75px;"></textarea></div>
+          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 2 (Để trống nếu chỉ tạo đề lẻ Task 1)</h4>
+          <div class="form-group"><label>Task 2 Prompt</label><textarea id="weT2Prompt" class="form-input" style="height: 85px;"></textarea></div>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('writingEditorModal')">Cancel</button>
-        <button class="btn btn-emerald" onclick="saveWritingExam()">Save Writing Test</button>
+        <button class="btn btn-emerald" onclick="saveWritingExam()">Save Writing Test (Real-Time)</button>
       </div>
     </div>
   </div>
 
-  <!-- PROFILE, CLASS, STUDENT & ASSIGN MODALS -->
+  <!-- PROFILE MODAL -->
   <div class="modal-overlay" id="profileModal">
     <div class="modal-window" style="width: 400px;">
       <div class="modal-header">Account Profile</div>
       <div class="modal-body">
         <div class="form-group"><label>Full Name</label><input type="text" id="profNameInput" class="form-input"></div>
-        <div class="form-group"><label>New Password</label><input type="password" id="profPassInput" class="form-input"></div>
+        <div class="form-group"><label>New Password (leave blank to keep current)</label><input type="password" id="profPassInput" class="form-input"></div>
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('profileModal')">Cancel</button><button class="btn btn-emerald" onclick="saveProfileChanges()">Save</button></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('profileModal')">Cancel</button>
+        <button class="btn btn-emerald" onclick="saveProfileChanges()">Save</button>
+      </div>
     </div>
   </div>
 
+  <!-- CLASS MODAL -->
   <div class="modal-overlay" id="classModal">
     <div class="modal-window" style="width: 400px;">
       <div class="modal-header">Add Cohort / Class</div>
-      <div class="modal-body"><div class="form-group"><label>Class Name</label><input type="text" id="newClassName" class="form-input"></div></div>
+      <div class="modal-body"><div class="form-group"><label>Class Name</label><input type="text" id="newClassName" class="form-input" placeholder="e.g. IELTS Fighter B2"></div></div>
       <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('classModal')">Cancel</button><button class="btn btn-emerald" onclick="saveNewClass()">Save</button></div>
     </div>
   </div>
 
+  <!-- SINGLE STUDENT MODAL -->
   <div class="modal-overlay" id="studentModal">
     <div class="modal-window" style="width: 440px;">
       <div class="modal-header">Register Student Account</div>
       <div class="modal-body">
-        <div class="form-group"><label>Full Name</label><input type="text" id="newStuFullName" class="form-input"></div>
-        <div class="form-group"><label>Username</label><input type="text" id="newStuUsername" class="form-input"></div>
+        <div class="form-group"><label>Full Name</label><input type="text" id="newStuFullName" class="form-input" autocomplete="off" placeholder="Nguyen Van B"></div>
+        <div class="form-group"><label>Username</label><input type="text" id="newStuUsername" class="form-input" autocomplete="off" placeholder="nguyenvanb"></div>
         <div class="form-group"><label>Password</label><input type="text" id="newStuPassword" class="form-input" value="123456"></div>
-        <div class="form-group"><label>Class</label><select id="newStuClassSelect" class="form-input"></select></div>
+        <div class="form-group"><label>Assign to Class</label><select id="newStuClassSelect" class="form-input"></select></div>
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('studentModal')">Cancel</button><button class="btn btn-emerald" onclick="saveNewStudent()">Create</button></div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('studentModal')">Cancel</button><button class="btn btn-emerald" onclick="saveNewStudent()">Create Account</button></div>
     </div>
   </div>
 
+  <!-- BULK STUDENT GENERATOR MODAL -->
   <div class="modal-overlay" id="bulkStudentModal">
     <div class="modal-window" style="width: 540px;">
-      <div class="modal-header"><span>Bulk Add Students</span><button class="btn btn-secondary" onclick="closeModal('bulkStudentModal')">✕</button></div>
-      <div class="modal-body">
-        <div class="form-group"><label>Class</label><select id="bulkStuClassSelect" class="form-input"></select></div>
-        <div class="form-group"><label>Default Pass</label><input type="text" id="bulkStuDefaultPass" class="form-input" value="123456"></div>
-        <div class="form-group"><label>List (Name | username | pass)</label><textarea id="bulkStuTextarea" class="form-input" style="height: 140px; font-family: monospace;"></textarea></div>
+      <div class="modal-header">
+        <span>⚡ Bulk Student Account Generator</span>
+        <button class="btn btn-secondary" onclick="closeModal('bulkStudentModal')">✕</button>
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('bulkStudentModal')">Cancel</button><button class="btn btn-emerald" onclick="saveBulkStudents()">Generate</button></div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Select Target Class Cohort</label>
+          <select id="bulkStuClassSelect" class="form-input"></select>
+        </div>
+        <div class="form-group">
+          <label>Default Password for New Accounts</label>
+          <input type="text" id="bulkStuDefaultPass" class="form-input" value="123456">
+        </div>
+        <div class="form-group">
+          <label>Paste Student List (One student per line: either "Full Name" OR "Full Name | username | password")</label>
+          <textarea id="bulkStuTextarea" class="form-input" style="height: 160px; font-family: monospace;" placeholder="Tran Minh Quan&#10;Le Hoang Nam&#10;Pham Thu Ha | thuha99 | 123456"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('bulkStudentModal')">Cancel</button>
+        <button class="btn btn-emerald" onclick="saveBulkStudents()">Generate & Sync Accounts</button>
+      </div>
     </div>
   </div>
 
+  <!-- ASSIGN EXAM MODAL -->
   <div class="modal-overlay" id="assignModal">
     <div class="modal-window" style="width: 420px;">
-      <div class="modal-header">Assign Exam</div>
+      <div class="modal-header">Assign Exam to Cohort</div>
       <div class="modal-body">
         <input type="hidden" id="assignExamId">
         <input type="hidden" id="assignExamType">
-        <div class="form-group"><label>Target Class</label><select id="assignCohortSelect" class="form-input"></select></div>
+        <div class="form-group">
+          <label>Target Cohort (Select "All Classes" to make public to all students)</label>
+          <select id="assignCohortSelect" class="form-input"></select>
+        </div>
       </div>
       <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('assignModal')">Cancel</button><button class="btn btn-emerald" onclick="executeAssign()">Confirm</button></div>
     </div>
@@ -835,13 +1015,187 @@
       id: 'reading_science_of_shopping',
       title: 'Passage: The Science of Shopping (Questions 27-40)',
       duration: 20,
-      category: 'Passage 1',
-      topic: 'Psychology & Business',
+      category: 'Passage 3',
+      topic: 'Consumer Psychology',
       assignedClasses: [],
-      correctAnswers: { q27: 'B', q28: 'D', q29: 'A', q30: 'C', q31: 'YES', q32: 'YES', q33: 'NO', q34: 'NOT GIVEN', q35: 'NO', q36: 'G', q37: 'C', q38: 'A', q39: 'H', q40: 'E' },
-      explanations: { q27: 'Tác giả giải thích lý do các siêu thị giống nhau.' },
-      evidences: { q27: 'It is more that they are all well-versed' },
-      passages: [{ partNum: 1, title: 'Passage: The Science of Shopping', passageHtml: '<p>You may have wondered why so many supermarkets are virtually indistinguishable from each other...</p>', questionsHtml: '<div class="question" data-question="27"><div class="question-text">27 What does the writer suggest?</div><div class="options"><label><input type="radio" name="q27" value="A"> A</label><label><input type="radio" name="q27" value="B"> B</label></div></div>', vocab: [{ word: 'indistinguishable', type: 'adj', mean: 'Khó phân biệt', syn: 'identical' }] }]
+      correctAnswers: {
+        q27: 'B', q28: 'D', q29: 'A', q30: 'C',
+        q31: 'YES', q32: 'YES', q33: 'NO', q34: 'NOT GIVEN', q35: 'NO',
+        q36: 'G', q37: 'C', q38: 'A', q39: 'H', q40: 'E'
+      },
+      explanations: {
+        q27: 'Tác giả giải thích lý do các siêu thị giống nhau là vì am hiểu tâm lý người tiêu dùng ("khoa học thuyết phục người tiêu dùng mua hàng").',
+        q28: 'Khu vực chill zone để người mua có khởi đầu nhẹ nhàng và dần đưa tâm trí vào trạng thái sẵn sàng mua sắm.',
+        q29: 'Việc chọn lựa thực phẩm tươi lành ngay khi bắt đầu mua sắm giúp người mua cảm thấy phấn chấn (uplifting) và có tâm lý dễ chịu.',
+        q30: 'Cụm từ "Shoppers have worked out that..." thể hiện người đi siêu thị đã nhận ra một số thủ thuật của cửa hàng.',
+        q31: 'Bài đọc chỉ ra các cửa hàng xếp sản phẩm rẻ hơn ở kệ thấp để kích thích khách mua sản phẩm đắt tiền đặt ngang tầm mắt.',
+        q32: 'Tác giả nêu rõ quy định từ trụ sở chính gây ra nhiều tranh cãi và các nhà bán lẻ có quan điểm riêng.',
+        q33: 'Bài viết khẳng định việc sắp xếp kệ hàng cực kỳ gây tranh cãi và không có sự đồng thuận chung.',
+        q34: 'Bài viết chỉ đề cập camera an ninh dùng để phân tích hành vi, không bàn luận về mối đe dọa quyền riêng tư.',
+        q35: 'Dữ liệu điện tử nói lên rất ít lý do khách rời đi; phỏng vấn trực tiếp mới mang lại thông tin chi tiết và giá trị hơn.',
+        q36: 'Mọi người đưa ra quyết định mua sắm dựa trên logic và ý thức chung (G. rational decisions).',
+        q37: 'Nghiên cứu cho thấy có các yếu tố cảm xúc và ký ức mà cá nhân không hoàn toàn nhận thức được (C. unconscious factors).',
+        q38: 'Nghiên cứu sử dụng máy quét fMRI để theo dõi hoạt động não bộ của người tham gia (A. brain scans).',
+        q39: 'Kết quả quét não cho thấy sự mâu thuẫn lớn giữa lời nói và cảm xúc thực sự trong não (H. emotional reaction).',
+        q40: 'Tỷ lệ thất bại của các sản phẩm mới tung ra thị trường là rất cao (8 trên 10 sản phẩm không thành công) (E. failures).'
+      },
+      evidences: {
+        q27: 'It is more that they are all well-versed in the science of persuading people to buy things',
+        q28: 'It takes a while for the mind to get into a shopping mode. People need to make a gentle start and take stock of the surroundings',
+        q29: 'selecting wholesome fresh food is an uplifting way to start shopping, and it makes people feel less guilty',
+        q30: 'Shoppers have worked out that everyday items, like milk, will invariably be placed in an aisle towards the back of a store',
+        q31: 'stores encourage customers to buy expensive branded products by arranging them at eye-level, with cheaper ones lower down',
+        q32: 'Often head offices specify where everything has to be placed and spot-checks are carried out to make sure instructions are followed to the letter. But shelf-positioning is extremely controversial.',
+        q33: 'Despite all the academic papers written on how best to stack shelves, retailers have their own views. While many stores consider eye-level to be the top spot, others think a little higher is better.',
+        q34: 'Pictures showing shoppers while they are making their selections can now be analysed',
+        q35: 'This low-tech approach has become widespread following comments from stores that data collected electronically tells them little about why so many customers leave without making a purchase',
+        q36: 'People tell market researchers that they make decisions about what to buy based on logic and common sense',
+        q37: 'there are clearly other factors which play a role, such as certain feelings and memories which individuals are not fully aware of',
+        q38: 'scanners reveal their brain activity as they respond',
+        q39: 'major contradictions are apparent between what they say and what they are thinking',
+        q40: 'Eight out of ten new consumer products launched on the market do not succeed'
+      },
+      passages: [
+        {
+          partNum: 1,
+          title: 'Passage: The Science of Shopping',
+          passageHtml: `
+            <p>You may have wondered why so many supermarkets are virtually indistinguishable from each other. It is not, as some might suspect, that the companies operating them lack imagination. It is more that they are all well-versed in the science of persuading people to buy things - a science that, thanks to technological advances, is beginning to understand what motivates consumers when they make decisions on what to purchase.</p>
+            <p>It takes a while for the mind to get into a shopping mode. People need to make a gentle start and take stock of the surroundings. This is why some supermarkets have a so-called chill zone for browsing magazines, books and DVDs, an area which is also designed to catch the customer's eye and tempt them to make impulsive purchases. But many will ignore it, in which case the first thing they encounter is the fresh fruit and vegetables section. For shoppers, this makes no sense. Fruit in particular can be easily bruised, so ideally should be bought at the end, not the beginning, of a shopping trip. But psychology is at work here: selecting wholesome fresh food is an uplifting way to start shopping, and it makes people feel less guilty about reaching for the less nutritious stuff later on.</p>
+            <p>Shoppers have worked out that everyday items, like milk, will invariably be placed in an aisle towards the back of a store to provide more opportunity to tempt customers on their way there. This is also why pharmacies are generally at the rear, even in convenience stores. But supermarkets know shoppers know this, so they use other tricks, like placing popular items halfway along a section, thereby forcing people to walk along the aisle looking for them. The idea is to boost the length of time shoppers spend in a store.</p>
+            <p>Having walked to the end of the fruit and vegetable aisle, shoppers arrive at counters of prepared food, the fishmonger and the butcher. Then there is the in-store bakery, which can be smelt before being seen. Even small supermarkets now use in-store bakeries. Mostly these bake pre-prepared items, and they have boomed, although central bakeries that deliver to many stores are more efficient. The smell of freshly baked bread can make people hungry, encouraging them to buy not just bread but other food.</p>
+            <p>There are also numerous ways stores get shoppers to choose particular products. For example, stores encourage customers to buy expensive branded products by arranging them at eye-level, with cheaper ones lower down. Often head offices specify where everything has to be placed and spot-checks are carried out to make sure instructions are followed to the letter. But shelf-positioning is extremely controversial. Despite all the academic papers written on how best to stack shelves, retailers have their own views. While many stores consider eye-level to be the top spot, others think a little higher is better.</p>
+            <p>Technology is making the process of monitoring shopper behaviour easier, which is why the security cameras in stores may be doing considerably more than watching out for theft. Pictures showing shoppers while they are making their selections can now be analysed. It is possible to see how many shoppers went straight to one brand, the number that hesitated, and those that compared several brands. However, despite the availability of sophisticated technology, researchers have found that simply talking to consumers as they exit the store can yield valuable insights. This low-tech approach has become widespread following comments from stores that data collected electronically tells them little about why so many customers leave without making a purchase. Face-to-face interviews reveal that customers leave shops empty-handed more often because they are unable to decide than because prices are too high.</p>
+            <p>People tell market researchers that they make decisions about what to buy based on logic and common sense, considering issues such as price, quality or convenience. But there are clearly other factors which play a role, such as certain feelings and memories which individuals are not fully aware of. Researchers hired by big stores are now conducting studies using functional magnetic resonance imaging (fMRI), which detects changes in the brain corresponding to increases or decreases in mental activity. Research participants are shown different products and asked questions about them, while scanners reveal their brain activity as they respond. Often, major contradictions are apparent between what they say and what they are thinking. This is immensely valuable information. Eight out of ten new consumer products launched on the market do not succeed, despite having been tested on people who insist they would buy them but who, deep down, may have reservations about the desirability of these products.</p>
+            <p>This shopping science probably has its limits, however. Dr Eric Spangenberg of the University of Washington argues that while it is unlikely that someone could be persuaded to buy something they do not need, they might be convinced to choose one brand in preference to another without being aware that this is happening. This claim is also borne out by numerous research findings. But if consumers were to realise quite how much research is being done into the many psychological factors influencing their choices, they might be much more wary of making purchases in the future.</p>
+          `,
+          questionsHtml: `
+            <div class="question-group">
+              <div class="question-group-title">Questions 27-30</div>
+              <p>Choose the correct letter, <strong>A, B, C</strong> or <strong>D</strong>.</p>
+              <div class="question" data-question="27">
+                <div class="question-text"><span class="q-badge">27</span> What does the writer suggest about supermarkets in the first paragraph?</div>
+                <div class="options">
+                  <label><input type="radio" name="q27" value="A"> A They need to try harder to be different from one another.</label>
+                  <label><input type="radio" name="q27" value="B"> B They share a similar understanding of consumer psychology.</label>
+                  <label><input type="radio" name="q27" value="C"> C They depend too much on the latest technology.</label>
+                  <label><input type="radio" name="q27" value="D"> D They should do more to analyse how consumers think.</label>
+                </div>
+              </div>
+              <div class="question" data-question="28">
+                <div class="question-text"><span class="q-badge">28</span> The writer says the function of the chill zone in supermarkets is</div>
+                <div class="options">
+                  <label><input type="radio" name="q28" value="A"> A to give customers time to decide what they want to buy.</label>
+                  <label><input type="radio" name="q28" value="B"> B to present customers with a range of interesting bargains.</label>
+                  <label><input type="radio" name="q28" value="C"> C to ensure customers feel under no pressure to buy anything.</label>
+                  <label><input type="radio" name="q28" value="D"> D to help customers slowly prepare themselves to go shopping.</label>
+                </div>
+              </div>
+              <div class="question" data-question="29">
+                <div class="question-text"><span class="q-badge">29</span> According to the writer, placing fruit and vegetables near the front of the store</div>
+                <div class="options">
+                  <label><input type="radio" name="q29" value="A"> A ensures the customers will feel good about the first products they buy.</label>
+                  <label><input type="radio" name="q29" value="B"> B reduces the risk of customers damaging these products later on.</label>
+                  <label><input type="radio" name="q29" value="C"> C encourages customers to buy more of these products than they intended.</label>
+                  <label><input type="radio" name="q29" value="D"> D makes customers consider healthier options in other sections they visit.</label>
+                </div>
+              </div>
+              <div class="question" data-question="30">
+                <div class="question-text"><span class="q-badge">30</span> What point does the writer make about shoppers in the third paragraph?</div>
+                <div class="options">
+                  <label><input type="radio" name="q30" value="A"> A They spend more time in stores than they realise.</label>
+                  <label><input type="radio" name="q30" value="B"> B They believe stores make life unnecessarily difficult for them.</label>
+                  <label><input type="radio" name="q30" value="C"> C They are aware of some of the techniques used by stores.</label>
+                  <label><input type="radio" name="q30" value="D"> D They are confused by frequent changes in the layout of stores.</label>
+                </div>
+              </div>
+            </div>
+            <div class="question-group">
+              <div class="question-group-title">Questions 31-35</div>
+              <p>Choose <strong>YES</strong>, <strong>NO</strong> or <strong>NOT GIVEN</strong>.</p>
+              <div class="question" data-question="31">
+                <div class="question-text"><span class="q-badge">31</span> Cheaper products are placed on lower shelves to minimise the likelihood that they will be bought.</div>
+                <div class="options">
+                  <label><input type="radio" name="q31" value="YES"> YES</label>
+                  <label><input type="radio" name="q31" value="NO"> NO</label>
+                  <label><input type="radio" name="q31" value="NOT GIVEN"> NOT GIVEN</label>
+                </div>
+              </div>
+              <div class="question" data-question="32">
+                <div class="question-text"><span class="q-badge">32</span> Head offices should be more flexible about how products are arranged by supermarkets.</div>
+                <div class="options">
+                  <label><input type="radio" name="q32" value="YES"> YES</label>
+                  <label><input type="radio" name="q32" value="NO"> NO</label>
+                  <label><input type="radio" name="q32" value="NOT GIVEN"> NOT GIVEN</label>
+                </div>
+              </div>
+              <div class="question" data-question="33">
+                <div class="question-text"><span class="q-badge">33</span> There is widespread agreement on how products should be arranged on shelves.</div>
+                <div class="options">
+                  <label><input type="radio" name="q33" value="YES"> YES</label>
+                  <label><input type="radio" name="q33" value="NO"> NO</label>
+                  <label><input type="radio" name="q33" value="NOT GIVEN"> NOT GIVEN</label>
+                </div>
+              </div>
+              <div class="question" data-question="34">
+                <div class="question-text"><span class="q-badge">34</span> Security cameras are a serious threat to customers' privacy.</div>
+                <div class="options">
+                  <label><input type="radio" name="q34" value="YES"> YES</label>
+                  <label><input type="radio" name="q34" value="NO"> NO</label>
+                  <label><input type="radio" name="q34" value="NOT GIVEN"> NOT GIVEN</label>
+                </div>
+              </div>
+              <div class="question" data-question="35">
+                <div class="question-text"><span class="q-badge">35</span> Technology is the best tool for determining why shoppers fail to make purchases.</div>
+                <div class="options">
+                  <label><input type="radio" name="q35" value="YES"> YES</label>
+                  <label><input type="radio" name="q35" value="NO"> NO</label>
+                  <label><input type="radio" name="q35" value="NOT GIVEN"> NOT GIVEN</label>
+                </div>
+              </div>
+            </div>
+            <div class="question-group">
+              <div class="question-group-title">Questions 36-40</div>
+              <p>Complete the summary using the list of words and phrases, <strong>A-I</strong>, below.</p>
+              <div class="drag-options">
+                <div class="drag-item" draggable="true" data-answer="A">A brain scans</div>
+                <div class="drag-item" draggable="true" data-answer="B">B purpose</div>
+                <div class="drag-item" draggable="true" data-answer="C">C unconscious factors</div>
+                <div class="drag-item" draggable="true" data-answer="D">D shelf placement</div>
+                <div class="drag-item" draggable="true" data-answer="E">E failures</div>
+                <div class="drag-item" draggable="true" data-answer="F">F social pressure</div>
+                <div class="drag-item" draggable="true" data-answer="G">G rational decisions</div>
+                <div class="drag-item" draggable="true" data-answer="H">H emotional reaction</div>
+                <div class="drag-item" draggable="true" data-answer="I">I shopping habits</div>
+              </div>
+              <p style="line-height: 2.3; margin-top: 10px;">
+                Research is providing insights into what makes people purchase particular products. Most shoppers believe that their choices are the result of 
+                <span class="drop-zone" data-target="q36" data-placeholder="36">36</span>. 
+                Research involving fMRI scanners, however, has revealed that certain 
+                <span class="drop-zone" data-target="q37" data-placeholder="37">37</span> 
+                influence shoppers' decisions to a significant extent. In the research, a comparison was made between participants' stated opinions of a product and data from 
+                <span class="drop-zone" data-target="q38" data-placeholder="38">38</span>, 
+                which often indicated a radically different 
+                <span class="drop-zone" data-target="q39" data-placeholder="39">39</span>. 
+                As most new products are 
+                <span class="drop-zone" data-target="q40" data-placeholder="40">40</span>, 
+                this data could be extremely valuable for marketing departments.
+              </p>
+            </div>
+          `,
+          vocab: [
+            { word: 'indistinguishable', type: 'adj', mean: 'Khó phân biệt, giống hệt nhau', syn: 'identical, similar, alike' },
+            { word: 'well-versed', type: 'adj', mean: 'Am hiểu, thông thạo', syn: 'knowledgeable, proficient' },
+            { word: 'motivate', type: 'verb', mean: 'Thúc đẩy, tạo động lực', syn: 'encourage, stimulate' },
+            { word: 'impulsive', type: 'adj', mean: 'Bốc đồng, ngẫu hứng', syn: 'spontaneous, rash' },
+            { word: 'bruised', type: 'adj', mean: 'Bị dập, thâm tím', syn: 'damaged, harmed' },
+            { word: 'wholesome', type: 'adj', mean: 'Lành mạnh, bổ dưỡng', syn: 'healthy, nourishing' },
+            { word: 'controversial', type: 'adj', mean: 'Gây tranh cãi', syn: 'debatable, contentious' },
+            { word: 'sophisticated', type: 'adj', mean: 'Tinh vi, hiện đại', syn: 'advanced, complex' },
+            { word: 'contradiction', type: 'noun', mean: 'Sự mâu thuẫn', syn: 'inconsistency, discrepancy' }
+          ]
+        }
+      ]
     };
 
     let db = {
@@ -856,18 +1210,18 @@
       ],
       savedVocab: {},
       readingExams: [ defaultShoppingExam ],
+      listeningExams: [],
       writingExams: [
         {
           id: 'we_full_demo',
           title: 'IELTS Academic Writing Simulation 01',
           duration: 60,
-          topic: 'Bar Chart / Environment',
+          topic: 'Bar Chart / Opinion',
           assignedClasses: [],
-          task1: { prompt: 'The chart below shows global energy consumption by source...', image: '' },
-          task2: { prompt: 'Some people argue that technological progress increases the gap...' }
+          task1: { prompt: 'The chart below shows global energy consumption by source between 1990 and 2020. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.', image: '' },
+          task2: { prompt: 'Some people argue that technological progress increases the gap between rich and poor nations, while others believe it has the opposite effect. Discuss both views and give your own opinion.' }
         }
       ],
-      listeningExams: [],
       results: []
     };
 
@@ -880,6 +1234,18 @@
       }
     }
 
+    function ensureArraysExist() {
+      if (!db.users || !db.users.length) {
+        db.users = [{ id: 'u_admin', username: 'amuro', pass: 'amuro123', name: 'Teacher Amuro', role: 'teacher' }];
+      }
+      if (!db.classes) db.classes = [];
+      if (!db.readingExams) db.readingExams = [];
+      if (!db.listeningExams) db.listeningExams = [];
+      if (!db.writingExams) db.writingExams = [];
+      if (!db.results) db.results = [];
+      if (!db.savedVocab) db.savedVocab = {};
+    }
+
     function initDatabaseListener() {
       try {
         const cached = localStorage.getItem('AMURO_IELTS_DB_BACKUP');
@@ -887,9 +1253,7 @@
           const parsed = JSON.parse(cached);
           if (parsed && parsed.users) {
             db = parsed;
-            if (!db.readingExams) db.readingExams = [];
-            if (!db.writingExams) db.writingExams = [];
-            if (!db.listeningExams) db.listeningExams = [];
+            ensureArraysExist();
           }
         }
       } catch (e) {}
@@ -898,7 +1262,8 @@
         if (e.key === 'AMURO_IELTS_DB_BACKUP' && e.newValue) {
           try {
             db = JSON.parse(e.newValue);
-            renderDashboard();
+            ensureArraysExist();
+            if (activeUser) renderDashboard();
           } catch (err) {}
         }
       });
@@ -909,34 +1274,42 @@
             const cloudData = doc.data();
             if (cloudData && cloudData.users) {
               db = cloudData;
-              if (!db.readingExams) db.readingExams = [];
-              if (!db.writingExams) db.writingExams = [];
-              if (!db.listeningExams) db.listeningExams = [];
+              ensureArraysExist();
               localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
-              setSyncStatus('Cloud Synced', true);
-              renderDashboard();
+              setSyncStatus('Cloud Real-Time Active', true);
+              if (activeUser) {
+                const updatedMe = db.users.find(u => u.id === activeUser.id || u.username === activeUser.username);
+                if (updatedMe) {
+                  activeUser = updatedMe;
+                  sessionStorage.setItem('AMURO_CURRENT_USER', JSON.stringify(activeUser));
+                }
+                renderDashboard();
+              }
             }
           } else {
             persist();
           }
         }, (err) => {
-          setSyncStatus('Local Mode', false);
+          console.warn('Firestore Realtime fallback:', err.message);
+          setSyncStatus('Local Sync Active', false);
         });
       }
     }
 
     function persist() {
+      ensureArraysExist();
       try {
         localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
       } catch (e) {}
 
       if (CLOUD_DOC) {
-        setSyncStatus('Syncing...', true);
+        setSyncStatus('Syncing changes...', true);
         const cleanData = JSON.parse(JSON.stringify(db));
         CLOUD_DOC.set(cleanData).then(() => {
-          setSyncStatus('Cloud Synced', true);
+          setSyncStatus('Cloud Real-Time Active', true);
         }).catch(err => {
-          setSyncStatus('Local Mode', false);
+          console.error('Failed to sync to Firestore:', err);
+          setSyncStatus('Saved Locally', false);
         });
       }
     }
@@ -957,6 +1330,7 @@
     let secondsRemaining = 3600;
     let selectedDragItem = null;
 
+    /* AUTH CONTROLLER */
     function checkSession() {
       if (activeUser) {
         document.getElementById('loginScreen').style.display = 'none';
@@ -975,7 +1349,14 @@
       const p = document.getElementById('logPass').value.trim();
       if (!u || !p) return alert('Please enter both username and password!');
       
-      const user = (db.users || []).find(x => x.username.toLowerCase() === u.toLowerCase() && String(x.pass).trim() === p);
+      ensureArraysExist();
+      let user = (db.users || []).find(x => x.username.toLowerCase() === u.toLowerCase() && String(x.pass).trim() === p);
+      // Fallback bảo vệ tài khoản giáo viên mặc định không bao giờ bị mất
+      if (!user && u.toLowerCase() === 'amuro' && p === 'amuro123') {
+        user = { id: 'u_admin', username: 'amuro', pass: 'amuro123', name: 'Teacher Amuro', role: 'teacher' };
+        db.users.push(user);
+        persist();
+      }
       if (!user) return alert('Invalid username or password!');
       
       activeUser = user;
@@ -1010,9 +1391,10 @@
       sessionStorage.setItem('AMURO_CURRENT_USER', JSON.stringify(activeUser));
       closeModal('profileModal');
       checkSession();
-      alert('Profile updated!');
+      alert('Profile updated in real-time!');
     }
 
+    /* DASHBOARD CONTROLLER */
     function switchDashTab(tab) {
       document.querySelectorAll('.dash-tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.dash-pane').forEach(p => p.style.display = 'none');
@@ -1036,10 +1418,11 @@
 
     function renderDashboard() {
       if (!activeUser) return;
+      ensureArraysExist();
       renderHomeTab();
       renderReadingTable();
-      renderWritingTable();
       renderListeningTable();
+      renderWritingTable();
       renderMySavedVocab();
       if (activeUser.role === 'teacher') {
         renderClassTable();
@@ -1050,16 +1433,27 @@
 
     function renderHomeTab() {
       if (!activeUser) return;
-      document.getElementById('homeWelcomeTitle').textContent = `Welcome back, ${activeUser.name}!`;
-      document.getElementById('statReadingCount').textContent = getVisibleExams(db.readingExams).length;
-      document.getElementById('statWritingCount').textContent = getVisibleExams(db.writingExams).length;
-      document.getElementById('statListeningCount').textContent = getVisibleExams(db.listeningExams).length;
+      const elWelcome = document.getElementById('homeWelcomeTitle');
+      if (elWelcome) elWelcome.textContent = `Welcome back, ${activeUser.name}!`;
+      
+      const elRead = document.getElementById('statReadingCount');
+      if (elRead) elRead.textContent = getVisibleExams(db.readingExams).length;
+      
+      const elLis = document.getElementById('statListeningCount');
+      if (elLis) elLis.textContent = getVisibleExams(db.listeningExams).length;
+
+      const elWrite = document.getElementById('statWritingCount');
+      if (elWrite) elWrite.textContent = getVisibleExams(db.writingExams).length;
       
       const savedCount = (db.savedVocab && db.savedVocab[activeUser.username]) ? db.savedVocab[activeUser.username].length : 0;
-      document.getElementById('statVocabCount').textContent = savedCount;
-      document.getElementById('statSubmissionsCount').textContent = (db.results || []).length;
+      const elVocab = document.getElementById('statVocabCount');
+      if (elVocab) elVocab.textContent = savedCount;
+
+      const elSub = document.getElementById('statSubmissionsCount');
+      if (elSub) elSub.textContent = (db.results || []).length;
 
       const tbody = document.getElementById('homeRecentActivityTbody');
+      if (!tbody) return;
       tbody.innerHTML = '';
       let recents = (db.results || []).slice().reverse();
       if (activeUser.role === 'student') {
@@ -1094,10 +1488,11 @@
       const topicKw = (document.getElementById('filterReadingTopic')?.value || '').toLowerCase().trim();
 
       const list = getVisibleExams(db.readingExams).filter(e => {
-        const titleMatch = !searchKw || e.title.toLowerCase().includes(searchKw);
-        const topicMatch = !topicKw || (e.topic || '').toLowerCase().includes(topicKw);
-        const partMatch = partFilter === 'ALL' || (e.category || 'Full Test') === partFilter;
-        return titleMatch && topicMatch && partMatch;
+        const hay = `${e.title || ''} ${e.topic || ''} ${e.category || ''}`.toLowerCase();
+        const matchSearch = !searchKw || hay.includes(searchKw);
+        const matchTopic = !topicKw || hay.includes(topicKw);
+        const matchPart = !partFilter || partFilter === 'ALL' || (e.category || 'Full Test') === partFilter;
+        return matchSearch && matchTopic && matchPart;
       });
 
       if (!list.length) {
@@ -1105,15 +1500,20 @@
         return;
       }
       list.forEach(e => {
-        const clsNames = (!e.assignedClasses || e.assignedClasses.length === 0) ? 'All Classes' : e.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
+        const clsNames = (!e.assignedClasses || e.assignedClasses.length === 0)
+          ? 'All Classes'
+          : e.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
         const catBadge = e.category ? `<span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; margin-right:6px;">${e.category}</span>` : '';
         const topBadge = e.topic ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700;">🏷️ ${e.topic}</span>` : '';
         
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><div><b>${e.title}</b></div><div>${catBadge}${topBadge}</div></td>
+          <td>
+            <div style="margin-bottom:4px;"><b>${e.title}</b></div>
+            <div>${catBadge}${topBadge}</div>
+          </td>
           <td>${e.duration} mins</td>
-          <td>${e.passages ? e.passages.length : 1} Part(s)</td>
+          <td>${e.passages ? e.passages.length : 1} Passage(s)</td>
           <td><span style="color: #64748b; font-weight:600;">${clsNames}</span></td>
           <td style="display:flex; gap:6px; flex-wrap:wrap;">
             <button class="btn btn-emerald" onclick="launchExam('${e.id}')">Start Test</button>
@@ -1122,56 +1522,6 @@
               <button class="btn btn-secondary" onclick="openEditExamModal('${e.id}')">Edit</button>
               <button class="btn btn-secondary" onclick="openAssignModal('${e.id}', 'reading')">Assign</button>
               <button class="btn btn-danger" onclick="deleteExam('${e.id}', 'reading')">Delete</button>
-            ` : ''}
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderWritingTable() {
-      const tbody = document.getElementById('writingTbody');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-
-      const searchKw = (document.getElementById('filterWritingSearch')?.value || '').toLowerCase().trim();
-      const partFilter = document.getElementById('filterWritingPart')?.value || 'ALL';
-      const topicKw = (document.getElementById('filterWritingTopic')?.value || '').toLowerCase().trim();
-
-      const list = getVisibleExams(db.writingExams).filter(w => {
-        const hasT1 = Boolean(w.task1 && w.task1.prompt);
-        const hasT2 = Boolean(w.task2 && w.task2.prompt);
-        const wType = (hasT1 && hasT2) ? 'Full Writing' : (hasT1 ? 'Task 1 Only' : 'Task 2 Only');
-
-        const titleMatch = !searchKw || w.title.toLowerCase().includes(searchKw);
-        const topicMatch = !topicKw || (w.topic || '').toLowerCase().includes(topicKw);
-        const partMatch = partFilter === 'ALL' || wType === partFilter;
-        return titleMatch && topicMatch && partMatch;
-      });
-
-      if (!list.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No matching writing tests found.</td></tr>`;
-        return;
-      }
-      list.forEach(w => {
-        const hasT1 = Boolean(w.task1 && w.task1.prompt);
-        const hasT2 = Boolean(w.task2 && w.task2.prompt);
-        const taskLabel = (hasT1 && hasT2) ? 'Task 1 & Task 2' : (hasT1 ? 'Task 1 Only' : 'Task 2 Only');
-        const topBadge = w.topic ? `<div style="margin-top:4px;"><span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700;">🏷️ ${w.topic}</span></div>` : '';
-
-        const clsNames = (!w.assignedClasses || w.assignedClasses.length === 0) ? 'All Classes' : w.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><b>${w.title}</b>${topBadge}</td>
-          <td>${w.duration} mins</td>
-          <td><span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:4px; font-size:11.5px; font-weight:700;">${taskLabel}</span></td>
-          <td><span style="color: #64748b; font-weight:600;">${clsNames}</span></td>
-          <td style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button class="btn btn-emerald" onclick="launchWritingExam('${w.id}')">Start Writing</button>
-            ${activeUser && activeUser.role === 'teacher' ? `
-              <button class="btn btn-secondary" onclick="openEditWritingModal('${w.id}')">Edit</button>
-              <button class="btn btn-secondary" onclick="openAssignModal('${w.id}', 'writing')">Assign</button>
-              <button class="btn btn-danger" onclick="deleteExam('${w.id}', 'writing')">Delete</button>
             ` : ''}
           </td>
         `;
@@ -1189,14 +1539,15 @@
       const topicKw = (document.getElementById('filterListeningTopic')?.value || '').toLowerCase().trim();
 
       const list = getVisibleExams(db.listeningExams || []).filter(e => {
-        const titleMatch = !searchKw || e.title.toLowerCase().includes(searchKw);
-        const topicMatch = !topicKw || (e.topic || '').toLowerCase().includes(topicKw);
-        const partMatch = partFilter === 'ALL' || (e.category || 'Listening Full') === partFilter;
-        return titleMatch && topicMatch && partMatch;
+        const hay = `${e.title || ''} ${e.topic || ''} ${e.category || ''}`.toLowerCase();
+        const matchSearch = !searchKw || hay.includes(searchKw);
+        const matchTopic = !topicKw || hay.includes(topicKw);
+        const matchPart = !partFilter || partFilter === 'ALL' || (e.category || 'Listening Full') === partFilter;
+        return matchSearch && matchTopic && matchPart;
       });
 
       if (!list.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No listening tests found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No listening tests found. Click "+ Create Listening Test" to add one.</td></tr>`;
         return;
       }
       list.forEach(e => {
@@ -1223,10 +1574,64 @@
       });
     }
 
-    /* VOCABULARY STUDY MODAL (FIXED HIGHLIGHT) */
+    function renderWritingTable() {
+      const tbody = document.getElementById('writingTbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const searchKw = (document.getElementById('filterWritingSearch')?.value || '').toLowerCase().trim();
+      const partFilter = document.getElementById('filterWritingPart')?.value || 'ALL';
+      const topicKw = (document.getElementById('filterWritingTopic')?.value || '').toLowerCase().trim();
+
+      const list = getVisibleExams(db.writingExams).filter(w => {
+        const hasT1 = Boolean(w.task1 && w.task1.prompt);
+        const hasT2 = Boolean(w.task2 && w.task2.prompt);
+        const wType = (hasT1 && hasT2) ? 'Full Writing' : (hasT1 ? 'Task 1 Only' : 'Task 2 Only');
+
+        const hay = `${w.title || ''} ${w.topic || ''} ${w.task1?.prompt || ''} ${w.task2?.prompt || ''}`.toLowerCase();
+        const matchSearch = !searchKw || hay.includes(searchKw);
+        const matchTopic = !topicKw || hay.includes(topicKw);
+        const matchPart = !partFilter || partFilter === 'ALL' || wType === partFilter;
+        return matchSearch && matchTopic && matchPart;
+      });
+
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No matching writing tests found.</td></tr>`;
+        return;
+      }
+      list.forEach(w => {
+        const hasT1 = Boolean(w.task1 && w.task1.prompt);
+        const hasT2 = Boolean(w.task2 && w.task2.prompt);
+        const taskLabel = (hasT1 && hasT2) ? 'Task 1 & Task 2' : (hasT1 ? 'Task 1 Only' : 'Task 2 Only');
+        const topBadge = w.topic ? `<div style="margin-top:4px;"><span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700;">🏷️ ${w.topic}</span></div>` : '';
+
+        const clsNames = (!w.assignedClasses || w.assignedClasses.length === 0)
+          ? 'All Classes'
+          : w.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${w.title}</b>${topBadge}</td>
+          <td>${w.duration} mins</td>
+          <td><span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:4px; font-size:11.5px; font-weight:700;">${taskLabel}</span></td>
+          <td><span style="color: #64748b; font-weight:600;">${clsNames}</span></td>
+          <td style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-emerald" onclick="launchWritingExam('${w.id}')">Start Writing</button>
+            ${activeUser && activeUser.role === 'teacher' ? `
+              <button class="btn btn-secondary" onclick="openEditWritingModal('${w.id}')">Edit</button>
+              <button class="btn btn-secondary" onclick="openAssignModal('${w.id}', 'writing')">Assign</button>
+              <button class="btn btn-danger" onclick="deleteExam('${w.id}', 'writing')">Delete</button>
+            ` : ''}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* MODAL STUDY VOCABULARY (WITH HIGHLIGHT IN PASSAGE) */
     function openStudyVocabModal(examId) {
       const exam = db.readingExams.find(e => e.id === examId);
       if (!exam || !exam.passages || !exam.passages.length) return alert('No passage data found.');
+      
       const p = exam.passages[0];
       document.getElementById('studyVocabModalTitle').textContent = `Vocabulary Study: ${exam.title}`;
       document.getElementById('modalVocabPassagePane').innerHTML = p.passageHtml;
@@ -1243,21 +1648,23 @@
               <button class="btn btn-secondary" style="padding:2px 8px; font-size:11px;" onclick="saveToMyVault('${v.word.replace(/'/g,"")}', '${v.mean.replace(/'/g,"")}', '${(v.syn||'').replace(/'/g,"")}', '${exam.title.replace(/'/g,"")}')">⭐ Save</button>
             </div>
             <div style="font-size:13px; margin:4px 0;">${v.mean}</div>
-            <div style="font-size:11.5px; color:#64748b; margin-bottom:6px;">Synonyms: <b>${v.syn || 'N/A'}</b></div>
-            <button class="btn btn-emerald" style="padding:3px 8px; font-size:11px; width:100%;" onclick="spotVocabWordInModal('${v.word.replace(/'/g,"")}')">🔍 Highlight in Passage</button>
+            <div style="font-size:11.5px; color:#64748b;">Synonyms: <b>${v.syn || 'N/A'}</b></div>
+            <button class="btn btn-emerald" style="margin-top:6px; padding:3px 8px; font-size:11px; width:100%;" onclick="spotVocabWordInModal('${v.word.replace(/'/g,"")}')">🔍 Highlight in Passage</button>
           </div>
         `).join('');
       }
       openModal('studyVocabModal');
     }
 
+    function escapeRegex(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
     function spotVocabWordInModal(word) {
       const pPane = document.getElementById('modalVocabPassagePane');
       pPane.querySelectorAll('.evidence-highlight-active').forEach(el => el.outerHTML = el.innerHTML);
 
-      const safeWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`(^|[^a-zA-Z0-9])(${safeWord})([^a-zA-Z0-9]|$)`, 'gi');
-      
+      const regex = new RegExp(`(^|[^a-zA-Z0-9])(${escapeRegex(word)})([^a-zA-Z0-9]|$)`, 'i');
       if (regex.test(pPane.innerHTML)) {
         pPane.innerHTML = pPane.innerHTML.replace(regex, `$1<span class="evidence-highlight-active" id="activeModalVocabSpot">$2</span>$3`);
         document.getElementById('activeModalVocabSpot')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1274,7 +1681,7 @@
       list.push({ word, mean, syn, passageTitle });
       persist();
       renderHomeTab();
-      alert(`Word "${word}" saved!`);
+      alert(`Word "${word}" saved to your vault!`);
     }
 
     function renderMySavedVocab() {
@@ -1311,10 +1718,21 @@
       const tbody = document.getElementById('studentTbody');
       if (!tbody) return;
       tbody.innerHTML = '';
-      (db.users || []).filter(u => u.role === 'student').forEach(u => {
+      const stuList = (db.users || []).filter(u => u.role === 'student');
+      if (!stuList.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No student accounts registered yet.</td></tr>`;
+        return;
+      }
+      stuList.forEach(u => {
         const c = (db.classes || []).find(cl => cl.id === u.classId);
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><b>${u.name}</b></td><td><code>${u.username}</code></td><td><code>${u.pass}</code></td><td>${c ? c.name : 'Unassigned'}</td><td><button class="btn btn-danger" onclick="deleteUser('${u.id}')">Remove</button></td>`;
+        tr.innerHTML = `
+          <td><b>${u.name}</b></td>
+          <td><code>${u.username}</code></td>
+          <td><code>${u.pass}</code></td>
+          <td>${c ? c.name : 'Unassigned'}</td>
+          <td><button class="btn btn-danger" onclick="deleteUser('${u.id}')">Remove</button></td>
+        `;
         tbody.appendChild(tr);
       });
     }
@@ -1332,7 +1750,13 @@
           <td>${r.score}</td>
           <td><b style="color: var(--emerald-accent);">${String(r.band).startsWith('Band') ? r.band : 'Band ' + r.band}</b></td>
           <td>${r.timestamp}</td>
-          <td>${isWriting ? `<button class="btn btn-emerald" onclick="openGradeWritingModal('${r.id}')">Review & Grade</button>` : `<button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">Review Keys</button>`}</td>
+          <td>
+            ${isWriting ? `
+              <button class="btn btn-emerald" onclick="openGradeWritingModal('${r.id}')">Review & Grade</button>
+            ` : `
+              <button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">Review Keys</button>
+            `}
+          </td>
         `;
         tbody.appendChild(tr);
       });
@@ -1363,10 +1787,12 @@
       closeModal('gradeWritingModal');
       renderAnalyticsTable();
       renderHomeTab();
-      alert('Writing evaluation saved!');
+      alert('Writing evaluation saved and synced!');
     }
 
-    /* EXAM EXECUTION & WORKSPACE */
+    /* ========================================================
+       READING & LISTENING EXAM ENGINE
+       ======================================================== */
     function changeExamFontSize(size) {
       document.getElementById('insperaLeftPane').style.fontSize = size;
       document.getElementById('insperaRightPane').style.fontSize = size;
@@ -1379,10 +1805,62 @@
       if (theme === 'yellow') shell.classList.add('theme-yellow');
     }
 
+    function stopAllAudioPlayers() {
+      const audioEl = document.getElementById('examAudioPlayer');
+      if (audioEl) {
+        audioEl.pause();
+        audioEl.removeAttribute('src');
+      }
+      const driveIframe = document.getElementById('examDriveAudioIframe');
+      if (driveIframe) {
+        driveIframe.src = 'about:blank';
+        driveIframe.style.display = 'none';
+      }
+      const container = document.getElementById('listeningAudioHeaderContainer');
+      if (container) container.style.display = 'none';
+    }
+
+    function setupHeaderAudioPlayer(rawUrl) {
+      const container = document.getElementById('listeningAudioHeaderContainer');
+      const audioEl = document.getElementById('examAudioPlayer');
+      const driveIframe = document.getElementById('examDriveAudioIframe');
+      const fallbackLink = document.getElementById('examAudioFallbackLink');
+
+      container.style.display = 'flex';
+      const url = (rawUrl || '').trim();
+      if (!url) return;
+
+      // Tự động nhận diện link Google Drive -> Dùng Google Drive Preview Player để không bao giờ bị chặn CORS / 0:00
+      const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (url.includes('drive.google.com') && driveMatch && driveMatch[1]) {
+        const fileId = driveMatch[1];
+        audioEl.pause();
+        audioEl.style.display = 'none';
+        driveIframe.style.display = 'block';
+        const previewUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+        if (driveIframe.src !== previewUrl) {
+          driveIframe.src = previewUrl;
+        }
+        fallbackLink.href = `https://drive.google.com/file/d/${fileId}/view`;
+        fallbackLink.style.display = 'inline';
+      } else {
+        driveIframe.src = 'about:blank';
+        driveIframe.style.display = 'none';
+        audioEl.style.display = 'block';
+        if (audioEl.src !== url) {
+          audioEl.src = url;
+          audioEl.load();
+        }
+        fallbackLink.href = url;
+        fallbackLink.style.display = 'inline';
+      }
+    }
+
     function launchExam(examId) {
       activeExam = db.readingExams.find(e => e.id === examId);
       if (!activeExam) return;
 
+      stopAllAudioPlayers();
       activeExamType = 'reading';
       isReviewMode = false;
       isTeacherEditMode = false;
@@ -1417,6 +1895,7 @@
       isTeacherEditMode = false;
       activePartNum = 1;
       userAnswers = {};
+      selectedDragItem = null;
       secondsRemaining = (activeExam.duration || 30) * 60;
 
       document.getElementById('dashboardApp').style.display = 'none';
@@ -1428,9 +1907,8 @@
       document.getElementById('btnToggleTeacherMode').style.display = activeUser.role === 'teacher' ? '' : 'none';
       document.getElementById('footerSectionLabel').textContent = 'Questions:';
 
-      const nav = document.getElementById('insperaPartTabs');
-      nav.innerHTML = `<button class="part-pill active">Listening Section</button>`;
-
+      setupHeaderAudioPlayer(activeExam.audioUrl);
+      renderPartPills();
       loadPassageView(1);
       buildFooterNav();
       setupResizer();
@@ -1441,11 +1919,13 @@
     function renderPartPills() {
       const nav = document.getElementById('insperaPartTabs');
       if (activeExamType === 'listening') {
-        nav.innerHTML = `<button class="part-pill active">Listening Section</button>`;
+        nav.innerHTML = `<button class="part-pill active">${activeExam.category || 'Listening Section'}</button>`;
         return;
       }
       nav.innerHTML = (activeExam.passages || []).map(p => `
-        <button class="part-pill ${p.partNum === activePartNum ? 'active' : ''}" onclick="switchExamPassage(${p.partNum})">Part ${p.partNum}</button>
+        <button class="part-pill ${p.partNum === activePartNum ? 'active' : ''}" onclick="switchExamPassage(${p.partNum})">
+          Part ${p.partNum}
+        </button>
       `).join('');
     }
 
@@ -1457,51 +1937,29 @@
     }
 
     function loadPassageView(partNum) {
-      const passage = (activeExam.passages || [])[partNum - 1] || (activeExam.passages || [])[0] || { title: '', passageHtml: '', questionsHtml: '' };
+      const passage = (activeExam.passages || []).find(p => p.partNum === partNum) || (activeExam.passages || [])[0] || { title: '', passageHtml: '', questionsHtml: '' };
       const left = document.getElementById('insperaLeftPane');
       const right = document.getElementById('insperaRightPane');
       const resizer = document.getElementById('insperaResizer');
-      const audioContainer = document.getElementById('listeningAudioHeaderContainer');
 
       document.getElementById('insperaPartInstructionText').innerHTML = activeExamType === 'listening'
-        ? `<b>IELTS Listening</b> — Listen to the audio and answer the questions.`
-        : `<b>Part ${partNum}</b> — Read the text and answer questions on the right.`;
+        ? (isReviewMode ? `<b>Listening Review Mode</b> — Compare your answers on the right with the transcript on the left.` : `<b>${activeExam.category || 'IELTS Listening'}</b> — Listen to the audio on the top bar and answer all questions below.`)
+        : `<b>Part ${partNum}</b> — Read the text on the left and answer the questions on the right.`;
 
-      // Xử lý hiển thị Audio Player trên Header và chuyển đổi link Google Drive trực tiếp
-      if (activeExamType === 'listening') {
-        audioContainer.style.display = 'flex';
-        const audioEl = document.getElementById('examAudioPlayer');
-        if (audioEl && activeExam.audioUrl) {
-          let directUrl = activeExam.audioUrl.trim();
-          if (directUrl.includes('drive.google.com') && !directUrl.includes('export=download')) {
-            const matchId = directUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || directUrl.match(/id=([a-zA-Z0-9_-]+)/);
-            if (matchId && matchId[1]) {
-              directUrl = `https://docs.google.com/uc?export=download&id=${matchId[1]}`;
-            }
-          }
-          if (audioEl.src !== directUrl) {
-            audioEl.src = directUrl;
-            audioEl.load();
-          }
-        }
-      } else {
-        audioContainer.style.display = 'none';
-      }
-
-      // LUẬT HIỂN THỊ LISTENING: LÚC LÀM BÀI FULL TRANG (ẨN CỘT TRÁI), LÚC REVIEW MỚI HIỆN CỘT TRÁI (TRANSCRIPT)
+      // LISTENING: KHI LÀM BÀI -> HIỂN THỊ CÂU HỎI TOÀN TRANG (100%). KHI REVIEW -> CHIA ĐÔI (TRÁI TRANSCRIPT, PHẢI ĐÁP ÁN)
       if (activeExamType === 'listening' && !isReviewMode) {
         left.style.display = 'none';
         resizer.style.display = 'none';
         right.style.width = '100%';
+        right.innerHTML = `<div style="max-width: 960px; margin: 0 auto;"><h2 class="section-title">Questions</h2>${passage.questionsHtml || ''}</div>`;
       } else {
         left.style.display = 'block';
         resizer.style.display = 'flex';
         left.style.width = '50%';
         right.style.width = '50%';
-        left.innerHTML = `<h2 class="section-title">${isReviewMode && activeExamType === 'listening' ? '🎧 Transcript - ' : ''}${passage.title || 'PASSAGE ' + partNum}</h2><div class="passage-content">${passage.passageHtml}</div>`;
+        left.innerHTML = `<h2 class="section-title">${activeExamType === 'listening' ? '🎧 Listening Transcript' : (passage.title || 'READING PASSAGE ' + partNum)}</h2><div class="passage-content">${passage.passageHtml || '<p>No transcript/passage text provided.</p>'}</div>`;
+        right.innerHTML = `<h2 class="section-title">Questions</h2>${passage.questionsHtml || ''}`;
       }
-
-      right.innerHTML = `<h2 class="section-title">Questions</h2>${passage.questionsHtml || ''}`;
 
       bindInputListeners(document.getElementById('insperaSplitBox'));
       setupDragDropEngine();
@@ -1516,11 +1974,14 @@
       }
     }
 
+    /* IN-EXAM HIGHLIGHT ENGINE */
     let currentSelectedRange = null;
+
     function setupInExamHighlightEngine() {
       const workspace = document.getElementById('insperaSplitBox');
       const tooltip = document.getElementById('selectionTooltip');
-      workspace.onmouseup = () => {
+
+      workspace.onmouseup = (e) => {
         setTimeout(() => {
           const sel = window.getSelection();
           if (sel && !sel.isCollapsed && sel.toString().trim().length > 0) {
@@ -1531,7 +1992,9 @@
             tooltip.style.top = `${Math.max(10, rect.top + window.scrollY - 38)}px`;
             tooltip.style.display = 'flex';
           } else {
-            if (!event.target.closest('#selectionTooltip')) tooltip.style.display = 'none';
+            if (!e.target.closest('#selectionTooltip')) {
+              tooltip.style.display = 'none';
+            }
           }
         }, 10);
       };
@@ -1541,7 +2004,11 @@
       if (!currentSelectedRange) return;
       const span = document.createElement('span');
       span.className = 'user-highlight-span';
-      try { currentSelectedRange.surroundContents(span); } catch (err) { document.execCommand('hiliteColor', false, '#fde047'); }
+      try {
+        currentSelectedRange.surroundContents(span);
+      } catch (err) {
+        document.execCommand('hiliteColor', false, '#fde047');
+      }
       document.getElementById('selectionTooltip').style.display = 'none';
       window.getSelection().removeAllRanges();
       currentSelectedRange = null;
@@ -1551,8 +2018,11 @@
       const sel = window.getSelection();
       if (sel && !sel.isCollapsed) {
         const parentSpan = sel.anchorNode.parentElement.closest('.user-highlight-span');
-        if (parentSpan) parentSpan.outerHTML = parentSpan.innerHTML;
-        else document.execCommand('removeFormat', false, null);
+        if (parentSpan) {
+          parentSpan.outerHTML = parentSpan.innerHTML;
+        } else {
+          document.execCommand('removeFormat', false, null);
+        }
       }
       document.getElementById('selectionTooltip').style.display = 'none';
       window.getSelection().removeAllRanges();
@@ -1573,6 +2043,28 @@
         inp.addEventListener('input', handler);
         inp.addEventListener('change', handler);
       });
+
+      scope.querySelectorAll('input[type="checkbox"][data-pair-group]').forEach(chk => {
+        chk.addEventListener('change', () => {
+          if (isReviewMode) return;
+          const groupName = chk.getAttribute('data-pair-group');
+          const allBoxes = Array.from(scope.querySelectorAll(`input[type="checkbox"][data-pair-group="${groupName}"]`));
+          const checkedBoxes = allBoxes.filter(b => b.checked);
+          const qNames = groupName.split('_');
+
+          if (checkedBoxes.length > qNames.length) {
+            chk.checked = false;
+            return alert(`You can only select ${qNames.length} options for this question group.`);
+          }
+
+          const selectedValues = checkedBoxes.map(b => b.value).sort();
+          qNames.forEach((qKey, idx) => {
+            if (selectedValues[idx]) userAnswers[qKey] = selectedValues[idx];
+            else delete userAnswers[qKey];
+          });
+          updateFooterNav();
+        });
+      });
     }
 
     function restoreUserAnswersInDOM(scope) {
@@ -1580,8 +2072,13 @@
         const val = userAnswers[name];
         const textInp = scope.querySelector(`input[type="text"][name="${name}"]`);
         if (textInp) textInp.value = val;
+
+        const selInp = scope.querySelector(`select[name="${name}"]`);
+        if (selInp) selInp.value = val;
+
         const radio = scope.querySelector(`input[type="radio"][name="${name}"][value="${val}"]`);
         if (radio) radio.checked = true;
+
         const zone = scope.querySelector(`.drop-zone[data-target="${name}"]`);
         if (zone && val) {
           const item = scope.querySelector(`.drag-item[data-answer="${val}"]`);
@@ -1589,6 +2086,14 @@
           zone.classList.add('filled');
           if (item) item.classList.add('used');
         }
+      });
+
+      scope.querySelectorAll('[data-multi-pair]').forEach(container => {
+        const pairKeys = container.getAttribute('data-multi-pair').split(',');
+        const chosenVals = pairKeys.map(k => userAnswers[k.trim()]).filter(Boolean);
+        container.querySelectorAll('input[type="checkbox"]').forEach(box => {
+          box.checked = chosenVals.includes(box.value);
+        });
       });
     }
 
@@ -1610,15 +2115,44 @@
         };
       });
 
+      function assignDropValue(zone, ans, lbl) {
+        if (!ans) return;
+        const oldAns = userAnswers[zone.dataset.target];
+        if (oldAns) {
+          const oldItem = document.querySelector(`#insperaSplitBox .drag-item[data-answer="${oldAns}"]`);
+          if (oldItem) oldItem.classList.remove('used');
+        }
+
+        zone.textContent = lbl || ans;
+        zone.classList.add('filled');
+        const qName = zone.dataset.target;
+        userAnswers[qName] = ans;
+
+        const currentItem = document.querySelector(`#insperaSplitBox .drag-item[data-answer="${ans}"]`);
+        if (currentItem) {
+          currentItem.classList.add('used');
+          currentItem.style.outline = 'none';
+        }
+        selectedDragItem = null;
+        updateFooterNav();
+      }
+
       zones.forEach(zone => {
-        zone.ondragover = (e) => { if (!isReviewMode) { e.preventDefault(); zone.classList.add('over'); } };
+        zone.ondragover = (e) => {
+          if (isReviewMode) return;
+          e.preventDefault();
+          zone.classList.add('over');
+        };
         zone.ondragleave = () => zone.classList.remove('over');
         zone.ondrop = (e) => {
           if (isReviewMode) return;
           e.preventDefault();
           zone.classList.remove('over');
-          assignDropValue(zone, e.dataTransfer.getData('ans'), e.dataTransfer.getData('label'));
+          const ans = e.dataTransfer.getData('ans');
+          const lbl = e.dataTransfer.getData('label');
+          assignDropValue(zone, ans, lbl);
         };
+
         zone.onclick = () => {
           if (isReviewMode) return;
           if (selectedDragItem) {
@@ -1640,22 +2174,6 @@
       });
     }
 
-    function assignDropValue(zone, ans, lbl) {
-      if (!ans) return;
-      const oldAns = userAnswers[zone.dataset.target];
-      if (oldAns) {
-        const oldItem = document.querySelector(`#insperaSplitBox .drag-item[data-answer="${oldAns}"]`);
-        if (oldItem) oldItem.classList.remove('used');
-      }
-      zone.textContent = lbl || ans;
-      zone.classList.add('filled');
-      userAnswers[zone.dataset.target] = ans;
-      const currentItem = document.querySelector(`#insperaSplitBox .drag-item[data-answer="${ans}"]`);
-      if (currentItem) { currentItem.classList.add('used'); currentItem.style.outline = 'none'; }
-      selectedDragItem = null;
-      updateFooterNav();
-    }
-
     function buildFooterNav() {
       const container = document.getElementById('insperaFooterList');
       container.innerHTML = '';
@@ -1669,8 +2187,13 @@
         btn.id = `fpill_${k}`;
         btn.textContent = num;
         btn.onclick = () => {
-          const targetEl = document.querySelector(`#insperaSplitBox [data-question="${num}"]`) || document.querySelector(`#insperaSplitBox [name="${k}"]`);
-          if (targetEl) { targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); if (targetEl.focus) targetEl.focus(); }
+          const targetEl = document.querySelector(`#insperaSplitBox [data-question="${num}"]`)
+            || document.querySelector(`#insperaSplitBox [name="${k}"]`)
+            || document.querySelector(`#insperaSplitBox .drop-zone[data-target="${k}"]`);
+          if (targetEl) {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (targetEl.focus) targetEl.focus();
+          }
         };
         container.appendChild(btn);
       });
@@ -1679,9 +2202,13 @@
 
     function updateFooterNav() {
       if (activeExamType === 'writing') return;
-      Object.keys(activeExam.correctAnswers || {}).forEach(k => {
+      const keys = Object.keys(activeExam.correctAnswers || {});
+      keys.forEach(k => {
         const btn = document.getElementById(`fpill_${k}`);
-        if (btn) btn.classList.toggle('answered', Boolean(userAnswers[k] && String(userAnswers[k]).trim() !== ''));
+        if (btn) {
+          const hasVal = Boolean(userAnswers[k] && String(userAnswers[k]).trim() !== '');
+          btn.classList.toggle('answered', hasVal);
+        }
       });
     }
 
@@ -1689,7 +2216,9 @@
       const user = String(userAnswers[qKey] || '').trim().toLowerCase();
       const rawKey = String(activeExam.correctAnswers[qKey] || '').trim().toLowerCase();
       if (!user) return false;
-      if (rawKey.includes('|')) return rawKey.split('|').map(x => x.trim()).includes(user);
+      if (rawKey.includes('|')) {
+        return rawKey.split('|').map(x => x.trim()).includes(user);
+      }
       return user === rawKey;
     }
 
@@ -1699,21 +2228,129 @@
         const userVal = userAnswers[k] || '';
         const isRight = isAnswerCorrect(k);
         const qNum = k.replace('q','');
-        const target = scope.querySelector(`[data-question="${qNum}"]`) || scope.querySelector(`[name="${k}"]`)?.closest('.question');
+
+        const zone = scope.querySelector(`.drop-zone[data-target="${k}"]`);
+        if (zone) {
+          zone.style.borderColor = isRight ? '#22c55e' : '#ef4444';
+          zone.style.background = isRight ? '#dcfce7' : '#fee2e2';
+
+          const holder = zone.classList.contains('heading-drop') ? zone : zone.closest('.question-group');
+          if (holder && !scope.querySelector(`.answer-indicator[data-ind="${k}"]`)) {
+            const div = document.createElement('div');
+            div.className = `answer-indicator ${isRight ? 'correct' : 'incorrect'}`;
+            div.setAttribute('data-ind', k);
+            div.innerHTML = `
+              <b>Q${qNum}:</b> ${isRight ? '✅ Correct!' : '❌ Incorrect.'} Your answer: <b>${userVal || '(Blank)'}</b> | Key: <b>${keyVal}</b>
+              ${activeExam.explanations && activeExam.explanations[k] ? `<div style="font-size:12px; margin-top:4px; font-weight:normal;">${activeExam.explanations[k]}</div>` : ''}
+              ${activeExam.evidences && activeExam.evidences[k] ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(activeExam.evidences[k])}')">🔍 Locate in Passage/Transcript</button>` : ''}
+            `;
+            if (zone.classList.contains('heading-drop')) {
+              zone.insertAdjacentElement('afterend', div);
+            } else if (holder) {
+              holder.appendChild(div);
+            }
+          }
+          return;
+        }
+
+        let target = scope.querySelector(`[data-question="${qNum}"]`) || scope.querySelector(`[name="${k}"]`)?.closest('.question') || scope.querySelector(`[name="${k}"]`)?.parentNode;
         if (target && !scope.querySelector(`.answer-indicator[data-ind="${k}"]`)) {
           const div = document.createElement('div');
           div.className = `answer-indicator ${isRight ? 'correct' : 'incorrect'}`;
           div.setAttribute('data-ind', k);
-          div.innerHTML = `<b>Q${qNum}:</b> ${isRight ? '✅ Correct!' : '❌ Incorrect.'} Your answer: <b>${userVal || '(Blank)'}</b> | Key: <b>${keyVal}</b>`;
-          target.appendChild(div);
+          div.innerHTML = `
+            <b>Q${qNum}:</b> ${isRight ? '✅ Correct!' : '❌ Incorrect.'} Your answer: <b>${userVal || '(Blank)'}</b> | Key: <b>${keyVal}</b>
+            ${activeExam.explanations && activeExam.explanations[k] ? `<div style="font-size:12px; margin-top:4px; font-weight:normal;">${activeExam.explanations[k]}</div>` : ''}
+            ${activeExam.evidences && activeExam.evidences[k] ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(activeExam.evidences[k])}')">🔍 Locate in Passage/Transcript</button>` : ''}
+          `;
+          if (target.tagName === 'TR') {
+            target.closest('.question-group').appendChild(div);
+          } else {
+            target.appendChild(div);
+          }
         }
       });
     }
 
+    function locateEvidenceSnippet(encodedSnippet) {
+      const snippet = decodeURIComponent(encodedSnippet).trim();
+      if (!snippet) return;
+
+      const leftPane = document.getElementById('insperaLeftPane');
+      leftPane.querySelectorAll('.evidence-highlight-active').forEach(el => el.outerHTML = el.innerHTML);
+
+      const safeSnippet = escapeRegex(snippet);
+      const regex = new RegExp(`(${safeSnippet})`, 'gi');
+
+      if (regex.test(leftPane.innerHTML)) {
+        leftPane.innerHTML = leftPane.innerHTML.replace(regex, `<span class="evidence-highlight-active" id="activeLocateTarget">$1</span>`);
+        document.getElementById('activeLocateTarget')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        const shortSnippet = escapeRegex(snippet.substring(0, Math.min(snippet.length, 45)));
+        const shortRegex = new RegExp(`(${shortSnippet})`, 'gi');
+        if (shortRegex.test(leftPane.innerHTML)) {
+          leftPane.innerHTML = leftPane.innerHTML.replace(shortRegex, `<span class="evidence-highlight-active" id="activeLocateTarget">$1</span>`);
+          document.getElementById('activeLocateTarget')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }
+
+    /* TEACHER LIVE EDIT */
     function toggleTeacherEditMode() {
       isTeacherEditMode = !isTeacherEditMode;
-      document.getElementById('btnToggleTeacherMode').textContent = isTeacherEditMode ? '✅ Done' : '✏️ Edit Keys';
+      const btn = document.getElementById('btnToggleTeacherMode');
+      btn.textContent = isTeacherEditMode ? '✅ Done Editing' : '✏️ Live Edit Keys';
       loadPassageView(activePartNum);
+    }
+
+    function injectTeacherEditBadges(scope) {
+      Object.keys(activeExam.correctAnswers || {}).forEach(k => {
+        const qNum = k.replace('q','');
+        const target = scope.querySelector(`[data-question="${qNum}"] .question-text`)
+          || scope.querySelector(`[data-question="${qNum}"] td.matrix-statement`)
+          || scope.querySelector(`.drop-zone[data-target="${k}"]`)
+          || scope.querySelector(`input[name="${k}"]`)?.parentNode;
+
+        if (target && !target.querySelector(`.teacher-edit-badge[data-edit="${k}"]`)) {
+          const badge = document.createElement('span');
+          badge.className = 'teacher-edit-badge';
+          badge.setAttribute('data-edit', k);
+          badge.textContent = `✏️ Edit ${k.toUpperCase()}`;
+          badge.onclick = (e) => {
+            e.stopPropagation();
+            openTeacherEditModal(k);
+          };
+          target.appendChild(badge);
+        }
+      });
+    }
+
+    function openTeacherEditModal(k) {
+      document.getElementById('editKeyName').value = k;
+      document.getElementById('teacherEditTitle').textContent = `Edit Solution for ${k.toUpperCase()}`;
+      document.getElementById('editKeyVal').value = activeExam.correctAnswers[k] || '';
+      document.getElementById('editKeyExp').value = (activeExam.explanations && activeExam.explanations[k]) || '';
+      document.getElementById('editKeyEvi').value = (activeExam.evidences && activeExam.evidences[k]) || '';
+      openModal('teacherEditModal');
+    }
+
+    function saveTeacherKeyUpdate() {
+      const k = document.getElementById('editKeyName').value;
+      const keyVal = document.getElementById('editKeyVal').value.trim();
+      const expVal = document.getElementById('editKeyExp').value.trim();
+      const eviVal = document.getElementById('editKeyEvi').value.trim();
+
+      if (!activeExam.explanations) activeExam.explanations = {};
+      if (!activeExam.evidences) activeExam.evidences = {};
+
+      activeExam.correctAnswers[k] = keyVal;
+      activeExam.explanations[k] = expVal;
+      activeExam.evidences[k] = eviVal;
+
+      persist();
+      closeModal('teacherEditModal');
+      loadPassageView(activePartNum);
+      alert(`Updated explanation & key for ${k.toUpperCase()} in real-time!`);
     }
 
     function setupResizer() {
@@ -1737,29 +2374,38 @@
       clearInterval(examTimer);
       const timerEl = document.getElementById('insperaTimer');
       examTimer = setInterval(() => {
-        if (isReviewMode) { timerEl.textContent = 'REVIEW'; return; }
-        if (secondsRemaining <= 0) { clearInterval(examTimer); alert('Time expired!'); submitExam(true); return; }
+        if (isReviewMode) { timerEl.textContent = 'REVIEW MODE'; return; }
+        if (secondsRemaining <= 0) {
+          clearInterval(examTimer);
+          alert('Time has expired! Submitting your exam automatically.');
+          submitExam(true);
+          return;
+        }
         secondsRemaining--;
-        timerEl.textContent = `${String(Math.floor(secondsRemaining / 60)).padStart(2, '0')}:${String(secondsRemaining % 60).padStart(2, '0')}`;
+        const m = String(Math.floor(secondsRemaining / 60)).padStart(2, '0');
+        const s = String(secondsRemaining % 60).padStart(2, '0');
+        timerEl.textContent = `${m}:${s}`;
       }, 1000);
     }
 
     function exitExamShell() {
-      if (confirm('Exit exam room?')) {
+      if (confirm('Exit exam room and return to dashboard?')) {
         clearInterval(examTimer);
-        const audioEl = document.getElementById('examAudioPlayer');
-        if (audioEl) audioEl.pause();
+        stopAllAudioPlayers();
         document.getElementById('examShell').style.display = 'none';
         document.getElementById('dashboardApp').style.display = 'flex';
         renderDashboard();
       }
     }
 
-    /* WRITING EXAM WORKSPACE */
+    /* ========================================================
+       WRITING ENGINE
+       ======================================================== */
     function launchWritingExam(examId) {
       activeExam = db.writingExams.find(w => w.id === examId);
       if (!activeExam) return;
 
+      stopAllAudioPlayers();
       const hasT1 = Boolean(activeExam.task1 && activeExam.task1.prompt);
       const hasT2 = Boolean(activeExam.task2 && activeExam.task2.prompt);
 
@@ -1767,7 +2413,7 @@
       isReviewMode = false;
       activePartNum = hasT1 ? 1 : 2;
       writingAnswers = { task1: '', task2: '' };
-      secondsRemaining = (activeExam.duration || 60) * 60;
+      secondsRemaining = (activeExam.duration || (hasT1 && hasT2 ? 60 : (hasT1 ? 20 : 40))) * 60;
 
       document.getElementById('dashboardApp').style.display = 'none';
       document.getElementById('examShell').style.display = 'flex';
@@ -1780,14 +2426,14 @@
 
       const topTabs = document.getElementById('insperaPartTabs');
       topTabs.innerHTML = `
-        ${hasT1 ? `<button class="part-pill ${activePartNum === 1 ? 'active' : ''}" id="wtab_1" onclick="switchWritingTask(1)">Part 1</button>` : ''}
-        ${hasT2 ? `<button class="part-pill ${activePartNum === 2 ? 'active' : ''}" id="wtab_2" onclick="switchWritingTask(2)">Part 2</button>` : ''}
+        ${hasT1 ? `<button class="part-pill ${activePartNum === 1 ? 'active' : ''}" id="wtab_1" onclick="switchWritingTask(1)">Part 1 (Task 1)</button>` : ''}
+        ${hasT2 ? `<button class="part-pill ${activePartNum === 2 ? 'active' : ''}" id="wtab_2" onclick="switchWritingTask(2)">Part 2 (Task 2)</button>` : ''}
       `;
 
       const footerList = document.getElementById('insperaFooterList');
       footerList.innerHTML = `
-        ${hasT1 ? `<button class="progress-item ${activePartNum === 1 ? 'current' : ''}" id="wfoot_1" onclick="switchWritingTask(1)" style="min-width:70px; height:32px;">Task 1</button>` : ''}
-        ${hasT2 ? `<button class="progress-item ${activePartNum === 2 ? 'current' : ''}" id="wfoot_2" onclick="switchWritingTask(2)" style="min-width:70px; height:32px;">Task 2</button>` : ''}
+        ${hasT1 ? `<button class="progress-item ${activePartNum === 1 ? 'current' : ''}" id="wfoot_1" onclick="switchWritingTask(1)" style="min-width:85px; height:32px;">Part 1</button>` : ''}
+        ${hasT2 ? `<button class="progress-item ${activePartNum === 2 ? 'current' : ''}" id="wfoot_2" onclick="switchWritingTask(2)" style="min-width:85px; height:32px;">Part 2</button>` : ''}
         <span id="writingWordCountDisplay" style="margin-left: 20px; font-weight: 700; color: #1e293b; font-size: 14px;">Words: 0</span>
       `;
 
@@ -1802,7 +2448,25 @@
         if (activePartNum === 1) writingAnswers.task1 = currentEditor.value;
         else writingAnswers.task2 = currentEditor.value;
       }
+
       activePartNum = taskNum;
+
+      const wtab1 = document.getElementById('wtab_1');
+      const wtab2 = document.getElementById('wtab_2');
+      if (wtab1) wtab1.classList.toggle('active', taskNum === 1);
+      if (wtab2) wtab2.classList.toggle('active', taskNum === 2);
+
+      const foot1 = document.getElementById('wfoot_1');
+      const foot2 = document.getElementById('wfoot_2');
+      if (foot1) {
+        foot1.classList.toggle('current', taskNum === 1);
+        foot1.classList.toggle('answered', writingAnswers.task1.trim().length > 0);
+      }
+      if (foot2) {
+        foot2.classList.toggle('current', taskNum === 2);
+        foot2.classList.toggle('answered', writingAnswers.task2.trim().length > 0);
+      }
+
       loadWritingWorkspace(taskNum);
     }
 
@@ -1819,62 +2483,117 @@
       left.style.width = '50%';
       right.style.width = '50%';
 
-      document.getElementById('insperaPartInstructionText').innerHTML = `<b>Writing Task ${taskNum}</b> — Write at least ${isTask1 ? '150' : '250'} words.`;
-      left.innerHTML = `<h2 class="section-title">Task ${taskNum} Prompt</h2><div style="font-size:15px; line-height:1.7;">${taskData.prompt}</div>`;
-      right.innerHTML = `<textarea id="writingEditor" class="form-input" style="width:100%; height:calc(100vh - 170px); font-size:15px; padding:16px;" oninput="writingAnswers.task${taskNum}=this.value; updateWordCount(this.value)">${savedText}</textarea>`;
+      document.getElementById('insperaPartInstructionText').innerHTML = isTask1
+        ? `<b>Academic Writing Part 1</b> — You should spend about 20 minutes on this task. Write at least <b>150 words</b>.`
+        : `<b>Academic Writing Part 2</b> — You should spend about 40 minutes on this task. Write at least <b>250 words</b>.`;
+
+      left.innerHTML = `
+        <h2 class="section-title">Writing Task ${taskNum}</h2>
+        <div style="font-size: 15.5px; line-height: 1.7; margin-bottom: 18px; padding: 14px; background: rgba(5, 150, 105, 0.05); border-left: 4px solid var(--emerald-accent); border-radius: 4px;">
+          ${taskData.prompt}
+        </div>
+        ${isTask1 && taskData.image ? `
+          <div style="margin-top: 14px; text-align: center;">
+            <img src="${taskData.image}" style="max-width: 100%; border: 1px solid var(--inspera-border); border-radius: 6px; cursor: zoom-in;" alt="Task 1 Visual" onclick="window.open(this.src, '_blank')">
+            <div style="font-size:11px; color:#64748b; margin-top:4px;">(Click image to open full resolution in new tab)</div>
+          </div>
+        ` : ''}
+      `;
+
+      right.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-weight:700; color:#475569;">Candidate Response Sheet (Auto-Spellcheck Off)</span>
+          <span id="inlineWordBadge" style="font-weight:800; color:var(--emerald-accent); background:#ecfdf5; padding:4px 10px; border-radius:20px; border:1px solid #a7f3d0;">Word Count: 0</span>
+        </div>
+        <textarea 
+          id="writingEditor" 
+          class="form-input" 
+          spellcheck="false"
+          autocorrect="off"
+          autocapitalize="off"
+          style="width: 100%; height: calc(100vh - 230px); font-size: 15.5px; line-height: 1.75; padding: 16px; resize: none; outline: none; border-radius: 8px; font-family: 'Segoe UI', Roboto, sans-serif;"
+          placeholder="Type your essay here..."
+          oninput="handleWritingInput(this.value)"
+        >${savedText}</textarea>
+      `;
+
+      updateWordCountDisplay(savedText);
     }
 
-    function updateWordCount(text) {
+    function handleWritingInput(text) {
+      if (activePartNum === 1) writingAnswers.task1 = text;
+      else writingAnswers.task2 = text;
+      updateWordCountDisplay(text);
+    }
+
+    function updateWordCountDisplay(text) {
       const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-      const badge = document.getElementById('writingWordCountDisplay');
-      if (badge) badge.textContent = `Words: ${words}`;
+      const display = document.getElementById('writingWordCountDisplay');
+      const inlineBadge = document.getElementById('inlineWordBadge');
+      if (display) display.textContent = `Words: ${words}`;
+      if (inlineBadge) inlineBadge.textContent = `Word Count: ${words}`;
     }
 
-    /* SUBMISSION */
-    function submitExam(force = false) {
-      if (!force && !confirm('Submit your test now?')) return;
+    /* ========================================================
+       SUBMISSION & SCORING
+       ======================================================== */
+    function submitExam(forceSubmit = false) {
+      if (!forceSubmit && !confirm('Are you sure you want to submit your test now?')) return;
       clearInterval(examTimer);
 
       if (activeExamType === 'writing') {
-        const ed = document.getElementById('writingEditor');
-        if (ed) { if (activePartNum === 1) writingAnswers.task1 = ed.value; else writingAnswers.task2 = ed.value; }
-        const w1 = writingAnswers.task1.trim().split(/\s+/).filter(Boolean).length;
-        const w2 = writingAnswers.task2.trim().split(/\s+/).filter(Boolean).length;
+        const currentEditor = document.getElementById('writingEditor');
+        if (currentEditor) {
+          if (activePartNum === 1) writingAnswers.task1 = currentEditor.value;
+          else writingAnswers.task2 = currentEditor.value;
+        }
 
+        const w1Count = writingAnswers.task1.trim() ? writingAnswers.task1.trim().split(/\s+/).length : 0;
+        const w2Count = writingAnswers.task2.trim() ? writingAnswers.task2.trim().split(/\s+/).length : 0;
+
+        if (!db.results) db.results = [];
         db.results.push({
           id: 'res_w_' + Date.now(),
           examId: activeExam.id,
           userName: activeUser.name,
           examTitle: activeExam.title,
-          score: `T1: ${w1}w | T2: ${w2}w`,
+          score: `T1: ${w1Count}w | T2: ${w2Count}w`,
           band: 'Submitted',
           teacherFeedback: '',
           writingSubmission: { ...writingAnswers },
           timestamp: new Date().toLocaleString()
         });
         persist();
-        alert('Writing submitted!');
-        exitExamShell();
+
+        alert(`Writing assessment submitted!\n- Task 1: ${w1Count} words\n- Task 2: ${w2Count} words`);
+        document.getElementById('examShell').style.display = 'none';
+        document.getElementById('dashboardApp').style.display = 'flex';
+        renderDashboard();
         return;
       }
 
-      const audioEl = document.getElementById('examAudioPlayer');
-      if (audioEl) audioEl.pause();
+      let correct = 0;
+      let total = 0;
+      const keys = Object.keys(activeExam.correctAnswers || {});
 
-      let correct = 0, total = 0;
-      Object.keys(activeExam.correctAnswers || {}).forEach(k => {
+      keys.forEach(k => {
         total++;
         if (isAnswerCorrect(k)) correct++;
       });
 
-      let band = '6.0';
+      let band = '4.5';
       const pct = total > 0 ? correct / total : 0;
-      if (pct >= 0.9) band = '8.5';
-      else if (pct >= 0.8) band = '7.5';
-      else if (pct >= 0.7) band = '7.0';
-      else if (pct >= 0.6) band = '6.5';
+      if (pct >= 0.95) band = '9.0';
+      else if (pct >= 0.88) band = '8.5';
+      else if (pct >= 0.82) band = '8.0';
+      else if (pct >= 0.75) band = '7.5';
+      else if (pct >= 0.68) band = '7.0';
+      else if (pct >= 0.58) band = '6.5';
+      else if (pct >= 0.48) band = '6.0';
+      else if (pct >= 0.38) band = '5.5';
+      else if (pct >= 0.28) band = '5.0';
 
-      db.results.push({
+      const res = {
         id: 'res_' + Date.now(),
         examId: activeExam.id,
         userName: activeUser.name,
@@ -1883,16 +2602,20 @@
         band,
         userAnswersCopy: JSON.parse(JSON.stringify(userAnswers)),
         timestamp: new Date().toLocaleString()
-      });
+      };
+
+      if (!db.results) db.results = [];
+      db.results.push(res);
       persist();
 
       document.getElementById('summaryBandDisplay').textContent = `Band ${band}`;
-      document.getElementById('summaryScoreDisplay').textContent = `Correct: ${correct} / ${total}`;
+      document.getElementById('summaryScoreDisplay').textContent = `Correct: ${correct} / ${total} questions`;
       openModal('scoreSummaryModal');
     }
 
     function closeScoreSummaryToDashboard() {
       closeModal('scoreSummaryModal');
+      stopAllAudioPlayers();
       document.getElementById('examShell').style.display = 'none';
       document.getElementById('dashboardApp').style.display = 'flex';
       renderDashboard();
@@ -1903,34 +2626,192 @@
       isReviewMode = true;
       document.getElementById('btnSubmitExam').style.display = 'none';
       document.getElementById('btnSubmitBottom').style.display = 'none';
-      document.getElementById('insperaTimer').textContent = 'REVIEW';
+      document.getElementById('insperaTimer').textContent = 'REVIEW MODE';
+
       loadPassageView(activePartNum);
+
+      Object.keys(activeExam.correctAnswers || {}).forEach(k => {
+        const btn = document.getElementById(`fpill_${k}`);
+        if (btn) {
+          btn.classList.remove('answered');
+          btn.classList.add(isAnswerCorrect(k) ? 'correct' : 'incorrect');
+        }
+      });
     }
 
     function reopenReviewFromHistory(resId) {
       const res = (db.results || []).find(r => r.id === resId);
       if (!res) return;
-      const t = db.readingExams.find(e => e.id === res.examId) || db.listeningExams.find(e => e.id === res.examId);
-      if (!t) return;
-      if (db.listeningExams.some(e => e.id === t.id)) launchListeningExam(t.id);
-      else launchExam(t.id);
+      const lExam = (db.listeningExams || []).find(e => e.id === res.examId);
+      if (lExam) {
+        launchListeningExam(lExam.id);
+      } else {
+        const rExam = (db.readingExams || []).find(e => e.id === res.examId) || db.readingExams[0];
+        if (!rExam) return;
+        launchExam(rExam.id);
+      }
       userAnswers = res.userAnswersCopy || {};
       enterReviewModeFromSummary();
     }
 
-    /* EDITORS & BUILDERS */
+    /* ========================================================
+       BUILDER CONTROLLER & TEMPLATE GENERATOR (READING + LISTENING)
+       ======================================================== */
+    let passageDrafts = { 1: {}, 2: {}, 3: {} };
+    let currentDraftTab = 1;
+
+    function insertQuestionTemplate(type, mode = 're') {
+      const qBox = document.getElementById(mode === 'le' ? 'leQuestions' : 'rePQuestionsHtml');
+      const pBox = document.getElementById(mode === 'le' ? 'leTranscript' : 'rePText');
+      let snippet = '';
+
+      if (type === 'tfng') {
+        snippet = `\n<div class="question-group">
+  <div class="question-group-title">Questions 1–3: True / False / Not Given</div>
+  <p>Do the following statements agree with the information given in the reading passage? Choose <strong>TRUE</strong>, <strong>FALSE</strong> or <strong>NOT GIVEN</strong>.</p>
+  <div class="question" data-question="1">
+    <div class="question-text"><span class="q-badge">1</span> Statement 1 text goes here.</div>
+    <div class="options">
+      <label><input type="radio" name="q1" value="TRUE"> TRUE</label>
+      <label><input type="radio" name="q1" value="FALSE"> FALSE</label>
+      <label><input type="radio" name="q1" value="NOT GIVEN"> NOT GIVEN</label>
+    </div>
+  </div>
+</div>\n`;
+      } else if (type === 'mcq1') {
+        snippet = `\n<div class="question-group">
+  <div class="question-group-title">Questions 21–22: Multiple Choice</div>
+  <p>Choose the correct letter, <strong>A, B</strong> or <strong>C</strong>.</p>
+  <div class="question" data-question="21">
+    <div class="question-text"><span class="q-badge">21</span> Question stem goes here?</div>
+    <div class="options">
+      <label><input type="radio" name="q21" value="A"> A Option A</label>
+      <label><input type="radio" name="q21" value="B"> B Option B</label>
+      <label><input type="radio" name="q21" value="C"> C Option C</label>
+    </div>
+  </div>
+</div>\n`;
+      } else if (type === 'mcq2') {
+        snippet = `\n<div class="question-group">
+  <div class="question-group-title">Questions 23–24: Choose TWO Letters</div>
+  <p>Choose <strong>TWO</strong> letters, <strong>A–E</strong>.</p>
+  <div class="question" data-question="23" data-multi-pair="q23,q24">
+    <div class="question-text"><span class="q-badge">23–24</span> Which TWO points are mentioned?</div>
+    <div class="options">
+      <label><input type="checkbox" data-pair-group="q23_q24" value="A"> A First option</label>
+      <label><input type="checkbox" data-pair-group="q23_q24" value="B"> B Second option</label>
+      <label><input type="checkbox" data-pair-group="q23_q24" value="C"> C Third option</label>
+      <label><input type="checkbox" data-pair-group="q23_q24" value="D"> D Fourth option</label>
+      <label><input type="checkbox" data-pair-group="q23_q24" value="E"> E Fifth option</label>
+    </div>
+  </div>
+</div>\n`;
+      } else if (type === 'gapfill') {
+        snippet = `\n<div class="question-group">
+  <div class="question-group-title">Questions 1–5: Note / Form Completion</div>
+  <p>Complete the notes below. Write <strong>ONE WORD AND/OR A NUMBER</strong> for each answer.</p>
+  <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:16px; line-height:2.2;">
+    <p>• First note with blank <input type="text" class="input-field inline-input" name="q1" placeholder="1" autocomplete="off"> inside the sentence.</p>
+    <p>• Second note with blank <input type="text" class="input-field inline-input" name="q2" placeholder="2" autocomplete="off"> inside the sentence.</p>
+  </div>
+</div>\n`;
+      } else if (type === 'summary_drag') {
+        snippet = `\n<div class="question-group">
+  <div class="question-group-title">Questions 25–26: Matching / Summary Completion (Drag & Drop)</div>
+  <p>Choose the correct letter, <strong>A–E</strong>, and drag it into each gap.</p>
+  <div class="drag-options">
+    <div class="drag-item" draggable="true" data-answer="A">A innovation</div>
+    <div class="drag-item" draggable="true" data-answer="B">B agriculture</div>
+    <div class="drag-item" draggable="true" data-answer="C">C investment</div>
+  </div>
+  <p style="line-height:2.2;">
+    Item 25: <span class="drop-zone" data-target="q25" data-placeholder="25">25</span> <br>
+    Item 26: <span class="drop-zone" data-target="q26" data-placeholder="26">26</span>
+  </p>
+</div>\n`;
+      } else if (type === 'headings') {
+        if (pBox) pBox.value += `\n<div class="drop-zone heading-drop" data-target="q1" data-placeholder="1. Drop Heading for Paragraph A here">1. Drop Heading for Paragraph A here</div>\n<p><strong>Paragraph A</strong><br>Paragraph text here...</p>\n`;
+        snippet = `\n<div class="question-group">
+  <div class="question-group-title">Questions 1–2: Matching Headings</div>
+  <p>Drag the correct heading for each paragraph and drop it into the box above the paragraph on the left.</p>
+  <div class="drag-options headings-bank">
+    <div class="drag-item" draggable="true" data-answer="i">i. First heading option</div>
+    <div class="drag-item" draggable="true" data-answer="ii">ii. Second heading option</div>
+    <div class="drag-item" draggable="true" data-answer="iii">iii. Third heading option</div>
+  </div>
+</div>\n`;
+      } else if (type === 'matrix') {
+        snippet = `\n<div class="question-group">
+  <div class="question-group-title">Questions 13–14: Matching Information Matrix</div>
+  <p>Choose the correct letter, <strong>A, B, C</strong> or <strong>D</strong>.</p>
+  <table class="matrix-table">
+    <thead><tr><th>Statement</th><th>A</th><th>B</th><th>C</th><th>D</th></tr></thead>
+    <tbody>
+      <tr class="question" data-question="13">
+        <td class="matrix-statement"><span class="q-badge">13</span> First statement to match</td>
+        <td><input type="radio" name="q13" value="A"></td>
+        <td><input type="radio" name="q13" value="B"></td>
+        <td><input type="radio" name="q13" value="C"></td>
+        <td><input type="radio" name="q13" value="D"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>\n`;
+      }
+
+      if (qBox) qBox.value += snippet;
+    }
+
+    function autoGenerateKeysFromHtml(mode = 're') {
+      const foundKeys = new Set();
+      let combinedHtml = '';
+      if (mode === 'le') {
+        combinedHtml = document.getElementById('leQuestions').value;
+      } else {
+        saveActiveDraftCards(currentDraftTab);
+        [1, 2, 3].forEach(pNum => {
+          combinedHtml += (passageDrafts[pNum]?.passageHtml || '') + '\n' + (passageDrafts[pNum]?.questionsHtml || '');
+        });
+      }
+
+      const regexName = /name=["'](q\d+)["']/gi;
+      const regexTarget = /data-target=["'](q\d+)["']/gi;
+      const regexPair = /data-multi-pair=["']([^"']+)["']/gi;
+      let m;
+      while ((m = regexName.exec(combinedHtml)) !== null) foundKeys.add(m[1]);
+      while ((m = regexTarget.exec(combinedHtml)) !== null) foundKeys.add(m[1]);
+      while ((m = regexPair.exec(combinedHtml)) !== null) {
+        m[1].split(',').forEach(k => foundKeys.add(k.trim()));
+      }
+
+      const sorted = Array.from(foundKeys).sort((a,b) => parseInt(a.replace('q','')) - parseInt(b.replace('q','')));
+      if (!sorted.length) return alert('No question attributes (name="q1" or data-target="q1") detected yet.');
+
+      const keyBox = document.getElementById(mode === 'le' ? 'leKeys' : 'rePKeys');
+      const existing = {};
+      keyBox.value.split('\n').forEach(line => {
+        const p = line.split('=');
+        if (p.length >= 2) existing[p[0].trim()] = p.slice(1).join('=').trim();
+      });
+
+      keyBox.value = sorted.map(k => `${k}=${existing[k] || ''}`).join('\n');
+      alert(`Detected ${sorted.length} questions (${sorted[0]} to ${sorted[sorted.length - 1]})!`);
+    }
+
     function openReadingEditorModal() {
       document.getElementById('editingExamId').value = '';
+      passageDrafts = { 1: {}, 2: {}, 3: {} };
       document.getElementById('reTitle').value = '';
       document.getElementById('reDuration').value = 60;
       document.getElementById('reCategory').value = 'Full Test';
       document.getElementById('reTopic').value = '';
-      document.getElementById('rePTitle').value = '';
-      document.getElementById('rePText').value = '';
-      document.getElementById('rePQuestionsHtml').value = '';
       document.getElementById('rePKeys').value = '';
       document.getElementById('rePExps').value = '';
       document.getElementById('rePEvis').value = '';
+      document.getElementById('rePVocab').value = '';
+      currentDraftTab = 1;
+      [1, 2, 3].forEach(n => document.getElementById(`subtab-p${n}`).classList.toggle('active-subtab', n === 1));
+      loadDraftToEditor(1);
       openModal('readingEditorModal');
     }
 
@@ -1942,57 +2823,170 @@
       document.getElementById('reDuration').value = exam.duration;
       document.getElementById('reCategory').value = exam.category || 'Full Test';
       document.getElementById('reTopic').value = exam.topic || '';
-      const p = (exam.passages || [])[0] || {};
-      document.getElementById('rePTitle').value = p.title || '';
-      document.getElementById('rePText').value = p.passageHtml || '';
-      document.getElementById('rePQuestionsHtml').value = p.questionsHtml || '';
-      document.getElementById('rePKeys').value = Object.keys(exam.correctAnswers || {}).map(k => `${k}=${exam.correctAnswers[k]}`).join('\n');
-      document.getElementById('rePExps').value = Object.keys(exam.explanations || {}).map(k => `${k}=${exam.explanations[k]}`).join('\n');
-      document.getElementById('rePEvis').value = Object.keys(exam.evidences || {}).map(k => `${k}=${exam.evidences[k]}`).join('\n');
+
+      passageDrafts = { 1: {}, 2: {}, 3: {} };
+      (exam.passages || []).forEach(p => {
+        const vocabStr = (p.vocab || []).map(v => `${v.word} | ${v.type} | ${v.mean} | ${v.syn || ''}`).join('\n');
+        passageDrafts[p.partNum] = {
+          title: p.title,
+          passageHtml: p.passageHtml,
+          questionsHtml: p.questionsHtml,
+          vocabText: vocabStr
+        };
+      });
+
+      const keysStr = Object.keys(exam.correctAnswers || {}).map(k => `${k}=${exam.correctAnswers[k]}`).join('\n');
+      const expsStr = Object.keys(exam.explanations || {}).map(k => `${k}=${exam.explanations[k]}`).join('\n');
+      const evisStr = Object.keys(exam.evidences || {}).map(k => `${k}=${exam.evidences[k]}`).join('\n');
+
+      document.getElementById('rePKeys').value = keysStr;
+      document.getElementById('rePExps').value = expsStr;
+      document.getElementById('rePEvis').value = evisStr;
+
+      currentDraftTab = 1;
+      [1, 2, 3].forEach(n => document.getElementById(`subtab-p${n}`).classList.toggle('active-subtab', n === 1));
+      loadDraftToEditor(1);
       openModal('readingEditorModal');
     }
 
+    function switchPassageEditor(pNum) {
+      saveActiveDraftCards(currentDraftTab);
+      currentDraftTab = pNum;
+      [1, 2, 3].forEach(n => document.getElementById(`subtab-p${n}`).classList.toggle('active-subtab', n === pNum));
+      loadDraftToEditor(pNum);
+    }
+
+    function saveActiveDraftCards(pNum) {
+      passageDrafts[pNum] = {
+        title: document.getElementById('rePTitle').value.trim(),
+        passageHtml: document.getElementById('rePText').value.trim(),
+        questionsHtml: document.getElementById('rePQuestionsHtml').value.trim(),
+        vocabText: document.getElementById('rePVocab').value.trim()
+      };
+    }
+
+    function loadDraftToEditor(pNum) {
+      const d = passageDrafts[pNum] || {};
+      document.getElementById('rePTitle').value = d.title || `Passage ${pNum}`;
+      document.getElementById('rePText').value = d.passageHtml || '';
+      document.getElementById('rePQuestionsHtml').value = d.questionsHtml || '';
+      document.getElementById('rePVocab').value = d.vocabText || '';
+    }
+
+    function parseVocabText(text) {
+      if (!text || !text.trim()) return [];
+      const lines = text.trim().split(/\r?\n/);
+      const list = [];
+      lines.forEach(line => {
+        const parts = line.split('|').map(p => p.trim());
+        if (parts.length >= 3) {
+          list.push({
+            word: parts[0],
+            type: parts[1],
+            mean: parts[2],
+            syn: parts[3] || ''
+          });
+        }
+      });
+      return list;
+    }
+
     function saveActiveExamFromEditor() {
+      saveActiveDraftCards(currentDraftTab);
       const title = document.getElementById('reTitle').value.trim();
       const duration = Number(document.getElementById('reDuration').value) || 60;
-      const category = document.getElementById('reCategory').value;
+      const category = document.getElementById('reCategory').value || 'Full Test';
       const topic = document.getElementById('reTopic').value.trim();
-      const pTitle = document.getElementById('rePTitle').value.trim() || 'Passage 1';
-      const passageHtml = document.getElementById('rePText').value.trim();
-      const questionsHtml = document.getElementById('rePQuestionsHtml').value.trim();
       const rawKeys = document.getElementById('rePKeys').value.trim();
       const rawExps = document.getElementById('rePExps').value.trim();
       const rawEvis = document.getElementById('rePEvis').value.trim();
-      const editId = document.getElementById('editingExamId').value;
+      const editingId = document.getElementById('editingExamId').value;
+      if (!title) return alert('Exam Title is required!');
 
-      if (!title) return alert('Title is required!');
+      const correctAnswers = {};
+      const explanations = {};
+      const evidences = {};
 
-      const correctAnswers = {}, explanations = {}, evidences = {};
-      rawKeys.split(/\r?\n/).forEach(l => { const p = l.split('='); if(p.length>=2) correctAnswers[p[0].trim()] = p.slice(1).join('=').trim(); });
-      rawExps.split(/\r?\n/).forEach(l => { const p = l.split('='); if(p.length>=2) explanations[p[0].trim()] = p.slice(1).join('=').trim(); });
-      rawEvis.split(/\r?\n/).forEach(l => { const p = l.split('='); if(p.length>=2) evidences[p[0].trim()] = p.slice(1).join('=').trim(); });
+      rawKeys.split(/\r?\n/).forEach(line => {
+        const idx = line.indexOf('=');
+        if (idx > 0) {
+          const k = line.substring(0, idx).trim();
+          const v = line.substring(idx + 1).trim();
+          if (k) correctAnswers[k] = v;
+        }
+      });
 
-      const examObj = {
-        id: editId || ('re_' + Date.now()),
-        title, duration, category, topic, assignedClasses: [],
-        correctAnswers, explanations, evidences,
-        passages: [{ partNum: 1, title: pTitle, passageHtml, questionsHtml }]
-      };
+      rawExps.split(/\r?\n/).forEach(line => {
+        const idx = line.indexOf('=');
+        if (idx > 0) {
+          const k = line.substring(0, idx).trim();
+          const v = line.substring(idx + 1).trim();
+          if (k) explanations[k] = v;
+        }
+      });
 
-      if (!db.readingExams) db.readingExams = [];
-      if (editId) {
-        const idx = db.readingExams.findIndex(e => e.id === editId);
-        if (idx >= 0) db.readingExams[idx] = examObj;
+      rawEvis.split(/\r?\n/).forEach(line => {
+        const idx = line.indexOf('=');
+        if (idx > 0) {
+          const k = line.substring(0, idx).trim();
+          const v = line.substring(idx + 1).trim();
+          if (k) evidences[k] = v;
+        }
+      });
+
+      const passages = [];
+      [1, 2, 3].forEach(pNum => {
+        const d = passageDrafts[pNum];
+        if (d && (d.passageHtml || d.questionsHtml)) {
+          passages.push({
+            partNum: pNum,
+            title: d.title || `Passage ${pNum}`,
+            passageHtml: d.passageHtml,
+            questionsHtml: d.questionsHtml,
+            vocab: parseVocabText(d.vocabText)
+          });
+        }
+      });
+
+      if (!passages.length) return alert('Please enter at least one passage!');
+
+      if (editingId) {
+        const ex = db.readingExams.find(e => e.id === editingId);
+        if (ex) {
+          ex.title = title;
+          ex.duration = duration;
+          ex.category = category;
+          ex.topic = topic;
+          ex.passages = passages;
+          ex.correctAnswers = correctAnswers;
+          ex.explanations = explanations;
+          ex.evidences = evidences;
+        }
       } else {
-        db.readingExams.push(examObj);
+        if (!db.readingExams) db.readingExams = [];
+        db.readingExams.push({
+          id: 're_' + Date.now(),
+          title,
+          duration,
+          category,
+          topic,
+          assignedClasses: [],
+          correctAnswers,
+          explanations,
+          evidences,
+          passages
+        });
       }
 
       persist();
       closeModal('readingEditorModal');
-      renderReadingTable();
-      alert('Reading test saved successfully!');
+      renderDashboard();
+      alert('Reading test saved & synced in real-time!');
     }
 
+    /* ========================================================
+       LISTENING TEST CRUD
+       ======================================================== */
     function openListeningEditorModal() {
       document.getElementById('editingListeningId').value = '';
       document.getElementById('leTitle').value = '';
@@ -2004,6 +2998,7 @@
       document.getElementById('leQuestions').value = '';
       document.getElementById('leKeys').value = '';
       document.getElementById('leExps').value = '';
+      document.getElementById('leEvis').value = '';
       openModal('listeningEditorModal');
     }
 
@@ -2012,7 +3007,7 @@
       if (!exam) return;
       document.getElementById('editingListeningId').value = exam.id;
       document.getElementById('leTitle').value = exam.title;
-      document.getElementById('leDuration').value = exam.duration;
+      document.getElementById('leDuration').value = exam.duration || 30;
       document.getElementById('leAudioUrl').value = exam.audioUrl || '';
       document.getElementById('leCategory').value = exam.category || 'Listening Full';
       document.getElementById('leTopic').value = exam.topic || '';
@@ -2021,6 +3016,7 @@
       document.getElementById('leQuestions').value = p.questionsHtml || '';
       document.getElementById('leKeys').value = Object.keys(exam.correctAnswers || {}).map(k => `${k}=${exam.correctAnswers[k]}`).join('\n');
       document.getElementById('leExps').value = Object.keys(exam.explanations || {}).map(k => `${k}=${exam.explanations[k]}`).join('\n');
+      document.getElementById('leEvis').value = Object.keys(exam.evidences || {}).map(k => `${k}=${exam.evidences[k]}`).join('\n');
       openModal('listeningEditorModal');
     }
 
@@ -2035,18 +3031,38 @@
       const questionsHtml = document.getElementById('leQuestions').value.trim();
       const rawKeys = document.getElementById('leKeys').value.trim();
       const rawExps = document.getElementById('leExps').value.trim();
+      const rawEvis = document.getElementById('leEvis').value.trim();
 
-      if (!title || !audioUrl) return alert('Title and Audio URL are required!');
+      if (!title || !audioUrl) return alert('Please enter Exam Title and Audio MP3 URL!');
 
-      const correctAnswers = {}, explanations = {};
-      rawKeys.split(/\r?\n/).forEach(l => { const p = l.split('='); if(p.length>=2) correctAnswers[p[0].trim()] = p.slice(1).join('=').trim(); });
-      rawExps.split(/\r?\n/).forEach(l => { const p = l.split('='); if(p.length>=2) explanations[p[0].trim()] = p.slice(1).join('=').trim(); });
+      const correctAnswers = {};
+      const explanations = {};
+      const evidences = {};
+      rawKeys.split(/\r?\n/).forEach(line => {
+        const idx = line.indexOf('=');
+        if (idx > 0) correctAnswers[line.substring(0, idx).trim()] = line.substring(idx + 1).trim();
+      });
+      rawExps.split(/\r?\n/).forEach(line => {
+        const idx = line.indexOf('=');
+        if (idx > 0) explanations[line.substring(0, idx).trim()] = line.substring(idx + 1).trim();
+      });
+      rawEvis.split(/\r?\n/).forEach(line => {
+        const idx = line.indexOf('=');
+        if (idx > 0) evidences[line.substring(0, idx).trim()] = line.substring(idx + 1).trim();
+      });
 
       const examObj = {
         id: editId || ('le_' + Date.now()),
-        title, duration, audioUrl, category, topic, assignedClasses: [],
-        correctAnswers, explanations,
-        passages: [{ partNum: 1, title: 'Transcript', passageHtml: transcript || '<p>Transcript</p>', questionsHtml }]
+        title,
+        duration,
+        audioUrl,
+        category,
+        topic,
+        assignedClasses: [],
+        correctAnswers,
+        explanations,
+        evidences,
+        passages: [{ partNum: 1, title: 'Listening Transcript', passageHtml: transcript || '<p>No transcript provided.</p>', questionsHtml }]
       };
 
       if (!db.listeningExams) db.listeningExams = [];
@@ -2056,13 +3072,15 @@
       } else {
         db.listeningExams.push(examObj);
       }
-
       persist();
       closeModal('listeningEditorModal');
-      renderListeningTable();
-      alert('Listening test saved successfully!');
+      renderDashboard();
+      alert('Listening test saved and synced in real-time!');
     }
 
+    /* ========================================================
+       WRITING TEST CRUD
+       ======================================================== */
     function openWritingEditorModal() {
       document.getElementById('editingWritingId').value = '';
       document.getElementById('weTitle').value = '';
@@ -2096,97 +3114,224 @@
       const t1Image = document.getElementById('weT1Image').value.trim();
       const t2Prompt = document.getElementById('weT2Prompt').value.trim();
 
-      if (!title || (!t1Prompt && !t2Prompt)) return alert('Vui lòng nhập Tên đề và ít nhất 1 Task!');
-
-      const examObj = {
-        id: editId || ('we_' + Date.now()),
-        title, duration, topic, assignedClasses: [],
-        task1: { prompt: t1Prompt, image: t1Image },
-        task2: { prompt: t2Prompt }
-      };
+      if (!title || (!t1Prompt && !t2Prompt)) {
+        return alert('Vui lòng nhập Tên đề và ít nhất 1 Task (Task 1 hoặc Task 2)!');
+      }
 
       if (!db.writingExams) db.writingExams = [];
       if (editId) {
-        const idx = db.writingExams.findIndex(x => x.id === editId);
-        if (idx >= 0) db.writingExams[idx] = examObj;
+        const w = db.writingExams.find(x => x.id === editId);
+        if (w) {
+          w.title = title;
+          w.duration = duration;
+          w.topic = topic;
+          w.task1 = { prompt: t1Prompt, image: t1Image };
+          w.task2 = { prompt: t2Prompt };
+        }
       } else {
-        db.writingExams.push(examObj);
+        db.writingExams.push({
+          id: 'we_' + Date.now(),
+          title,
+          duration,
+          topic,
+          assignedClasses: [],
+          task1: { prompt: t1Prompt, image: t1Image },
+          task2: { prompt: t2Prompt }
+        });
       }
 
       persist();
       closeModal('writingEditorModal');
-      renderWritingTable();
-      alert('Writing test saved successfully!');
+      renderDashboard();
+      alert('Writing assessment saved & synced in real-time!');
     }
 
-    /* MANAGEMENT & UTILS */
-    function openCreateClassModal() { document.getElementById('newClassName').value = ''; openModal('classModal'); }
+    /* ========================================================
+       CLASS, STUDENT & BULK ACCOUNT PROVISIONING
+       ======================================================== */
+    function openCreateClassModal() {
+      document.getElementById('newClassName').value = '';
+      openModal('classModal');
+    }
+
     function saveNewClass() {
       const name = document.getElementById('newClassName').value.trim();
-      if (!name) return alert('Name required!');
+      if (!name) return alert('Please enter a class name!');
       if (!db.classes) db.classes = [];
       db.classes.push({ id: 'c_' + Date.now(), name });
-      persist(); closeModal('classModal'); renderDashboard();
+      persist();
+      closeModal('classModal');
+      renderDashboard();
     }
-    function deleteClass(id) { if (!confirm('Delete class?')) return; db.classes = db.classes.filter(c => c.id !== id); persist(); renderDashboard(); }
-    function populateClassSelect(selId, allOpt = false) {
-      const s = document.getElementById(selId); if (!s) return;
-      s.innerHTML = allOpt ? '<option value="ALL">All Classes</option>' : '';
-      (db.classes || []).forEach(c => { s.innerHTML += `<option value="${c.id}">${c.name}</option>`; });
+
+    function deleteClass(classId) {
+      if (!confirm('Delete this class cohort?')) return;
+      db.classes = (db.classes || []).filter(c => c.id !== classId);
+      persist();
+      renderDashboard();
     }
-    function openCreateStudentModal() { populateClassSelect('newStuClassSelect'); openModal('studentModal'); }
+
+    function populateClassSelect(selectId, includeAllOption = false) {
+      const sel = document.getElementById(selectId);
+      if (!sel) return;
+      sel.innerHTML = '';
+      if (includeAllOption) {
+        sel.innerHTML += `<option value="ALL">All Classes (Public to all students)</option>`;
+      }
+      (db.classes || []).forEach(c => {
+        sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+      });
+    }
+
+    function openCreateStudentModal() {
+      document.getElementById('newStuFullName').value = '';
+      document.getElementById('newStuUsername').value = '';
+      document.getElementById('newStuPassword').value = '123456';
+      populateClassSelect('newStuClassSelect');
+      openModal('studentModal');
+    }
+
     function saveNewStudent() {
       const name = document.getElementById('newStuFullName').value.trim();
       const username = document.getElementById('newStuUsername').value.trim();
       const pass = document.getElementById('newStuPassword').value.trim() || '123456';
       const classId = document.getElementById('newStuClassSelect').value;
-      if (!name || !username) return alert('Required fields missing!');
-      if (!db.users) db.users = [];
-      db.users.push({ id: 'u_' + Date.now(), username, pass, name, role: 'student', classId });
-      persist(); closeModal('studentModal'); renderDashboard(); alert('Student registered!');
+
+      if (!name || !username) return alert('Full Name and Username are required!');
+      ensureArraysExist();
+      if ((db.users || []).some(u => u.username.toLowerCase() === username.toLowerCase())) {
+        return alert('Username already exists!');
+      }
+
+      db.users.push({
+        id: 'u_' + Date.now(),
+        username,
+        pass,
+        name,
+        role: 'student',
+        classId
+      });
+
+      persist();
+      closeModal('studentModal');
+      renderDashboard();
+      alert(`Student account "${username}" created and active immediately!`);
     }
-    function openBulkStudentModal() { populateClassSelect('bulkStuClassSelect'); openModal('bulkStudentModal'); }
+
+    function openBulkStudentModal() {
+      document.getElementById('bulkStuTextarea').value = '';
+      document.getElementById('bulkStuDefaultPass').value = '123456';
+      populateClassSelect('bulkStuClassSelect');
+      openModal('bulkStudentModal');
+    }
+
+    function slugifyUsername(fullName) {
+      return fullName
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+    }
+
     function saveBulkStudents() {
       const raw = document.getElementById('bulkStuTextarea').value.trim();
       const classId = document.getElementById('bulkStuClassSelect').value;
       const defaultPass = document.getElementById('bulkStuDefaultPass').value.trim() || '123456';
-      if (!raw) return;
-      if (!db.users) db.users = [];
-      raw.split(/\r?\n/).forEach((l, i) => {
-        const p = l.split('|').map(x => x.trim());
-        if (p[0]) db.users.push({ id: 'u_' + Date.now() + '_' + i, username: p[1] || p[0].toLowerCase().replace(/\s+/g,''), pass: p[2] || defaultPass, name: p[0], role: 'student', classId });
-      });
-      persist(); closeModal('bulkStudentModal'); renderDashboard(); alert('Bulk added!');
-    }
-    function deleteUser(id) { if (!confirm('Delete?')) return; db.users = db.users.filter(u => u.id !== id); persist(); renderDashboard(); }
+      if (!raw) return alert('Please paste at least one student line!');
 
-    function openAssignModal(examId, type) {
+      ensureArraysExist();
+      const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      let createdCount = 0;
+
+      lines.forEach((line, idx) => {
+        const parts = line.split('|').map(p => p.trim());
+        const fullName = parts[0];
+        if (!fullName) return;
+
+        let username = parts[1] || slugifyUsername(fullName);
+        const pass = parts[2] || defaultPass;
+
+        if ((db.users || []).some(u => u.username.toLowerCase() === username.toLowerCase())) {
+          username = `${username}${Math.floor(10 + Math.random() * 89)}`;
+        }
+
+        db.users.push({
+          id: 'u_' + Date.now() + '_' + idx,
+          username,
+          pass,
+          name: fullName,
+          role: 'student',
+          classId
+        });
+        createdCount++;
+      });
+
+      persist();
+      closeModal('bulkStudentModal');
+      renderDashboard();
+      alert(`Successfully generated and synced ${createdCount} student accounts in real-time!`);
+    }
+
+    function deleteUser(userId) {
+      if (!confirm('Remove this student account?')) return;
+      db.users = (db.users || []).filter(u => u.id !== userId);
+      persist();
+      renderDashboard();
+    }
+
+    function openAssignModal(examId, type = 'reading') {
       document.getElementById('assignExamId').value = examId;
       document.getElementById('assignExamType').value = type;
       populateClassSelect('assignCohortSelect', true);
       openModal('assignModal');
     }
+
     function executeAssign() {
-      const id = document.getElementById('assignExamId').value;
+      const examId = document.getElementById('assignExamId').value;
       const type = document.getElementById('assignExamType').value;
       const cohort = document.getElementById('assignCohortSelect').value;
+
       const list = type === 'writing' ? db.writingExams : (type === 'listening' ? db.listeningExams : db.readingExams);
-      const target = (list || []).find(e => e.id === id);
+      const target = (list || []).find(e => e.id === examId);
       if (!target) return;
-      target.assignedClasses = cohort === 'ALL' ? [] : [cohort];
-      persist(); closeModal('assignModal'); renderDashboard(); alert('Assigned!');
+
+      if (cohort === 'ALL') {
+        target.assignedClasses = [];
+      } else {
+        if (!target.assignedClasses) target.assignedClasses = [];
+        if (!target.assignedClasses.includes(cohort)) {
+          target.assignedClasses.push(cohort);
+        }
+      }
+
+      persist();
+      closeModal('assignModal');
+      renderDashboard();
+      alert('Exam assignment updated in real-time!');
     }
 
-    function deleteExam(id, type) {
-      if (!confirm('Delete test?')) return;
-      if (type === 'writing') db.writingExams = db.writingExams.filter(e => e.id !== id);
-      else if (type === 'listening') db.listeningExams = db.listeningExams.filter(e => e.id !== id);
-      else db.readingExams = db.readingExams.filter(e => e.id !== id);
-      persist(); renderDashboard();
+    function deleteExam(examId, type = 'reading') {
+      if (!confirm('Are you sure you want to delete this test?')) return;
+      if (type === 'writing') {
+        db.writingExams = (db.writingExams || []).filter(e => e.id !== examId);
+      } else if (type === 'listening') {
+        db.listeningExams = (db.listeningExams || []).filter(e => e.id !== examId);
+      } else {
+        db.readingExams = (db.readingExams || []).filter(e => e.id !== examId);
+      }
+      persist();
+      renderDashboard();
     }
 
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function openModal(id) {
+      const m = document.getElementById(id);
+      if (m) m.style.display = 'flex';
+    }
+
+    function closeModal(id) {
+      const m = document.getElementById(id);
+      if (m) m.style.display = 'none';
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
       initDatabaseListener();
