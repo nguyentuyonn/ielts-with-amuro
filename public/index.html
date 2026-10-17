@@ -412,6 +412,23 @@
             <span>Reading Test Library</span>
             <button class="btn btn-emerald teacher-item" onclick="openReadingEditorModal()">+ Create / Import Reading Test</button>
           </div>
+          <!-- THANH TÌM KIẾM & LỌC READING / LISTENING -->
+          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:14px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+            <input type="text" id="filterReadingSearch" class="form-input" placeholder="🔍 Tìm tên đề Reading / Listening..." oninput="renderReadingTable()">
+            <select id="filterReadingPart" class="form-input" onchange="renderReadingTable()">
+              <option value="ALL">📂 Tất cả Phần / Kỹ năng</option>
+              <option value="Full Test">Full Test (3 Passages)</option>
+              <option value="Passage 1">Reading - Passage 1</option>
+              <option value="Passage 2">Reading - Passage 2</option>
+              <option value="Passage 3">Reading - Passage 3</option>
+              <option value="Listening Part 1">🎧 Listening - Part 1</option>
+              <option value="Listening Part 2">🎧 Listening - Part 2</option>
+              <option value="Listening Part 3">🎧 Listening - Part 3</option>
+              <option value="Listening Part 4">🎧 Listening - Part 4</option>
+              <option value="Listening Full">🎧 Listening - Full Test</option>
+            </select>
+            <input type="text" id="filterReadingTopic" class="form-input" placeholder="🏷️ Lọc theo Chủ đề (VD: Environment, Cam 19...)" oninput="renderReadingTable()">
+          </div>
           <table>
             <thead>
               <tr><th>Test Title</th><th>Duration</th><th>Passages</th><th>Assigned Cohort</th><th>Actions</th></tr>
@@ -428,6 +445,17 @@
             <span>Writing Assessment Library (Task 1 & Task 2)</span>
             <button class="btn btn-emerald teacher-item" onclick="openWritingEditorModal()">+ Create Writing Test (Both Tasks)</button>
           </div>
+          <!-- THANH TÌM KIẾM & LỌC WRITING -->
+          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:14px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+            <input type="text" id="filterWritingSearch" class="form-input" placeholder="🔍 Tìm tên đề Writing..." oninput="renderWritingTable()">
+            <select id="filterWritingPart" class="form-input" onchange="renderWritingTable()">
+              <option value="ALL">📂 Tất cả các phần</option>
+              <option value="Task 1 Only">Chỉ làm Task 1 (20p)</option>
+              <option value="Task 2 Only">Chỉ làm Task 2 (40p)</option>
+              <option value="Full Writing">Full Writing (Task 1 & 2)</option>
+            </select>
+            <input type="text" id="filterWritingTopic" class="form-input" placeholder="🏷️ Lọc dạng/chủ đề (VD: Line Graph, Map, Opinion...)" oninput="renderWritingTable()">
+          </div>
           <table>
             <thead>
               <tr><th>Test Title</th><th>Duration</th><th>Tasks</th><th>Assigned Cohort</th><th>Action</th></tr>
@@ -436,7 +464,6 @@
           </table>
         </div>
       </div>
-
       <!-- TAB 4: MY SAVED VOCAB -->
       <div id="tab-myvocab" class="dash-pane" style="display: none;">
         <div class="card">
@@ -666,6 +693,26 @@
             <input type="number" id="reDuration" class="form-input" value="60">
           </div>
         </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label>Phân loại Phần / Kỹ năng (Category)</label>
+            <select id="reCategory" class="form-input">
+              <option value="Full Test">Reading - Full Test</option>
+              <option value="Passage 1">Reading - Passage 1</option>
+              <option value="Passage 2">Reading - Passage 2</option>
+              <option value="Passage 3">Reading - Passage 3</option>
+              <option value="Listening Part 1">🎧 Listening - Part 1</option>
+              <option value="Listening Part 2">🎧 Listening - Part 2</option>
+              <option value="Listening Part 3">🎧 Listening - Part 3</option>
+              <option value="Listening Part 4">🎧 Listening - Part 4</option>
+              <option value="Listening Full">🎧 Listening - Full Test</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Chủ đề / Nguồn đề (Topic - VD: Environment, Technology, Cam 19...)</label>
+            <input type="text" id="reTopic" class="form-input" placeholder="e.g. Environment / Cambridge 19">
+          </div>
+        </div>
 
         <div style="display: flex; gap: 8px; margin: 8px 0 12px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
           <button class="btn btn-secondary active-subtab" id="subtab-p1" onclick="switchPassageEditor(1)">Passage 1</button>
@@ -741,6 +788,10 @@
         <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px;">
           <div class="form-group"><label>Exam Title</label><input type="text" id="weTitle" class="form-input" placeholder="e.g. IELTS Academic Writing Test 02"></div>
           <div class="form-group"><label>Duration (Minutes)</label><input type="number" id="weDuration" class="form-input" value="60"></div>
+        </div>
+        <div class="form-group">
+          <label>Chủ đề / Dạng bài (VD: Line Graph, Bar Chart, Map, Process, Opinion, Discussion...)</label>
+          <input type="text" id="weTopic" class="form-input" placeholder="e.g. Bar Chart / Education">
         </div>
         <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px; margin-bottom: 14px;">
           <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 1 (At least 150 words - 20 mins)</h4>
@@ -1478,22 +1529,39 @@
 
     function renderReadingTable() {
       const tbody = document.getElementById('readingTbody');
+      if (!tbody) return;
       tbody.innerHTML = '';
       
-      const list = getVisibleExams(db.readingExams);
+      const searchKw = (document.getElementById('filterReadingSearch')?.value || '').toLowerCase().trim();
+      const partFilter = document.getElementById('filterReadingPart')?.value || 'ALL';
+      const topicKw = (document.getElementById('filterReadingTopic')?.value || '').toLowerCase().trim();
+
+      const list = getVisibleExams(db.readingExams).filter(e => {
+        const matchSearch = !searchKw || e.title.toLowerCase().includes(searchKw) || (e.topic || '').toLowerCase().includes(searchKw);
+        const matchPart = partFilter === 'ALL' || (e.category || 'Full Test') === partFilter;
+        const matchTopic = !topicKw || (e.topic || '').toLowerCase().includes(topicKw) || e.title.toLowerCase().includes(topicKw);
+        return matchSearch && matchPart && matchTopic;
+      });
+
       if (!list.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No reading tests assigned yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No matching reading or listening tests found.</td></tr>`;
         return;
       }
       list.forEach(e => {
         const clsNames = (!e.assignedClasses || e.assignedClasses.length === 0)
           ? 'All Classes'
           : e.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
+        const catBadge = e.category ? `<span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; margin-right:6px;">${e.category}</span>` : '';
+        const topBadge = e.topic ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700;">🏷️ ${e.topic}</span>` : '';
+        
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><b>${e.title}</b></td>
+          <td>
+            <div style="margin-bottom:4px;"><b>${e.title}</b></div>
+            <div>${catBadge}${topBadge}</div>
+          </td>
           <td>${e.duration} mins</td>
-          <td>${e.passages ? e.passages.length : 1} Passage(s)</td>
+          <td>${e.passages ? e.passages.length : 1} Part(s)</td>
           <td><span style="color: #64748b; font-weight:600;">${clsNames}</span></td>
           <td style="display:flex; gap:6px; flex-wrap:wrap;">
             <button class="btn btn-emerald" onclick="launchExam('${e.id}')">Start Test</button>
@@ -1511,21 +1579,42 @@
 
     function renderWritingTable() {
       const tbody = document.getElementById('writingTbody');
+      if (!tbody) return;
       tbody.innerHTML = '';
-      const list = getVisibleExams(db.writingExams);
+
+      const searchKw = (document.getElementById('filterWritingSearch')?.value || '').toLowerCase().trim();
+      const partFilter = document.getElementById('filterWritingPart')?.value || 'ALL';
+      const topicKw = (document.getElementById('filterWritingTopic')?.value || '').toLowerCase().trim();
+
+      const list = getVisibleExams(db.writingExams).filter(w => {
+        const hasT1 = Boolean(w.task1 && w.task1.prompt);
+        const hasT2 = Boolean(w.task2 && w.task2.prompt);
+        const wType = (hasT1 && hasT2) ? 'Full Writing' : (hasT1 ? 'Task 1 Only' : 'Task 2 Only');
+
+        const matchSearch = !searchKw || w.title.toLowerCase().includes(searchKw) || (w.topic || '').toLowerCase().includes(searchKw);
+        const matchPart = partFilter === 'ALL' || wType === partFilter;
+        const matchTopic = !topicKw || (w.topic || '').toLowerCase().includes(topicKw) || w.title.toLowerCase().includes(topicKw);
+        return matchSearch && matchPart && matchTopic;
+      });
+
       if (!list.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No writing tests available.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No matching writing tests found.</td></tr>`;
         return;
       }
       list.forEach(w => {
+        const hasT1 = Boolean(w.task1 && w.task1.prompt);
+        const hasT2 = Boolean(w.task2 && w.task2.prompt);
+        const taskLabel = (hasT1 && hasT2) ? 'Task 1 & Task 2' : (hasT1 ? 'Task 1 Only' : 'Task 2 Only');
+        const topBadge = w.topic ? `<div style="margin-top:4px;"><span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700;">🏷️ ${w.topic}</span></div>` : '';
+
         const clsNames = (!w.assignedClasses || w.assignedClasses.length === 0)
           ? 'All Classes'
           : w.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><b>${w.title}</b></td>
+          <td><b>${w.title}</b>${topBadge}</td>
           <td>${w.duration} mins</td>
-          <td>Task 1 & Task 2</td>
+          <td><span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:4px; font-size:11.5px; font-weight:700;">${taskLabel}</span></td>
           <td><span style="color: #64748b; font-weight:600;">${clsNames}</span></td>
           <td style="display:flex; gap:6px; flex-wrap:wrap;">
             <button class="btn btn-emerald" onclick="launchWritingExam('${w.id}')">Start Writing</button>
@@ -2219,41 +2308,44 @@
        WRITING ENGINE (IELTSMATERIALS.UZ CD-IELTS INTERFACE)
        ======================================================== */
     function launchWritingExam(examId) {
-      activeExam = db.writingExams.find(w => w.id === examId);
-      if (!activeExam) return;
+   activeExam = db.writingExams.find(w => w.id === examId);
+   if (!activeExam) return;
 
-      activeExamType = 'writing';
-      isReviewMode = false;
-      activePartNum = 1;
-      writingAnswers = { task1: '', task2: '' };
-      secondsRemaining = (activeExam.duration || 60) * 60;
+   const hasT1 = Boolean(activeExam.task1 && activeExam.task1.prompt);
+   const hasT2 = Boolean(activeExam.task2 && activeExam.task2.prompt);
 
-      document.getElementById('dashboardApp').style.display = 'none';
-      document.getElementById('examShell').style.display = 'flex';
-      document.getElementById('insperaExamTitle').textContent = activeExam.title;
-      document.getElementById('insperaCandidateTag').textContent = `Candidate: ${activeUser.name}`;
-      document.getElementById('btnToggleTeacherMode').style.display = 'none';
-      document.getElementById('btnSubmitExam').style.display = '';
-      document.getElementById('btnSubmitBottom').style.display = '';
-      document.getElementById('footerSectionLabel').textContent = 'Writing Parts:';
+   activeExamType = 'writing';
+   isReviewMode = false;
+   activePartNum = hasT1 ? 1 : 2;
+   writingAnswers = { task1: '', task2: '' };
+   secondsRemaining = (activeExam.duration || (hasT1 && hasT2 ? 60 : (hasT1 ? 20 : 40))) * 60;
 
-      const topTabs = document.getElementById('insperaPartTabs');
-      topTabs.innerHTML = `
-        <button class="part-pill active" id="wtab_1" onclick="switchWritingTask(1)">Part 1 (Task 1)</button>
-        <button class="part-pill" id="wtab_2" onclick="switchWritingTask(2)">Part 2 (Task 2)</button>
-      `;
+   document.getElementById('dashboardApp').style.display = 'none';
+   document.getElementById('examShell').style.display = 'flex';
+   document.getElementById('insperaExamTitle').textContent = activeExam.title;
+   document.getElementById('insperaCandidateTag').textContent = `Candidate: ${activeUser.name}`;
+   document.getElementById('btnToggleTeacherMode').style.display = 'none';
+   document.getElementById('btnSubmitExam').style.display = '';
+   document.getElementById('btnSubmitBottom').style.display = '';
+   document.getElementById('footerSectionLabel').textContent = 'Writing Parts:';
 
-      const footerList = document.getElementById('insperaFooterList');
-      footerList.innerHTML = `
-        <button class="progress-item current" id="wfoot_1" onclick="switchWritingTask(1)" style="min-width:85px; height:32px;">Part 1</button>
-        <button class="progress-item" id="wfoot_2" onclick="switchWritingTask(2)" style="min-width:85px; height:32px;">Part 2</button>
-        <span id="writingWordCountDisplay" style="margin-left: 20px; font-weight: 700; color: #1e293b; font-size: 14px;">Words: 0</span>
-      `;
+   const topTabs = document.getElementById('insperaPartTabs');
+   topTabs.innerHTML = `
+     ${hasT1 ? `<button class="part-pill ${activePartNum === 1 ? 'active' : ''}" id="wtab_1" onclick="switchWritingTask(1)">Part 1 (Task 1)</button>` : ''}
+     ${hasT2 ? `<button class="part-pill ${activePartNum === 2 ? 'active' : ''}" id="wtab_2" onclick="switchWritingTask(2)">Part 2 (Task 2)</button>` : ''}
+   `;
 
-      loadWritingWorkspace(1);
-      setupResizer();
-      startTimer();
-    }
+   const footerList = document.getElementById('insperaFooterList');
+   footerList.innerHTML = `
+     ${hasT1 ? `<button class="progress-item ${activePartNum === 1 ? 'current' : ''}" id="wfoot_1" onclick="switchWritingTask(1)" style="min-width:85px; height:32px;">Part 1</button>` : ''}
+     ${hasT2 ? `<button class="progress-item ${activePartNum === 2 ? 'current' : ''}" id="wfoot_2" onclick="switchWritingTask(2)" style="min-width:85px; height:32px;">Part 2</button>` : ''}
+     <span id="writingWordCountDisplay" style="margin-left: 20px; font-weight: 700; color: #1e293b; font-size: 14px;">Words: 0</span>
+   `;
+
+   loadWritingWorkspace(activePartNum);
+   setupResizer();
+   startTimer();
+ }
 
     function switchWritingTask(taskNum) {
       const currentEditor = document.getElementById('writingEditor');
@@ -2590,13 +2682,15 @@
 
     function openReadingEditorModal() {
       document.getElementById('editingExamId').value = '';
-      passageDrafts = { 1: {}, 2: {}, 3: {} };
-      document.getElementById('reTitle').value = '';
-      document.getElementById('reDuration').value = 60;
-      document.getElementById('rePKeys').value = '';
-      document.getElementById('rePExps').value = '';
-      document.getElementById('rePEvis').value = '';
-      document.getElementById('rePVocab').value = '';
+   passageDrafts = { 1: {}, 2: {}, 3: {} };
+   document.getElementById('reTitle').value = '';
+   document.getElementById('reDuration').value = 60;
+   if (document.getElementById('reCategory')) document.getElementById('reCategory').value = 'Full Test';
+   if (document.getElementById('reTopic')) document.getElementById('reTopic').value = '';
+   document.getElementById('rePKeys').value = '';
+   document.getElementById('rePExps').value = '';
+   document.getElementById('rePEvis').value = '';
+   document.getElementById('rePVocab').value = '';
       currentDraftTab = 1;
       [1, 2, 3].forEach(n => document.getElementById(`subtab-p${n}`).classList.toggle('active-subtab', n === 1));
       loadDraftToEditor(1);
@@ -2607,8 +2701,10 @@
       const exam = db.readingExams.find(e => e.id === examId);
       if (!exam) return;
       document.getElementById('editingExamId').value = exam.id;
-      document.getElementById('reTitle').value = exam.title;
-      document.getElementById('reDuration').value = exam.duration;
+   document.getElementById('reTitle').value = exam.title;
+   document.getElementById('reDuration').value = exam.duration;
+   if (document.getElementById('reCategory')) document.getElementById('reCategory').value = exam.category || 'Full Test';
+   if (document.getElementById('reTopic')) document.getElementById('reTopic').value = exam.topic || '';
 
       passageDrafts = { 1: {}, 2: {}, 3: {} };
       (exam.passages || []).forEach(p => {
@@ -2681,7 +2777,9 @@
       saveActiveDraftCards(currentDraftTab);
       const title = document.getElementById('reTitle').value.trim();
       const duration = Number(document.getElementById('reDuration').value) || 60;
-      const rawKeys = document.getElementById('rePKeys').value.trim();
+      const category = document.getElementById('reCategory')?.value || 'Full Test';
+      const topic = document.getElementById('reTopic')?.value.trim() || '';
+	  const rawKeys = document.getElementById('rePKeys').value.trim();
       const rawExps = document.getElementById('rePExps').value.trim();
       const rawEvis = document.getElementById('rePEvis').value.trim();
       const editingId = document.getElementById('editingExamId').value;
@@ -2743,6 +2841,8 @@
           ex.correctAnswers = correctAnswers;
           ex.explanations = explanations;
           ex.evidences = evidences;
+		  ex.category = category;
+        ex.topic = topic;
         }
       } else {
         if (!db.readingExams) db.readingExams = [];
@@ -2797,9 +2897,9 @@
       const t1Image = document.getElementById('weT1Image').value.trim();
       const t2Prompt = document.getElementById('weT2Prompt').value.trim();
 
-      if (!title || !t1Prompt || !t2Prompt) {
-        return alert('Please fill in Title, Task 1 Prompt, and Task 2 Prompt!');
-      }
+      if (!title || (!t1Prompt && !t2Prompt)) {
+  return alert('Vui lòng nhập Tên đề và ít nhất 1 Task (Task 1 hoặc Task 2)!');
+}
 
       if (!db.writingExams) db.writingExams = [];
       if (editId) {
