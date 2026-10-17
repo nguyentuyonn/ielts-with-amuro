@@ -6,9 +6,9 @@
   <title>IELTS WITH AMURO - Official Computer-Delivered Testing</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Firebase SDKs (Compat Version) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <!-- FIREBASE CLOUD REALTIME SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <style>
     :root {
@@ -90,7 +90,7 @@
     th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
     th { background: #f8fafc; font-weight: 700; color: #475569; }
 
-    /* HOME HERO & STATS */
+    /* HOME HERO */
     .home-hero-banner {
       background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
       color: #fff; border-radius: 12px; padding: 32px 36px; margin-bottom: 24px;
@@ -110,7 +110,7 @@
     .stat-value { font-size: 22px; font-weight: 900; color: #0f172a; }
     .stat-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; }
 
-    /* 3. INSPERA REAL EXAM WORKSPACE */
+    /* 3. INSPERA EXAM WORKSPACE */
     #examShell { display: none; position: fixed; inset: 0; background: #fff; z-index: 5000; flex-direction: column; overflow: hidden; }
     .inspera-top {
       background: var(--inspera-dark); color: #fff; height: 46px;
@@ -131,7 +131,7 @@
     .resizer-bar:hover { background: #cbd5e1; }
     .questions-col { width: 50%; padding: 26px 30px; overflow-y: auto; background: #fff; font-size: 14px; user-select: text; }
 
-    /* IN-EXAM HIGHLIGHT TOOLTIP */
+    /* HIGHLIGHT TOOLTIP */
     #selectionTooltip {
       display: none; position: absolute; z-index: 99999; background: #1f2937; border-radius: 6px;
       padding: 4px 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); gap: 6px;
@@ -144,7 +144,7 @@
     #selectionTooltip button.btn-hl-yellow { color: #fde047; }
     .user-highlight-span { background-color: #fde047 !important; color: #111827; border-radius: 2px; }
 
-    /* STANDARDIZED EXAM STYLES */
+    /* QUESTION STYLES */
     .section-title { font-size: 1.3rem; font-weight: 700; color: #111827; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
     .question-group { background: transparent; padding: 0; margin-bottom: 34px; }
     .question-group-title { font-weight: 700; margin-bottom: 10px; color: #111827; font-size: 1.05rem; }
@@ -162,12 +162,7 @@
     }
     .input-field.inline-input:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.2); }
 
-    table.radio-matrix { width: 100%; border-collapse: collapse; margin: 16px 0 24px; table-layout: fixed; }
-    table.radio-matrix th, table.radio-matrix td { border: 1px solid #cbd5e0; padding: 10px; text-align: center; vertical-align: middle; }
-    table.radio-matrix th:first-child, table.radio-matrix td:first-child { width: 60%; text-align: left; font-weight: 500; }
-    table.radio-matrix input[type="radio"] { width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer; }
-
-    /* DRAG & DROP WITH USED OPACITY */
+    /* DRAG & DROP OPACITY ON USED */
     .drag-options { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 16px; }
     .drag-item {
       padding: 6px 12px; border: 1px solid #b9c7d8; border-radius: 6px; background: #f8fafc;
@@ -207,7 +202,7 @@
       box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.4);
     }
 
-    /* FOOTER RAIL */
+    /* FOOTER NAV */
     .progress-container {
       height: 52px; background: #fff; border-top: 1px solid var(--inspera-border);
       display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0;
@@ -701,7 +696,7 @@
     const firestore = firebase.firestore();
     const CLOUD_DOC = firestore.collection('suite').doc('main_database');
 
-    // Default Seed Exam
+    // Đề thi mặc định ban đầu
     const defaultShoppingExam = {
       id: 'reading_science_of_shopping',
       title: 'Passage: The Science of Shopping (Questions 27-40)',
@@ -925,14 +920,13 @@
       results: []
     };
 
-    // Đồng bộ Realtime Database Firestore
+    // LẮNG NGHE ĐỒNG BỘ DỮ LIỆU REALTIME
     function initDatabaseListener() {
       CLOUD_DOC.onSnapshot((doc) => {
         if (doc.exists) {
           const cloudData = doc.data();
           if (cloudData && cloudData.users) {
             db = cloudData;
-            // Đảm bảo bài Science of Shopping luôn có
             if (!db.readingExams || !db.readingExams.some(e => e.id === defaultShoppingExam.id)) {
               if (!db.readingExams) db.readingExams = [];
               db.readingExams.unshift(defaultShoppingExam);
@@ -940,17 +934,16 @@
             renderDashboard();
           }
         } else {
-          // Lưu dữ liệu mẫu lên đám mây lần đầu
           CLOUD_DOC.set(db);
         }
       }, (err) => {
-        console.warn('Firestore sync note:', err.message);
+        console.warn('Firestore Note:', err.message);
       });
     }
 
     function persist() {
       CLOUD_DOC.set(db).catch(err => {
-        console.error('Failed to sync to cloud:', err);
+        console.error('Failed to sync to Firestore:', err);
       });
     }
 
@@ -1442,7 +1435,7 @@
       });
     }
 
-    /* DRAG & DROP ENGINE: TỰ ĐỘNG ẨN THẺ ĐÃ DÙNG VÀ HOÀN TRẢ KHI HỦY */
+    /* ENGINE KÉO THẢ: ẨN THẺ ĐÃ DÙNG VÀ HOÀN TRẢ KHI HỦY */
     function setupDragDropEngine() {
       const items = document.querySelectorAll('#insperaSplitBox .drag-item');
       const zones = document.querySelectorAll('#insperaSplitBox .drop-zone');
@@ -1472,14 +1465,12 @@
           const lbl = e.dataTransfer.getData('label');
 
           if (ans) {
-            // Trả lại thẻ cũ nếu ô này trước đó đã có đáp án khác
             const oldAns = userAnswers[zone.dataset.target];
             if (oldAns) {
               const oldItem = document.querySelector(`.drag-item[data-answer="${oldAns}"]`);
               if (oldItem) oldItem.classList.remove('used');
             }
 
-            // Gán đáp án mới và ẩn thẻ vừa kéo
             zone.textContent = lbl || ans;
             zone.classList.add('filled');
             const qName = zone.dataset.target;
@@ -1497,7 +1488,6 @@
           if (zone.classList.contains('filled')) {
             const oldAns = userAnswers[zone.dataset.target];
             if (oldAns) {
-              // Hoàn trả lại thẻ kéo về danh sách ban đầu
               const oldItem = document.querySelector(`.drag-item[data-answer="${oldAns}"]`);
               if (oldItem) oldItem.classList.remove('used');
             }
@@ -1544,17 +1534,15 @@
       });
     }
 
-    /* HIỂN THỊ ĐẦY ĐỦ GIẢI THÍCH CHO CẢ DẠNG MULTIPLE CHOICE LẪN KÉO THẢ */
+    /* HIỂN THỊ ĐẦY ĐỦ GIẢI THÍCH CHO CẢ MULTIPLE CHOICE VÀ KÉO THẢ */
     function showReviewAnswersInDOM(scope) {
       Object.keys(activeExam.correctAnswers || {}).forEach(k => {
         const keyVal = activeExam.correctAnswers[k];
         const userVal = userAnswers[k] || '';
         const isRight = String(userVal).trim().toLowerCase() === String(keyVal).trim().toLowerCase();
 
-        // 1. Tìm container câu hỏi trắc nghiệm hoặc nhóm input thông thường
         let target = scope.querySelector(`[data-question="${k.replace('q','')}"]`) || scope.querySelector(`input[name="${k}"]`)?.closest('.question');
         
-        // 2. Nếu là dạng kéo thả (.drop-zone)
         const zone = scope.querySelector(`.drop-zone[data-target="${k}"]`);
         if (zone) {
           zone.style.borderColor = isRight ? '#22c55e' : '#ef4444';
@@ -1575,7 +1563,6 @@
           return;
         }
 
-        // 3. Nếu là dạng trắc nghiệm / điền từ thông thường
         if (target && !target.querySelector(`.answer-indicator[data-ind="${k}"]`)) {
           const div = document.createElement('div');
           div.className = `answer-indicator ${isRight ? 'correct' : 'incorrect'}`;
@@ -2078,118 +2065,4 @@
         }
       } else {
         if (!db.readingExams) db.readingExams = [];
-        db.readingExams.push({
-          id: 're_' + Date.now(),
-          title, duration, 
-          assignedClasses: [], // Trống = Cho phép tất cả các học sinh thấy đề
-          correctAnswers,
-          explanations,
-          evidences,
-          passages
-        });
-      }
-
-      persist();
-      closeModal('readingEditorModal');
-      renderDashboard();
-      alert('Exam saved and synced to cloud successfully!');
-    }
-
-    /* WRITING & MANAGEMENT */
-    function openWritingEditorModal() {
-      document.getElementById('weTitle').value = '';
-      document.getElementById('weDuration').value = 60;
-      document.getElementById('weT1Prompt').value = '';
-      document.getElementById('weT1Image').value = '';
-      document.getElementById('weT2Prompt').value = '';
-      openModal('writingEditorModal');
-    }
-    function saveWritingExam() {
-      const title = document.getElementById('weTitle').value.trim();
-      const duration = Number(document.getElementById('weDuration').value) || 60;
-      const t1Prompt = document.getElementById('weT1Prompt').value.trim();
-      const t1Image = document.getElementById('weT1Image').value.trim();
-      const t2Prompt = document.getElementById('weT2Prompt').value.trim();
-      if (!title || !t1Prompt || !t2Prompt) return alert('Fill in all prompts!');
-
-      if (!db.writingExams) db.writingExams = [];
-      db.writingExams.push({
-        id: 'we_' + Date.now(),
-        title, duration,
-        task1: { prompt: t1Prompt, image: t1Image },
-        task2: { prompt: t2Prompt }
-      });
-      persist();
-      closeModal('writingEditorModal');
-      renderDashboard();
-      alert('Writing assessment saved to cloud!');
-    }
-
-    function openCreateClassModal() { document.getElementById('newClassName').value = ''; openModal('classModal'); }
-    function saveNewClass() {
-      const name = document.getElementById('newClassName').value.trim();
-      if (!name) return;
-      if (!db.classes) db.classes = [];
-      db.classes.push({ id: 'c_' + Date.now(), name });
-      persist(); closeModal('classModal'); renderDashboard();
-    }
-    function openCreateStudentModal() {
-      document.getElementById('newStuFullName').value = '';
-      document.getElementById('newStuUsername').value = '';
-      document.getElementById('newStuPassword').value = '123456';
-      const sel = document.getElementById('newStuClassSelect');
-      sel.innerHTML = (db.classes || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-      openModal('studentModal');
-    }
-    function saveNewStudent() {
-      const n = document.getElementById('newStuFullName').value.trim();
-      const u = document.getElementById('newStuUsername').value.trim();
-      const p = document.getElementById('newStuPassword').value.trim();
-      const c = document.getElementById('newStuClassSelect').value;
-      if (!n || !u || !p) return alert('All fields required!');
-      if (!db.users) db.users = [];
-      if (db.users.some(x => x.username.toLowerCase() === u.toLowerCase())) return alert('Username already exists!');
-      
-      db.users.push({ id: 'u_' + Date.now(), name: n, username: u, pass: p, role: 'student', classId: c });
-      persist(); 
-      closeModal('studentModal'); 
-      renderDashboard();
-      alert(`Student account "${u}" registered successfully and synced to cloud! Password: ${p}`);
-    }
-    function openAssignModal(eId) {
-      document.getElementById('assignExamId').value = eId;
-      const sel = document.getElementById('assignCohortSelect');
-      sel.innerHTML = (db.classes || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-      openModal('assignModal');
-    }
-    function executeAssign() {
-      const eId = document.getElementById('assignExamId').value;
-      const cId = document.getElementById('assignCohortSelect').value;
-      const ex = db.readingExams.find(e => e.id === eId);
-      if (ex) {
-        if (!ex.assignedClasses) ex.assignedClasses = [];
-        if (!ex.assignedClasses.includes(cId)) {
-          ex.assignedClasses.push(cId);
-          persist(); renderDashboard();
-        }
-      }
-      closeModal('assignModal');
-    }
-    function deleteExam(id) { 
-      if (confirm('Delete exam?')) { 
-        db.readingExams = db.readingExams.filter(e => e.id !== id); 
-        persist(); 
-        renderDashboard(); 
-      } 
-    }
-    function deleteClass(id) { if (confirm('Delete class?')) { db.classes = db.classes.filter(c => c.id !== id); persist(); renderDashboard(); } }
-    function deleteUser(id) { if (confirm('Remove user?')) { db.users = db.users.filter(u => u.id !== id); persist(); renderDashboard(); } }
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-    // Khởi động lắng nghe Realtime Firebase
-    initDatabaseListener();
-    checkSession();
-  </script>
-</body>
-</html>
+        db.readingExams.push
