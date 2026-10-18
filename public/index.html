@@ -2432,30 +2432,47 @@
         const isRight = isAnswerCorrect(k);
         const qNum = k.replace('q','');
 
-        const zone = scope.querySelector(`.drop-zone[data-target="${k}"]`);
+        // 1. XỬ LÝ MỌI DẠNG KÉO THẢ (MATCHING HEADINGS, SENTENCE ENDINGS, SUMMARY DRAG & DROP)
+        const zone = scope.querySelector(`.drop-zone[data-target="${k}"]`) || scope.querySelector(`[data-target="${k}"]`);
         if (zone) {
           zone.style.borderColor = isRight ? '#22c55e' : '#ef4444';
           zone.style.background = isRight ? '#dcfce7' : '#fee2e2';
 
-          const holder = zone.classList.contains('heading-drop') ? zone : zone.closest('.question-group');
-          if (holder && !scope.querySelector(`.answer-indicator[data-ind="${k}"]`)) {
+          // Tìm thẻ lựa chọn tương ứng để lấy cả nội dung chữ (VD: "i. Heading..." hoặc "A. ending...")
+          const matchedUserItem = scope.querySelector(`.drag-item[data-answer="${userVal}"]`);
+          const matchedKeyItem = scope.querySelector(`.drag-item[data-answer="${keyVal}"]`);
+          const userDisplay = matchedUserItem ? matchedUserItem.textContent.trim() : (userVal || '(Blank)');
+          const keyDisplay = matchedKeyItem ? matchedKeyItem.textContent.trim() : keyVal;
+
+          if (!scope.querySelector(`.answer-indicator[data-ind="${k}"]`)) {
             const div = document.createElement('div');
             div.className = `answer-indicator ${isRight ? 'correct' : 'incorrect'}`;
             div.setAttribute('data-ind', k);
             div.innerHTML = `
-              <b>Q${qNum}:</b> ${isRight ? '✅ Correct!' : '❌ Incorrect.'} Your answer: <b>${userVal || '(Blank)'}</b> | Key: <b>${keyVal}</b>
-              ${activeExam.explanations && activeExam.explanations[k] ? `<div style="font-size:12px; margin-top:4px; font-weight:normal;">${activeExam.explanations[k]}</div>` : ''}
+              <b>Q${qNum}:</b> ${isRight ? '✅ Correct!' : '❌ Incorrect.'} Your answer: <b>${userDisplay}</b> | Key: <b>${keyDisplay}</b>
+              ${activeExam.explanations && activeExam.explanations[k] ? `<div style="font-size:12.5px; margin-top:4px; font-weight:normal; color:#1e293b;">💡 <b>Explanation:</b> ${activeExam.explanations[k]}</div>` : ''}
               ${activeExam.evidences && activeExam.evidences[k] ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(activeExam.evidences[k])}')">🔍 Locate in Passage/Transcript</button>` : ''}
             `;
-            if (zone.classList.contains('heading-drop')) {
+
+            // Nếu là Matching Headings ở cột bài đọc bên trái hoặc câu rời -> Chèn ngay dưới ô kéo thả
+            const inLeftPassage = Boolean(zone.closest('#insperaLeftPane'));
+            const parentQuestion = zone.closest('.question') || zone.closest('li') || zone.closest('p') || zone.closest('div');
+            const parentGroup = zone.closest('.question-group');
+
+            if (inLeftPassage || zone.classList.contains('heading-drop')) {
               zone.insertAdjacentElement('afterend', div);
-            } else if (holder) {
-              holder.appendChild(div);
+            } else if (parentGroup) {
+              parentGroup.appendChild(div);
+            } else if (parentQuestion) {
+              parentQuestion.insertAdjacentElement('afterend', div);
+            } else {
+              zone.insertAdjacentElement('afterend', div);
             }
           }
           return;
         }
 
+        // 2. XỬ LÝ CÁC DẠNG CÒN LẠI (MCQ, TFNG, INLINE GAP-FILL, MATRIX)
         let target = scope.querySelector(`[data-question="${qNum}"]`) || scope.querySelector(`[name="${k}"]`)?.closest('.question') || scope.querySelector(`[name="${k}"]`)?.parentNode;
         if (target && !scope.querySelector(`.answer-indicator[data-ind="${k}"]`)) {
           const div = document.createElement('div');
@@ -2463,11 +2480,11 @@
           div.setAttribute('data-ind', k);
           div.innerHTML = `
             <b>Q${qNum}:</b> ${isRight ? '✅ Correct!' : '❌ Incorrect.'} Your answer: <b>${userVal || '(Blank)'}</b> | Key: <b>${keyVal}</b>
-            ${activeExam.explanations && activeExam.explanations[k] ? `<div style="font-size:12px; margin-top:4px; font-weight:normal;">${activeExam.explanations[k]}</div>` : ''}
+            ${activeExam.explanations && activeExam.explanations[k] ? `<div style="font-size:12.5px; margin-top:4px; font-weight:normal; color:#1e293b;">💡 <b>Explanation:</b> ${activeExam.explanations[k]}</div>` : ''}
             ${activeExam.evidences && activeExam.evidences[k] ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(activeExam.evidences[k])}')">🔍 Locate in Passage/Transcript</button>` : ''}
           `;
           if (target.tagName === 'TR') {
-            target.closest('.question-group').appendChild(div);
+            (target.closest('.question-group') || target.closest('table').parentNode).appendChild(div);
           } else {
             target.appendChild(div);
           }
@@ -2482,20 +2499,29 @@
       const leftPane = document.getElementById('insperaLeftPane');
       leftPane.querySelectorAll('.evidence-highlight-active').forEach(el => el.outerHTML = el.innerHTML);
 
+      // Tạm gỡ các hộp giải thích trong cột bài đọc trước khi highlight để không bị lỗi HTML
+      leftPane.querySelectorAll('.answer-indicator').forEach(el => el.remove());
+
       const safeSnippet = escapeRegex(snippet);
       const regex = new RegExp(`(${safeSnippet})`, 'gi');
 
       if (regex.test(leftPane.innerHTML)) {
         leftPane.innerHTML = leftPane.innerHTML.replace(regex, `<span class="evidence-highlight-active" id="activeLocateTarget">$1</span>`);
-        document.getElementById('activeLocateTarget')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
         const shortSnippet = escapeRegex(snippet.substring(0, Math.min(snippet.length, 45)));
         const shortRegex = new RegExp(`(${shortSnippet})`, 'gi');
         if (shortRegex.test(leftPane.innerHTML)) {
           leftPane.innerHTML = leftPane.innerHTML.replace(shortRegex, `<span class="evidence-highlight-active" id="activeLocateTarget">$1</span>`);
-          document.getElementById('activeLocateTarget')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }
+
+      // Khôi phục lại trạng thái kéo thả & hộp giải thích cho Matching Headings bên cột trái
+      setupDragDropEngine();
+      restoreUserAnswersInDOM(document.getElementById('insperaSplitBox'));
+      if (isReviewMode) {
+        showReviewAnswersInDOM(document.getElementById('insperaSplitBox'));
+      }
+      document.getElementById('activeLocateTarget')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     /* TEACHER LIVE EDIT */
@@ -2509,12 +2535,12 @@
     function injectTeacherEditBadges(scope) {
       Object.keys(activeExam.correctAnswers || {}).forEach(k => {
         const qNum = k.replace('q','');
+        const zone = scope.querySelector(`.drop-zone[data-target="${k}"]`) || scope.querySelector(`[data-target="${k}"]`);
         const target = scope.querySelector(`[data-question="${qNum}"] .question-text`)
           || scope.querySelector(`[data-question="${qNum}"] td.matrix-statement`)
-          || scope.querySelector(`.drop-zone[data-target="${k}"]`)
           || scope.querySelector(`input[name="${k}"]`)?.parentNode;
 
-        if (target && !target.querySelector(`.teacher-edit-badge[data-edit="${k}"]`)) {
+        if (!scope.querySelector(`.teacher-edit-badge[data-edit="${k}"]`)) {
           const badge = document.createElement('span');
           badge.className = 'teacher-edit-badge';
           badge.setAttribute('data-edit', k);
@@ -2523,7 +2549,13 @@
             e.stopPropagation();
             openTeacherEditModal(k);
           };
-          target.appendChild(badge);
+
+          if (zone) {
+            // Chèn ngay bên cạnh ô kéo thả (không chèn vào bên trong để tránh bị mất khi điền đáp án)
+            zone.insertAdjacentElement('afterend', badge);
+          } else if (target) {
+            target.appendChild(badge);
+          }
         }
       });
     }
