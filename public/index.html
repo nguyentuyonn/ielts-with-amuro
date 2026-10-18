@@ -54,59 +54,97 @@
     #examShell.theme-yellow .form-input,
     #examShell.theme-yellow select { background: #111; color: #fde047; border-color: #eab308; }
 
-    /* 1. BRIGHT MODERN IELTS LOGIN SCREEN */
+    /* 1. ATTRACTIVE MODERN IELTS LOGIN SCREEN */
     #loginScreen {
       position: fixed; inset: 0; z-index: 9999; display: flex;
-      background: radial-gradient(circle at 15% 20%, #ecfdf5 0%, #f0f9ff 45%, #f8fafc 100%);
+      background:
+        radial-gradient(circle at 12% 18%, rgba(16, 185, 129, 0.14) 0%, transparent 38%),
+        radial-gradient(circle at 88% 82%, rgba(37, 99, 235, 0.12) 0%, transparent 42%),
+        linear-gradient(135deg, #f0fdf4 0%, #f8fafc 50%, #eff6ff 100%);
+      overflow-y: auto;
     }
     .login-left-banner {
-      width: 56%; display: flex; flex-direction: column; justify-content: center;
-      padding: 60px 80px; position: relative;
+      width: 58%; display: flex; flex-direction: column; justify-content: center;
+      padding: 50px 72px; position: relative;
       background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-      background-size: 24px 24px;
+      background-size: 28px 28px;
     }
     .login-brand-pill {
       display: inline-flex; align-items: center; gap: 8px; width: fit-content;
       background: #ffffff; border: 1px solid #a7f3d0; color: var(--emerald-accent);
-      padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 800;
-      letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.08);
+      padding: 7px 16px; border-radius: 999px; font-size: 12px; font-weight: 800;
+      letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 18px;
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.1);
     }
-    .login-hero-logo { font-size: 56px; font-weight: 800; line-height: 1.08; color: #0f172a; margin-bottom: 18px; letter-spacing: -1px; }
+    .login-hero-logo { font-size: 54px; font-weight: 800; line-height: 1.06; color: #0f172a; margin-bottom: 14px; letter-spacing: -1.2px; }
     .login-hero-logo span {
       background: linear-gradient(135deg, #059669 0%, #2563eb 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .login-hero-desc { font-size: 16px; color: #475569; line-height: 1.7; max-width: 520px; margin-bottom: 28px; font-weight: 500; }
-    
+    .login-hero-desc { font-size: 15.5px; color: #475569; line-height: 1.65; max-width: 540px; margin-bottom: 24px; font-weight: 500; }
+
+    /* IELTS TRF SHOWCASE CARD ON LOGIN */
+    .trf-showcase-card {
+      background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(12px);
+      border: 1px solid #e2e8f0; border-radius: 18px; padding: 18px 22px;
+      max-width: 540px; margin-bottom: 22px;
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+    }
+    .trf-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px dashed #cbd5e1;
+    }
+    .trf-title { font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 8px; }
+    .trf-overall-pill {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #fff;
+      padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 800;
+    }
+    .trf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .trf-box {
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 10px 8px; text-align: center; transition: 0.2s;
+    }
+    .trf-box:hover { transform: translateY(-2px); border-color: #a7f3d0; background: #fff; }
+    .trf-skill-name { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; }
+    .trf-skill-score { font-size: 20px; font-weight: 800; color: #0f172a; }
+
     .ielts-skill-pills {
-      display: grid; grid-template-columns: repeat(2, minmax(200px, 240px)); gap: 12px; margin-bottom: 28px;
+      display: grid; grid-template-columns: repeat(2, minmax(200px, 260px)); gap: 12px; margin-bottom: 22px;
     }
     .skill-badge-card {
-      background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px);
-      border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(8px);
+      border: 1px solid #e2e8f0; border-radius: 12px; padding: 11px 14px;
       display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
     }
     .skill-badge-icon {
-      width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
-      font-size: 16px; font-weight: 700;
+      width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; flex-shrink: 0;
     }
-    .skill-badge-title { font-size: 13px; font-weight: 800; color: #0f172a; }
+    .skill-badge-title { font-size: 12.5px; font-weight: 800; color: #0f172a; }
     .skill-badge-sub { font-size: 11px; font-weight: 600; color: #64748b; }
 
     .login-motto-badge {
       display: inline-block; width: fit-content; background: #ffffff;
-      border-left: 4px solid var(--emerald-accent); padding: 12px 20px;
-      font-size: 13.5px; font-style: italic; color: #334155; font-weight: 600;
+      border-left: 4px solid var(--emerald-accent); padding: 10px 18px;
+      font-size: 13px; font-style: italic; color: #334155; font-weight: 600;
       border-radius: 0 10px 10px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
-    .login-right-area { width: 44%; display: flex; align-items: center; justify-content: center; padding: 40px; }
+    .login-right-area { width: 42%; display: flex; align-items: center; justify-content: center; padding: 40px; }
     .login-card {
-      width: 100%; max-width: 410px; background: #ffffff; padding: 42px 36px; border-radius: 20px;
-      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0;
+      width: 100%; max-width: 420px; background: #ffffff; padding: 40px 36px; border-radius: 24px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.09); border: 1px solid #e2e8f0; position: relative; overflow: hidden;
     }
-    .login-card h2 { font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
-    .login-card p { font-size: 13.5px; color: #64748b; margin-bottom: 26px; font-weight: 500; }
+    .login-card::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+      background: linear-gradient(90deg, #059669 0%, #2563eb 100%);
+    }
+    .login-card-visual {
+      width: 100%; height: 115px; border-radius: 14px; margin-bottom: 20px; overflow: hidden; position: relative;
+      background: linear-gradient(135deg, #064e3b 0%, #1e3a8a 100%);
+      display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; color: #fff;
+    }
+    .login-card h2 { font-size: 23px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+    .login-card p { font-size: 13px; color: #64748b; margin-bottom: 22px; font-weight: 500; }
     
     .form-group { margin-bottom: 16px; text-align: left; }
     .form-group label { display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
@@ -177,6 +215,10 @@
     th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; }
     th { background: #f8fafc; font-weight: 700; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
     tbody tr:hover { background: #f8fafc; }
+
+    .student-group-row { cursor: pointer; transition: 0.15s; }
+    .student-group-row:hover { background: #f0fdf4 !important; }
+    .student-history-drawer { background: #f8fafc; padding: 16px 22px; border-left: 4px solid var(--emerald-accent); border-radius: 8px; margin: 6px 0; }
 
     /* HOME HERO */
     .home-hero-banner {
@@ -366,13 +408,39 @@
 </head>
 <body>
 
-  <!-- 1. LOGIN SCREEN -->
+  <!-- 1. ATTRACTIVE IELTS LOGIN SCREEN -->
   <div id="loginScreen">
     <div class="login-left-banner">
-      <div class="login-brand-pill"><i class="fas fa-graduation-cap"></i> Official CD-IELTS Simulation</div>
+      <div class="login-brand-pill"><i class="fas fa-graduation-cap"></i> Official Computer-Delivered IELTS Suite</div>
       <div class="login-hero-logo">IELTS WITH <span>AMURO</span></div>
       <div class="login-hero-desc">
-        Experience an authentic Computer-Delivered IELTS testing environment. Master Reading, Listening, and Academic Writing with real-time timers, interactive question formats, and instant evidence localization.
+        Step into an authentic Inspera-style Computer-Delivered IELTS testing room. Practice Academic Reading, Listening, and Writing with real-time timers, interactive question formats, and instant evidence localization.
+      </div>
+
+      <!-- IELTS OFFICIAL TRF BAND SHOWCASE -->
+      <div class="trf-showcase-card">
+        <div class="trf-header">
+          <div class="trf-title"><i class="fas fa-certificate" style="color:var(--emerald-accent);"></i> Target IELTS Test Report Form</div>
+          <div class="trf-overall-pill">Overall Band 8.5</div>
+        </div>
+        <div class="trf-grid">
+          <div class="trf-box">
+            <div class="trf-skill-name">Listening</div>
+            <div class="trf-skill-score" style="color:#2563eb;">9.0</div>
+          </div>
+          <div class="trf-box">
+            <div class="trf-skill-name">Reading</div>
+            <div class="trf-skill-score" style="color:#059669;">9.0</div>
+          </div>
+          <div class="trf-box">
+            <div class="trf-skill-name">Writing</div>
+            <div class="trf-skill-score" style="color:#d97706;">9.0</div>
+          </div>
+          <div class="trf-box">
+            <div class="trf-skill-name">Speaking</div>
+            <div class="trf-skill-score" style="color:#7c3aed;">9.0</div>
+          </div>
+        </div>
       </div>
       
       <div class="ielts-skill-pills">
@@ -387,31 +455,27 @@
           <div class="skill-badge-icon" style="background:#eff6ff; color:#2563eb;"><i class="fas fa-headphones"></i></div>
           <div>
             <div class="skill-badge-title">IELTS Listening</div>
-            <div class="skill-badge-sub">Audio Bar & Transcript</div>
-          </div>
-        </div>
-        <div class="skill-badge-card">
-          <div class="skill-badge-icon" style="background:#fef3c7; color:#d97706;"><i class="fas fa-pen-nib"></i></div>
-          <div>
-            <div class="skill-badge-title">Academic Writing</div>
-            <div class="skill-badge-sub">Live Word Count & Grading</div>
-          </div>
-        </div>
-        <div class="skill-badge-card">
-          <div class="skill-badge-icon" style="background:#f3e8ff; color:#7c3aed;"><i class="fas fa-award"></i></div>
-          <div>
-            <div class="skill-badge-title">Band 9.0 Analytics</div>
-            <div class="skill-badge-sub">Instant Cloud Feedback</div>
+            <div class="skill-badge-sub">Top Audio Bar & Transcript</div>
           </div>
         </div>
       </div>
 
       <div class="login-motto-badge">"Let justice be done though the heavens fall"</div>
     </div>
+
     <div class="login-right-area">
       <div class="login-card">
+        <div class="login-card-visual">
+          <div>
+            <div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#a7f3d0; margin-bottom:4px;">CD-IELTS Examination Room</div>
+            <div style="font-size:18px; font-weight:800;">Academic Portal</div>
+            <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Real-Time Cloud Assessment</div>
+          </div>
+          <div style="font-size:42px; color:rgba(255,255,255,0.22);"><i class="fas fa-laptop-code"></i></div>
+        </div>
+
         <h2>Student & Teacher Sign In</h2>
-        <p>Enter your account credentials to access the portal</p>
+        <p>Enter your account credentials to enter the practice portal</p>
         <div class="form-group">
           <label>Username</label>
           <input type="text" id="logUser" class="form-input" placeholder="Enter username" autocomplete="off" onkeydown="if(event.key==='Enter') execLogin()">
@@ -623,7 +687,7 @@
         </div>
       </div>
 
-      <!-- TAB 6: STUDENTS -->
+      <!-- TAB 6: STUDENTS (WITH EDIT STUDENT FEATURE) -->
       <div id="tab-students" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title">
@@ -642,13 +706,30 @@
         </div>
       </div>
 
-      <!-- TAB 7: ANALYTICS -->
+      <!-- TAB 7: ANALYTICS (GROUPED BY STUDENT + DATE FILTER) -->
       <div id="tab-analytics" class="dash-pane" style="display: none;">
         <div class="card">
-          <div class="card-title"><span>Student Performance History & Writing Grading</span></div>
+          <div class="card-title">
+            <span>Student Performance History & Writing Grading</span>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-emerald" id="btnAnalyticsGroupStu" onclick="setAnalyticsViewMode('student')">👥 Group by Student</button>
+              <button class="btn btn-secondary" id="btnAnalyticsAllSub" onclick="setAnalyticsViewMode('all')">🕒 All Submissions</button>
+            </div>
+          </div>
+
+          <!-- FILTER BAR FOR SUBMISSIONS & SCORES -->
+          <div style="display:grid; grid-template-columns: 1.5fr 1fr 1fr auto; gap:10px; margin-bottom:16px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0; align-items:center;">
+            <input type="text" id="filterAnalyticsSearch" class="form-input" placeholder="🔍 Search student name or exam title..." oninput="renderAnalyticsTable()">
+            <select id="filterAnalyticsClass" class="form-input" onchange="renderAnalyticsTable()">
+              <option value="ALL">🏫 All Classes</option>
+            </select>
+            <input type="date" id="filterAnalyticsDate" class="form-input" onchange="renderAnalyticsTable()" title="Filter by submission date">
+            <button class="btn btn-secondary" onclick="clearAnalyticsFilters()">Reset</button>
+          </div>
+
           <table>
-            <thead>
-              <tr><th>Student Name</th><th>Assessment Title</th><th>Score / Word Count</th><th>Band</th><th>Submission Date</th><th>Action</th></tr>
+            <thead id="analyticsThead">
+              <tr><th>Student Name</th><th>Class</th><th>Total Submissions</th><th>Latest Band</th><th>Latest Activity</th><th>Action</th></tr>
             </thead>
             <tbody id="analyticsTbody"></tbody>
           </table>
@@ -1041,17 +1122,21 @@
     </div>
   </div>
 
-  <!-- SINGLE STUDENT MODAL -->
+  <!-- SINGLE STUDENT MODAL (REGISTER OR EDIT STUDENT) -->
   <div class="modal-overlay" id="studentModal">
     <div class="modal-window" style="width: 440px;">
-      <div class="modal-header">Register Student Account</div>
+      <div class="modal-header" id="studentModalTitle">Register Student Account</div>
       <div class="modal-body">
+        <input type="hidden" id="editingStudentId">
         <div class="form-group"><label>Full Name</label><input type="text" id="newStuFullName" class="form-input" autocomplete="off" placeholder="Alex Johnson"></div>
         <div class="form-group"><label>Username</label><input type="text" id="newStuUsername" class="form-input" autocomplete="off" placeholder="alexjohnson"></div>
         <div class="form-group"><label>Password</label><input type="text" id="newStuPassword" class="form-input" value="123456"></div>
         <div class="form-group"><label>Assign Class</label><select id="newStuClassSelect" class="form-input"></select></div>
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('studentModal')">Cancel</button><button class="btn btn-emerald" onclick="saveNewStudent()">Create Account</button></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('studentModal')">Cancel</button>
+        <button class="btn btn-emerald" id="studentModalSaveBtn" onclick="saveNewStudent()">Save Account</button>
+      </div>
     </div>
   </div>
 
@@ -1446,6 +1531,8 @@
     let examTimer = null;
     let secondsRemaining = 3600;
     let selectedDragItem = null;
+    let analyticsViewMode = 'student';
+    let expandedAnalyticsStudent = null;
 
     /* AUTH CONTROLLER */
     function checkSession() {
@@ -1860,35 +1947,237 @@
           <td><b>${u.name}</b></td>
           <td><code>${u.username}</code></td>
           <td><code>${u.pass}</code></td>
-          <td>${c ? c.name : 'Unassigned'}</td>
-          <td><button class="btn btn-danger" onclick="deleteUser('${u.id}')">Remove</button></td>
+          <td><span style="background:#f1f5f9; padding:3px 10px; border-radius:999px; font-weight:600; font-size:12px;">${c ? c.name : 'Unassigned'}</span></td>
+          <td style="display:flex; gap:6px;">
+            <button class="btn btn-secondary" onclick="openEditStudentModal('${u.id}')">✏️ Edit</button>
+            <button class="btn btn-danger" onclick="deleteUser('${u.id}')">Remove</button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
+    /* ========================================================
+       SUBMISSIONS & SCORES: GROUP BY STUDENT + DATE FILTER
+       ======================================================== */
+    function setAnalyticsViewMode(mode) {
+      analyticsViewMode = mode;
+      document.getElementById('btnAnalyticsGroupStu').className = mode === 'student' ? 'btn btn-emerald' : 'btn btn-secondary';
+      document.getElementById('btnAnalyticsAllSub').className = mode === 'all' ? 'btn btn-emerald' : 'btn btn-secondary';
+      renderAnalyticsTable();
+    }
+
+    function clearAnalyticsFilters() {
+      const s = document.getElementById('filterAnalyticsSearch');
+      const c = document.getElementById('filterAnalyticsClass');
+      const d = document.getElementById('filterAnalyticsDate');
+      if (s) s.value = '';
+      if (c) c.value = 'ALL';
+      if (d) d.value = '';
+      renderAnalyticsTable();
+    }
+
+    function matchesDateFilter(resultItem, selectedDateStr) {
+      if (!selectedDateStr) return true;
+      if (resultItem.isoDate) return resultItem.isoDate === selectedDateStr;
+      // Fallback parse from timestamp or id (res_1729...)
+      const idMatch = String(resultItem.id || '').match(/(\d{13})/);
+      if (idMatch) {
+        const dt = new Date(Number(idMatch[1]));
+        const yyyy = dt.getFullYear();
+        const mm = String(dt.getMonth() + 1).padStart(2, '0');
+        const dd = String(dt.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}` === selectedDateStr;
+      }
+      const parsed = new Date(resultItem.timestamp);
+      if (!isNaN(parsed.getTime())) {
+        const yyyy = parsed.getFullYear();
+        const mm = String(parsed.getMonth() + 1).padStart(2, '0');
+        const dd = String(parsed.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}` === selectedDateStr;
+      }
+      return String(resultItem.timestamp || '').includes(selectedDateStr);
+    }
+
+    function toggleExpandStudentHistory(studentName) {
+      expandedAnalyticsStudent = (expandedAnalyticsStudent === studentName) ? null : studentName;
+      renderAnalyticsTable();
+    }
+
     function renderAnalyticsTable() {
       const tbody = document.getElementById('analyticsTbody');
-      if (!tbody) return;
+      const thead = document.getElementById('analyticsThead');
+      if (!tbody || !thead) return;
+
+      // Sync class filter dropdown options
+      const classSelect = document.getElementById('filterAnalyticsClass');
+      if (classSelect) {
+        const currentVal = classSelect.value || 'ALL';
+        classSelect.innerHTML = `<option value="ALL">🏫 All Classes</option>` +
+          (db.classes || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        classSelect.value = currentVal;
+      }
+
+      const searchKw = (document.getElementById('filterAnalyticsSearch')?.value || '').toLowerCase().trim();
+      const classFilter = document.getElementById('filterAnalyticsClass')?.value || 'ALL';
+      const dateFilter = document.getElementById('filterAnalyticsDate')?.value || '';
+
       tbody.innerHTML = '';
-      (db.results || []).slice().reverse().forEach(r => {
-        const isWriting = r.writingSubmission ? true : false;
+
+      const allResults = (db.results || []).slice().reverse().filter(r => {
+        if (!matchesDateFilter(r, dateFilter)) return false;
+        const stuObj = (db.users || []).find(u => u.name.toLowerCase() === String(r.userName || '').toLowerCase());
+        if (classFilter !== 'ALL') {
+          if (!stuObj || stuObj.classId !== classFilter) return false;
+        }
+        if (searchKw) {
+          const hay = `${r.userName || ''} ${r.examTitle || ''}`.toLowerCase();
+          if (!hay.includes(searchKw)) return false;
+        }
+        return true;
+      });
+
+      if (analyticsViewMode === 'all') {
+        thead.innerHTML = `<tr><th>Student Name</th><th>Class</th><th>Assessment Title</th><th>Score / Word Count</th><th>Band</th><th>Submission Date</th><th>Action</th></tr>`;
+        if (!allResults.length) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:20px;">No submissions match the selected filters.</td></tr>`;
+          return;
+        }
+        allResults.forEach(r => {
+          const isWriting = Boolean(r.writingSubmission);
+          const stuObj = (db.users || []).find(u => u.name.toLowerCase() === String(r.userName || '').toLowerCase());
+          const clsObj = stuObj ? (db.classes || []).find(c => c.id === stuObj.classId) : null;
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><b>${r.userName}</b></td>
+            <td><span style="color:#64748b; font-size:12px;">${clsObj ? clsObj.name : '—'}</span></td>
+            <td>${r.examTitle}</td>
+            <td>${r.score}</td>
+            <td><b style="color: var(--emerald-accent);">${String(r.band).startsWith('Band') ? r.band : 'Band ' + r.band}</b></td>
+            <td>${r.timestamp}</td>
+            <td>
+              ${isWriting ? `
+                <button class="btn btn-emerald" onclick="openGradeWritingModal('${r.id}')">Review & Grade</button>
+              ` : `
+                <button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">Review Keys</button>
+              `}
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+        return;
+      }
+
+      // GROUP BY STUDENT MODE
+      thead.innerHTML = `<tr><th>Student Name (Click to view submissions)</th><th>Class</th><th>Submissions</th><th>Average / Latest Band</th><th>Latest Activity</th><th>Action</th></tr>`;
+
+      const studentMap = new Map();
+      // Include registered students first
+      (db.users || []).filter(u => u.role === 'student').forEach(u => {
+        if (classFilter !== 'ALL' && u.classId !== classFilter) return;
+        studentMap.set(u.name, { userObj: u, submissions: [] });
+      });
+
+      allResults.forEach(r => {
+        if (!studentMap.has(r.userName)) {
+          const uObj = (db.users || []).find(u => u.name === r.userName);
+          studentMap.set(r.userName, { userObj: uObj, submissions: [] });
+        }
+        studentMap.get(r.userName).submissions.push(r);
+      });
+
+      const entries = Array.from(studentMap.entries()).filter(([stuName, data]) => {
+        if (dateFilter && data.submissions.length === 0) return false;
+        if (searchKw) {
+          const matchName = stuName.toLowerCase().includes(searchKw);
+          const matchSub = data.submissions.some(s => (s.examTitle || '').toLowerCase().includes(searchKw));
+          return matchName || matchSub;
+        }
+        return true;
+      });
+
+      if (!entries.length) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;">No students or submissions match the current filter.</td></tr>`;
+        return;
+      }
+
+      entries.forEach(([stuName, data]) => {
+        const subs = data.submissions;
+        const clsObj = data.userObj ? (db.classes || []).find(c => c.id === data.userObj.classId) : null;
+        const isExpanded = (expandedAnalyticsStudent === stuName);
+
+        // Calculate average numeric band if available
+        const numericBands = subs
+          .map(s => parseFloat(String(s.band).replace('Band', '').trim()))
+          .filter(n => !isNaN(n));
+        const avgBand = numericBands.length
+          ? `Band ${(numericBands.reduce((a, b) => a + b, 0) / numericBands.length).toFixed(1)}`
+          : (subs[0] ? subs[0].band : '—');
+
+        const latestDate = subs[0] ? subs[0].timestamp : 'No submissions yet';
+
         const tr = document.createElement('tr');
+        tr.className = 'student-group-row';
+        tr.onclick = () => toggleExpandStudentHistory(stuName);
         tr.innerHTML = `
-          <td><b>${r.userName}</b></td>
-          <td>${r.examTitle}</td>
-          <td>${r.score}</td>
-          <td><b style="color: var(--emerald-accent);">${String(r.band).startsWith('Band') ? r.band : 'Band ' + r.band}</b></td>
-          <td>${r.timestamp}</td>
           <td>
-            ${isWriting ? `
-              <button class="btn btn-emerald" onclick="openGradeWritingModal('${r.id}')">Review & Grade</button>
-            ` : `
-              <button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">Review Keys</button>
-            `}
+            <div style="display:flex; align-items:center; gap:8px;">
+              <i class="fas fa-chevron-${isExpanded ? 'down' : 'right'}" style="color:var(--emerald-accent); width:14px;"></i>
+              <b>👤 ${stuName}</b>
+            </div>
+          </td>
+          <td><span style="background:#f1f5f9; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600;">${clsObj ? clsObj.name : 'Unassigned'}</span></td>
+          <td><span style="background:#ecfdf5; color:#047857; padding:3px 10px; border-radius:999px; font-weight:800; font-size:12px;">${subs.length} test(s)</span></td>
+          <td><b style="color:var(--emerald-accent);">${avgBand}</b></td>
+          <td><span style="color:#64748b; font-size:12px;">${latestDate}</span></td>
+          <td>
+            <button class="btn btn-secondary" style="padding:5px 12px; font-size:12px;" onclick="event.stopPropagation(); toggleExpandStudentHistory('${stuName.replace(/'/g, "\\'")}')">
+              ${isExpanded ? 'Hide History' : 'View Tests (' + subs.length + ')'}
+            </button>
           </td>
         `;
         tbody.appendChild(tr);
+
+        if (isExpanded) {
+          const detailTr = document.createElement('tr');
+          detailTr.innerHTML = `
+            <td colspan="6" style="padding: 8px 18px 18px 18px; background: #ffffff;">
+              <div class="student-history-drawer">
+                <div style="font-weight:800; color:#0f172a; margin-bottom:10px; font-size:13px;">
+                  📋 All Completed Tests for <span style="color:var(--emerald-accent);">${stuName}</span>
+                </div>
+                ${!subs.length ? `<div style="color:#64748b; font-style:italic;">No test submissions recorded for this student.</div>` : `
+                  <table style="background:#fff; border-radius:8px; overflow:hidden; border:1px solid #e2e8f0;">
+                    <thead>
+                      <tr><th>Assessment Title</th><th>Score / Word Count</th><th>Band</th><th>Date & Time</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                      ${subs.map(s => {
+                        const isW = Boolean(s.writingSubmission);
+                        return `
+                          <tr>
+                            <td><b>${s.examTitle}</b></td>
+                            <td>${s.score}</td>
+                            <td><b style="color:var(--emerald-accent);">${String(s.band).startsWith('Band') ? s.band : 'Band ' + s.band}</b></td>
+                            <td><span style="color:#64748b; font-size:12px;">${s.timestamp}</span></td>
+                            <td>
+                              ${isW ? `
+                                <button class="btn btn-emerald" style="padding:5px 12px; font-size:12px;" onclick="openGradeWritingModal('${s.id}')">Review & Grade</button>
+                              ` : `
+                                <button class="btn btn-secondary" style="padding:5px 12px; font-size:12px;" onclick="reopenReviewFromHistory('${s.id}')">Review Keys</button>
+                              `}
+                            </td>
+                          </tr>
+                        `;
+                      }).join('')}
+                    </tbody>
+                  </table>
+                `}
+              </div>
+            </td>
+          `;
+          tbody.appendChild(detailTr);
+        }
       });
     }
 
@@ -1977,7 +2266,6 @@
       let url = (rawUrl || '').trim();
       if (!url) return;
 
-      // Auto-convert Dropbox links to direct stream for native HTML5 player
       if (url.includes('dropbox.com')) {
         url = url.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace(/[?&]dl=[01]/, '');
       }
@@ -2015,7 +2303,6 @@
       const origText = btnText ? btnText.textContent : 'Upload MP3';
       if (btnText) btnText.textContent = '⏳ Uploading...';
 
-      // 1. Try Firebase Cloud Storage first
       if (CLOUD_STORAGE) {
         try {
           const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -2032,7 +2319,6 @@
         }
       }
 
-      // 2. Fallback to Cloud Audio Host (Catbox API) so Firestore never hits the 1MB limit
       try {
         const formData = new FormData();
         formData.append('reqtype', 'fileupload');
@@ -2432,13 +2718,12 @@
         const isRight = isAnswerCorrect(k);
         const qNum = k.replace('q','');
 
-        // 1. XỬ LÝ MỌI DẠNG KÉO THẢ (MATCHING HEADINGS, SENTENCE ENDINGS, SUMMARY DRAG & DROP)
+        // 1. ALL DRAG & DROP FORMATS (MATCHING HEADINGS, SENTENCE ENDINGS, SUMMARY DRAG & DROP)
         const zone = scope.querySelector(`.drop-zone[data-target="${k}"]`) || scope.querySelector(`[data-target="${k}"]`);
         if (zone) {
           zone.style.borderColor = isRight ? '#22c55e' : '#ef4444';
           zone.style.background = isRight ? '#dcfce7' : '#fee2e2';
 
-          // Tìm thẻ lựa chọn tương ứng để lấy cả nội dung chữ (VD: "i. Heading..." hoặc "A. ending...")
           const matchedUserItem = scope.querySelector(`.drag-item[data-answer="${userVal}"]`);
           const matchedKeyItem = scope.querySelector(`.drag-item[data-answer="${keyVal}"]`);
           const userDisplay = matchedUserItem ? matchedUserItem.textContent.trim() : (userVal || '(Blank)');
@@ -2454,7 +2739,6 @@
               ${activeExam.evidences && activeExam.evidences[k] ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(activeExam.evidences[k])}')">🔍 Locate in Passage/Transcript</button>` : ''}
             `;
 
-            // Nếu là Matching Headings ở cột bài đọc bên trái hoặc câu rời -> Chèn ngay dưới ô kéo thả
             const inLeftPassage = Boolean(zone.closest('#insperaLeftPane'));
             const parentQuestion = zone.closest('.question') || zone.closest('li') || zone.closest('p') || zone.closest('div');
             const parentGroup = zone.closest('.question-group');
@@ -2472,7 +2756,7 @@
           return;
         }
 
-        // 2. XỬ LÝ CÁC DẠNG CÒN LẠI (MCQ, TFNG, INLINE GAP-FILL, MATRIX)
+        // 2. OTHER QUESTION FORMATS (MCQ, TFNG, INLINE GAP-FILL, MATRIX)
         let target = scope.querySelector(`[data-question="${qNum}"]`) || scope.querySelector(`[name="${k}"]`)?.closest('.question') || scope.querySelector(`[name="${k}"]`)?.parentNode;
         if (target && !scope.querySelector(`.answer-indicator[data-ind="${k}"]`)) {
           const div = document.createElement('div');
@@ -2498,8 +2782,6 @@
 
       const leftPane = document.getElementById('insperaLeftPane');
       leftPane.querySelectorAll('.evidence-highlight-active').forEach(el => el.outerHTML = el.innerHTML);
-
-      // Tạm gỡ các hộp giải thích trong cột bài đọc trước khi highlight để không bị lỗi HTML
       leftPane.querySelectorAll('.answer-indicator').forEach(el => el.remove());
 
       const safeSnippet = escapeRegex(snippet);
@@ -2515,7 +2797,6 @@
         }
       }
 
-      // Khôi phục lại trạng thái kéo thả & hộp giải thích cho Matching Headings bên cột trái
       setupDragDropEngine();
       restoreUserAnswersInDOM(document.getElementById('insperaSplitBox'));
       if (isReviewMode) {
@@ -2551,7 +2832,6 @@
           };
 
           if (zone) {
-            // Chèn ngay bên cạnh ô kéo thả (không chèn vào bên trong để tránh bị mất khi điền đáp án)
             zone.insertAdjacentElement('afterend', badge);
           } else if (target) {
             target.appendChild(badge);
@@ -2771,6 +3051,14 @@
     /* ========================================================
        SUBMISSION & SCORING
        ======================================================== */
+    function getTodayIsoString() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
     function submitExam(forceSubmit = false) {
       if (!forceSubmit && !confirm('Are you sure you want to submit your test now?')) return;
       clearInterval(examTimer);
@@ -2795,6 +3083,7 @@
           band: 'Submitted',
           teacherFeedback: '',
           writingSubmission: { ...writingAnswers },
+          isoDate: getTodayIsoString(),
           timestamp: new Date().toLocaleString()
         });
         persist();
@@ -2835,6 +3124,7 @@
         score: `${correct}/${total}`,
         band,
         userAnswersCopy: JSON.parse(JSON.stringify(userAnswers)),
+        isoDate: getTodayIsoString(),
         timestamp: new Date().toLocaleString()
       };
 
@@ -3400,7 +3690,7 @@
     }
 
     /* ========================================================
-       CLASS, STUDENT & BULK ACCOUNT PROVISIONING
+       CLASS, STUDENT (CREATE + EDIT) & BULK PROVISIONING
        ======================================================== */
     function openCreateClassModal() {
       document.getElementById('newClassName').value = '';
@@ -3437,6 +3727,9 @@
     }
 
     function openCreateStudentModal() {
+      document.getElementById('editingStudentId').value = '';
+      document.getElementById('studentModalTitle').textContent = 'Register Student Account';
+      document.getElementById('studentModalSaveBtn').textContent = 'Create Account';
       document.getElementById('newStuFullName').value = '';
       document.getElementById('newStuUsername').value = '';
       document.getElementById('newStuPassword').value = '123456';
@@ -3444,7 +3737,24 @@
       openModal('studentModal');
     }
 
+    function openEditStudentModal(stuId) {
+      const stu = (db.users || []).find(u => u.id === stuId);
+      if (!stu) return;
+      document.getElementById('editingStudentId').value = stu.id;
+      document.getElementById('studentModalTitle').textContent = 'Edit Student Information';
+      document.getElementById('studentModalSaveBtn').textContent = 'Save Changes';
+      document.getElementById('newStuFullName').value = stu.name || '';
+      document.getElementById('newStuUsername').value = stu.username || '';
+      document.getElementById('newStuPassword').value = stu.pass || '';
+      populateClassSelect('newStuClassSelect');
+      if (stu.classId) {
+        document.getElementById('newStuClassSelect').value = stu.classId;
+      }
+      openModal('studentModal');
+    }
+
     function saveNewStudent() {
+      const editId = document.getElementById('editingStudentId').value;
       const name = document.getElementById('newStuFullName').value.trim();
       const username = document.getElementById('newStuUsername').value.trim();
       const pass = document.getElementById('newStuPassword').value.trim() || '123456';
@@ -3452,6 +3762,32 @@
 
       if (!name || !username) return alert('Full Name and Username are required!');
       ensureArraysExist();
+
+      if (editId) {
+        const stu = db.users.find(u => u.id === editId);
+        if (!stu) return;
+        if (db.users.some(u => u.id !== editId && u.username.toLowerCase() === username.toLowerCase())) {
+          return alert('Username is already taken by another account!');
+        }
+        const oldName = stu.name;
+        stu.name = name;
+        stu.username = username;
+        stu.pass = pass;
+        stu.classId = classId;
+
+        // Update student name across past submissions so history stays linked
+        if (oldName && oldName !== name) {
+          (db.results || []).forEach(r => {
+            if (r.userName === oldName) r.userName = name;
+          });
+        }
+        persist();
+        closeModal('studentModal');
+        renderDashboard();
+        alert(`Updated information for "${name}"!`);
+        return;
+      }
+
       if ((db.users || []).some(u => u.username.toLowerCase() === username.toLowerCase())) {
         return alert('Username already exists!');
       }
