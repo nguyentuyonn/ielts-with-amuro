@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>IELTS WITH AMURO - Official Computer-Delivered Testing</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- FIREBASE CLOUD REALTIME SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -12,20 +13,22 @@
 
   <style>
     :root {
-      --mint-light: #f0fdf4;
-      --mint-pastel: #d1fae5;
-      --matcha-bg: #ecfccb;
+      --bg-main: #f8fafc;
+      --surface: #ffffff;
       --emerald-dark: #064e3b;
       --emerald-accent: #059669;
       --emerald-hover: #047857;
-      --inspera-dark: #202428;
-      --inspera-border: #cbd5e1;
-      --bookmark-gold: #d97706;
+      --emerald-soft: #ecfdf5;
+      --royal-accent: #2563eb;
+      --royal-soft: #eff6ff;
+      --inspera-dark: #0f172a;
+      --inspera-border: #e2e8f0;
       --highlight-yellow: #fef08a;
-      --text-main: #1f2937;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background: #fff; color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; }
+    body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
     /* THEME MODES FOR EXAM WORKSPACE */
     #examShell.theme-dark { background: #111827; color: #f9fafb; }
@@ -50,182 +53,246 @@
     #examShell.theme-yellow .form-input,
     #examShell.theme-yellow select { background: #111; color: #fde047; border-color: #eab308; }
 
-    /* 1. LOGIN SCREEN */
-    #loginScreen { position: fixed; inset: 0; z-index: 9999; display: flex; background: #fff; }
+    /* 1. BRIGHT MODERN IELTS LOGIN SCREEN */
+    #loginScreen {
+      position: fixed; inset: 0; z-index: 9999; display: flex;
+      background: radial-gradient(circle at 15% 20%, #ecfdf5 0%, #f0f9ff 45%, #f8fafc 100%);
+    }
     .login-left-banner {
-      width: 55%; background: linear-gradient(135deg, var(--matcha-bg) 0%, var(--mint-pastel) 50%, var(--mint-light) 100%);
-      clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%); display: flex; flex-direction: column; justify-content: center;
+      width: 56%; display: flex; flex-direction: column; justify-content: center;
       padding: 60px 80px; position: relative;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 24px 24px;
     }
-    .login-brand-tag { font-size: 14px; font-weight: 800; letter-spacing: 2.5px; color: var(--emerald-accent); text-transform: uppercase; margin-bottom: 14px; }
-    .login-hero-logo { font-size: 64px; font-weight: 900; line-height: 1.05; color: var(--emerald-dark); margin-bottom: 24px; letter-spacing: 1px; }
-    .login-hero-logo span { color: var(--emerald-accent); }
-    .login-hero-desc { font-size: 16px; color: #374151; line-height: 1.7; max-width: 520px; margin-bottom: 28px; }
+    .login-brand-pill {
+      display: inline-flex; align-items: center; gap: 8px; width: fit-content;
+      background: #ffffff; border: 1px solid #a7f3d0; color: var(--emerald-accent);
+      padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 800;
+      letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.08);
+    }
+    .login-hero-logo { font-size: 56px; font-weight: 800; line-height: 1.08; color: #0f172a; margin-bottom: 18px; letter-spacing: -1px; }
+    .login-hero-logo span {
+      background: linear-gradient(135deg, #059669 0%, #2563eb 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .login-hero-desc { font-size: 16px; color: #475569; line-height: 1.7; max-width: 520px; margin-bottom: 28px; font-weight: 500; }
+    
+    .ielts-skill-pills {
+      display: grid; grid-template-columns: repeat(2, minmax(200px, 240px)); gap: 12px; margin-bottom: 28px;
+    }
+    .skill-badge-card {
+      background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px);
+      border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+    }
+    .skill-badge-icon {
+      width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700;
+    }
+    .skill-badge-title { font-size: 13px; font-weight: 800; color: #0f172a; }
+    .skill-badge-sub { font-size: 11px; font-weight: 600; color: #64748b; }
+
     .login-motto-badge {
-      display: inline-block; background: rgba(255, 255, 255, 0.75);
-      border-left: 4px solid var(--emerald-accent); padding: 12px 18px;
-      font-size: 14px; font-style: italic; color: #064e3b; font-weight: 600; border-radius: 0 8px 8px 0;
+      display: inline-block; width: fit-content; background: #ffffff;
+      border-left: 4px solid var(--emerald-accent); padding: 12px 20px;
+      font-size: 13.5px; font-style: italic; color: #334155; font-weight: 600;
+      border-radius: 0 10px 10px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
-    .login-right-area { width: 45%; display: flex; align-items: center; justify-content: center; padding: 40px; margin-left: -5%; }
+    .login-right-area { width: 44%; display: flex; align-items: center; justify-content: center; padding: 40px; }
     .login-card {
-      width: 100%; max-width: 380px; background: #fff; padding: 40px 32px; border-radius: 14px;
-      box-shadow: 0 12px 32px rgba(6,95,70,0.08); border: 1px solid #e2e8f0;
+      width: 100%; max-width: 410px; background: #ffffff; padding: 42px 36px; border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08); border: 1px solid #e2e8f0;
     }
-    .login-card h2 { font-size: 22px; font-weight: 800; color: var(--emerald-dark); margin-bottom: 6px; }
-    .login-card p { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+    .login-card h2 { font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+    .login-card p { font-size: 13.5px; color: #64748b; margin-bottom: 26px; font-weight: 500; }
+    
     .form-group { margin-bottom: 16px; text-align: left; }
-    .form-group label { display: block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 6px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
     .form-input {
       width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1;
-      border-radius: 8px; font-size: 14px; outline: none; transition: 0.15s;
+      border-radius: 10px; font-size: 14px; outline: none; transition: 0.15s; background: #fff; color: #0f172a;
     }
-    .form-input:focus { border-color: var(--emerald-accent); box-shadow: 0 0 0 3px rgba(5,150,105,0.15); }
+    .form-input:focus { border-color: var(--emerald-accent); box-shadow: 0 0 0 3px rgba(5,150,105,0.12); }
 
-    .btn { padding: 8px 14px; border-radius: 6px; border: 1px solid transparent; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-    .btn-emerald { background: var(--emerald-accent); color: #fff; }
-    .btn-emerald:hover { background: var(--emerald-hover); }
+    .btn {
+      padding: 9px 16px; border-radius: 10px; border: 1px solid transparent;
+      font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.15s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-emerald { background: var(--emerald-accent); color: #fff; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2); }
+    .btn-emerald:hover { background: var(--emerald-hover); transform: translateY(-1px); }
     .btn-secondary { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
     .btn-secondary:hover { background: #e2e8f0; }
     .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
 
-    /* 2. DASHBOARD */
+    /* 2. BRIGHT MODERN DASHBOARD */
     #dashboardApp { display: none; min-height: 100vh; flex-direction: column; }
     header.dash-header {
-      background: var(--emerald-dark); color: #fff; height: 56px;
-      display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+      background: #ffffff; color: #0f172a; height: 64px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 32px;
+      position: sticky; top: 0; z-index: 100;
     }
-    .dash-brand { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 12px; letter-spacing: 0.5px; }
+    .dash-brand { font-size: 19px; font-weight: 800; display: flex; align-items: center; gap: 12px; color: #0f172a; letter-spacing: -0.3px; }
+    .brand-icon-box {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px;
+    }
     .sync-badge {
-      font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
-      background: rgba(16, 185, 129, 0.2); border: 1px solid #34d399; color: #a7f3d0;
+      font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 999px;
+      background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857;
       display: inline-flex; align-items: center; gap: 6px;
     }
-    .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #34d399; display: inline-block; }
+    .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block; }
     .dash-user-controls { display: flex; align-items: center; gap: 12px; }
     .dash-user-badge {
-      background: #047857; padding: 6px 14px; border-radius: 20px;
-      font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
+      background: #f8fafc; padding: 7px 16px; border-radius: 999px;
+      font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #e2e8f0; color: #0f172a;
     }
-    .dash-body { max-width: 1320px; margin: 24px auto; padding: 0 16px; width: 100%; flex: 1; }
-    .dash-tabs { display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; flex-wrap: wrap; }
+    .dash-user-badge:hover { background: #f1f5f9; }
+    
+    .dash-body { max-width: 1340px; margin: 28px auto; padding: 0 24px; width: 100%; flex: 1; }
+    .dash-tabs {
+      display: flex; gap: 6px; background: #ffffff; padding: 6px;
+      border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 24px; flex-wrap: wrap;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+    }
     .dash-tab-btn {
-      padding: 10px 18px; border: none; background: none; font-weight: 700;
-      font-size: 13.5px; color: #64748b; cursor: pointer; position: relative; bottom: -2px;
+      padding: 10px 18px; border: none; background: transparent; font-weight: 700;
+      font-size: 13px; color: #64748b; cursor: pointer; border-radius: 10px; transition: 0.15s;
     }
-    .dash-tab-btn.active { color: var(--emerald-accent); border-bottom: 2px solid var(--emerald-accent); }
-    .card { background: #fff; border-radius: 8px; border: 1px solid var(--inspera-border); padding: 22px; margin-bottom: 22px; }
-    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-    th { background: #f8fafc; font-weight: 700; color: #475569; }
+    .dash-tab-btn:hover { color: #0f172a; background: #f8fafc; }
+    .dash-tab-btn.active { color: #ffffff; background: var(--emerald-accent); box-shadow: 0 4px 10px rgba(5, 150, 105, 0.2); }
+    
+    .card {
+      background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0;
+      padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+    }
+    .card-title { font-size: 17px; font-weight: 800; color: #0f172a; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+    th { background: #f8fafc; font-weight: 700; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    tbody tr:hover { background: #f8fafc; }
 
     /* HOME HERO */
     .home-hero-banner {
-      background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
-      color: #fff; border-radius: 12px; padding: 32px 36px; margin-bottom: 24px;
-      box-shadow: 0 4px 14px rgba(6,78,59,0.12);
+      background: linear-gradient(135deg, #ecfdf5 0%, #eff6ff 100%);
+      color: #0f172a; border-radius: 20px; padding: 34px 40px; margin-bottom: 24px;
+      border: 1px solid #bbf7d0; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap;
     }
-    .home-hero-title { font-size: 26px; font-weight: 900; margin-bottom: 8px; }
-    .home-hero-sub { font-size: 14px; color: #d1fae5; line-height: 1.6; max-width: 680px; }
+    .home-hero-title { font-size: 26px; font-weight: 800; margin-bottom: 8px; color: #064e3b; }
+    .home-hero-sub { font-size: 14px; color: #334155; line-height: 1.6; max-width: 680px; font-weight: 500; }
+    .hero-band-badge {
+      background: #ffffff; border: 1px solid #a7f3d0; padding: 14px 22px; border-radius: 16px;
+      text-align: center; box-shadow: 0 8px 20px rgba(5, 150, 105, 0.06);
+    }
     .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .stat-card {
-      background: #fff; border: 1px solid var(--inspera-border); border-radius: 10px;
+      background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;
       padding: 20px; display: flex; align-items: center; gap: 16px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02);
     }
     .stat-icon {
-      width: 46px; height: 46px; border-radius: 10px; background: var(--mint-pastel);
-      color: var(--emerald-dark); display: flex; align-items: center; justify-content: center; font-size: 20px;
+      width: 48px; height: 48px; border-radius: 12px; background: var(--emerald-soft);
+      color: var(--emerald-accent); display: flex; align-items: center; justify-content: center; font-size: 20px;
     }
-    .stat-value { font-size: 22px; font-weight: 900; color: #0f172a; }
-    .stat-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; }
+    .stat-value { font-size: 24px; font-weight: 800; color: #0f172a; }
+    .stat-label { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; }
 
     /* 3. INSPERA EXAM WORKSPACE */
     #examShell { display: none; position: fixed; inset: 0; background: #fff; z-index: 5000; flex-direction: column; overflow: hidden; }
     .inspera-top {
-      background: var(--inspera-dark); color: #fff; min-height: 52px;
+      background: #ffffff; color: #0f172a; min-height: 56px;
+      border-bottom: 1px solid #cbd5e1;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 6px 18px; font-size: 13px; font-weight: 600; flex-shrink: 0; flex-wrap: wrap; gap: 10px;
+      padding: 6px 20px; font-size: 13px; font-weight: 700; flex-shrink: 0; flex-wrap: wrap; gap: 10px;
     }
-    .inspera-timer { background: #111827; padding: 4px 12px; border-radius: 4px; font-family: monospace; font-size: 15px; font-weight: 700; color: #fbbf24; border: 1px solid #374151; }
+    .inspera-timer {
+      background: #fef3c7; padding: 5px 14px; border-radius: 8px;
+      font-family: monospace; font-size: 15px; font-weight: 800; color: #b45309; border: 1px solid #fde68a;
+    }
     
     .inspera-instruction-banner {
-      background: #f1f5f9; border-bottom: 1px solid var(--inspera-border);
-      padding: 8px 20px; font-size: 13px; color: #1e293b; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+      background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+      padding: 9px 20px; font-size: 13px; color: #1e293b; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
     }
-    .inspera-part-tabs { background: #e5e7eb; border-bottom: 1px solid var(--inspera-border); padding: 6px 16px 0; display: flex; gap: 4px; flex-shrink: 0; }
+    .inspera-part-tabs { background: #f1f5f9; border-bottom: 1px solid #cbd5e1; padding: 6px 16px 0; display: flex; gap: 6px; flex-shrink: 0; }
     .part-pill {
       padding: 8px 24px; border: 1px solid transparent; border-bottom: none;
-      border-radius: 4px 4px 0 0; background: #d1d5db; font-size: 13px; font-weight: 700; color: #4b5563; cursor: pointer;
+      border-radius: 8px 8px 0 0; background: #e2e8f0; font-size: 13px; font-weight: 700; color: #475569; cursor: pointer;
     }
-    .part-pill.active { background: #fff; border-color: var(--inspera-border); border-bottom-color: #fff; color: #111; margin-bottom: -1px; }
+    .part-pill.active { background: #fff; border-color: #cbd5e1; border-bottom-color: #fff; color: var(--emerald-accent); margin-bottom: -1px; }
 
     .inspera-workspace { flex: 1; display: flex; overflow: hidden; position: relative; }
-    .passage-col { width: 50%; padding: 26px 30px; overflow-y: auto; font-size: 15px; line-height: 1.8; border-right: 1px solid var(--inspera-border); user-select: text; }
+    .passage-col { width: 50%; padding: 28px 34px; overflow-y: auto; font-size: 15px; line-height: 1.8; border-right: 1px solid #cbd5e1; user-select: text; background: #ffffff; }
     .passage-col p { margin-bottom: 14px; }
-    .resizer-bar { width: 8px; cursor: col-resize; background: #f1f5f9; border-left: 1px solid var(--inspera-border); border-right: 1px solid var(--inspera-border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .resizer-bar { width: 8px; cursor: col-resize; background: #f1f5f9; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
     .resizer-bar::after { content: "⋮"; color: #64748b; font-weight: bold; }
     .resizer-bar:hover { background: #cbd5e1; }
-    .questions-col { width: 50%; padding: 26px 30px; overflow-y: auto; background: #fff; font-size: 14.5px; user-select: text; }
+    .questions-col { width: 50%; padding: 28px 34px; overflow-y: auto; background: #ffffff; font-size: 14.5px; user-select: text; }
 
     /* HIGHLIGHT TOOLTIP */
     #selectionTooltip {
-      display: none; position: absolute; z-index: 99999; background: #1f2937; border-radius: 6px;
-      padding: 4px 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); gap: 6px;
+      display: none; position: absolute; z-index: 99999; background: #0f172a; border-radius: 8px;
+      padding: 4px 6px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); gap: 6px;
     }
     #selectionTooltip button {
       background: none; border: none; color: #fff; font-size: 12px; font-weight: 700;
       cursor: pointer; padding: 4px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;
     }
-    #selectionTooltip button:hover { background: #374151; }
+    #selectionTooltip button:hover { background: #334155; }
     #selectionTooltip button.btn-hl-yellow { color: #fde047; }
-    .user-highlight-span { background-color: #fde047 !important; color: #111827 !important; border-radius: 2px; }
+    .user-highlight-span { background-color: #fef08a !important; color: #111827 !important; border-radius: 2px; }
 
     /* QUESTION STYLES */
-    .section-title { font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 18px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
+    .section-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 18px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
     .question-group { background: transparent; padding: 0; margin-bottom: 32px; }
-    .question-group-title { font-weight: 700; margin-bottom: 8px; color: #111827; font-size: 1.05rem; }
+    .question-group-title { font-weight: 800; margin-bottom: 8px; color: #0f172a; font-size: 1.05rem; }
     .question-group p { margin-bottom: 12px; line-height: 1.5; }
     
-    .question { margin-bottom: 16px; padding: 12px 14px; border: 1px solid transparent; border-radius: 6px; background: transparent; position: relative; transition: 0.15s; }
-    .question:focus-within, .question.active-question-box { border-color: #3b82f6; background: rgba(59, 130, 246, 0.03); }
-    .question-text { font-weight: 600; margin-bottom: 10px; line-height: 1.5; color: #111827; }
+    .question { margin-bottom: 16px; padding: 12px 14px; border: 1px solid #f1f5f9; border-radius: 10px; background: #ffffff; position: relative; transition: 0.15s; }
+    .question:focus-within, .question.active-question-box { border-color: #3b82f6; background: #f8fafc; }
+    .question-text { font-weight: 600; margin-bottom: 10px; line-height: 1.5; color: #0f172a; }
     .q-badge {
       display: inline-flex; align-items: center; justify-content: center;
-      min-width: 26px; height: 24px; padding: 0 6px; background: #1e293b; color: #fff;
-      font-size: 12px; font-weight: 700; border-radius: 4px; margin-right: 6px;
+      min-width: 26px; height: 24px; padding: 0 6px; background: var(--emerald-accent); color: #fff;
+      font-size: 12px; font-weight: 800; border-radius: 6px; margin-right: 6px;
     }
     .options { display: flex; flex-direction: column; gap: 8px; padding-left: 6px; }
-    .options label { display: flex; align-items: center; gap: 10px; cursor: pointer; line-height: 1.45; padding: 4px 8px; border-radius: 4px; }
-    .options label:hover { background: rgba(0,0,0,0.035); }
-    .options input[type="radio"], .options input[type="checkbox"] { width: 17px; height: 17px; accent-color: #2563eb; cursor: pointer; }
+    .options label { display: flex; align-items: center; gap: 10px; cursor: pointer; line-height: 1.45; padding: 5px 8px; border-radius: 6px; }
+    .options label:hover { background: #f1f5f9; }
+    .options input[type="radio"], .options input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--emerald-accent); cursor: pointer; }
 
     .input-field.inline-input {
-      display: inline-block; width: 145px; border: 1.5px solid #64748b;
-      border-radius: 4px; padding: 3px 8px; background: #fff; color: #000;
+      display: inline-block; width: 145px; border: 1.5px solid #94a3b8;
+      border-radius: 6px; padding: 3px 8px; background: #fff; color: #0f172a;
       font-size: 14px; text-align: center; font-weight: 700; margin: 2px 4px; vertical-align: baseline; outline: none;
     }
-    .input-field.inline-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.2); }
+    .input-field.inline-input:focus { border-color: var(--emerald-accent); box-shadow: 0 0 0 3px rgba(5,150,105,0.15); }
     .inline-select {
-      display: inline-block; min-width: 90px; border: 1.5px solid #64748b;
-      border-radius: 4px; padding: 3px 8px; background: #fff; font-size: 14px; font-weight: 700; margin: 2px 4px; outline: none; cursor: pointer;
+      display: inline-block; min-width: 90px; border: 1.5px solid #94a3b8;
+      border-radius: 6px; padding: 3px 8px; background: #fff; font-size: 14px; font-weight: 700; margin: 2px 4px; outline: none; cursor: pointer;
     }
 
     /* MATRIX TABLE */
     .matrix-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13.5px; }
     .matrix-table th, .matrix-table td { border: 1px solid #cbd5e1; padding: 10px; text-align: center; }
-    .matrix-table th { background: #f1f5f9; font-weight: 700; color: #1e293b; }
+    .matrix-table th { background: #f8fafc; font-weight: 700; color: #1e293b; }
     .matrix-table td.matrix-statement { text-align: left; font-weight: 500; width: 55%; }
-    .matrix-table tr:hover { background: rgba(59, 130, 246, 0.04); }
+    .matrix-table tr:hover { background: #f8fafc; }
 
     /* DRAG & DROP */
-    .drag-options { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; padding: 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; }
+    .drag-options { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; padding: 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; }
     .drag-options.headings-bank { flex-direction: column; align-items: flex-start; }
     .drag-item {
-      padding: 6px 12px; border: 1px solid #94a3b8; border-radius: 5px; background: #fff;
+      padding: 6px 12px; border: 1px solid #94a3b8; border-radius: 6px; background: #fff;
       font-size: 13.5px; font-weight: 600; cursor: grab; user-select: none; transition: 0.15s ease;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05); color: #1e293b;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04); color: #1e293b;
     }
-    .drag-item:hover { border-color: #2563eb; background: #eff6ff; }
+    .drag-item:hover { border-color: var(--emerald-accent); background: #ecfdf5; }
     .drag-item:active { cursor: grabbing; transform: scale(0.98); }
     .drag-item.used {
       opacity: 0.3; pointer-events: none; background: #e2e8f0; border-style: dashed; text-decoration: line-through;
@@ -234,26 +301,26 @@
     .drop-zone {
       display: inline-flex; align-items: center; justify-content: center;
       min-width: 90px; min-height: 30px; padding: 2px 12px;
-      border: 2px dashed #64748b; border-radius: 5px; background: #f8fafc;
+      border: 2px dashed #64748b; border-radius: 6px; background: #f8fafc;
       font-weight: 700; color: #475569; margin: 2px 4px; vertical-align: middle;
       line-height: normal; transition: all 0.15s ease; cursor: pointer; font-size: 13.5px;
     }
     .drop-zone.heading-drop {
       display: flex; width: 100%; justify-content: flex-start; padding: 8px 14px;
-      margin: 10px 0 6px 0; background: #f1f5f9; border-color: #3b82f6; color: #1d4ed8;
+      margin: 10px 0 6px 0; background: #f8fafc; border-color: #3b82f6; color: #1d4ed8;
     }
-    .drop-zone.over { border-color: #2563eb; background: #dbeafe; transform: scale(1.01); }
-    .drop-zone.filled { border-style: solid; border-color: #059669; background: #ecfdf5; color: #065f46; }
+    .drop-zone.over { border-color: var(--emerald-accent); background: #d1fae5; transform: scale(1.01); }
+    .drop-zone.filled { border-style: solid; border-color: var(--emerald-accent); background: #ecfdf5; color: #065f46; }
 
     .answer-indicator {
-      display: block; margin-top: 8px; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 600;
+      display: block; margin-top: 8px; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;
     }
     .answer-indicator.correct { background: #dcfce7; border: 1px solid #22c55e; color: #14532d; }
     .answer-indicator.incorrect { background: #fee2e2; border: 1px solid #ef4444; color: #7f1d1d; }
 
     .btn-locate {
       background: #eff6ff; border: 1px solid #3b82f6; color: #1d4ed8;
-      padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;
     }
     .evidence-highlight-active {
       background-color: #fef08a !important; color: #000 !important; padding: 2px 4px; border-radius: 3px;
@@ -262,17 +329,17 @@
 
     /* FOOTER NAV */
     .progress-container {
-      height: 54px; background: #fff; border-top: 1px solid var(--inspera-border);
-      display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0;
+      height: 56px; background: #fff; border-top: 1px solid #cbd5e1;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0;
     }
-    .progress-items { display: flex; gap: 5px; overflow-x: auto; max-width: 78%; align-items: center; padding: 4px 0; }
+    .progress-items { display: flex; gap: 6px; overflow-x: auto; max-width: 78%; align-items: center; padding: 4px 0; }
     .progress-item {
-      min-width: 30px; height: 30px; border: 1px solid #cbd5e0; border-radius: 4px;
-      background: #f1f5f9; font-size: 12.5px; font-weight: 700; color: #475569;
+      min-width: 32px; height: 32px; border: 1px solid #cbd5e1; border-radius: 6px;
+      background: #f8fafc; font-size: 12.5px; font-weight: 700; color: #475569;
       cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.1s;
     }
-    .progress-item:hover { border-color: #3b82f6; }
-    .progress-item.answered { background: #1e293b; color: #fff; border-color: #0f172a; }
+    .progress-item:hover { border-color: var(--emerald-accent); }
+    .progress-item.answered { background: var(--emerald-accent); color: #fff; border-color: var(--emerald-hover); }
     .progress-item.current { outline: 2px solid #2563eb; outline-offset: 1px; }
     .progress-item.correct { background: #16a34a !important; color: #fff !important; border-color: #15803d !important; }
     .progress-item.incorrect { background: #dc2626 !important; color: #fff !important; border-color: #b91c1c !important; }
@@ -284,16 +351,16 @@
     .teacher-edit-badge:hover { background: #fde68a; }
 
     /* MODALS */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 7000; align-items: center; justify-content: center; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(3px); z-index: 7000; align-items: center; justify-content: center; }
     .modal-window {
       background: #fff; width: 980px; max-width: 96vw; max-height: 92vh;
-      border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+      border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px rgba(15, 23, 42, 0.18);
     }
-    .modal-header { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
-    .modal-body { padding: 20px; overflow-y: auto; flex: 1; font-size: 13px; }
-    .modal-footer { padding: 12px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc; }
+    .modal-header { padding: 16px 24px; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 16px; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+    .modal-body { padding: 24px; overflow-y: auto; flex: 1; font-size: 13px; }
+    .modal-footer { padding: 14px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc; }
     .active-subtab { background: var(--emerald-accent) !important; color: #fff !important; border-color: var(--emerald-accent) !important; }
-    .template-toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; margin-bottom: 12px; }
+    .template-toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; margin-bottom: 14px; }
   </style>
 </head>
 <body>
@@ -301,27 +368,59 @@
   <!-- 1. LOGIN SCREEN -->
   <div id="loginScreen">
     <div class="login-left-banner">
-      <div class="login-brand-tag">IELTS READING, LISTENING & WRITING SYSTEM</div>
+      <div class="login-brand-pill"><i class="fas fa-Graduation-Cap"></i> Official CD-IELTS Simulation</div>
       <div class="login-hero-logo">IELTS WITH <span>AMURO</span></div>
       <div class="login-hero-desc">
-        Practice better, one passage at a time. A focused exam environment equipped with texts, questions, real-time timer, and instant evidence review.
+        Experience an authentic Computer-Delivered IELTS testing environment. Master Reading, Listening, and Academic Writing with real-time timers, interactive question formats, and instant evidence localization.
       </div>
+      
+      <div class="ielts-skill-pills">
+        <div class="skill-badge-card">
+          <div class="skill-badge-icon" style="background:#ecfdf5; color:#059669;"><i class="fas fa-book-open"></i></div>
+          <div>
+            <div class="skill-badge-title">Academic Reading</div>
+            <div class="skill-badge-sub">Split-Screen & Evidence</div>
+          </div>
+        </div>
+        <div class="skill-badge-card">
+          <div class="skill-badge-icon" style="background:#eff6ff; color:#2563eb;"><i class="fas fa-headphones"></i></div>
+          <div>
+            <div class="skill-badge-title">IELTS Listening</div>
+            <div class="skill-badge-sub">Audio Bar & Transcript</div>
+          </div>
+        </div>
+        <div class="skill-badge-card">
+          <div class="skill-badge-icon" style="background:#fef3c7; color:#d97706;"><i class="fas fa-pen-nib"></i></div>
+          <div>
+            <div class="skill-badge-title">Academic Writing</div>
+            <div class="skill-badge-sub">Live Word Count & Grading</div>
+          </div>
+        </div>
+        <div class="skill-badge-card">
+          <div class="skill-badge-icon" style="background:#f3e8ff; color:#7c3aed;"><i class="fas fa-award"></i></div>
+          <div>
+            <div class="skill-badge-title">Band 9.0 Analytics</div>
+            <div class="skill-badge-sub">Instant Cloud Feedback</div>
+          </div>
+        </div>
+      </div>
+
       <div class="login-motto-badge">"Let justice be done though the heavens fall"</div>
     </div>
     <div class="login-right-area">
       <div class="login-card">
-        <h2>Sign In</h2>
-        <p>Access your practice account</p>
+        <h2>Candidate Sign In</h2>
+        <p>Enter your credentials to access the test portal</p>
         <div class="form-group">
           <label>Username</label>
-          <input type="text" id="logUser" class="form-input" placeholder="Username" autocomplete="off" onkeydown="if(event.key==='Enter') execLogin()">
+          <input type="text" id="logUser" class="form-input" placeholder="Enter username" autocomplete="off" onkeydown="if(event.key==='Enter') execLogin()">
         </div>
         <div class="form-group">
           <label>Password</label>
-          <input type="password" id="logPass" class="form-input" placeholder="Password" autocomplete="off" onkeydown="if(event.key==='Enter') execLogin()">
+          <input type="password" id="logPass" class="form-input" placeholder="Enter password" autocomplete="off" onkeydown="if(event.key==='Enter') execLogin()">
         </div>
-        <button class="btn btn-emerald" style="width: 100%; padding: 11px; margin-top: 8px;" onclick="execLogin()">
-          Enter Practice Room
+        <button class="btn btn-emerald" style="width: 100%; padding: 12px; margin-top: 8px; font-size: 14px;" onclick="execLogin()">
+          Enter Examination Portal <i class="fas fa-arrow-right"></i>
         </button>
       </div>
     </div>
@@ -331,6 +430,7 @@
   <div id="dashboardApp">
     <header class="dash-header">
       <div class="dash-brand">
+        <div class="brand-icon-box"><i class="fas fa-globe"></i></div>
         <span>IELTS WITH AMURO</span>
         <span class="sync-badge" id="realtimeSyncBadge">
           <span class="sync-dot" id="realtimeSyncDot"></span>
@@ -339,27 +439,33 @@
       </div>
       <div class="dash-user-controls">
         <div class="dash-user-badge" onclick="openProfileModal()" id="userProfileLabel">👤 Account</div>
-        <button class="btn btn-secondary" onclick="execLogout()">Sign Out</button>
+        <button class="btn btn-secondary" onclick="execLogout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
       </div>
     </header>
 
     <div class="dash-body">
       <div class="dash-tabs">
-        <button class="dash-tab-btn active" id="tabbtn-home" onclick="switchDashTab('home')">🏠 Home</button>
+        <button class="dash-tab-btn active" id="tabbtn-home" onclick="switchDashTab('home')">🏠 Overview</button>
         <button class="dash-tab-btn" id="tabbtn-reading" onclick="switchDashTab('reading')">📖 Reading Tests</button>
         <button class="dash-tab-btn" id="tabbtn-listening" onclick="switchDashTab('listening')">🎧 Listening Tests</button>
         <button class="dash-tab-btn" id="tabbtn-writing" onclick="switchDashTab('writing')">✍️ Writing Tests</button>
-        <button class="dash-tab-btn" id="tabbtn-myvocab" onclick="switchDashTab('myvocab')">⭐ My Saved Vocabulary</button>
-        <button class="dash-tab-btn teacher-item" id="tabbtn-classes" onclick="switchDashTab('classes')">🏫 Class Management</button>
-        <button class="dash-tab-btn teacher-item" id="tabbtn-students" onclick="switchDashTab('students')">👤 Students & Accounts</button>
-        <button class="dash-tab-btn teacher-item" id="tabbtn-analytics" onclick="switchDashTab('analytics')">📊 Submissions & Scores</button>
+        <button class="dash-tab-btn" id="tabbtn-myvocab" onclick="switchDashTab('myvocab')">⭐ Vocabulary Vault</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-classes" onclick="switchDashTab('classes')">🏫 Cohorts</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-students" onclick="switchDashTab('students')">👤 Candidates</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-analytics" onclick="switchDashTab('analytics')">📊 Submissions & Grading</button>
       </div>
 
       <!-- TAB 0: HOME -->
       <div id="tab-home" class="dash-pane">
         <div class="home-hero-banner">
-          <div class="home-hero-title" id="homeWelcomeTitle">Welcome to IELTS WITH AMURO</div>
-          <div class="home-hero-sub">An authentic Computer-Delivered IELTS preparation environment featuring real-time cloud synchronization, multi-format question interfaces, evidence localization, and vocabulary retention.</div>
+          <div>
+            <div class="home-hero-title" id="homeWelcomeTitle">Welcome to IELTS WITH AMURO</div>
+            <div class="home-hero-sub">Official Computer-Delivered IELTS preparation suite with real-time cloud synchronization, interactive question formats, and automated band analytics.</div>
+          </div>
+          <div class="hero-band-badge">
+            <div style="font-size:11px; font-weight:800; color:#059669; text-transform:uppercase; letter-spacing:1px;">Target Standard</div>
+            <div style="font-size:26px; font-weight:800; color:#0f172a;">CD-IELTS 9.0</div>
+          </div>
         </div>
 
         <div class="stat-grid">
@@ -371,21 +477,21 @@
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-headphones"></i></div>
+            <div class="stat-icon" style="background:#eff6ff; color:#2563eb;"><i class="fas fa-headphones"></i></div>
             <div>
               <div class="stat-value" id="statListeningCount">0</div>
               <div class="stat-label">Listening Tests</div>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-pen-nib"></i></div>
+            <div class="stat-icon" style="background:#fef3c7; color:#d97706;"><i class="fas fa-pen-nib"></i></div>
             <div>
               <div class="stat-value" id="statWritingCount">0</div>
               <div class="stat-label">Writing Tests</div>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-spell-check"></i></div>
+            <div class="stat-icon" style="background:#f3e8ff; color:#7c3aed;"><i class="fas fa-bookmark"></i></div>
             <div>
               <div class="stat-value" id="statVocabCount">0</div>
               <div class="stat-label">Saved Words</div>
@@ -404,7 +510,7 @@
           <div class="card-title"><span>Recent Assessment Submissions</span></div>
           <table>
             <thead>
-              <tr><th>Candidate</th><th>Assessment Title</th><th>Score / Status</th><th>Band Score</th><th>Date & Time</th><th>Action / Feedback</th></tr>
+              <tr><th>Candidate</th><th>Assessment Title</th><th>Score / Word Count</th><th>Band Score</th><th>Date & Time</th><th>Action / Feedback</th></tr>
             </thead>
             <tbody id="homeRecentActivityTbody"></tbody>
           </table>
@@ -416,18 +522,18 @@
         <div class="card">
           <div class="card-title">
             <span>Reading Test Library</span>
-            <button class="btn btn-emerald teacher-item" onclick="openReadingEditorModal()">+ Create / Import Reading Test</button>
+            <button class="btn btn-emerald teacher-item" onclick="openReadingEditorModal()">+ Create Reading Test</button>
           </div>
-          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:14px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-            <input type="text" id="filterReadingSearch" class="form-input" placeholder="🔍 Tìm tên đề Reading..." oninput="renderReadingTable()">
+          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:16px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0;">
+            <input type="text" id="filterReadingSearch" class="form-input" placeholder="🔍 Search by test title..." oninput="renderReadingTable()">
             <select id="filterReadingPart" class="form-input" onchange="renderReadingTable()">
-              <option value="ALL">📂 Tất cả các phần</option>
+              <option value="ALL">📂 All Sections</option>
               <option value="Full Test">Full Test (3 Passages)</option>
               <option value="Passage 1">Passage 1</option>
               <option value="Passage 2">Passage 2</option>
               <option value="Passage 3">Passage 3</option>
             </select>
-            <input type="text" id="filterReadingTopic" class="form-input" placeholder="🏷️ Lọc theo Chủ đề (VD: Environment, Cam 19...)" oninput="renderReadingTable()">
+            <input type="text" id="filterReadingTopic" class="form-input" placeholder="🏷️ Filter by topic (e.g. Environment, Cam 19...)" oninput="renderReadingTable()">
           </div>
           <table>
             <thead>
@@ -445,21 +551,21 @@
             <span>Listening Test Library</span>
             <button class="btn btn-emerald teacher-item" onclick="openListeningEditorModal()">+ Create Listening Test</button>
           </div>
-          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:14px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-            <input type="text" id="filterListeningSearch" class="form-input" placeholder="🔍 Tìm tên đề Listening..." oninput="renderListeningTable()">
+          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:16px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0;">
+            <input type="text" id="filterListeningSearch" class="form-input" placeholder="🔍 Search listening test title..." oninput="renderListeningTable()">
             <select id="filterListeningPart" class="form-input" onchange="renderListeningTable()">
-              <option value="ALL">📂 Tất cả các Part</option>
+              <option value="ALL">📂 All Parts</option>
               <option value="Listening Full">Full Test (Part 1-4)</option>
               <option value="Listening Part 1">Part 1</option>
               <option value="Listening Part 2">Part 2</option>
               <option value="Listening Part 3">Part 3</option>
               <option value="Listening Part 4">Part 4</option>
             </select>
-            <input type="text" id="filterListeningTopic" class="form-input" placeholder="🏷️ Lọc chủ đề..." oninput="renderListeningTable()">
+            <input type="text" id="filterListeningTopic" class="form-input" placeholder="🏷️ Filter by topic or source..." oninput="renderListeningTable()">
           </div>
           <table>
             <thead>
-              <tr><th>Test Title</th><th>Duration</th><th>Parts</th><th>Assigned Cohort</th><th>Actions</th></tr>
+              <tr><th>Test Title</th><th>Duration</th><th>Section</th><th>Assigned Cohort</th><th>Actions</th></tr>
             </thead>
             <tbody id="listeningTbody"></tbody>
           </table>
@@ -473,19 +579,19 @@
             <span>Writing Assessment Library (Task 1 & Task 2)</span>
             <button class="btn btn-emerald teacher-item" onclick="openWritingEditorModal()">+ Create Writing Test</button>
           </div>
-          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:14px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-            <input type="text" id="filterWritingSearch" class="form-input" placeholder="🔍 Tìm tên đề Writing..." oninput="renderWritingTable()">
+          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:16px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0;">
+            <input type="text" id="filterWritingSearch" class="form-input" placeholder="🔍 Search writing test title..." oninput="renderWritingTable()">
             <select id="filterWritingPart" class="form-input" onchange="renderWritingTable()">
-              <option value="ALL">📂 Tất cả các phần</option>
-              <option value="Task 1 Only">Chỉ làm Task 1 (20p)</option>
-              <option value="Task 2 Only">Chỉ làm Task 2 (40p)</option>
+              <option value="ALL">📂 All Formats</option>
+              <option value="Task 1 Only">Task 1 Only (20 mins)</option>
+              <option value="Task 2 Only">Task 2 Only (40 mins)</option>
               <option value="Full Writing">Full Writing (Task 1 & 2)</option>
             </select>
-            <input type="text" id="filterWritingTopic" class="form-input" placeholder="🏷️ Lọc dạng/chủ đề (VD: Bar Chart, Opinion...)" oninput="renderWritingTable()">
+            <input type="text" id="filterWritingTopic" class="form-input" placeholder="🏷️ Filter by task type or topic (e.g. Bar Chart, Opinion...)" oninput="renderWritingTable()">
           </div>
           <table>
             <thead>
-              <tr><th>Test Title</th><th>Duration</th><th>Tasks</th><th>Assigned Cohort</th><th>Action</th></tr>
+              <tr><th>Test Title</th><th>Duration</th><th>Tasks</th><th>Assigned Cohort</th><th>Actions</th></tr>
             </thead>
             <tbody id="writingTbody"></tbody>
           </table>
@@ -505,11 +611,11 @@
         <div class="card">
           <div class="card-title">
             <span>Class Cohorts</span>
-            <button class="btn btn-emerald" onclick="openCreateClassModal()">+ Add New Class</button>
+            <button class="btn btn-emerald" onclick="openCreateClassModal()">+ Create Cohort</button>
           </div>
           <table>
             <thead>
-              <tr><th>Class Name</th><th>Total Students</th><th>Action</th></tr>
+              <tr><th>Cohort Name</th><th>Enrolled Candidates</th><th>Action</th></tr>
             </thead>
             <tbody id="classTbody"></tbody>
           </table>
@@ -520,15 +626,15 @@
       <div id="tab-students" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title">
-            <span>Student Accounts & Real-Time Provisioning</span>
+            <span>Candidate Accounts & Cohort Placement</span>
             <div style="display:flex; gap:8px;">
-              <button class="btn btn-secondary" onclick="openBulkStudentModal()">⚡ Bulk Add Students (Auto-Generate)</button>
-              <button class="btn btn-emerald" onclick="openCreateStudentModal()">+ Register Single Student</button>
+              <button class="btn btn-secondary" onclick="openBulkStudentModal()">⚡ Bulk Generate Accounts</button>
+              <button class="btn btn-emerald" onclick="openCreateStudentModal()">+ Register Candidate</button>
             </div>
           </div>
           <table>
             <thead>
-              <tr><th>Full Name</th><th>Username</th><th>Password</th><th>Assigned Class</th><th>Action</th></tr>
+              <tr><th>Full Name</th><th>Username</th><th>Password</th><th>Assigned Cohort</th><th>Action</th></tr>
             </thead>
             <tbody id="studentTbody"></tbody>
           </table>
@@ -538,10 +644,10 @@
       <!-- TAB 7: ANALYTICS -->
       <div id="tab-analytics" class="dash-pane" style="display: none;">
         <div class="card">
-          <div class="card-title"><span>Student Performance History & Writing Grading</span></div>
+          <div class="card-title"><span>Candidate Performance History & Writing Evaluation</span></div>
           <table>
             <thead>
-              <tr><th>Student Name</th><th>Exam Title</th><th>Score / Word Count</th><th>Band</th><th>Submission Date</th><th>Action</th></tr>
+              <tr><th>Candidate</th><th>Assessment Title</th><th>Score / Word Count</th><th>Band</th><th>Submission Date</th><th>Action</th></tr>
             </thead>
             <tbody id="analyticsTbody"></tbody>
           </table>
@@ -554,39 +660,39 @@
   <div id="examShell">
     <div class="inspera-top">
       <div style="display:flex; align-items:center; gap:14px;">
-        <span id="insperaExamTitle" style="font-weight:800;">IELTS Exam</span>
-        <span id="insperaCandidateTag" style="font-size:12px; color:#9ca3af;"></span>
+        <span id="insperaExamTitle" style="font-weight:800; color:#0f172a;">IELTS Assessment</span>
+        <span id="insperaCandidateTag" style="font-size:12px; color:#64748b; background:#f1f5f9; padding:3px 10px; border-radius:999px;"></span>
       </div>
       
-      <!-- THANH AUDIO GHIM TRÊN HEADER (Tự động hỗ trợ cả Google Drive Iframe & MP3 trực tiếp) -->
-      <div id="listeningAudioHeaderContainer" style="display: none; align-items: center; gap: 10px; background: #111827; padding: 4px 12px; border-radius: 6px; border: 1px solid #374151;">
-        <span style="font-size: 12px; color: #34d399; font-weight: 700;"><i class="fas fa-headphones"></i> Audio:</span>
+      <!-- CLEAN TOP AUDIO BAR -->
+      <div id="listeningAudioHeaderContainer" style="display: none; align-items: center; gap: 10px; background: #f8fafc; padding: 4px 12px; border-radius: 10px; border: 1px solid #cbd5e1;">
+        <span style="font-size: 12px; color: var(--emerald-accent); font-weight: 800;"><i class="fas fa-volume-up"></i> Audio Track:</span>
         <audio id="examAudioPlayer" controls preload="auto" style="height: 32px; width: 320px;"></audio>
-        <iframe id="examDriveAudioIframe" allow="autoplay" style="display:none; width: 340px; height: 42px; border: none; border-radius: 4px; background: #1f2937;"></iframe>
-        <a id="examAudioFallbackLink" href="#" target="_blank" style="font-size: 11px; color: #93c5fd; text-decoration: underline; display: none;">Mở tab phụ nếu trình duyệt chặn</a>
+        <iframe id="examDriveAudioIframe" allow="autoplay" style="display:none; width: 340px; height: 40px; border: none; border-radius: 6px; background: #0f172a;"></iframe>
+        <a id="examAudioFallbackLink" href="#" target="_blank" style="font-size: 11px; color: #2563eb; font-weight: 700; text-decoration: none; display: none;" title="Open External Player"><i class="fas fa-external-link-alt"></i></a>
       </div>
 
       <div style="display: flex; align-items: center; gap: 10px;">
         <span class="inspera-timer" id="insperaTimer">60:00</span>
-        <select id="examFontSizeSelect" onchange="changeExamFontSize(this.value)" style="background:#374151; color:#fff; border:1px solid #4b5563; padding:4px 8px; border-radius:4px; font-size:12px;">
+        <select id="examFontSizeSelect" onchange="changeExamFontSize(this.value)" style="background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; padding:5px 10px; border-radius:8px; font-size:12px; font-weight:600;">
           <option value="15px">Standard Text</option>
           <option value="17px">Large Text</option>
           <option value="19px">Extra Large</option>
         </select>
-        <select id="examThemeSelect" onchange="changeExamTheme(this.value)" style="background:#374151; color:#fff; border:1px solid #4b5563; padding:4px 8px; border-radius:4px; font-size:12px;">
+        <select id="examThemeSelect" onchange="changeExamTheme(this.value)" style="background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; padding:5px 10px; border-radius:8px; font-size:12px; font-weight:600;">
           <option value="light">Black on White</option>
           <option value="dark">White on Black</option>
           <option value="yellow">Yellow on Black</option>
         </select>
-        <button class="btn btn-secondary teacher-item" id="btnToggleTeacherMode" onclick="toggleTeacherEditMode()">✏️ Live Edit Keys</button>
+        <button class="btn btn-secondary teacher-item" id="btnToggleTeacherMode" onclick="toggleTeacherEditMode()">✏️ Edit Keys</button>
         <button class="btn btn-secondary" onclick="exitExamShell()">Exit</button>
-        <button class="btn btn-danger" id="btnSubmitExam" onclick="submitExam()">Submit Test</button>
+        <button class="btn btn-emerald" id="btnSubmitExam" onclick="submitExam()">Submit Test</button>
       </div>
     </div>
 
     <div class="inspera-instruction-banner" id="insperaInstructionBanner">
-      <span id="insperaPartInstructionText"><b>Part 1</b> — Read the text and answer questions.</span>
-      <span style="font-size:12px; color:#64748b;">💡 Tip: Select any text to highlight or clear notes.</span>
+      <span id="insperaPartInstructionText"><b>Part 1</b> — Read the text and answer the questions.</span>
+      <span style="font-size:12px; color:#64748b; font-weight:600;"><i class="fas fa-highlighter"></i> Select any text to highlight or clear notes</span>
     </div>
 
     <div class="inspera-part-tabs" id="insperaPartTabs"></div>
@@ -603,9 +709,9 @@
     </div>
 
     <div class="progress-container">
-      <span style="font-size: 12px; font-weight: 700; color: #475569;" id="footerSectionLabel">Questions:</span>
+      <span style="font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase;" id="footerSectionLabel">Questions</span>
       <div class="progress-items" id="insperaFooterList"></div>
-      <button class="btn btn-emerald" id="btnSubmitBottom" onclick="submitExam()">Finish Assessment</button>
+      <button class="btn btn-emerald" id="btnSubmitBottom" onclick="submitExam()">Finish Test</button>
     </div>
   </div>
 
@@ -617,8 +723,8 @@
         <button class="btn btn-secondary" onclick="closeModal('studyVocabModal')">Close</button>
       </div>
       <div class="modal-body" style="display:flex; gap:16px; padding:16px; overflow:hidden;">
-        <div style="width: 60%; height: 100%; overflow-y: auto; padding: 20px; border: 1px solid var(--inspera-border); border-radius: 8px; line-height: 1.8;" id="modalVocabPassagePane"></div>
-        <div style="width: 40%; height: 100%; overflow-y: auto; padding: 14px; background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px;" id="modalVocabCardsPane"></div>
+        <div style="width: 60%; height: 100%; overflow-y: auto; padding: 20px; border: 1px solid var(--inspera-border); border-radius: 12px; line-height: 1.8;" id="modalVocabPassagePane"></div>
+        <div style="width: 40%; height: 100%; overflow-y: auto; padding: 14px; background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 12px;" id="modalVocabCardsPane"></div>
       </div>
     </div>
   </div>
@@ -627,33 +733,33 @@
   <div class="modal-overlay" id="gradeWritingModal">
     <div class="modal-window" style="width: 980px; height: 90vh;">
       <div class="modal-header">
-        <span id="gradeWritingTitle">Review & Grade Student Writing</span>
+        <span id="gradeWritingTitle">Writing Submission & Examiner Feedback</span>
         <button class="btn btn-secondary" onclick="closeModal('gradeWritingModal')">Close</button>
       </div>
       <div class="modal-body" style="display:flex; gap:20px; overflow-y:auto; padding:20px;">
         <div style="flex:1; display:flex; flex-direction:column; gap:16px;">
-          <div style="background:#f8fafc; border:1px solid var(--inspera-border); border-radius:8px; padding:16px;">
-            <h4 style="color:var(--emerald-accent); margin-bottom:8px;">Task 1 Submission</h4>
-            <div id="gradeTask1Text" style="white-space:pre-wrap; line-height:1.7; font-size:14px; background:#fff; padding:12px; border-radius:6px; border:1px solid #e2e8f0; min-height:140px;"></div>
+          <div style="background:#f8fafc; border:1px solid var(--inspera-border); border-radius:12px; padding:16px;">
+            <h4 style="color:var(--emerald-accent); margin-bottom:8px;">Task 1 Response</h4>
+            <div id="gradeTask1Text" style="white-space:pre-wrap; line-height:1.7; font-size:14px; background:#fff; padding:12px; border-radius:8px; border:1px solid #e2e8f0; min-height:140px;"></div>
           </div>
-          <div style="background:#f8fafc; border:1px solid var(--inspera-border); border-radius:8px; padding:16px;">
-            <h4 style="color:var(--emerald-accent); margin-bottom:8px;">Task 2 Submission</h4>
-            <div id="gradeTask2Text" style="white-space:pre-wrap; line-height:1.7; font-size:14px; background:#fff; padding:12px; border-radius:6px; border:1px solid #e2e8f0; min-height:180px;"></div>
+          <div style="background:#f8fafc; border:1px solid var(--inspera-border); border-radius:12px; padding:16px;">
+            <h4 style="color:var(--emerald-accent); margin-bottom:8px;">Task 2 Response</h4>
+            <div id="gradeTask2Text" style="white-space:pre-wrap; line-height:1.7; font-size:14px; background:#fff; padding:12px; border-radius:8px; border:1px solid #e2e8f0; min-height:180px;"></div>
           </div>
         </div>
-        <div style="width: 320px; background:#fafafa; border:1px solid var(--inspera-border); border-radius:8px; padding:18px; display:flex; flex-direction:column; gap:14px;">
+        <div style="width: 320px; background:#f8fafc; border:1px solid var(--inspera-border); border-radius:12px; padding:18px; display:flex; flex-direction:column; gap:14px;">
           <input type="hidden" id="gradeSubmissionId">
           <div><b>Candidate:</b> <span id="gradeStudentName"></span></div>
           <div><b>Assessment:</b> <span id="gradeExamTitle"></span></div>
           <div class="form-group">
-            <label>Award Band Score (e.g. 6.5, 7.0, 7.5):</label>
-            <input type="text" id="gradeBandInput" class="form-input" placeholder="Band score...">
+            <label>Overall Band Score</label>
+            <input type="text" id="gradeBandInput" class="form-input" placeholder="e.g. 6.5, 7.0, 7.5">
           </div>
           <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
-            <label>Teacher's Feedback & Corrections:</label>
-            <textarea id="gradeFeedbackInput" class="form-input" style="flex:1; min-height:160px; line-height:1.6;" placeholder="Provide feedback, lexical notes, grammar correction..."></textarea>
+            <label>Examiner Feedback & Corrections</label>
+            <textarea id="gradeFeedbackInput" class="form-input" style="flex:1; min-height:160px; line-height:1.6;" placeholder="Enter detailed band descriptors, lexical notes, and grammar corrections..."></textarea>
           </div>
-          <button class="btn btn-emerald" style="width:100%; padding:10px;" onclick="saveWritingEvaluation()">Save Evaluation (Real-Time)</button>
+          <button class="btn btn-emerald" style="width:100%; padding:10px;" onclick="saveWritingEvaluation()">Save Evaluation</button>
         </div>
       </div>
     </div>
@@ -662,17 +768,17 @@
   <!-- MODAL: CLEAN SCORE POPUP -->
   <div class="modal-overlay" id="scoreSummaryModal">
     <div class="modal-window" style="width: 450px; text-align: center;">
-      <div class="modal-header" style="justify-content: center;">Test Submission Result</div>
+      <div class="modal-header" style="justify-content: center;">Assessment Result</div>
       <div class="modal-body" style="padding: 30px 20px;">
-        <div style="font-size: 48px; font-weight: 900; color: var(--emerald-accent);" id="summaryBandDisplay">Band 7.5</div>
-        <p style="font-size: 16px; font-weight: 700; color: #374151; margin-top: 8px;" id="summaryScoreDisplay">Correct: 32 / 40</p>
+        <div style="font-size: 48px; font-weight: 800; color: var(--emerald-accent);" id="summaryBandDisplay">Band 7.5</div>
+        <p style="font-size: 16px; font-weight: 700; color: #334155; margin-top: 8px;" id="summaryScoreDisplay">Correct: 32 / 40</p>
         <p style="font-size: 13px; color: #64748b; margin-top: 14px;">
-          Your responses have been saved to the cloud. Click below to review answers, explanations, and transcript/passage evidence.
+          Your answers have been recorded. Click below to review answer keys, explanations, and passage evidence.
         </p>
       </div>
       <div class="modal-footer" style="justify-content: center; gap: 12px;">
         <button class="btn btn-secondary" onclick="closeScoreSummaryToDashboard()">Dashboard</button>
-        <button class="btn btn-emerald" onclick="enterReviewModeFromSummary()">Review Answers & Explanations</button>
+        <button class="btn btn-emerald" onclick="enterReviewModeFromSummary()">Review Answers & Evidence</button>
       </div>
     </div>
   </div>
@@ -681,36 +787,36 @@
   <div class="modal-overlay" id="teacherEditModal">
     <div class="modal-window" style="width: 500px;">
       <div class="modal-header">
-        <span id="teacherEditTitle">Edit Explanation & Locate</span>
+        <span id="teacherEditTitle">Edit Answer Key & Evidence</span>
         <button class="btn btn-secondary" onclick="closeModal('teacherEditModal')">✕</button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="editKeyName">
         <div class="form-group">
-          <label>Correct Key / Answer (Use | for multiple valid answers, e.g., color|colour):</label>
+          <label>Correct Key (Use | for multiple valid answers)</label>
           <input type="text" id="editKeyVal" class="form-input">
         </div>
         <div class="form-group">
-          <label>Explanation:</label>
+          <label>Explanation</label>
           <textarea id="editKeyExp" class="form-input" style="height: 90px;"></textarea>
         </div>
         <div class="form-group">
-          <label>Evidence Snippet (Exact quote from passage to highlight on click):</label>
+          <label>Evidence Quote (Exact text from passage/transcript)</label>
           <input type="text" id="editKeyEvi" class="form-input">
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('teacherEditModal')">Cancel</button>
-        <button class="btn btn-emerald" onclick="saveTeacherKeyUpdate()">Save Explanation</button>
+        <button class="btn btn-emerald" onclick="saveTeacherKeyUpdate()">Save Changes</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL: IMPORT / CREATE MULTI-FORMAT READING TEST -->
   <div class="modal-overlay" id="readingEditorModal">
-    <div class="modal-window" style="width: 1060px;">
+    <div class="modal-window" style="width: 1080px;">
       <div class="modal-header">
-        <span>Create / Edit Multi-Format Reading Test (ieltsmaterials.uz Compatible)</span>
+        <span>Reading Test Builder</span>
         <button class="btn btn-secondary" onclick="closeModal('readingEditorModal')">✕</button>
       </div>
       <div class="modal-body">
@@ -718,7 +824,7 @@
         <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px;">
           <div class="form-group">
             <label>Exam Title</label>
-            <input type="text" id="reTitle" class="form-input" placeholder="e.g. Cambridge 19 Test 1 - Reading Full">
+            <input type="text" id="reTitle" class="form-input" placeholder="e.g. Cambridge 19 Test 1 - Reading">
           </div>
           <div class="form-group">
             <label>Duration (Minutes)</label>
@@ -727,7 +833,7 @@
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
           <div class="form-group">
-            <label>Phân loại Phần (Category)</label>
+            <label>Section Category</label>
             <select id="reCategory" class="form-input">
               <option value="Full Test">Full Test (3 Passages)</option>
               <option value="Passage 1">Passage 1</option>
@@ -736,7 +842,7 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Chủ đề / Nguồn đề (Topic - VD: Environment, Technology, Cam 19...)</label>
+            <label>Topic / Source</label>
             <input type="text" id="reTopic" class="form-input" placeholder="e.g. Environment / Cambridge 19">
           </div>
         </div>
@@ -748,65 +854,66 @@
         </div>
 
         <div class="template-toolbar">
-          <span style="font-size:12px; font-weight:800; color:#065f46; width:100%; margin-bottom:2px;">
-            ⚡ Quick Insert CD-IELTS Question Type Template (ieltsmaterials.uz Layouts):
+          <span style="font-size:11.5px; font-weight:800; color:#065f46; width:100%; margin-bottom:2px; text-transform:uppercase;">
+            ⚡ Insert Question Format Templates:
           </span>
           <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('tfng', 're')">+ TFNG / YNNG</button>
           <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq1', 're')">+ Multiple Choice (1 Ans)</button>
-          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq2', 're')">+ Multiple Choice (Choose TWO)</button>
-          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('gapfill', 're')">+ Note / Summary Inline Gap-Fill</button>
-          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('summary_drag', 're')">+ Summary Drag & Drop Bank</button>
-          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('headings', 're')">+ Matching Headings (Drag to Passage)</button>
-          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('matrix', 're')">+ Matching Information Matrix Table</button>
-          <button type="button" class="btn btn-emerald" onclick="autoGenerateKeysFromHtml('re')">🔍 Auto-Detect Question Numbers</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq2', 're')">+ Choose TWO Letters</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('gapfill', 're')">+ Inline Gap-Fill</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('summary_drag', 're')">+ Drag & Drop Matching</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('headings', 're')">+ Matching Headings</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('matrix', 're')">+ Matrix Radio Grid</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('diagram', 're')">+ Diagram / Map Image</button>
+          <button type="button" class="btn btn-emerald" onclick="autoGenerateKeysFromHtml('re')">🔍 Auto-Detect Questions</button>
         </div>
 
         <div class="form-group">
           <label>Passage Title</label>
-          <input type="text" id="rePTitle" class="form-input" placeholder="Passage Title...">
+          <input type="text" id="rePTitle" class="form-input" placeholder="Enter passage title...">
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
           <div class="form-group">
-            <label>Passage HTML (Left Pane - Supports Heading Drop-zones)</label>
+            <label>Passage HTML (Left Panel)</label>
             <textarea id="rePText" class="form-input" style="height: 170px; font-family: monospace; font-size:12px;"></textarea>
           </div>
           <div class="form-group">
-            <label>Questions HTML (Right Pane - Multi-Format Support)</label>
+            <label>Questions HTML (Right Panel)</label>
             <textarea id="rePQuestionsHtml" class="form-input" style="height: 170px; font-family: monospace; font-size:12px;"></textarea>
           </div>
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
           <div class="form-group">
-            <label>Correct Keys (One per line: q1=TRUE)</label>
+            <label>Correct Keys (q1=TRUE)</label>
             <textarea id="rePKeys" class="form-input" style="height: 90px; font-family: monospace; font-size:12px;" placeholder="q1=TRUE&#10;q2=FALSE&#10;q3=canopy"></textarea>
           </div>
           <div class="form-group">
-            <label>Explanations (One per line: q1=Giải thích...)</label>
-            <textarea id="rePExps" class="form-input" style="height: 90px; font-family: monospace; font-size:12px;" placeholder="q1=Đoạn 1 nêu rõ..."></textarea>
+            <label>Explanations (q1=Explanation...)</label>
+            <textarea id="rePExps" class="form-input" style="height: 90px; font-family: monospace; font-size:12px;"></textarea>
           </div>
           <div class="form-group">
-            <label>Evidence Quotes (One per line: q1=Exact quote)</label>
-            <textarea id="rePEvis" class="form-input" style="height: 90px; font-family: monospace; font-size:12px;" placeholder="q1=it takes a while for the mind"></textarea>
+            <label>Evidence Quotes (q1=Exact quote)</label>
+            <textarea id="rePEvis" class="form-input" style="height: 90px; font-family: monospace; font-size:12px;"></textarea>
           </div>
         </div>
         <div class="form-group">
-          <label>Vocabulary List (One per line: word | part of speech | Vietnamese meaning | synonyms)</label>
-          <textarea id="rePVocab" class="form-input" style="height: 65px; font-family: monospace; font-size:12px;" placeholder="indistinguishable | adj | Khó phân biệt | identical, similar"></textarea>
+          <label>Vocabulary List (word | part of speech | meaning | synonyms)</label>
+          <textarea id="rePVocab" class="form-input" style="height: 65px; font-family: monospace; font-size:12px;" placeholder="indistinguishable | adj | identical in appearance | identical, similar"></textarea>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('readingEditorModal')">Cancel</button>
-        <button class="btn btn-emerald" onclick="saveActiveExamFromEditor()">Save & Publish Real-Time</button>
+        <button class="btn btn-emerald" onclick="saveActiveExamFromEditor()">Save & Publish</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL: CREATE LISTENING TEST -->
   <div class="modal-overlay" id="listeningEditorModal">
-    <div class="modal-window" style="width: 1020px;">
+    <div class="modal-window" style="width: 1060px;">
       <div class="modal-header">
-        <span>Create / Edit Listening Test (Full-Screen Questions + Review Transcript)</span>
+        <span>Listening Test Builder</span>
         <button class="btn btn-secondary" onclick="closeModal('listeningEditorModal')">✕</button>
       </div>
       <div class="modal-body">
@@ -817,55 +924,60 @@
         </div>
         <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px;">
           <div class="form-group">
-            <label>Audio MP3 URL (Dán link Share Google Drive bất kỳ hoặc link .mp3 trực tiếp)</label>
-            <input type="text" id="leAudioUrl" class="form-input" placeholder="https://drive.google.com/file/d/.../view?usp=sharing">
-            <small style="color:#059669; font-size:11.5px; font-weight:600;">✔ Hỗ trợ trực tiếp link Google Drive (Nhớ bật quyền "Anyone with the link" trên Drive). Hệ thống sẽ nhúng trình phát Google Drive chính chủ không bao giờ bị lỗi 0:00!</small>
+            <label>Audio Source (Direct .mp3 URL, Google Drive Link, or Upload File)</label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="leAudioUrl" class="form-input" placeholder="https://.../audio.mp3 or Google Drive Share Link">
+              <label class="btn btn-secondary" style="white-space:nowrap; cursor:pointer; margin:0;">
+                <i class="fas fa-upload"></i> Upload MP3
+                <input type="file" accept="audio/*" style="display:none;" onchange="handleListeningAudioUpload(this)">
+              </label>
+            </div>
           </div>
           <div class="form-group">
-            <label>Listening Part Category</label>
+            <label>Section Category</label>
             <select id="leCategory" class="form-input">
-              <option value="Listening Full">Full Listening Test (Part 1-4)</option>
-              <option value="Listening Part 1">Listening Part 1</option>
-              <option value="Listening Part 2">Listening Part 2</option>
-              <option value="Listening Part 3">Listening Part 3</option>
-              <option value="Listening Part 4">Listening Part 4</option>
+              <option value="Listening Full">Full Test (Part 1-4)</option>
+              <option value="Listening Part 1">Part 1</option>
+              <option value="Listening Part 2">Part 2</option>
+              <option value="Listening Part 3">Part 3</option>
+              <option value="Listening Part 4">Part 4</option>
             </select>
           </div>
         </div>
-        <div class="form-group"><label>Topic / Source (Tag)</label><input type="text" id="leTopic" class="form-input" placeholder="e.g. Cam 19 Test 1 / Education"></div>
+        <div class="form-group"><label>Topic / Source</label><input type="text" id="leTopic" class="form-input" placeholder="e.g. Cam 19 Test 1 / Business"></div>
 
-        <!-- THANH CÔNG CỤ CHÈN MẪU CÂU HỎI CHO LISTENING -->
         <div class="template-toolbar">
-          <span style="font-size:12px; font-weight:800; color:#065f46; width:100%; margin-bottom:2px;">
-            ⚡ Quick Insert Listening Question Templates:
+          <span style="font-size:11.5px; font-weight:800; color:#065f46; width:100%; margin-bottom:2px; text-transform:uppercase;">
+            ⚡ Insert Listening Question Templates:
           </span>
-          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('gapfill', 'le')">+ Note / Form Completion (Inline Gap-Fill)</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('gapfill', 'le')">+ Note / Form Gap-Fill</button>
           <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq1', 'le')">+ Multiple Choice (A, B, C)</button>
-          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq2', 'le')">+ Choose TWO Letters (A-E)</button>
-          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('summary_drag', 'le')">+ Matching / Drag & Drop Box</button>
-          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('matrix', 'le')">+ Matrix Table</button>
-          <button type="button" class="btn btn-emerald" onclick="autoGenerateKeysFromHtml('le')">🔍 Auto-Detect Question Numbers</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq2', 'le')">+ Choose TWO Letters</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('summary_drag', 'le')">+ Matching (Drag & Drop Box)</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('matrix', 'le')">+ Matching (Radio Grid)</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('diagram', 'le')">+ Map / Plan Labelling Image</button>
+          <button type="button" class="btn btn-emerald" onclick="autoGenerateKeysFromHtml('le')">🔍 Auto-Detect Questions</button>
         </div>
 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
           <div class="form-group">
-            <label>Transcript HTML (Ẩn khi đang thi — Chỉ hiện ở cột trái khi học sinh bấm Review đáp án)</label>
-            <textarea id="leTranscript" class="form-input" style="height: 150px; font-family: monospace; font-size:12px;" placeholder="<p><b>Tutor:</b> So, Sally, how did you find the peer assessment project?</p>"></textarea>
+            <label>Transcript HTML (Displayed on Left Panel during Review Mode)</label>
+            <textarea id="leTranscript" class="form-input" style="height: 150px; font-family: monospace; font-size:12px;" placeholder="<p><b>Speaker:</b> Transcript text...</p>"></textarea>
           </div>
           <div class="form-group">
-            <label>Questions HTML (Hiển thị TOÀN TRANG 100% khi làm bài)</label>
-            <textarea id="leQuestions" class="form-input" style="height: 150px; font-family: monospace; font-size:12px;" placeholder="Bấm các nút mẫu phía trên hoặc dán HTML câu hỏi vào đây..."></textarea>
+            <label>Questions HTML (Full-Screen during Test)</label>
+            <textarea id="leQuestions" class="form-input" style="height: 150px; font-family: monospace; font-size:12px;" placeholder="Insert question templates or paste HTML here..."></textarea>
           </div>
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
-          <div class="form-group"><label>Correct Keys (q1=answer)</label><textarea id="leKeys" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;" placeholder="q21=B&#10;q22=A"></textarea></div>
-          <div class="form-group"><label>Explanations (Giải thích)</label><textarea id="leExps" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;" placeholder="q21=Sally nói rằng..."></textarea></div>
-          <div class="form-group"><label>Evidence Quotes (Câu trích trong Transcript để bấm Locate)</label><textarea id="leEvis" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;" placeholder="q21=students see it as a useful learning tool"></textarea></div>
+          <div class="form-group"><label>Correct Keys (q21=B)</label><textarea id="leKeys" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;"></textarea></div>
+          <div class="form-group"><label>Explanations</label><textarea id="leExps" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;"></textarea></div>
+          <div class="form-group"><label>Evidence Quotes</label><textarea id="leEvis" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;"></textarea></div>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('listeningEditorModal')">Cancel</button>
-        <button class="btn btn-emerald" onclick="saveListeningExam()">Save & Publish Real-Time</button>
+        <button class="btn btn-emerald" onclick="saveListeningExam()">Save & Publish</button>
       </div>
     </div>
   </div>
@@ -874,7 +986,7 @@
   <div class="modal-overlay" id="writingEditorModal">
     <div class="modal-window" style="width: 720px;">
       <div class="modal-header">
-        <span>Create / Edit Writing Assessment (Task 1 & Task 2)</span>
+        <span>Writing Assessment Builder</span>
         <button class="btn btn-secondary" onclick="closeModal('writingEditorModal')">✕</button>
       </div>
       <div class="modal-body">
@@ -884,22 +996,22 @@
           <div class="form-group"><label>Duration (Minutes)</label><input type="number" id="weDuration" class="form-input" value="60"></div>
         </div>
         <div class="form-group">
-          <label>Chủ đề / Dạng bài (VD: Line Graph, Bar Chart, Map, Process, Opinion, Discussion...)</label>
+          <label>Task Type / Topic (e.g. Line Graph, Bar Chart, Map, Process, Opinion, Discussion)</label>
           <input type="text" id="weTopic" class="form-input" placeholder="e.g. Bar Chart / Education">
         </div>
-        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px; margin-bottom: 14px;">
-          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 1 (Để trống nếu chỉ tạo đề lẻ Task 2)</h4>
+        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 1 (Leave blank for Task 2 Only test)</h4>
           <div class="form-group"><label>Task 1 Prompt</label><textarea id="weT1Prompt" class="form-input" style="height: 85px;"></textarea></div>
           <div class="form-group"><label>Chart / Diagram Image URL (Optional)</label><input type="text" id="weT1Image" class="form-input" placeholder="https://..."></div>
         </div>
-        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 8px; padding: 14px;">
-          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 2 (Để trống nếu chỉ tạo đề lẻ Task 1)</h4>
+        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 12px; padding: 14px;">
+          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 2 (Leave blank for Task 1 Only test)</h4>
           <div class="form-group"><label>Task 2 Prompt</label><textarea id="weT2Prompt" class="form-input" style="height: 85px;"></textarea></div>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('writingEditorModal')">Cancel</button>
-        <button class="btn btn-emerald" onclick="saveWritingExam()">Save Writing Test (Real-Time)</button>
+        <button class="btn btn-emerald" onclick="saveWritingExam()">Save & Publish</button>
       </div>
     </div>
   </div>
@@ -910,7 +1022,7 @@
       <div class="modal-header">Account Profile</div>
       <div class="modal-body">
         <div class="form-group"><label>Full Name</label><input type="text" id="profNameInput" class="form-input"></div>
-        <div class="form-group"><label>New Password (leave blank to keep current)</label><input type="password" id="profPassInput" class="form-input"></div>
+        <div class="form-group"><label>New Password (Optional)</label><input type="password" id="profPassInput" class="form-input"></div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('profileModal')">Cancel</button>
@@ -922,8 +1034,8 @@
   <!-- CLASS MODAL -->
   <div class="modal-overlay" id="classModal">
     <div class="modal-window" style="width: 400px;">
-      <div class="modal-header">Add Cohort / Class</div>
-      <div class="modal-body"><div class="form-group"><label>Class Name</label><input type="text" id="newClassName" class="form-input" placeholder="e.g. IELTS Fighter B2"></div></div>
+      <div class="modal-header">Create Cohort</div>
+      <div class="modal-body"><div class="form-group"><label>Cohort Name</label><input type="text" id="newClassName" class="form-input" placeholder="e.g. IELTS Intensive 7.5+"></div></div>
       <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('classModal')">Cancel</button><button class="btn btn-emerald" onclick="saveNewClass()">Save</button></div>
     </div>
   </div>
@@ -931,12 +1043,12 @@
   <!-- SINGLE STUDENT MODAL -->
   <div class="modal-overlay" id="studentModal">
     <div class="modal-window" style="width: 440px;">
-      <div class="modal-header">Register Student Account</div>
+      <div class="modal-header">Register Candidate Account</div>
       <div class="modal-body">
-        <div class="form-group"><label>Full Name</label><input type="text" id="newStuFullName" class="form-input" autocomplete="off" placeholder="Nguyen Van B"></div>
-        <div class="form-group"><label>Username</label><input type="text" id="newStuUsername" class="form-input" autocomplete="off" placeholder="nguyenvanb"></div>
+        <div class="form-group"><label>Full Name</label><input type="text" id="newStuFullName" class="form-input" autocomplete="off" placeholder="Alex Johnson"></div>
+        <div class="form-group"><label>Username</label><input type="text" id="newStuUsername" class="form-input" autocomplete="off" placeholder="alexjohnson"></div>
         <div class="form-group"><label>Password</label><input type="text" id="newStuPassword" class="form-input" value="123456"></div>
-        <div class="form-group"><label>Assign to Class</label><select id="newStuClassSelect" class="form-input"></select></div>
+        <div class="form-group"><label>Assign Cohort</label><select id="newStuClassSelect" class="form-input"></select></div>
       </div>
       <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('studentModal')">Cancel</button><button class="btn btn-emerald" onclick="saveNewStudent()">Create Account</button></div>
     </div>
@@ -946,26 +1058,26 @@
   <div class="modal-overlay" id="bulkStudentModal">
     <div class="modal-window" style="width: 540px;">
       <div class="modal-header">
-        <span>⚡ Bulk Student Account Generator</span>
+        <span>⚡ Bulk Candidate Account Generator</span>
         <button class="btn btn-secondary" onclick="closeModal('bulkStudentModal')">✕</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label>Select Target Class Cohort</label>
+          <label>Target Cohort</label>
           <select id="bulkStuClassSelect" class="form-input"></select>
         </div>
         <div class="form-group">
-          <label>Default Password for New Accounts</label>
+          <label>Default Password</label>
           <input type="text" id="bulkStuDefaultPass" class="form-input" value="123456">
         </div>
         <div class="form-group">
-          <label>Paste Student List (One student per line: either "Full Name" OR "Full Name | username | password")</label>
+          <label>Candidate List (One per line: "Full Name" OR "Full Name | username | password")</label>
           <textarea id="bulkStuTextarea" class="form-input" style="height: 160px; font-family: monospace;" placeholder="Tran Minh Quan&#10;Le Hoang Nam&#10;Pham Thu Ha | thuha99 | 123456"></textarea>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('bulkStudentModal')">Cancel</button>
-        <button class="btn btn-emerald" onclick="saveBulkStudents()">Generate & Sync Accounts</button>
+        <button class="btn btn-emerald" onclick="saveBulkStudents()">Generate Accounts</button>
       </div>
     </div>
   </div>
@@ -973,12 +1085,12 @@
   <!-- ASSIGN EXAM MODAL -->
   <div class="modal-overlay" id="assignModal">
     <div class="modal-window" style="width: 420px;">
-      <div class="modal-header">Assign Exam to Cohort</div>
+      <div class="modal-header">Assign Assessment to Cohort</div>
       <div class="modal-body">
         <input type="hidden" id="assignExamId">
         <input type="hidden" id="assignExamType">
         <div class="form-group">
-          <label>Target Cohort (Select "All Classes" to make public to all students)</label>
+          <label>Target Cohort</label>
           <select id="assignCohortSelect" class="form-input"></select>
         </div>
       </div>
@@ -1024,20 +1136,20 @@
         q36: 'G', q37: 'C', q38: 'A', q39: 'H', q40: 'E'
       },
       explanations: {
-        q27: 'Tác giả giải thích lý do các siêu thị giống nhau là vì am hiểu tâm lý người tiêu dùng ("khoa học thuyết phục người tiêu dùng mua hàng").',
-        q28: 'Khu vực chill zone để người mua có khởi đầu nhẹ nhàng và dần đưa tâm trí vào trạng thái sẵn sàng mua sắm.',
-        q29: 'Việc chọn lựa thực phẩm tươi lành ngay khi bắt đầu mua sắm giúp người mua cảm thấy phấn chấn (uplifting) và có tâm lý dễ chịu.',
-        q30: 'Cụm từ "Shoppers have worked out that..." thể hiện người đi siêu thị đã nhận ra một số thủ thuật của cửa hàng.',
-        q31: 'Bài đọc chỉ ra các cửa hàng xếp sản phẩm rẻ hơn ở kệ thấp để kích thích khách mua sản phẩm đắt tiền đặt ngang tầm mắt.',
-        q32: 'Tác giả nêu rõ quy định từ trụ sở chính gây ra nhiều tranh cãi và các nhà bán lẻ có quan điểm riêng.',
-        q33: 'Bài viết khẳng định việc sắp xếp kệ hàng cực kỳ gây tranh cãi và không có sự đồng thuận chung.',
-        q34: 'Bài viết chỉ đề cập camera an ninh dùng để phân tích hành vi, không bàn luận về mối đe dọa quyền riêng tư.',
-        q35: 'Dữ liệu điện tử nói lên rất ít lý do khách rời đi; phỏng vấn trực tiếp mới mang lại thông tin chi tiết và giá trị hơn.',
-        q36: 'Mọi người đưa ra quyết định mua sắm dựa trên logic và ý thức chung (G. rational decisions).',
-        q37: 'Nghiên cứu cho thấy có các yếu tố cảm xúc và ký ức mà cá nhân không hoàn toàn nhận thức được (C. unconscious factors).',
-        q38: 'Nghiên cứu sử dụng máy quét fMRI để theo dõi hoạt động não bộ của người tham gia (A. brain scans).',
-        q39: 'Kết quả quét não cho thấy sự mâu thuẫn lớn giữa lời nói và cảm xúc thực sự trong não (H. emotional reaction).',
-        q40: 'Tỷ lệ thất bại của các sản phẩm mới tung ra thị trường là rất cao (8 trên 10 sản phẩm không thành công) (E. failures).'
+        q27: 'Supermarkets share a similar understanding of consumer psychology ("the science of persuading people to buy things").',
+        q28: 'The chill zone helps customers make a gentle start and prepare themselves to go shopping.',
+        q29: 'Selecting wholesome fresh food is an uplifting way to start shopping and makes people feel less guilty.',
+        q30: 'The phrase "Shoppers have worked out that..." shows shoppers are aware of store techniques.',
+        q31: 'Stores encourage customers to buy expensive products at eye-level while placing cheaper ones lower down.',
+        q32: 'Head office specifications are controversial and retailers have their own views.',
+        q33: 'Shelf-positioning is extremely controversial with no widespread agreement.',
+        q34: 'Security cameras are mentioned for behaviour analysis, not privacy threats.',
+        q35: 'Electronic data tells little about why customers leave; face-to-face interviews yield better insights.',
+        q36: 'People claim they make decisions based on logic and common sense (G. rational decisions).',
+        q37: 'Feelings and memories individuals are not fully aware of also play a role (C. unconscious factors).',
+        q38: 'Studies use fMRI scanners to reveal brain activity (A. brain scans).',
+        q39: 'Scanners reveal major contradictions between what people say and think (H. emotional reaction).',
+        q40: 'Eight out of ten new consumer products launched on the market do not succeed (E. failures).'
       },
       evidences: {
         q27: 'It is more that they are all well-versed in the science of persuading people to buy things',
@@ -1184,15 +1296,15 @@
             </div>
           `,
           vocab: [
-            { word: 'indistinguishable', type: 'adj', mean: 'Khó phân biệt, giống hệt nhau', syn: 'identical, similar, alike' },
-            { word: 'well-versed', type: 'adj', mean: 'Am hiểu, thông thạo', syn: 'knowledgeable, proficient' },
-            { word: 'motivate', type: 'verb', mean: 'Thúc đẩy, tạo động lực', syn: 'encourage, stimulate' },
-            { word: 'impulsive', type: 'adj', mean: 'Bốc đồng, ngẫu hứng', syn: 'spontaneous, rash' },
-            { word: 'bruised', type: 'adj', mean: 'Bị dập, thâm tím', syn: 'damaged, harmed' },
-            { word: 'wholesome', type: 'adj', mean: 'Lành mạnh, bổ dưỡng', syn: 'healthy, nourishing' },
-            { word: 'controversial', type: 'adj', mean: 'Gây tranh cãi', syn: 'debatable, contentious' },
-            { word: 'sophisticated', type: 'adj', mean: 'Tinh vi, hiện đại', syn: 'advanced, complex' },
-            { word: 'contradiction', type: 'noun', mean: 'Sự mâu thuẫn', syn: 'inconsistency, discrepancy' }
+            { word: 'indistinguishable', type: 'adj', mean: 'Identical in appearance; impossible to tell apart', syn: 'identical, similar, alike' },
+            { word: 'well-versed', type: 'adj', mean: 'Highly experienced and skilled in a subject', syn: 'knowledgeable, proficient' },
+            { word: 'motivate', type: 'verb', mean: 'Provide someone with a reason for doing something', syn: 'encourage, stimulate' },
+            { word: 'impulsive', type: 'adj', mean: 'Acting or done without forethought', syn: 'spontaneous, rash' },
+            { word: 'bruised', type: 'adj', mean: 'Damaged or discolored by impact', syn: 'damaged, harmed' },
+            { word: 'wholesome', type: 'adj', mean: 'Conducive to good health and physical well-being', syn: 'healthy, nourishing' },
+            { word: 'controversial', type: 'adj', mean: 'Giving rise to public disagreement', syn: 'debatable, contentious' },
+            { word: 'sophisticated', type: 'adj', mean: 'Developed to a high degree of complexity', syn: 'advanced, complex' },
+            { word: 'contradiction', type: 'noun', mean: 'A combination of statements that are opposed to one another', syn: 'inconsistency, discrepancy' }
           ]
         }
       ]
@@ -1229,7 +1341,7 @@
       const dot = document.getElementById('realtimeSyncDot');
       const txt = document.getElementById('realtimeSyncText');
       if (dot && txt) {
-        dot.style.background = isOnline ? '#34d399' : '#fbbf24';
+        dot.style.background = isOnline ? '#10b981' : '#f59e0b';
         txt.textContent = statusText;
       }
     }
@@ -1303,7 +1415,7 @@
       } catch (e) {}
 
       if (CLOUD_DOC) {
-        setSyncStatus('Syncing changes...', true);
+        setSyncStatus('Syncing...', true);
         const cleanData = JSON.parse(JSON.stringify(db));
         CLOUD_DOC.set(cleanData).then(() => {
           setSyncStatus('Cloud Real-Time Active', true);
@@ -1351,7 +1463,6 @@
       
       ensureArraysExist();
       let user = (db.users || []).find(x => x.username.toLowerCase() === u.toLowerCase() && String(x.pass).trim() === p);
-      // Fallback bảo vệ tài khoản giáo viên mặc định không bao giờ bị mất
       if (!user && u.toLowerCase() === 'amuro' && p === 'amuro123') {
         user = { id: 'u_admin', username: 'amuro', pass: 'amuro123', name: 'Teacher Amuro', role: 'teacher' };
         db.users.push(user);
@@ -1391,7 +1502,7 @@
       sessionStorage.setItem('AMURO_CURRENT_USER', JSON.stringify(activeUser));
       closeModal('profileModal');
       checkSession();
-      alert('Profile updated in real-time!');
+      alert('Profile updated!');
     }
 
     /* DASHBOARD CONTROLLER */
@@ -1462,7 +1573,7 @@
       recents = recents.slice(0, 8);
 
       if (!recents.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:20px;">No assessment submissions recorded yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;">No assessment submissions recorded yet.</td></tr>`;
         return;
       }
       recents.forEach(r => {
@@ -1470,13 +1581,13 @@
         let actionBtn = '';
         if (isWriting) {
           if (activeUser.role === 'teacher') {
-            actionBtn = `<button class="btn btn-emerald" onclick="openGradeWritingModal('${r.id}')">✏️ Chấm bài</button>`;
+            actionBtn = `<button class="btn btn-emerald" onclick="openGradeWritingModal('${r.id}')">✏️ Evaluate</button>`;
           } else {
             const hasFb = r.teacherFeedback && r.teacherFeedback.trim() !== '';
-            actionBtn = `<button class="btn ${hasFb ? 'btn-emerald' : 'btn-secondary'}" onclick="openStudentViewWritingModal('${r.id}')">${hasFb ? '💬 Xem Feedback' : '👁️ Xem bài làm'}</button>`;
+            actionBtn = `<button class="btn ${hasFb ? 'btn-emerald' : 'btn-secondary'}" onclick="openStudentViewWritingModal('${r.id}')">${hasFb ? '💬 View Feedback' : '👁️ View Essay'}</button>`;
           }
         } else {
-          actionBtn = `<button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">🔍 Xem đáp án</button>`;
+          actionBtn = `<button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">🔍 Review Keys</button>`;
         }
 
         const tr = document.createElement('tr');
@@ -1515,10 +1626,10 @@
       }
       list.forEach(e => {
         const clsNames = (!e.assignedClasses || e.assignedClasses.length === 0)
-          ? 'All Classes'
+          ? 'All Cohorts'
           : e.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
-        const catBadge = e.category ? `<span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; margin-right:6px;">${e.category}</span>` : '';
-        const topBadge = e.topic ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700;">🏷️ ${e.topic}</span>` : '';
+        const catBadge = e.category ? `<span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; margin-right:6px;">${e.category}</span>` : '';
+        const topBadge = e.topic ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700;">🏷️ ${e.topic}</span>` : '';
         
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -1561,13 +1672,13 @@
       });
 
       if (!list.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No listening tests found. Click "+ Create Listening Test" to add one.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No listening tests available.</td></tr>`;
         return;
       }
       list.forEach(e => {
-        const clsNames = (!e.assignedClasses || e.assignedClasses.length === 0) ? 'All Classes' : e.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
-        const catBadge = `<span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; margin-right:6px;">${e.category || 'Listening'}</span>`;
-        const topBadge = e.topic ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700;">🏷️ ${e.topic}</span>` : '';
+        const clsNames = (!e.assignedClasses || e.assignedClasses.length === 0) ? 'All Cohorts' : e.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
+        const catBadge = `<span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; margin-right:6px;">${e.category || 'Listening'}</span>`;
+        const topBadge = e.topic ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700;">🏷️ ${e.topic}</span>` : '';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -1617,16 +1728,16 @@
         const hasT1 = Boolean(w.task1 && w.task1.prompt);
         const hasT2 = Boolean(w.task2 && w.task2.prompt);
         const taskLabel = (hasT1 && hasT2) ? 'Task 1 & Task 2' : (hasT1 ? 'Task 1 Only' : 'Task 2 Only');
-        const topBadge = w.topic ? `<div style="margin-top:4px;"><span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700;">🏷️ ${w.topic}</span></div>` : '';
+        const topBadge = w.topic ? `<div style="margin-top:4px;"><span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700;">🏷️ ${w.topic}</span></div>` : '';
 
         const clsNames = (!w.assignedClasses || w.assignedClasses.length === 0)
-          ? 'All Classes'
+          ? 'All Cohorts'
           : w.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><b>${w.title}</b>${topBadge}</td>
           <td>${w.duration} mins</td>
-          <td><span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:4px; font-size:11.5px; font-weight:700;">${taskLabel}</span></td>
+          <td><span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:6px; font-size:11.5px; font-weight:700;">${taskLabel}</span></td>
           <td><span style="color: #64748b; font-weight:600;">${clsNames}</span></td>
           <td style="display:flex; gap:6px; flex-wrap:wrap;">
             <button class="btn btn-emerald" onclick="launchWritingExam('${w.id}')">Start Writing</button>
@@ -1641,7 +1752,7 @@
       });
     }
 
-    /* MODAL STUDY VOCABULARY (WITH HIGHLIGHT IN PASSAGE) */
+    /* MODAL STUDY VOCABULARY */
     function openStudyVocabModal(examId) {
       const exam = db.readingExams.find(e => e.id === examId);
       if (!exam || !exam.passages || !exam.passages.length) return alert('No passage data found.');
@@ -1656,14 +1767,14 @@
         cardsPane.innerHTML = `<p style="color:#64748b; font-style:italic;">No vocabulary entries recorded for this passage.</p>`;
       } else {
         cardsPane.innerHTML = vocabList.map(v => `
-          <div style="background:#fff; border:1px solid var(--inspera-border); border-radius:8px; padding:12px; margin-bottom:10px;">
+          <div style="background:#fff; border:1px solid var(--inspera-border); border-radius:10px; padding:12px; margin-bottom:10px;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <span style="font-weight:700; color:var(--emerald-accent); font-size:15px;">${v.word} <small style="color:#64748b;">(${v.type})</small></span>
               <button class="btn btn-secondary" style="padding:2px 8px; font-size:11px;" onclick="saveToMyVault('${v.word.replace(/'/g,"")}', '${v.mean.replace(/'/g,"")}', '${(v.syn||'').replace(/'/g,"")}', '${exam.title.replace(/'/g,"")}')">⭐ Save</button>
             </div>
             <div style="font-size:13px; margin:4px 0;">${v.mean}</div>
             <div style="font-size:11.5px; color:#64748b;">Synonyms: <b>${v.syn || 'N/A'}</b></div>
-            <button class="btn btn-emerald" style="margin-top:6px; padding:3px 8px; font-size:11px; width:100%;" onclick="spotVocabWordInModal('${v.word.replace(/'/g,"")}')">🔍 Highlight in Passage</button>
+            <button class="btn btn-emerald" style="margin-top:6px; padding:4px 8px; font-size:11px; width:100%;" onclick="spotVocabWordInModal('${v.word.replace(/'/g,"")}')">🔍 Highlight in Passage</button>
           </div>
         `).join('');
       }
@@ -1707,7 +1818,7 @@
         return;
       }
       box.innerHTML = list.map((item, idx) => `
-        <div style="background:#fff; border:1px solid var(--inspera-border); border-radius:8px; padding:14px; position:relative;">
+        <div style="background:#fff; border:1px solid var(--inspera-border); border-radius:12px; padding:14px; position:relative;">
           <div style="font-weight:700; color:var(--emerald-accent); font-size:16px;">${item.word}</div>
           <div style="font-size:13px; margin:6px 0;">${item.mean}</div>
           <div style="font-size:12px; color:#64748b; margin-bottom:6px;">Synonyms: <b>${item.syn || 'N/A'}</b></div>
@@ -1723,7 +1834,7 @@
       (db.classes || []).forEach(c => {
         const count = (db.users || []).filter(u => u.classId === c.id).length;
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><b>${c.name}</b></td><td>${count} students</td><td><button class="btn btn-danger" onclick="deleteClass('${c.id}')">Delete</button></td>`;
+        tr.innerHTML = `<td><b>${c.name}</b></td><td>${count} candidates</td><td><button class="btn btn-danger" onclick="deleteClass('${c.id}')">Delete</button></td>`;
         tbody.appendChild(tr);
       });
     }
@@ -1734,7 +1845,7 @@
       tbody.innerHTML = '';
       const stuList = (db.users || []).filter(u => u.role === 'student');
       if (!stuList.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No student accounts registered yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No candidate accounts registered yet.</td></tr>`;
         return;
       }
       stuList.forEach(u => {
@@ -1787,7 +1898,7 @@
       document.getElementById('gradeBandInput').value = res.band === 'Submitted' ? '' : res.band;
       document.getElementById('gradeFeedbackInput').value = res.teacherFeedback || '';
 
-      document.getElementById('gradeWritingTitle').textContent = 'Review & Grade Student Writing';
+      document.getElementById('gradeWritingTitle').textContent = 'Review & Grade Candidate Writing';
       document.getElementById('gradeBandInput').readOnly = false;
       document.getElementById('gradeFeedbackInput').readOnly = false;
       const saveBtn = document.querySelector('#gradeWritingModal .btn-emerald');
@@ -1799,7 +1910,7 @@
     function openStudentViewWritingModal(resId) {
       openGradeWritingModal(resId);
       const isTeacher = activeUser && activeUser.role === 'teacher';
-      document.getElementById('gradeWritingTitle').textContent = isTeacher ? 'Review & Grade Student Writing' : 'Bài làm Writing & Nhận xét của Giáo viên';
+      document.getElementById('gradeWritingTitle').textContent = isTeacher ? 'Review & Grade Candidate Writing' : 'Writing Submission & Examiner Feedback';
       document.getElementById('gradeBandInput').readOnly = !isTeacher;
       document.getElementById('gradeFeedbackInput').readOnly = !isTeacher;
       const saveBtn = document.querySelector('#gradeWritingModal .btn-emerald');
@@ -1818,7 +1929,7 @@
       closeModal('gradeWritingModal');
       renderAnalyticsTable();
       renderHomeTab();
-      alert('Writing evaluation saved and synced!');
+      alert('Writing evaluation saved!');
     }
 
     /* ========================================================
@@ -1861,7 +1972,6 @@
       const url = (rawUrl || '').trim();
       if (!url) return;
 
-      // Tự động nhận diện link Google Drive -> Dùng Google Drive Preview Player để không bao giờ bị chặn CORS / 0:00
       const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
       if (url.includes('drive.google.com') && driveMatch && driveMatch[1]) {
         const fileId = driveMatch[1];
@@ -1883,8 +1993,19 @@
           audioEl.load();
         }
         fallbackLink.href = url;
-        fallbackLink.style.display = 'inline';
+        fallbackLink.style.display = url.startsWith('data:') ? 'none' : 'inline';
       }
+    }
+
+    function handleListeningAudioUpload(input) {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('leAudioUrl').value = e.target.result;
+        alert(`Audio file "${file.name}" loaded into the native HTML5 player!`);
+      };
+      reader.readAsDataURL(file);
     }
 
     function launchExam(examId) {
@@ -1907,7 +2028,7 @@
       document.getElementById('btnSubmitExam').style.display = '';
       document.getElementById('btnSubmitBottom').style.display = '';
       document.getElementById('btnToggleTeacherMode').style.display = activeUser.role === 'teacher' ? '' : 'none';
-      document.getElementById('footerSectionLabel').textContent = 'Questions:';
+      document.getElementById('footerSectionLabel').textContent = 'Questions';
 
       renderPartPills();
       loadPassageView(activePartNum);
@@ -1936,7 +2057,7 @@
       document.getElementById('btnSubmitExam').style.display = '';
       document.getElementById('btnSubmitBottom').style.display = '';
       document.getElementById('btnToggleTeacherMode').style.display = activeUser.role === 'teacher' ? '' : 'none';
-      document.getElementById('footerSectionLabel').textContent = 'Questions:';
+      document.getElementById('footerSectionLabel').textContent = 'Questions';
 
       setupHeaderAudioPlayer(activeExam.audioUrl);
       renderPartPills();
@@ -1974,10 +2095,9 @@
       const resizer = document.getElementById('insperaResizer');
 
       document.getElementById('insperaPartInstructionText').innerHTML = activeExamType === 'listening'
-        ? (isReviewMode ? `<b>Listening Review Mode</b> — Compare your answers on the right with the transcript on the left.` : `<b>${activeExam.category || 'IELTS Listening'}</b> — Listen to the audio on the top bar and answer all questions below.`)
-        : `<b>Part ${partNum}</b> — Read the text on the left and answer the questions on the right.`;
+        ? (isReviewMode ? `<b>Listening Review Mode</b> — Compare your responses on the right with the audio transcript on the left.` : `<b>${activeExam.category || 'IELTS Listening'}</b> — Listen to the audio track and answer all questions below.`)
+        : `<b>Part ${partNum}</b> — Read the passage on the left and answer the questions on the right.`;
 
-      // LISTENING: KHI LÀM BÀI -> HIỂN THỊ CÂU HỎI TOÀN TRANG (100%). KHI REVIEW -> CHIA ĐÔI (TRÁI TRANSCRIPT, PHẢI ĐÁP ÁN)
       if (activeExamType === 'listening' && !isReviewMode) {
         left.style.display = 'none';
         resizer.style.display = 'none';
@@ -1988,7 +2108,7 @@
         resizer.style.display = 'flex';
         left.style.width = '50%';
         right.style.width = '50%';
-        left.innerHTML = `<h2 class="section-title">${activeExamType === 'listening' ? '🎧 Listening Transcript' : (passage.title || 'READING PASSAGE ' + partNum)}</h2><div class="passage-content">${passage.passageHtml || '<p>No transcript/passage text provided.</p>'}</div>`;
+        left.innerHTML = `<h2 class="section-title">${activeExamType === 'listening' ? '🎧 Audio Transcript' : (passage.title || 'READING PASSAGE ' + partNum)}</h2><div class="passage-content">${passage.passageHtml || '<p>No transcript/passage text provided.</p>'}</div>`;
         right.innerHTML = `<h2 class="section-title">Questions</h2>${passage.questionsHtml || ''}`;
       }
 
@@ -2142,7 +2262,7 @@
           if (isReviewMode || item.classList.contains('used')) return;
           items.forEach(i => i.style.outline = 'none');
           selectedDragItem = { ans: item.dataset.answer, label: item.textContent.trim() };
-          item.style.outline = '2px solid #2563eb';
+          item.style.outline = '2px solid #059669';
         };
       });
 
@@ -2330,7 +2450,7 @@
     function toggleTeacherEditMode() {
       isTeacherEditMode = !isTeacherEditMode;
       const btn = document.getElementById('btnToggleTeacherMode');
-      btn.textContent = isTeacherEditMode ? '✅ Done Editing' : '✏️ Live Edit Keys';
+      btn.textContent = isTeacherEditMode ? '✅ Done Editing' : '✏️ Edit Keys';
       loadPassageView(activePartNum);
     }
 
@@ -2358,7 +2478,7 @@
 
     function openTeacherEditModal(k) {
       document.getElementById('editKeyName').value = k;
-      document.getElementById('teacherEditTitle').textContent = `Edit Solution for ${k.toUpperCase()}`;
+      document.getElementById('teacherEditTitle').textContent = `Edit Key & Evidence for ${k.toUpperCase()}`;
       document.getElementById('editKeyVal').value = activeExam.correctAnswers[k] || '';
       document.getElementById('editKeyExp').value = (activeExam.explanations && activeExam.explanations[k]) || '';
       document.getElementById('editKeyEvi').value = (activeExam.evidences && activeExam.evidences[k]) || '';
@@ -2381,7 +2501,7 @@
       persist();
       closeModal('teacherEditModal');
       loadPassageView(activePartNum);
-      alert(`Updated explanation & key for ${k.toUpperCase()} in real-time!`);
+      alert(`Updated solution for ${k.toUpperCase()}!`);
     }
 
     function setupResizer() {
@@ -2453,7 +2573,7 @@
       document.getElementById('btnToggleTeacherMode').style.display = 'none';
       document.getElementById('btnSubmitExam').style.display = '';
       document.getElementById('btnSubmitBottom').style.display = '';
-      document.getElementById('footerSectionLabel').textContent = 'Writing Parts:';
+      document.getElementById('footerSectionLabel').textContent = 'Writing Parts';
 
       const topTabs = document.getElementById('insperaPartTabs');
       topTabs.innerHTML = `
@@ -2515,26 +2635,25 @@
       right.style.width = '50%';
 
       document.getElementById('insperaPartInstructionText').innerHTML = isTask1
-        ? `<b>Academic Writing Part 1</b> — You should spend about 20 minutes on this task. Write at least <b>150 words</b>.`
-        : `<b>Academic Writing Part 2</b> — You should spend about 40 minutes on this task. Write at least <b>250 words</b>.`;
+        ? `<b>Academic Writing Part 1</b> — Spend about 20 minutes on this task. Write at least <b>150 words</b>.`
+        : `<b>Academic Writing Part 2</b> — Spend about 40 minutes on this task. Write at least <b>250 words</b>.`;
 
       left.innerHTML = `
         <h2 class="section-title">Writing Task ${taskNum}</h2>
-        <div style="font-size: 15.5px; line-height: 1.7; margin-bottom: 18px; padding: 14px; background: rgba(5, 150, 105, 0.05); border-left: 4px solid var(--emerald-accent); border-radius: 4px;">
+        <div style="font-size: 15.5px; line-height: 1.7; margin-bottom: 18px; padding: 16px; background: #f8fafc; border-left: 4px solid var(--emerald-accent); border-radius: 8px;">
           ${taskData.prompt}
         </div>
         ${isTask1 && taskData.image ? `
           <div style="margin-top: 14px; text-align: center;">
-            <img src="${taskData.image}" style="max-width: 100%; border: 1px solid var(--inspera-border); border-radius: 6px; cursor: zoom-in;" alt="Task 1 Visual" onclick="window.open(this.src, '_blank')">
-            <div style="font-size:11px; color:#64748b; margin-top:4px;">(Click image to open full resolution in new tab)</div>
+            <img src="${taskData.image}" style="max-width: 100%; border: 1px solid var(--inspera-border); border-radius: 10px; cursor: zoom-in;" alt="Task 1 Visual" onclick="window.open(this.src, '_blank')">
           </div>
         ` : ''}
       `;
 
       right.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-weight:700; color:#475569;">Candidate Response Sheet (Auto-Spellcheck Off)</span>
-          <span id="inlineWordBadge" style="font-weight:800; color:var(--emerald-accent); background:#ecfdf5; padding:4px 10px; border-radius:20px; border:1px solid #a7f3d0;">Word Count: 0</span>
+          <span style="font-weight:700; color:#475569;">Candidate Response Sheet</span>
+          <span id="inlineWordBadge" style="font-weight:800; color:var(--emerald-accent); background:#ecfdf5; padding:4px 12px; border-radius:999px; border:1px solid #a7f3d0;">Word Count: 0</span>
         </div>
         <textarea 
           id="writingEditor" 
@@ -2542,8 +2661,8 @@
           spellcheck="false"
           autocorrect="off"
           autocapitalize="off"
-          style="width: 100%; height: calc(100vh - 230px); font-size: 15.5px; line-height: 1.75; padding: 16px; resize: none; outline: none; border-radius: 8px; font-family: 'Segoe UI', Roboto, sans-serif;"
-          placeholder="Type your essay here..."
+          style="width: 100%; height: calc(100vh - 230px); font-size: 15.5px; line-height: 1.75; padding: 16px; resize: none; outline: none; border-radius: 12px;"
+          placeholder="Type your response here..."
           oninput="handleWritingInput(this.value)"
         >${savedText}</textarea>
       `;
@@ -2698,7 +2817,7 @@
 
       if (type === 'tfng') {
         snippet = `\n<div class="question-group">
-  <div class="question-group-title">Questions 1–3: True / False / Not Given</div>
+  <div class="question-group-title">Questions 1–3</div>
   <p>Do the following statements agree with the information given in the reading passage? Choose <strong>TRUE</strong>, <strong>FALSE</strong> or <strong>NOT GIVEN</strong>.</p>
   <div class="question" data-question="1">
     <div class="question-text"><span class="q-badge">1</span> Statement 1 text goes here.</div>
@@ -2711,7 +2830,7 @@
 </div>\n`;
       } else if (type === 'mcq1') {
         snippet = `\n<div class="question-group">
-  <div class="question-group-title">Questions 21–22: Multiple Choice</div>
+  <div class="question-group-title">Questions 21–22</div>
   <p>Choose the correct letter, <strong>A, B</strong> or <strong>C</strong>.</p>
   <div class="question" data-question="21">
     <div class="question-text"><span class="q-badge">21</span> Question stem goes here?</div>
@@ -2724,7 +2843,7 @@
 </div>\n`;
       } else if (type === 'mcq2') {
         snippet = `\n<div class="question-group">
-  <div class="question-group-title">Questions 23–24: Choose TWO Letters</div>
+  <div class="question-group-title">Questions 23–24</div>
   <p>Choose <strong>TWO</strong> letters, <strong>A–E</strong>.</p>
   <div class="question" data-question="23" data-multi-pair="q23,q24">
     <div class="question-text"><span class="q-badge">23–24</span> Which TWO points are mentioned?</div>
@@ -2739,26 +2858,29 @@
 </div>\n`;
       } else if (type === 'gapfill') {
         snippet = `\n<div class="question-group">
-  <div class="question-group-title">Questions 1–5: Note / Form Completion</div>
+  <div class="question-group-title">Questions 1–5</div>
   <p>Complete the notes below. Write <strong>ONE WORD AND/OR A NUMBER</strong> for each answer.</p>
-  <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:16px; line-height:2.2;">
+  <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:16px; line-height:2.2;">
     <p>• First note with blank <input type="text" class="input-field inline-input" name="q1" placeholder="1" autocomplete="off"> inside the sentence.</p>
     <p>• Second note with blank <input type="text" class="input-field inline-input" name="q2" placeholder="2" autocomplete="off"> inside the sentence.</p>
   </div>
 </div>\n`;
       } else if (type === 'summary_drag') {
         snippet = `\n<div class="question-group">
-  <div class="question-group-title">Questions 25–26: Matching / Summary Completion (Drag & Drop)</div>
-  <p>Choose the correct letter, <strong>A–E</strong>, and drag it into each gap.</p>
+  <div class="question-group-title">Questions 21–25</div>
+  <p>Choose FIVE letters from the box and drag them into spaces 21–25 below (or click an item then click the gap).</p>
   <div class="drag-options">
-    <div class="drag-item" draggable="true" data-answer="A">A innovation</div>
-    <div class="drag-item" draggable="true" data-answer="B">B agriculture</div>
-    <div class="drag-item" draggable="true" data-answer="C">C investment</div>
+    <div class="drag-item" draggable="true" data-answer="A">A It will save a lot of business time and effort</div>
+    <div class="drag-item" draggable="true" data-answer="B">B It is visualized</div>
+    <div class="drag-item" draggable="true" data-answer="C">C It does not fit our company</div>
+    <div class="drag-item" draggable="true" data-answer="D">D It will take too long</div>
+    <div class="drag-item" draggable="true" data-answer="E">E It is easy to use</div>
   </div>
-  <p style="line-height:2.2;">
-    Item 25: <span class="drop-zone" data-target="q25" data-placeholder="25">25</span> <br>
-    Item 26: <span class="drop-zone" data-target="q26" data-placeholder="26">26</span>
-  </p>
+  <div style="line-height:2.4;">
+    <div><b>21</b> PEST: <span class="drop-zone" data-target="q21" data-placeholder="21">21</span></div>
+    <div><b>22</b> Drill Down: <span class="drop-zone" data-target="q22" data-placeholder="22">22</span></div>
+    <div><b>23</b> PMI: <span class="drop-zone" data-target="q23" data-placeholder="23">23</span></div>
+  </div>
 </div>\n`;
       } else if (type === 'headings') {
         if (pBox) pBox.value += `\n<div class="drop-zone heading-drop" data-target="q1" data-placeholder="1. Drop Heading for Paragraph A here">1. Drop Heading for Paragraph A here</div>\n<p><strong>Paragraph A</strong><br>Paragraph text here...</p>\n`;
@@ -2773,13 +2895,13 @@
 </div>\n`;
       } else if (type === 'matrix') {
         snippet = `\n<div class="question-group">
-  <div class="question-group-title">Questions 13–14: Matching Information Matrix</div>
+  <div class="question-group-title">Questions 13–14</div>
   <p>Choose the correct letter, <strong>A, B, C</strong> or <strong>D</strong>.</p>
   <table class="matrix-table">
-    <thead><tr><th>Statement</th><th>A</th><th>B</th><th>C</th><th>D</th></tr></thead>
+    <thead><tr><th>Item / Statement</th><th>A</th><th>B</th><th>C</th><th>D</th></tr></thead>
     <tbody>
       <tr class="question" data-question="13">
-        <td class="matrix-statement"><span class="q-badge">13</span> First statement to match</td>
+        <td class="matrix-statement"><span class="q-badge">13</span> First item to match</td>
         <td><input type="radio" name="q13" value="A"></td>
         <td><input type="radio" name="q13" value="B"></td>
         <td><input type="radio" name="q13" value="C"></td>
@@ -2787,6 +2909,19 @@
       </tr>
     </tbody>
   </table>
+</div>\n`;
+      } else if (type === 'diagram') {
+        snippet = `\n<div class="question-group">
+  <div class="question-group-title">Questions 15–17: Map / Diagram Labelling</div>
+  <p>Label the map/diagram below. Write the correct letter, <strong>A–G</strong>, or word next to questions 15–17.</p>
+  <div style="margin: 14px 0; text-align: center;">
+    <img src="PASTE_YOUR_MAP_OR_DIAGRAM_IMAGE_URL_HERE" style="max-width: 100%; max-height: 420px; border: 1px solid #cbd5e1; border-radius: 10px;" alt="Map / Diagram">
+  </div>
+  <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:16px; line-height:2.4;">
+    <div><span class="q-badge">15</span> Library Entrance: <input type="text" class="input-field inline-input" name="q15" placeholder="15" autocomplete="off"></div>
+    <div><span class="q-badge">16</span> Main Lecture Hall: <input type="text" class="input-field inline-input" name="q16" placeholder="16" autocomplete="off"></div>
+    <div><span class="q-badge">17</span> Student Cafeteria: <input type="text" class="input-field inline-input" name="q17" placeholder="17" autocomplete="off"></div>
+  </div>
 </div>\n`;
       }
 
@@ -3012,7 +3147,7 @@
       persist();
       closeModal('readingEditorModal');
       renderDashboard();
-      alert('Reading test saved & synced in real-time!');
+      alert('Reading test saved & published!');
     }
 
     /* ========================================================
@@ -3064,7 +3199,7 @@
       const rawExps = document.getElementById('leExps').value.trim();
       const rawEvis = document.getElementById('leEvis').value.trim();
 
-      if (!title || !audioUrl) return alert('Please enter Exam Title and Audio MP3 URL!');
+      if (!title || !audioUrl) return alert('Please enter Exam Title and Audio Source!');
 
       const correctAnswers = {};
       const explanations = {};
@@ -3106,7 +3241,7 @@
       persist();
       closeModal('listeningEditorModal');
       renderDashboard();
-      alert('Listening test saved and synced in real-time!');
+      alert('Listening test saved and published!');
     }
 
     /* ========================================================
@@ -3146,7 +3281,7 @@
       const t2Prompt = document.getElementById('weT2Prompt').value.trim();
 
       if (!title || (!t1Prompt && !t2Prompt)) {
-        return alert('Vui lòng nhập Tên đề và ít nhất 1 Task (Task 1 hoặc Task 2)!');
+        return alert('Please enter an Exam Title and at least one Task prompt (Task 1 or Task 2)!');
       }
 
       if (!db.writingExams) db.writingExams = [];
@@ -3174,7 +3309,7 @@
       persist();
       closeModal('writingEditorModal');
       renderDashboard();
-      alert('Writing assessment saved & synced in real-time!');
+      alert('Writing assessment saved & published!');
     }
 
     /* ========================================================
@@ -3187,7 +3322,7 @@
 
     function saveNewClass() {
       const name = document.getElementById('newClassName').value.trim();
-      if (!name) return alert('Please enter a class name!');
+      if (!name) return alert('Please enter a cohort name!');
       if (!db.classes) db.classes = [];
       db.classes.push({ id: 'c_' + Date.now(), name });
       persist();
@@ -3196,7 +3331,7 @@
     }
 
     function deleteClass(classId) {
-      if (!confirm('Delete this class cohort?')) return;
+      if (!confirm('Delete this cohort?')) return;
       db.classes = (db.classes || []).filter(c => c.id !== classId);
       persist();
       renderDashboard();
@@ -3207,7 +3342,7 @@
       if (!sel) return;
       sel.innerHTML = '';
       if (includeAllOption) {
-        sel.innerHTML += `<option value="ALL">All Classes (Public to all students)</option>`;
+        sel.innerHTML += `<option value="ALL">All Cohorts (Public to all candidates)</option>`;
       }
       (db.classes || []).forEach(c => {
         sel.innerHTML += `<option value="${c.id}">${c.name}</option>`;
@@ -3246,7 +3381,7 @@
       persist();
       closeModal('studentModal');
       renderDashboard();
-      alert(`Student account "${username}" created and active immediately!`);
+      alert(`Candidate account "${username}" created!`);
     }
 
     function openBulkStudentModal() {
@@ -3268,7 +3403,7 @@
       const raw = document.getElementById('bulkStuTextarea').value.trim();
       const classId = document.getElementById('bulkStuClassSelect').value;
       const defaultPass = document.getElementById('bulkStuDefaultPass').value.trim() || '123456';
-      if (!raw) return alert('Please paste at least one student line!');
+      if (!raw) return alert('Please paste at least one candidate line!');
 
       ensureArraysExist();
       const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
@@ -3300,11 +3435,11 @@
       persist();
       closeModal('bulkStudentModal');
       renderDashboard();
-      alert(`Successfully generated and synced ${createdCount} student accounts in real-time!`);
+      alert(`Generated and synced ${createdCount} candidate accounts!`);
     }
 
     function deleteUser(userId) {
-      if (!confirm('Remove this student account?')) return;
+      if (!confirm('Remove this candidate account?')) return;
       db.users = (db.users || []).filter(u => u.id !== userId);
       persist();
       renderDashboard();
@@ -3338,7 +3473,7 @@
       persist();
       closeModal('assignModal');
       renderDashboard();
-      alert('Exam assignment updated in real-time!');
+      alert('Cohort assignment updated!');
     }
 
     function deleteExam(examId, type = 'reading') {
