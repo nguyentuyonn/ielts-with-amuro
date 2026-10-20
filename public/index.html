@@ -1609,40 +1609,35 @@
         }
       });
 
-      if (CLOUD_DOC) {
-        // Tải trực tiếp toàn bộ dữ liệu từ bản ghi gốc main_database trên Firebase
-        CLOUD_DOC.get().then((doc) => {
+      if (firebase && firebase.firestore) {
+        const firestore = firebase.firestore();
+        CLOUD_DB = firestore;
+        const mainDocRef = firestore.collection('suite').doc('main_database');
+
+        // Tải toàn bộ dữ liệu gốc từ Firebase về
+        mainDocRef.get().then((doc) => {
           if (doc.exists) {
             const cloudData = doc.data();
-            if (cloudData && cloudData.users) {
+            if (cloudData && (cloudData.readingExams || cloudData.users)) {
               db = cloudData;
               ensureArraysExist();
               localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
               setSyncStatus('Cloud Real-Time Active', true);
-              if (activeUser) {
-                const updatedMe = db.users.find(u => u.id === activeUser.id || u.username === activeUser.username);
-                if (updatedMe) {
-                  activeUser = updatedMe;
-                  sessionStorage.setItem('AMURO_CURRENT_USER', JSON.stringify(activeUser));
-                }
-                renderDashboard();
-              }
+              if (activeUser) renderDashboard();
             }
           }
-        }).catch((err) => {
-          console.warn('Cloud fetch fallback:', err);
-        });
+        }).catch(err => console.warn('Cloud fetch error:', err));
 
-        // Lắng nghe thay đổi thời gian thực
-        CLOUD_DOC.onSnapshot((doc) => {
+        mainDocRef.onSnapshot((doc) => {
           if (doc.exists) {
             const cloudData = doc.data();
             if (cloudData && cloudData.users) {
-              // Gộp dữ liệu cloud với dữ liệu local để không bị mất bài test nào
-              if (cloudData.listeningExams && cloudData.listeningExams.length >= (db.listeningExams || []).length) {
+              // Chỉ cập nhật nếu dữ liệu cloud có số lượng test bằng hoặc nhiều hơn local để tránh ghi đè mất bài
+              if ((cloudData.listeningExams || []).length >= (db.listeningExams || []).length) {
                 db = cloudData;
                 ensureArraysExist();
                 localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
+                setSyncStatus('Cloud Real-Time Active', true);
                 if (activeUser) renderDashboard();
               }
             }
@@ -1660,50 +1655,46 @@
           savedVocab: db.savedVocab,
           aiConfig: db.aiConfig,
           readingExams: db.readingExams,
+          listeningExams: db.listeningExams,
           writingExams: db.writingExams,
-          results: (db.results || []).slice(-40)
+          results: (db.results || []).slice(-30)
         };
         localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(lightDb));
       } catch (e) {}
 
-      if (CLOUD_DOC && CLOUD_DB) {
+      if (CLOUD_DB) {
         setSyncStatus('Syncing...', true);
         try {
-          // 1. Lưu phần chung (Học sinh, Lớp, Reading, Writing) vào bản ghi chính (đã được lược bớt listening để siêu nhẹ)
-          const corePayload = {
+          const mainDocRef = CLOUD_DB.collection('suite').doc('main_database');
+          
+          // Nén gọn dung lượng các bài Listening bằng cách lược bỏ bớt khoảng trắng thừa trước khi đẩy lên mây
+          const cleanListening = (db.listeningExams || []).map(item => ({
+            ...item,
+            passages: (item.passages || []).map(p => ({
+              ...p,
+              passageHtml: (p.passageHtml || '').trim(),
+              questionsHtml: (p.questionsHtml || '').trim()
+            }))
+          }));
+
+          const payload = {
             users: db.users,
             classes: db.classes,
             savedVocab: db.savedVocab || {},
             aiConfig: db.aiConfig || {},
             readingExams: db.readingExams || [],
+            listeningExams: cleanListening,
             writingExams: db.writingExams || [],
-            results: (db.results || []).slice(-40)
+            results: (db.results || []).slice(-30)
           };
-          await CLOUD_DOC.set(corePayload);
 
-          // 2. Lưu từng bài Listening thành các document độc lập trong collection 'suite_listening'
-          const listeningList = db.listeningExams || [];
-          for (const item of listeningList) {
-            if (item && item.id) {
-              await CLOUD_DB.collection('suite_listening').doc(item.id).set(item);
-            }
-          }
-
+          await mainDocRef.set(payload);
           setSyncStatus('Cloud Real-Time Active', true);
         } catch (err) {
-          console.error('Distributed save error:', err);
-          setSyncStatus('⚠️ Cloud Sync Error', false);
-          alert('Cảnh báo: Dữ liệu bài thi đang quá lớn. Anh hãy kiểm tra lại kết nối mạng.');
+          console.error('Firestore save error:', err);
+          setSyncStatus('⚠️ Cloud Sync Error (Data too large)', false);
+          alert('Lỗi lưu trữ: Dữ liệu bài Listening quá nặng vượt giới hạn 1MB. Anh hãy rút gọn bớt độ dài mã HTML transcript hoặc chia nhỏ văn bản.');
         }
-      } else if (CLOUD_DOC) {
-        // Fallback nếu dùng 1 doc đơn
-        const cleanData = JSON.parse(JSON.stringify(db));
-        if (cleanData.results && cleanData.results.length > 40) cleanData.results = cleanData.results.slice(-40);
-        CLOUD_DOC.set(cleanData).then(() => {
-          setSyncStatus('Cloud Real-Time Active', true);
-        }).catch(err => {
-          setSyncStatus('Saved Locally', false);
-        });
       }
     }
 
