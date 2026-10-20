@@ -1769,14 +1769,26 @@
       const t2Prompt = (wExam && wExam.task2 && wExam.task2.prompt) || 'Task 2 Academic Essay';
       const customRule = (db.aiConfig && db.aiConfig.customPrompt) ? `\nAdditional Teacher Instructions: ${db.aiConfig.customPrompt}\n` : '';
 
-      return `You are acertified Senior IELTS Writing Examiner. Evaluate the following student writing submission strictly according to the official IELTS Writing Band Descriptors (Task Achievement / Task Response, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy).
+      return `You are a certified Senior IELTS Writing Examiner. Evaluate the following student writing submission strictly according to the official IELTS Writing Band Descriptors (Task Achievement / Task Response, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy).
 ${customRule}
 ${hasT1 ? `--- WRITING TASK 1 ---\nPrompt: ${t1Prompt}\nStudent Response:\n${submission.task1}\n` : ''}
 ${hasT2 ? `--- WRITING TASK 2 ---\nPrompt: ${t2Prompt}\nStudent Response:\n${submission.task2}\n` : ''}
 
+IMPORTANT FORMATTING RULE: Write the feedback in clean, readable PLAIN TEXT only. DO NOT use any Markdown symbols such as **, *, ###, ##, or ---. Use simple numbered lists (1., 2.), bullet points (•), and uppercase section headers (e.g., [1. TASK RESPONSE], [2. COHERENCE & COHESION], [3. LEXICAL RESOURCE], [4. GRAMMATICAL RANGE & ACCURACY], [5. KEY CORRECTIONS & UPGRADES]).
+
 Return your evaluation in JSON format with two fields:
 1. "band": string (e.g. "6.5" or "7.0" - overall band score rounded to nearest 0.5)
-2. "feedback": string (Detailed breakdown of the 4 criteria with individual band scores, specific quotes of grammar/lexical errors with corrections, and high-band vocabulary suggestions).`;
+2. "feedback": string (Clean plain-text breakdown of the 4 criteria with individual band scores, specific grammar/lexical corrections using arrows like "old people" -> "the senior generation", and improvement tips).`;
+    }
+
+    function cleanMarkdownSymbols(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/^#{1,6}\s*(.+)$/gm, '[$1]') // Biến ### Tiêu đề thành [Tiêu đề]
+        .replace(/\*\*(.*?)\*\*/g, '$1')       // Xóa dấu in đậm **...**
+        .replace(/\*(.*?)\*/g, '$1')           // Xóa dấu in nghiêng *...*
+        .replace(/^-{3,}$/gm, '────────────────────────────────────────') // Đổi --- thành đường kẻ liền mạch
+        .replace(/^\s*-\s+/gm, '• ');          // Đổi gạch đầu dòng - thành dấu chấm •
     }
 
     async function callGeminiWritingEvaluator(wExam, submission) {
@@ -1816,7 +1828,7 @@ Return your evaluation in JSON format with two fields:
           const parsed = JSON.parse(cleanJson);
           return {
             band: String(parsed.band || '6.0').replace('Band', '').trim(),
-            feedback: parsed.feedback || rawText
+            feedback: cleanMarkdownSymbols(parsed.feedback || rawText)
           };
         } catch (err) {
           lastError = err.message;
