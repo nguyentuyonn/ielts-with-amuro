@@ -501,7 +501,7 @@
       <div class="trf-showcase-card">
         <div class="trf-header">
           <div class="trf-title"><i class="fas fa-certificate" style="color:var(--emerald-accent);"></i> Target IELTS Test Report Form</div>
-          <div class="trf-overall-pill">Overall Band 8.5</div>
+          <div class="trf-overall-pill">Overall Band 9.0</div>
         </div>
         <div class="trf-grid">
           <div class="trf-box">
@@ -4344,5 +4344,1015 @@ Return your evaluation in JSON format with two fields:
       checkSession();
     });
   </script>
+  <!-- ============================================================================
+     AMURO IELTS SUITE - BẢN NÂNG CẤP V2.0 (SHARDING, SORT, SPEED, PROGRESS, QUIZ)
+     Dán đoạn code này ngay trước thẻ đóng </body> của file index.html
+     ============================================================================ -->
+<style>
+  /* NHÃN ĐỀ THI (BADGES) & TIẾN ĐỘ */
+  .badge-new { background: #fee2e2; color: #dc2626; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; margin-right: 6px; display: inline-block; }
+  .badge-pop { background: #f3e8ff; color: #7c3aed; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
+  .badge-diff-Easy { background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
+  .badge-diff-Standard { background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
+  .badge-diff-Hard { background: #ffedd5; color: #c2410c; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
+
+  .skill-progress-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .skill-progress-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 20px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02); }
+  .skill-progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 800; font-size: 14px; }
+  .skill-progress-bar-bg { width: 100%; height: 10px; background: #f1f5f9; border-radius: 999px; overflow: hidden; margin-bottom: 8px; }
+  .skill-progress-bar-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+  .skill-progress-meta { font-size: 12px; color: #64748b; font-weight: 600; display: flex; justify-content: space-between; }
+
+  .milestone-banner {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px solid #f59e0b; border-radius: 14px; padding: 16px 20px;
+    margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .btn-locked { background: #e2e8f0 !important; color: #64748b !important; cursor: not-allowed !important; border-color: #cbd5e1 !important; box-shadow: none !important; }
+  .audio-speed-select {
+    background: #ffffff; color: #111827; border: 1px solid #9ca3af;
+    border-radius: 3px; padding: 3px 6px; font-size: 12px; font-weight: 700; cursor: pointer; outline: none;
+  }
+  .quiz-q-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  .quiz-q-title { font-weight: 700; font-size: 14px; color: #0f172a; margin-bottom: 10px; }
+</style>
+
+<!-- MODAL: MILESTONE VOCABULARY QUIZ -->
+<div class="modal-overlay" id="milestoneQuizModal">
+  <div class="modal-window" style="width: 780px; max-height: 90vh;">
+    <div class="modal-header">
+      <span id="milestoneQuizTitle">🎯 Milestone Vocabulary Quiz (Unlock Next Reading Stage)</span>
+      <button class="btn btn-secondary" onclick="closeModal('milestoneQuizModal')">✕</button>
+    </div>
+    <div class="modal-body" id="milestoneQuizBody" style="padding: 20px;"></div>
+    <div class="modal-footer">
+      <span id="milestoneQuizRequirementText" style="margin-right:auto; font-size:12.5px; color:#64748b; font-weight:700;">Pass requirement: ≥ 70% correct to unlock next Reading tests.</span>
+      <button class="btn btn-secondary" onclick="closeModal('milestoneQuizModal')">Cancel</button>
+      <button class="btn btn-emerald" onclick="submitMilestoneVocabQuiz()">Submit Quiz & Unlock 🔓</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ==========================================================================
+     1. KHỞI TẠO GIAO DIỆN NÂNG CẤP (DOM INJECTION)
+     ========================================================================== */
+  function injectUpgradeUI() {
+    // 1.1. Thêm nút chọn tốc độ (Playback Speed) cạnh thanh Audio Listening
+    const audioContainer = document.getElementById('listeningAudioHeaderContainer');
+    if (audioContainer && !document.getElementById('examAudioSpeedSelect')) {
+      const speedSel = document.createElement('select');
+      speedSel.id = 'examAudioSpeedSelect';
+      speedSel.className = 'audio-speed-select';
+      speedSel.title = 'Playback Speed';
+      speedSel.innerHTML = `
+        <option value="0.75">0.75x</option>
+        <option value="1" selected>1.0x (Normal)</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+      `;
+      speedSel.onchange = function() {
+        const player = document.getElementById('examAudioPlayer');
+        if (player) player.playbackRate = parseFloat(this.value) || 1.0;
+      };
+      audioContainer.appendChild(speedSel);
+    }
+
+    // 1.2. Thêm menu Sắp xếp (Sort By) vào 3 kho đề Reading, Listening, Writing
+    const sortOptionsHtml = `
+      <option value="newest">🆕 Newest First</option>
+      <option value="popular">🔥 Most Popular</option>
+      <option value="diff_asc">🟢 Độ khó: Dễ ➔ Khó</option>
+      <option value="diff_desc">📉 Độ khó: Khó ➔ Dễ</option>
+      <option value="az">🔤 Tên đề: A ➔ Z</option>
+    `;
+
+    const rSearch = document.getElementById('filterReadingSearch');
+    if (rSearch && !document.getElementById('sortReadingSelect')) {
+      rSearch.parentElement.style.gridTemplateColumns = '1.5fr 1fr 1fr 1.2fr';
+      const sel = document.createElement('select');
+      sel.id = 'sortReadingSelect';
+      sel.className = 'form-input';
+      sel.innerHTML = sortOptionsHtml;
+      sel.onchange = () => renderReadingTable();
+      rSearch.parentElement.appendChild(sel);
+    }
+
+    const lSearch = document.getElementById('filterListeningSearch');
+    if (lSearch && !document.getElementById('sortListeningSelect')) {
+      lSearch.parentElement.style.gridTemplateColumns = '1.5fr 1fr 1fr 1.2fr';
+      const sel = document.createElement('select');
+      sel.id = 'sortListeningSelect';
+      sel.className = 'form-input';
+      sel.innerHTML = sortOptionsHtml;
+      sel.onchange = () => renderListeningTable();
+      lSearch.parentElement.appendChild(sel);
+    }
+
+    const wSearch = document.getElementById('filterWritingSearch');
+    if (wSearch && !document.getElementById('sortWritingSelect')) {
+      wSearch.parentElement.style.gridTemplateColumns = '1.5fr 1fr 1fr 1.2fr';
+      const sel = document.createElement('select');
+      sel.id = 'sortWritingSelect';
+      sel.className = 'form-input';
+      sel.innerHTML = sortOptionsHtml;
+      sel.onchange = () => renderWritingTable();
+      wSearch.parentElement.appendChild(sel);
+    }
+
+    // 1.3. Thêm ô chọn Độ khó (Difficulty) vào 3 Modal Tạo Đề của Giáo viên
+    const reTopic = document.getElementById('reTopic');
+    if (reTopic && !document.getElementById('reDifficulty')) {
+      reTopic.parentElement.parentElement.style.gridTemplateColumns = '1fr 1fr 1fr';
+      const div = document.createElement('div');
+      div.className = 'form-group';
+      div.innerHTML = `
+        <label>Difficulty Level</label>
+        <select id="reDifficulty" class="form-input">
+          <option value="Easy">🟢 Easy</option>
+          <option value="Standard" selected>🔵 Standard</option>
+          <option value="Hard">🔴 Hard</option>
+        </select>
+      `;
+      reTopic.parentElement.parentElement.appendChild(div);
+    }
+
+    const leTopic = document.getElementById('leTopic');
+    if (leTopic && !document.getElementById('leDifficulty')) {
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'grid';
+      wrapper.style.gridTemplateColumns = '2fr 1fr';
+      wrapper.style.gap = '14px';
+      const parent = leTopic.parentElement;
+      parent.parentNode.insertBefore(wrapper, parent);
+      wrapper.appendChild(parent);
+      const div = document.createElement('div');
+      div.className = 'form-group';
+      div.innerHTML = `
+        <label>Difficulty Level</label>
+        <select id="leDifficulty" class="form-input">
+          <option value="Easy">🟢 Easy</option>
+          <option value="Standard" selected>🔵 Standard</option>
+          <option value="Hard">🔴 Hard</option>
+        </select>
+      `;
+      wrapper.appendChild(div);
+    }
+
+    const weTopic = document.getElementById('weTopic');
+    if (weTopic && !document.getElementById('weDifficulty')) {
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'grid';
+      wrapper.style.gridTemplateColumns = '2fr 1fr';
+      wrapper.style.gap = '14px';
+      const parent = weTopic.parentElement;
+      parent.parentNode.insertBefore(wrapper, parent);
+      wrapper.appendChild(parent);
+      const div = document.createElement('div');
+      div.className = 'form-group';
+      div.innerHTML = `
+        <label>Difficulty Level</label>
+        <select id="weDifficulty" class="form-input">
+          <option value="Easy">🟢 Easy</option>
+          <option value="Standard" selected>🔵 Standard</option>
+          <option value="Hard">🔴 Hard</option>
+        </select>
+      `;
+      wrapper.appendChild(div);
+    }
+
+    // 1.4. Thêm vùng hiển thị Skill Progress Tracker & Milestone Banner trên Trang chủ & Reading
+    const homeTab = document.getElementById('tab-home');
+    const statGrid = homeTab ? homeTab.querySelector('.stat-grid') : null;
+    if (homeTab && statGrid && !document.getElementById('studentSkillProgressBox')) {
+      const progBox = document.createElement('div');
+      progBox.id = 'studentSkillProgressBox';
+      statGrid.insertAdjacentElement('afterend', progBox);
+    }
+
+    const readingCard = document.querySelector('#tab-reading .card');
+    if (readingCard && !document.getElementById('readingMilestoneBannerBox')) {
+      const bannerBox = document.createElement('div');
+      bannerBox.id = 'readingMilestoneBannerBox';
+      readingCard.insertBefore(bannerBox, readingCard.children[1]);
+    }
+  }
+
+  /* ==========================================================================
+     2. CƠ CHẾ CHỐNG TRÀN 1MB FIREBASE VĨNH VIỄN (SHARDING STORAGE)
+     ========================================================================== */
+  const _origEnsureArrays = ensureArraysExist;
+  ensureArraysExist = function() {
+    _origEnsureArrays();
+    if (!db.milestoneProgress) db.milestoneProgress = {};
+  };
+
+  initDatabaseListener = async function() {
+    ensureArraysExist();
+    try {
+      const cached = localStorage.getItem('AMURO_IELTS_DB_BACKUP');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.users) {
+          db = { ...db, ...parsed };
+          ensureArraysExist();
+        }
+      }
+    } catch (e) {}
+
+    if (!firebase || !firebase.firestore) return;
+    const firestore = firebase.firestore();
+    CLOUD_DB = firestore;
+
+    try {
+      setSyncStatus('Loading Cloud Shards...', true);
+
+      // Kiểm tra dữ liệu từ cấu trúc Sharding mới
+      const [metaSnap, rSnap, lSnap, wSnap, resSnap] = await Promise.all([
+        firestore.collection('suite_meta').doc('core').get(),
+        firestore.collection('suite_readingExams').get(),
+        firestore.collection('suite_listeningExams').get(),
+        firestore.collection('suite_writingExams').get(),
+        firestore.collection('suite_results').get()
+      ]);
+
+      if (metaSnap.exists) {
+        const meta = metaSnap.data() || {};
+        if (meta.users && meta.users.length) db.users = meta.users;
+        if (meta.classes) db.classes = meta.classes;
+        if (meta.savedVocab) db.savedVocab = meta.savedVocab;
+        if (meta.aiConfig) db.aiConfig = meta.aiConfig;
+        if (meta.milestoneProgress) db.milestoneProgress = meta.milestoneProgress;
+
+        db.readingExams = rSnap.docs.map(d => d.data());
+        if (!db.readingExams.length) db.readingExams = [defaultShoppingExam];
+        db.listeningExams = lSnap.docs.map(d => d.data());
+        db.writingExams = wSnap.docs.map(d => d.data());
+        db.results = resSnap.docs.map(d => d.data()).sort((a, b) => {
+          const ta = Number(String(a.id || '').replace(/\D/g, '')) || 0;
+          const tb = Number(String(b.id || '').replace(/\D/g, '')) || 0;
+          return ta - tb;
+        });
+      } else {
+        // Tương thích ngược: Tự động di chuyển dữ liệu từ suite/main_database sang Sharding
+        const legacyDoc = await firestore.collection('suite').doc('main_database').get();
+        if (legacyDoc.exists) {
+          const legacyData = legacyDoc.data();
+          if (legacyData) {
+            db = { ...db, ...legacyData };
+            ensureArraysExist();
+            await persist();
+          }
+        }
+      }
+
+      ensureArraysExist();
+      try { localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db)); } catch (e) {}
+      setSyncStatus('Cloud Sharding Active', true);
+      if (activeUser) renderDashboard();
+
+      // Lắng nghe Real-time trên các nhánh Sharding
+      firestore.collection('suite_meta').doc('core').onSnapshot(doc => {
+        if (doc.exists) {
+          const m = doc.data() || {};
+          if (m.users) db.users = m.users;
+          if (m.classes) db.classes = m.classes;
+          if (m.savedVocab) db.savedVocab = m.savedVocab;
+          if (m.aiConfig) db.aiConfig = m.aiConfig;
+          if (m.milestoneProgress) db.milestoneProgress = m.milestoneProgress;
+          if (activeUser) renderDashboard();
+        }
+      });
+
+      firestore.collection('suite_readingExams').onSnapshot(snap => {
+        if (!snap.empty) {
+          db.readingExams = snap.docs.map(d => d.data());
+          if (activeUser) renderDashboard();
+        }
+      });
+
+      firestore.collection('suite_listeningExams').onSnapshot(snap => {
+        db.listeningExams = snap.docs.map(d => d.data());
+        if (activeUser) renderDashboard();
+      });
+
+      firestore.collection('suite_writingExams').onSnapshot(snap => {
+        if (!snap.empty) {
+          db.writingExams = snap.docs.map(d => d.data());
+          if (activeUser) renderDashboard();
+        }
+      });
+
+      firestore.collection('suite_results').onSnapshot(snap => {
+        if (!snap.empty) {
+          db.results = snap.docs.map(d => d.data()).sort((a, b) => {
+            const ta = Number(String(a.id || '').replace(/\D/g, '')) || 0;
+            const tb = Number(String(b.id || '').replace(/\D/g, '')) || 0;
+            return ta - tb;
+          });
+          if (activeUser) renderDashboard();
+        }
+      });
+
+    } catch (err) {
+      console.warn('Sharding init warning:', err);
+      setSyncStatus('Local Mode Ready', false);
+    }
+  };
+
+  persist = async function() {
+    ensureArraysExist();
+    try {
+      localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
+    } catch (e) {}
+
+    if (!CLOUD_DB) return;
+    setSyncStatus('Syncing Shards...', true);
+
+    try {
+      // 1. Lưu thông tin chung vào suite_meta/core
+      await CLOUD_DB.collection('suite_meta').doc('core').set({
+        users: db.users || [],
+        classes: db.classes || [],
+        savedVocab: db.savedVocab || {},
+        aiConfig: db.aiConfig || {},
+        milestoneProgress: db.milestoneProgress || {}
+      });
+
+      // 2. Lưu từng đề Reading thành document riêng biệt
+      for (const rExam of (db.readingExams || [])) {
+        if (rExam && rExam.id) {
+          await CLOUD_DB.collection('suite_readingExams').doc(String(rExam.id)).set(rExam);
+        }
+      }
+
+      // 3. Lưu từng đề Listening thành document riêng biệt
+      for (const lExam of (db.listeningExams || [])) {
+        if (lExam && lExam.id) {
+          await CLOUD_DB.collection('suite_listeningExams').doc(String(lExam.id)).set(lExam);
+        }
+      }
+
+      // 4. Lưu từng đề Writing thành document riêng biệt
+      for (const wExam of (db.writingExams || [])) {
+        if (wExam && wExam.id) {
+          await CLOUD_DB.collection('suite_writingExams').doc(String(wExam.id)).set(wExam);
+        }
+      }
+
+      // 5. Lưu lịch sử nộp bài thành document riêng biệt (lưu 50 bản ghi mới nhất để tối ưu tốc độ)
+      const recentResults = (db.results || []).slice(-50);
+      for (const resItem of recentResults) {
+        if (resItem && resItem.id) {
+          await CLOUD_DB.collection('suite_results').doc(String(resItem.id)).set(resItem);
+        }
+      }
+
+      setSyncStatus('Cloud Sharding Active', true);
+    } catch (err) {
+      console.error('Sharded persist error:', err);
+      setSyncStatus('⚠️ Sync Warning', false);
+    }
+  };
+
+  // Ghi đè hàm xóa đề để xóa luôn document tương ứng trên Firebase Shards
+  deleteExam = async function(examId, type = 'reading') {
+    if (!confirm('Are you sure you want to delete this test?')) return;
+    if (type === 'writing') {
+      db.writingExams = (db.writingExams || []).filter(e => e.id !== examId);
+      if (CLOUD_DB) try { await CLOUD_DB.collection('suite_writingExams').doc(String(examId)).delete(); } catch(e){}
+    } else if (type === 'listening') {
+      db.listeningExams = (db.listeningExams || []).filter(e => e.id !== examId);
+      if (CLOUD_DB) try { await CLOUD_DB.collection('suite_listeningExams').doc(String(examId)).delete(); } catch(e){}
+    } else {
+      db.readingExams = (db.readingExams || []).filter(e => e.id !== examId);
+      if (CLOUD_DB) try { await CLOUD_DB.collection('suite_readingExams').doc(String(examId)).delete(); } catch(e){}
+    }
+    await persist();
+    renderDashboard();
+  };
+
+  /* ==========================================================================
+     3. HỖ TRỢ ĐỘ KHÓ, SẮP XẾP (SORT BY) & NHÃN PHÂN LOẠI THÔNG MINH
+     ========================================================================== */
+  function getExamTimestamp(exam, index = 0) {
+    if (exam.createdAt) return Number(exam.createdAt);
+    const match = String(exam.id || '').match(/(\d{13})/);
+    if (match) return Number(match[1]);
+    return 1700000000000 + index;
+  }
+
+  function getExamSubmissionCount(examId, examTitle) {
+    return (db.results || []).filter(r => r.examId === examId || r.examTitle === examTitle).length;
+  }
+
+  function getDifficultyWeight(diff) {
+    if (diff === 'Easy') return 1;
+    if (diff === 'Hard') return 3;
+    return 2; // Standard
+  }
+
+  function sortExamList(list, sortMode) {
+    const arr = list.slice();
+    if (sortMode === 'newest') {
+      return arr.sort((a, b) => getExamTimestamp(b, arr.indexOf(b)) - getExamTimestamp(a, arr.indexOf(a)));
+    }
+    if (sortMode === 'popular') {
+      return arr.sort((a, b) => getExamSubmissionCount(b.id, b.title) - getExamSubmissionCount(a.id, a.title));
+    }
+    if (sortMode === 'diff_asc') {
+      return arr.sort((a, b) => getDifficultyWeight(a.difficulty) - getDifficultyWeight(b.difficulty));
+    }
+    if (sortMode === 'diff_desc') {
+      return arr.sort((a, b) => getDifficultyWeight(b.difficulty) - getDifficultyWeight(a.difficulty));
+    }
+    if (sortMode === 'az') {
+      return arr.sort((a, b) => String(a.title || '').localeCompare(String(b.title || '')));
+    }
+    return arr;
+  }
+
+  function renderSmartBadges(exam, isNewestItem) {
+    const subCount = getExamSubmissionCount(exam.id, exam.title);
+    const diff = exam.difficulty || 'Standard';
+    const isRecent = (Date.now() - getExamTimestamp(exam)) < 7 * 24 * 3600 * 1000;
+    const newBadge = (isNewestItem || isRecent) ? `<span class="badge-new">🆕 NEW</span>` : '';
+    const popBadge = `<span class="badge-pop">👥 ${subCount} lượt làm</span>`;
+    const diffIcon = diff === 'Easy' ? '🟢' : (diff === 'Hard' ? '🔴' : '🔵');
+    const diffBadge = `<span class="badge-diff-${diff}">${diffIcon} ${diff}</span>`;
+    return `${newBadge}${diffBadge}${popBadge}`;
+  }
+
+  // Cập nhật các hàm mở/lưu Modal để lưu thuộc tính difficulty & createdAt
+  const _origOpenReadingEditor = openReadingEditorModal;
+  openReadingEditorModal = function() {
+    _origOpenReadingEditor();
+    if (document.getElementById('reDifficulty')) document.getElementById('reDifficulty').value = 'Standard';
+  };
+
+  const _origOpenEditExam = openEditExamModal;
+  openEditExamModal = function(examId) {
+    _origOpenEditExam(examId);
+    const exam = (db.readingExams || []).find(e => e.id === examId);
+    if (exam && document.getElementById('reDifficulty')) {
+      document.getElementById('reDifficulty').value = exam.difficulty || 'Standard';
+    }
+  };
+
+  const _origSaveReadingExam = saveActiveExamFromEditor;
+  saveActiveExamFromEditor = function() {
+    const editingId = document.getElementById('editingExamId').value;
+    const diff = document.getElementById('reDifficulty') ? document.getElementById('reDifficulty').value : 'Standard';
+    _origSaveReadingExam();
+    const target = editingId
+      ? (db.readingExams || []).find(e => e.id === editingId)
+      : (db.readingExams || [])[db.readingExams.length - 1];
+    if (target) {
+      target.difficulty = diff;
+      if (!target.createdAt) target.createdAt = Date.now();
+      persist();
+      renderReadingTable();
+    }
+  };
+
+  const _origOpenListeningEditor = openListeningEditorModal;
+  openListeningEditorModal = function() {
+    _origOpenListeningEditor();
+    if (document.getElementById('leDifficulty')) document.getElementById('leDifficulty').value = 'Standard';
+  };
+
+  const _origOpenEditListening = openEditListeningModal;
+  openEditListeningModal = function(examId) {
+    _origOpenEditListening(examId);
+    const exam = (db.listeningExams || []).find(e => e.id === examId);
+    if (exam && document.getElementById('leDifficulty')) {
+      document.getElementById('leDifficulty').value = exam.difficulty || 'Standard';
+    }
+  };
+
+  const _origSaveListeningExam = saveListeningExam;
+  saveListeningExam = function() {
+    const editId = document.getElementById('editingListeningId').value;
+    const diff = document.getElementById('leDifficulty') ? document.getElementById('leDifficulty').value : 'Standard';
+    _origSaveListeningExam();
+    const target = editId
+      ? (db.listeningExams || []).find(e => e.id === editId)
+      : (db.listeningExams || [])[db.listeningExams.length - 1];
+    if (target) {
+      target.difficulty = diff;
+      if (!target.createdAt) target.createdAt = Date.now();
+      persist();
+      renderListeningTable();
+    }
+  };
+
+  const _origOpenWritingEditor = openWritingEditorModal;
+  openWritingEditorModal = function() {
+    _origOpenWritingEditor();
+    if (document.getElementById('weDifficulty')) document.getElementById('weDifficulty').value = 'Standard';
+  };
+
+  const _origOpenEditWriting = openEditWritingModal;
+  openEditWritingModal = function(wId) {
+    _origOpenEditWriting(wId);
+    const w = (db.writingExams || []).find(x => x.id === wId);
+    if (w && document.getElementById('weDifficulty')) {
+      document.getElementById('weDifficulty').value = w.difficulty || 'Standard';
+    }
+  };
+
+  const _origSaveWritingExam = saveWritingExam;
+  saveWritingExam = function() {
+    const editId = document.getElementById('editingWritingId').value;
+    const diff = document.getElementById('weDifficulty') ? document.getElementById('weDifficulty').value : 'Standard';
+    _origSaveWritingExam();
+    const target = editId
+      ? (db.writingExams || []).find(e => e.id === editId)
+      : (db.writingExams || [])[db.writingExams.length - 1];
+    if (target) {
+      target.difficulty = diff;
+      if (!target.createdAt) target.createdAt = Date.now();
+      persist();
+      renderWritingTable();
+    }
+  };
+
+  /* ==========================================================================
+     4. THANH AUDIO LISTENING CẢI TIẾN (PLAYBACK SPEED 1 CHẠM)
+     ========================================================================== */
+  const _origSetupHeaderAudio = setupHeaderAudioPlayer;
+  setupHeaderAudioPlayer = function(rawUrl) {
+    _origSetupHeaderAudio(rawUrl);
+    injectUpgradeUI();
+    const speedSel = document.getElementById('examAudioSpeedSelect');
+    const audioEl = document.getElementById('examAudioPlayer');
+    if (speedSel && audioEl) {
+      speedSel.value = '1';
+      audioEl.playbackRate = 1.0;
+      audioEl.onloadedmetadata = () => {
+        audioEl.playbackRate = parseFloat(speedSel.value) || 1.0;
+      };
+    }
+  };
+
+  /* ==========================================================================
+     5. TIẾN ĐỘ KỸ NĂNG & MILESTONE VOCABULARY QUIZ (KHÓA / MỞ ĐỀ READING)
+     ========================================================================== */
+  function getStudentCompletedExamIds(skillType) {
+    if (!activeUser) return [];
+    const examPool = skillType === 'reading' ? (db.readingExams || [])
+      : (skillType === 'listening' ? (db.listeningExams || []) : (db.writingExams || []));
+    const poolIds = new Set(examPool.map(e => e.id));
+    const completed = [];
+
+    (db.results || []).forEach(r => {
+      if (r.userName === activeUser.name && poolIds.has(r.examId)) {
+        if (!completed.includes(r.examId)) completed.push(r.examId);
+      }
+    });
+    return completed;
+  }
+
+  function getPendingReadingMilestone() {
+    if (!activeUser || activeUser.role === 'teacher') return null;
+    const completedReadingIds = getStudentCompletedExamIds('reading');
+    const count = completedReadingIds.length;
+    if (count < 5) return null;
+
+    const currentStage = Math.floor(count / 5); // Stage 1 = 5 bài, Stage 2 = 10 bài...
+    const passedStages = (db.milestoneProgress && db.milestoneProgress[activeUser.username]) || [];
+
+    for (let s = 1; s <= currentStage; s++) {
+      if (!passedStages.includes(s)) {
+        const stageExamIds = completedReadingIds.slice((s - 1) * 5, s * 5);
+        return { stage: s, examIds: stageExamIds, completedCount: count };
+      }
+    }
+    return null;
+  }
+
+  function renderStudentSkillTrackerAndMilestone() {
+    injectUpgradeUI();
+    const progBox = document.getElementById('studentSkillProgressBox');
+    const bannerBox = document.getElementById('readingMilestoneBannerBox');
+
+    if (!activeUser) return;
+
+    const rTotal = getVisibleExams(db.readingExams).length;
+    const lTotal = getVisibleExams(db.listeningExams).length;
+    const wTotal = getVisibleExams(db.writingExams).length;
+
+    const rDone = getStudentCompletedExamIds('reading').length;
+    const lDone = getStudentCompletedExamIds('listening').length;
+    const wDone = getStudentCompletedExamIds('writing').length;
+
+    const rPct = rTotal > 0 ? Math.min(100, Math.round((rDone / rTotal) * 100)) : 0;
+    const lPct = lTotal > 0 ? Math.min(100, Math.round((lDone / lTotal) * 100)) : 0;
+    const wPct = wTotal > 0 ? Math.min(100, Math.round((wDone / wTotal) * 100)) : 0;
+
+    const pendingMilestone = getPendingReadingMilestone();
+
+    if (progBox) {
+      progBox.innerHTML = `
+        ${pendingMilestone ? `
+          <div class="milestone-banner">
+            <div>
+              <div style="font-weight:800; font-size:15px; color:#92400e;">🔒 Milestone Vocabulary Quiz Required (Chặng ${pendingMilestone.stage}:${pendingMilestone.stage * 5} Reading Tests)</div>
+              <div style="font-size:13px; color:#b45309; margin-top:4px;">Bạn đã hoàn thành ${pendingMilestone.completedCount} đề Reading! Hãy hoàn thành bài Quiz ôn tập từ vựng của 5 bài vừa qua để mở khóa các đề Reading tiếp theo.</div>
+            </div>
+            <button class="btn btn-emerald" style="background:#d97706;" onclick="openMilestoneVocabQuizModal()">🎯 Làm Quiz Mở Khóa Ngay</button>
+          </div>
+        ` : ''}
+        <div class="skill-progress-grid">
+          <div class="skill-progress-card">
+            <div class="skill-progress-header">
+              <span>📖 Reading Progress</span>
+              <span style="color:#059669;">${rPct}%</span>
+            </div>
+            <div class="skill-progress-bar-bg">
+              <div class="skill-progress-bar-fill" style="width:${rPct}%; background:#059669;"></div>
+            </div>
+            <div class="skill-progress-meta">
+              <span>Completed: <b>${rDone} / ${rTotal}</b> tests</span>
+              <span>Milestone: ${rDone % 5}/5 to next Quiz</span>
+            </div>
+          </div>
+          <div class="skill-progress-card">
+            <div class="skill-progress-header">
+              <span>🎧 Listening Progress</span>
+              <span style="color:#2563eb;">${lPct}%</span>
+            </div>
+            <div class="skill-progress-bar-bg">
+              <div class="skill-progress-bar-fill" style="width:${lPct}%; background:#2563eb;"></div>
+            </div>
+            <div class="skill-progress-meta">
+              <span>Completed: <b>${lDone} / ${lTotal}</b> tests</span>
+              <span>Target: 100%</span>
+            </div>
+          </div>
+          <div class="skill-progress-card">
+            <div class="skill-progress-header">
+              <span>✍️ Writing Progress</span>
+              <span style="color:#d97706;">${wPct}%</span>
+            </div>
+            <div class="skill-progress-bar-bg">
+              <div class="skill-progress-bar-fill" style="width:${wPct}%; background:#d97706;"></div>
+            </div>
+            <div class="skill-progress-meta">
+              <span>Completed: <b>${wDone} / ${wTotal}</b> tests</span>
+              <span>AI Auto-Grader Ready</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (bannerBox) {
+      if (pendingMilestone) {
+        bannerBox.innerHTML = `
+          <div class="milestone-banner">
+            <div>
+              <div style="font-weight:800; font-size:15px; color:#92400e;">🔒 Chặng ${pendingMilestone.stage} (${pendingMilestone.stage * 5} bài Reading): Mở khóa đề tiếp theo</div>
+              <div style="font-size:13px; color:#b45309; margin-top:4px;">Hệ thống đang tạm khóa các bài Reading mới. Bạn cần vượt qua bài Quiz từ vựng trích xuất từ 5 bài đọc vừa làm để tiếp tục.</div>
+            </div>
+            <button class="btn btn-emerald" style="background:#d97706;" onclick="openMilestoneVocabQuizModal()">🎯 Start Milestone Vocab Quiz</button>
+          </div>
+        `;
+      } else {
+        bannerBox.innerHTML = '';
+      }
+    }
+  }
+
+  let activeMilestoneQuizData = [];
+  let activeMilestoneStageNum = null;
+
+  function openMilestoneVocabQuizModal() {
+    const pending = getPendingReadingMilestone();
+    if (!pending) return alert('Bạn hiện không có bài Quiz Milestone nào cần làm!');
+
+    activeMilestoneStageNum = pending.stage;
+    const vocabPool = [];
+    pending.examIds.forEach(eid => {
+      const ex = (db.readingExams || []).find(e => e.id === eid);
+      if (ex && ex.passages) {
+        ex.passages.forEach(p => {
+          (p.vocab || []).forEach(v => {
+            if (v && v.word && v.mean) vocabPool.push(v);
+          });
+        });
+      }
+    });
+
+    // Nếu 5 bài vừa qua chưa nhập từ vựng, lấy dự phòng từ bài mặc định
+    if (vocabPool.length < 4 && defaultShoppingExam.passages[0].vocab) {
+      defaultShoppingExam.passages[0].vocab.forEach(v => vocabPool.push(v));
+    }
+
+    const selectedWords = vocabPool.slice(0, 8);
+    activeMilestoneQuizData = selectedWords.map((v, idx) => {
+      const qType = idx % 4; // 0: Nghĩa, 1: Từ loại, 2: Đồng nghĩa/Collocation, 3: Điền từ
+      const distractors = vocabPool.filter(x => x.word !== v.word).slice(0, 3);
+      while (distractors.length < 3) {
+        distractors.push({ word: 'significant', type: 'adj', mean: 'Important or noticeable', syn: 'notable, crucial' });
+      }
+
+      if (qType === 0) {
+        const opts = [v.mean, ...distractors.map(d => d.mean)].sort(() => Math.random() - 0.5);
+        return {
+          qNum: idx + 1,
+          prompt: `[Meaning] What is the closest definition of the word "${v.word}" (${v.type || 'vocab'})?`,
+          inputType: 'radio',
+          options: opts,
+          answer: v.mean
+        };
+      } else if (qType === 1) {
+        const posOptions = ['noun', 'verb', 'adj', 'adv'];
+        const ansPos = (v.type || 'adj').toLowerCase().trim();
+        if (!posOptions.includes(ansPos)) posOptions.push(ansPos);
+        return {
+          qNum: idx + 1,
+          prompt: `[Word Form / Part of Speech] Identify the correct part of speech of "${v.word}" (meaning: ${v.mean}):`,
+          inputType: 'radio',
+          options: posOptions,
+          answer: ansPos
+        };
+      } else if (qType === 2 && v.syn && v.syn.trim()) {
+        const opts = [v.syn, ...distractors.map(d => d.syn || d.word)].sort(() => Math.random() - 0.5);
+        return {
+          qNum: idx + 1,
+          prompt: `[Synonyms & Collocations] Which set of words is closest in meaning to "${v.word}"?`,
+          inputType: 'radio',
+          options: opts,
+          answer: v.syn
+        };
+      } else {
+        const hint = v.word[0] + '_'.repeat(Math.max(2, v.word.length - 1));
+        return {
+          qNum: idx + 1,
+          prompt: `[Word Completion] Type the exact vocabulary word meaning "${v.mean}" (Synonyms: ${v.syn || 'N/A'} | Hint: ${hint}):`,
+          inputType: 'text',
+          answer: v.word.toLowerCase().trim()
+        };
+      }
+    });
+
+    document.getElementById('milestoneQuizTitle').textContent = `🎯 Milestone Vocabulary Quiz - Stage ${pending.stage} (${pending.stage * 5} Reading Tests)`;
+    const body = document.getElementById('milestoneQuizBody');
+    body.innerHTML = activeMilestoneQuizData.map((q, i) => `
+      <div class="quiz-q-card">
+        <div class="quiz-q-title">Question ${q.qNum}: ${q.prompt}</div>
+        ${q.inputType === 'radio' ? `
+          <div class="options">
+            ${q.options.map(opt => `
+              <label><input type="radio" name="mquiz_${i}" value="${opt.replace(/"/g, '&quot;')}"> ${opt}</label>
+            `).join('')}
+          </div>
+        ` : `
+          <input type="text" class="form-input" name="mquiz_${i}" placeholder="Type the exact word here..." autocomplete="off">
+        `}
+      </div>
+    `).join('');
+
+    openModal('milestoneQuizModal');
+  }
+
+  function submitMilestoneVocabQuiz() {
+    if (!activeMilestoneQuizData.length) return;
+    let correct = 0;
+    const total = activeMilestoneQuizData.length;
+
+    activeMilestoneQuizData.forEach((q, i) => {
+      if (q.inputType === 'radio') {
+        const checked = document.querySelector(`#milestoneQuizBody input[name="mquiz_${i}"]:checked`);
+        if (checked && checked.value.trim().toLowerCase() === String(q.answer).trim().toLowerCase()) {
+          correct++;
+        }
+      } else {
+        const inp = document.querySelector(`#milestoneQuizBody input[name="mquiz_${i}"]`);
+        if (inp && inp.value.trim().toLowerCase() === String(q.answer).trim().toLowerCase()) {
+          correct++;
+        }
+      }
+    });
+
+    const pct = Math.round((correct / total) * 100);
+    if (pct >= 70) {
+      ensureArraysExist();
+      if (!db.milestoneProgress[activeUser.username]) db.milestoneProgress[activeUser.username] = [];
+      if (!db.milestoneProgress[activeUser.username].includes(activeMilestoneStageNum)) {
+        db.milestoneProgress[activeUser.username].push(activeMilestoneStageNum);
+      }
+      persist();
+      closeModal('milestoneQuizModal');
+      renderDashboard();
+      alert(`🎉 Chúc mừng! Bạn đạt ${correct}/${total} (${pct}%) và đã mở khóa chặng Reading tiếp theo!`);
+    } else {
+      alert(`Bạn đạt ${correct}/${total} (${pct}%). Cần đạt tối thiểu 70% để mở khóa các đề Reading tiếp theo. Hãy kiểm tra lại các câu trả lời nhé!`);
+    }
+  }
+
+  /* ==========================================================================
+     6. CẬP NHẬT BẢNG HIỂN THỊ ĐỀ THI (CÓ SORT, BADGE, KHÓA/MỞ ĐỀ)
+     ========================================================================== */
+  const _origRenderHome = renderHomeTab;
+  renderHomeTab = function() {
+    _origRenderHome();
+    renderStudentSkillTrackerAndMilestone();
+  };
+
+  renderReadingTable = function() {
+    injectUpgradeUI();
+    renderStudentSkillTrackerAndMilestone();
+    const tbody = document.getElementById('readingTbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const searchKw = (document.getElementById('filterReadingSearch')?.value || '').toLowerCase().trim();
+    const partFilter = document.getElementById('filterReadingPart')?.value || 'ALL';
+    const topicKw = (document.getElementById('filterReadingTopic')?.value || '').toLowerCase().trim();
+    const sortMode = document.getElementById('sortReadingSelect')?.value || 'newest';
+
+    let list = getVisibleExams(db.readingExams).filter(e => {
+      const hay = `${e.title || ''} ${e.topic || ''} ${e.category || ''}`.toLowerCase();
+      const matchSearch = !searchKw || hay.includes(searchKw);
+      const matchTopic = !topicKw || hay.includes(topicKw);
+      const matchPart = !partFilter || partFilter === 'ALL' || (e.category || 'Full Test') === partFilter;
+      return matchSearch && matchTopic && matchPart;
+    });
+
+    list = sortExamList(list, sortMode);
+
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No matching reading tests found.</td></tr>`;
+      return;
+    }
+
+    const pendingMilestone = getPendingReadingMilestone();
+    const completedIds = getStudentCompletedExamIds('reading');
+
+    list.forEach((e, idx) => {
+      const clsNames = (!e.assignedClasses || e.assignedClasses.length === 0)
+        ? 'All Classes'
+        : e.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
+      const catBadge = e.category ? `<span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; margin-right:6px;">${e.category}</span>` : '';
+      const topBadge = e.topic ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; margin-right:6px;">🏷️ ${e.topic}</span>` : '';
+      const smartBadges = renderSmartBadges(e, sortMode === 'newest' && idx === 0);
+
+      const isLockedForStudent = Boolean(pendingMilestone && !completedIds.includes(e.id));
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <div style="margin-bottom:4px;"><b>${e.title}</b> ${completedIds.includes(e.id) ? '<span style="color:#059669; font-size:12px; font-weight:800;">✓ Done</span>' : ''}</div>
+          <div>${smartBadges}${catBadge}${topBadge}</div>
+        </td>
+        <td>${e.duration} mins</td>
+        <td>${e.passages ? e.passages.length : 1} Passage(s)</td>
+        <td><span style="color: #64748b; font-weight:600;">${clsNames}</span></td>
+        <td style="display:flex; gap:6px; flex-wrap:wrap;">
+          ${isLockedForStudent ? `
+            <button class="btn btn-locked" onclick="openMilestoneVocabQuizModal()" title="Complete Milestone Vocabulary Quiz to unlock">🔒 Locked (Quiz Required)</button>
+          ` : `
+            <button class="btn btn-emerald" onclick="launchExam('${e.id}')">Start Test</button>
+          `}
+          <button class="btn btn-secondary" onclick="openStudyVocabModal('${e.id}')">Vocabulary</button>
+          ${activeUser && activeUser.role === 'teacher' ? `
+            <button class="btn btn-secondary" onclick="openEditExamModal('${e.id}')">Edit</button>
+            <button class="btn btn-secondary" onclick="openAssignModal('${e.id}', 'reading')">Assign</button>
+            <button class="btn btn-danger" onclick="deleteExam('${e.id}', 'reading')">Delete</button>
+          ` : ''}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  };
+
+  renderListeningTable = function() {
+    injectUpgradeUI();
+    const tbody = document.getElementById('listeningTbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const searchKw = (document.getElementById('filterListeningSearch')?.value || '').toLowerCase().trim();
+    const partFilter = document.getElementById('filterListeningPart')?.value || 'ALL';
+    const topicKw = (document.getElementById('filterListeningTopic')?.value || '').toLowerCase().trim();
+    const sortMode = document.getElementById('sortListeningSelect')?.value || 'newest';
+
+    let list = getVisibleExams(db.listeningExams || []).filter(e => {
+      const hay = `${e.title || ''} ${e.topic || ''} ${e.category || ''}`.toLowerCase();
+      const matchSearch = !searchKw || hay.includes(searchKw);
+      const matchTopic = !topicKw || hay.includes(topicKw);
+      const matchPart = !partFilter || partFilter === 'ALL' || (e.category || 'Listening Full') === partFilter;
+      return matchSearch && matchTopic && matchPart;
+    });
+
+    list = sortExamList(list, sortMode);
+
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No listening tests available.</td></tr>`;
+      return;
+    }
+
+    const completedIds = getStudentCompletedExamIds('listening');
+
+    list.forEach((e, idx) => {
+      const clsNames = (!e.assignedClasses || e.assignedClasses.length === 0) ? 'All Classes' : e.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
+      const catBadge = `<span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; margin-right:6px;">${e.category || 'Listening'}</span>`;
+      const topBadge = e.topic ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; margin-right:6px;">🏷️ ${e.topic}</span>` : '';
+      const smartBadges = renderSmartBadges(e, sortMode === 'newest' && idx === 0);
+      const partCount = e.passages ? e.passages.length : 1;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <b>${e.title}</b> ${completedIds.includes(e.id) ? '<span style="color:#059669; font-size:12px; font-weight:800;">✓ Done</span>' : ''}
+          <div style="margin-top:4px;">${smartBadges}${catBadge}${topBadge}</div>
+        </td>
+        <td>${e.duration} mins</td>
+        <td>${partCount} Part(s)</td>
+        <td><span style="color: #64748b; font-weight:600;">${clsNames}</span></td>
+        <td style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="btn btn-emerald" onclick="launchListeningExam('${e.id}')">Start Listening</button>
+          ${activeUser && activeUser.role === 'teacher' ? `
+            <button class="btn btn-secondary" onclick="openEditListeningModal('${e.id}')">Edit</button>
+            <button class="btn btn-secondary" onclick="openAssignModal('${e.id}', 'listening')">Assign</button>
+            <button class="btn btn-danger" onclick="deleteExam('${e.id}', 'listening')">Delete</button>
+          ` : ''}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  };
+
+  renderWritingTable = function() {
+    injectUpgradeUI();
+    const tbody = document.getElementById('writingTbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const searchKw = (document.getElementById('filterWritingSearch')?.value || '').toLowerCase().trim();
+    const partFilter = document.getElementById('filterWritingPart')?.value || 'ALL';
+    const topicKw = (document.getElementById('filterWritingTopic')?.value || '').toLowerCase().trim();
+    const sortMode = document.getElementById('sortWritingSelect')?.value || 'newest';
+
+    let list = getVisibleExams(db.writingExams).filter(w => {
+      const hasT1 = Boolean(w.task1 && w.task1.prompt);
+      const hasT2 = Boolean(w.task2 && w.task2.prompt);
+      const wType = (hasT1 && hasT2) ? 'Full Writing' : (hasT1 ? 'Task 1 Only' : 'Task 2 Only');
+
+      const hay = `${w.title || ''} ${w.topic || ''} ${w.task1?.prompt || ''} ${w.task2?.prompt || ''}`.toLowerCase();
+      const matchSearch = !searchKw || hay.includes(searchKw);
+      const matchTopic = !topicKw || hay.includes(topicKw);
+      const matchPart = !partFilter || partFilter === 'ALL' || wType === partFilter;
+      return matchSearch && matchTopic && matchPart;
+    });
+
+    list = sortExamList(list, sortMode);
+
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No matching writing tests found.</td></tr>`;
+      return;
+    }
+
+    const completedIds = getStudentCompletedExamIds('writing');
+
+    list.forEach((w, idx) => {
+      const hasT1 = Boolean(w.task1 && w.task1.prompt);
+      const hasT2 = Boolean(w.task2 && w.task2.prompt);
+      const taskLabel = (hasT1 && hasT2) ? 'Task 1 & Task 2' : (hasT1 ? 'Task 1 Only' : 'Task 2 Only');
+      const topBadge = w.topic ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; margin-right:6px;">🏷️ ${w.topic}</span>` : '';
+      const smartBadges = renderSmartBadges(w, sortMode === 'newest' && idx === 0);
+
+      const clsNames = (!w.assignedClasses || w.assignedClasses.length === 0)
+        ? 'All Classes'
+        : w.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <b>${w.title}</b> ${completedIds.includes(w.id) ? '<span style="color:#059669; font-size:12px; font-weight:800;">✓ Done</span>' : ''}
+          <div style="margin-top:4px;">${smartBadges}${topBadge}</div>
+        </td>
+        <td>${w.duration} mins</td>
+        <td><span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:6px; font-size:11.5px; font-weight:700;">${taskLabel}</span></td>
+        <td><span style="color: #64748b; font-weight:600;">${clsNames}</span></td>
+        <td style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="btn btn-emerald" onclick="launchWritingExam('${w.id}')">Start Writing</button>
+          ${activeUser && activeUser.role === 'teacher' ? `
+            <button class="btn btn-secondary" onclick="openEditWritingModal('${w.id}')">Edit</button>
+            <button class="btn btn-secondary" onclick="openAssignModal('${w.id}', 'writing')">Assign</button>
+            <button class="btn btn-danger" onclick="deleteExam('${w.id}', 'writing')">Delete</button>
+          ` : ''}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  };
+
+  // Khởi chạy nâng cấp giao diện ngay khi tải trang
+  window.addEventListener('DOMContentLoaded', () => {
+    injectUpgradeUI();
+  });
+</script>
 </body>
 </html>
