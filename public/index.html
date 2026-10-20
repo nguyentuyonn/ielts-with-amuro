@@ -1638,8 +1638,21 @@
     function persist() {
       ensureArraysExist();
       try {
-        localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
-      } catch (e) {}
+        // Chỉ lưu các phần dữ liệu cốt lõi vào LocalStorage để tiết kiệm dung lượng tối đa
+        const lightDb = {
+          users: db.users,
+          classes: db.classes,
+          savedVocab: db.savedVocab,
+          aiConfig: db.aiConfig,
+          readingExams: db.readingExams,
+          listeningExams: db.listeningExams,
+          writingExams: db.writingExams,
+          results: (db.results || []).slice(-100) // Chỉ giữ lại 100 kết quả gần nhất để nhẹ bộ nhớ
+        };
+        localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(lightDb));
+      } catch (e) {
+        console.warn('LocalStorage quota reached, relying on cloud sync:', e);
+      }
 
       if (CLOUD_DOC) {
         setSyncStatus('Syncing...', true);
