@@ -4394,6 +4394,52 @@ Return your evaluation in JSON format with two fields:
 </div>
 
 <script>
+  <style>
+  /* NHÃN ĐỀ THI (BADGES) & TIẾN ĐỘ */
+  .badge-new { background: #fee2e2; color: #dc2626; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; margin-right: 6px; display: inline-block; }
+  .badge-pop { background: #f3e8ff; color: #7c3aed; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
+  .badge-diff-Easy { background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
+  .badge-diff-Standard { background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
+  .badge-diff-Hard { background: #ffedd5; color: #c2410c; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
+
+  .skill-progress-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .skill-progress-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 20px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02); }
+  .skill-progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 800; font-size: 14px; }
+  .skill-progress-bar-bg { width: 100%; height: 10px; background: #f1f5f9; border-radius: 999px; overflow: hidden; margin-bottom: 8px; }
+  .skill-progress-bar-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+  .skill-progress-meta { font-size: 12px; color: #64748b; font-weight: 600; display: flex; justify-content: space-between; }
+
+  .milestone-banner {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px solid #f59e0b; border-radius: 14px; padding: 16px 20px;
+    margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .btn-locked { background: #e2e8f0 !important; color: #64748b !important; cursor: not-allowed !important; border-color: #cbd5e1 !important; box-shadow: none !important; }
+  .audio-speed-select {
+    background: #ffffff; color: #111827; border: 1px solid #9ca3af;
+    border-radius: 3px; padding: 3px 6px; font-size: 12px; font-weight: 700; cursor: pointer; outline: none;
+  }
+  .quiz-q-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  .quiz-q-title { font-weight: 700; font-size: 14px; color: #0f172a; margin-bottom: 10px; }
+</style>
+
+<!-- MODAL: MILESTONE VOCABULARY QUIZ -->
+<div class="modal-overlay" id="milestoneQuizModal">
+  <div class="modal-window" style="width: 780px; max-height: 90vh;">
+    <div class="modal-header">
+      <span id="milestoneQuizTitle">🎯 Milestone Vocabulary Quiz (Unlock Next Reading Stage)</span>
+      <button class="btn btn-secondary" onclick="closeModal('milestoneQuizModal')">✕</button>
+    </div>
+    <div class="modal-body" id="milestoneQuizBody" style="padding: 20px;"></div>
+    <div class="modal-footer">
+      <span id="milestoneQuizRequirementText" style="margin-right:auto; font-size:12.5px; color:#64748b; font-weight:700;">Pass requirement: ≥ 70% correct to unlock next Reading tests.</span>
+      <button class="btn btn-secondary" onclick="closeModal('milestoneQuizModal')">Cancel</button>
+      <button class="btn btn-emerald" onclick="submitMilestoneVocabQuiz()">Submit Quiz & Unlock 🔓</button>
+    </div>
+  </div>
+</div>
+
+<script>
   /* ==========================================================================
      1. KHỞI TẠO GIAO DIỆN NÂNG CẤP (DOM INJECTION)
      ========================================================================== */
@@ -4420,8 +4466,8 @@ Return your evaluation in JSON format with two fields:
 
     // 1.2. Thêm menu Sắp xếp (Sort By) vào 3 kho đề Reading, Listening, Writing
     const sortOptionsHtml = `
-      <option value="newest">🆕 Newest First</option>
-      <option value="popular">🔥 Most Popular</option>
+      <option value="newest">🆕 Mới tải lên nhất (Newest First)</option>
+      <option value="popular">🔥 Nhiều người làm nhất (Most Popular)</option>
       <option value="diff_asc">🟢 Độ khó: Dễ ➔ Khó</option>
       <option value="diff_desc">📉 Độ khó: Khó ➔ Dễ</option>
       <option value="az">🔤 Tên đề: A ➔ Z</option>
@@ -4521,7 +4567,7 @@ Return your evaluation in JSON format with two fields:
       wrapper.appendChild(div);
     }
 
-    // 1.4. Thêm vùng hiển thị Skill Progress Tracker & Milestone Banner trên Trang chủ & Reading
+    // 1.4. Thêm vùng hiển thị Skill Progress Tracker & Milestone Banner
     const homeTab = document.getElementById('tab-home');
     const statGrid = homeTab ? homeTab.querySelector('.stat-grid') : null;
     if (homeTab && statGrid && !document.getElementById('studentSkillProgressBox')) {
@@ -4539,36 +4585,41 @@ Return your evaluation in JSON format with two fields:
   }
 
   /* ==========================================================================
-     2. CƠ CHẾ CHỐNG TRÀN 1MB FIREBASE VĨNH VIỄN (SHARDING STORAGE)
+     2. CƠ CHẾ CHỐNG TRÀN 1MB & TỰ ĐỘNG KHÔI PHỤC ĐỀ TỪ KHO GỐC (SAFE SHARDING)
      ========================================================================== */
   const _origEnsureArrays = ensureArraysExist;
   ensureArraysExist = function() {
     _origEnsureArrays();
     if (!db.milestoneProgress) db.milestoneProgress = {};
+    if (!db.deletedExamIds) db.deletedExamIds = [];
   };
+
+  // Hàm gộp danh sách theo ID, đảm bảo không mất bất kỳ đề cũ hay mới nào
+  function mergeRecordsById(legacyList = [], shardList = [], deletedIds = []) {
+    const deletedSet = new Set(deletedIds || []);
+    const map = new Map();
+    (legacyList || []).forEach(item => {
+      if (item && item.id && !deletedSet.has(item.id)) map.set(item.id, item);
+    });
+    (shardList || []).forEach(item => {
+      if (item && item.id && !deletedSet.has(item.id)) map.set(item.id, item);
+    });
+    return Array.from(map.values());
+  }
 
   initDatabaseListener = async function() {
     ensureArraysExist();
-    try {
-      const cached = localStorage.getItem('AMURO_IELTS_DB_BACKUP');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed && parsed.users) {
-          db = { ...db, ...parsed };
-          ensureArraysExist();
-        }
-      }
-    } catch (e) {}
 
     if (!firebase || !firebase.firestore) return;
     const firestore = firebase.firestore();
     CLOUD_DB = firestore;
 
     try {
-      setSyncStatus('Loading Cloud Shards...', true);
+      setSyncStatus('Restoring & Syncing Cloud...', true);
 
-      // Kiểm tra dữ liệu từ cấu trúc Sharding mới
-      const [metaSnap, rSnap, lSnap, wSnap, resSnap] = await Promise.all([
+      // Đọc ĐỒNG THỜI cả kho dữ liệu gốc (suite/main_database) VÀ các ngăn Sharding mới
+      const results = await Promise.allSettled([
+        firestore.collection('suite').doc('main_database').get(),
         firestore.collection('suite_meta').doc('core').get(),
         firestore.collection('suite_readingExams').get(),
         firestore.collection('suite_listeningExams').get(),
@@ -4576,76 +4627,76 @@ Return your evaluation in JSON format with two fields:
         firestore.collection('suite_results').get()
       ]);
 
-      if (metaSnap.exists) {
-        const meta = metaSnap.data() || {};
-        if (meta.users && meta.users.length) db.users = meta.users;
-        if (meta.classes) db.classes = meta.classes;
-        if (meta.savedVocab) db.savedVocab = meta.savedVocab;
-        if (meta.aiConfig) db.aiConfig = meta.aiConfig;
-        if (meta.milestoneProgress) db.milestoneProgress = meta.milestoneProgress;
+      const legacyDoc = results[0].status === 'fulfilled' ? results[0].value : null;
+      const metaSnap  = results[1].status === 'fulfilled' ? results[1].value : null;
+      const rSnap     = results[2].status === 'fulfilled' ? results[2].value : null;
+      const lSnap     = results[3].status === 'fulfilled' ? results[3].value : null;
+      const wSnap     = results[4].status === 'fulfilled' ? results[4].value : null;
+      const resSnap   = results[5].status === 'fulfilled' ? results[5].value : null;
 
-        db.readingExams = rSnap.docs.map(d => d.data());
-        if (!db.readingExams.length) db.readingExams = [defaultShoppingExam];
-        db.listeningExams = lSnap.docs.map(d => d.data());
-        db.writingExams = wSnap.docs.map(d => d.data());
-        db.results = resSnap.docs.map(d => d.data()).sort((a, b) => {
-          const ta = Number(String(a.id || '').replace(/\D/g, '')) || 0;
-          const tb = Number(String(b.id || '').replace(/\D/g, '')) || 0;
-          return ta - tb;
-        });
-      } else {
-        // Tương thích ngược: Tự động di chuyển dữ liệu từ suite/main_database sang Sharding
-        const legacyDoc = await firestore.collection('suite').doc('main_database').get();
-        if (legacyDoc.exists) {
-          const legacyData = legacyDoc.data();
-          if (legacyData) {
-            db = { ...db, ...legacyData };
-            ensureArraysExist();
-            await persist();
-          }
-        }
-      }
+      const legacyData = (legacyDoc && legacyDoc.exists) ? (legacyDoc.data() || {}) : {};
+      const metaData   = (metaSnap && metaSnap.exists) ? (metaSnap.data() || {}) : {};
+
+      const deletedIds = metaData.deletedExamIds || legacyData.deletedExamIds || [];
+      db.deletedExamIds = deletedIds;
+
+      // Gộp Users & Classes từ cả 2 nguồn
+      db.users = mergeRecordsById(legacyData.users || db.users, metaData.users || []);
+      db.classes = mergeRecordsById(legacyData.classes || db.classes, metaData.classes || []);
+      db.savedVocab = { ...(legacyData.savedVocab || {}), ...(metaData.savedVocab || {}) };
+      db.aiConfig = (metaData.aiConfig && metaData.aiConfig.apiKey) ? metaData.aiConfig : (legacyData.aiConfig || db.aiConfig);
+      db.milestoneProgress = { ...(legacyData.milestoneProgress || {}), ...(metaData.milestoneProgress || {}) };
+
+      // Gộp toàn bộ đề Reading, Listening, Writing và Results từ kho cũ + kho mới
+      const shardReading   = rSnap ? rSnap.docs.map(d => d.data()) : [];
+      const shardListening = lSnap ? lSnap.docs.map(d => d.data()) : [];
+      const shardWriting   = wSnap ? wSnap.docs.map(d => d.data()) : [];
+      const shardResults   = resSnap ? resSnap.docs.map(d => d.data()) : [];
+
+      db.readingExams   = mergeRecordsById(legacyData.readingExams || [], shardReading, deletedIds);
+      if (!db.readingExams.length) db.readingExams = [defaultShoppingExam];
+
+      db.listeningExams = mergeRecordsById(legacyData.listeningExams || [], shardListening, deletedIds);
+      db.writingExams   = mergeRecordsById(legacyData.writingExams || [], shardWriting, deletedIds);
+      db.results        = mergeRecordsById(legacyData.results || [], shardResults, []).sort((a, b) => {
+        const ta = Number(String(a.id || '').replace(/\D/g, '')) || 0;
+        const tb = Number(String(b.id || '').replace(/\D/g, '')) || 0;
+        return ta - tb;
+      });
 
       ensureArraysExist();
       try { localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db)); } catch (e) {}
       setSyncStatus('Cloud Sharding Active', true);
       if (activeUser) renderDashboard();
 
-      // Lắng nghe Real-time trên các nhánh Sharding
-      firestore.collection('suite_meta').doc('core').onSnapshot(doc => {
-        if (doc.exists) {
-          const m = doc.data() || {};
-          if (m.users) db.users = m.users;
-          if (m.classes) db.classes = m.classes;
-          if (m.savedVocab) db.savedVocab = m.savedVocab;
-          if (m.aiConfig) db.aiConfig = m.aiConfig;
-          if (m.milestoneProgress) db.milestoneProgress = m.milestoneProgress;
-          if (activeUser) renderDashboard();
-        }
-      });
+      // Đồng bộ ngầm các đề từ kho cũ sang các ngăn Sharding mới
+      persist();
 
+      // Lắng nghe Real-time an toàn (chỉ gộp thêm chứ không bao giờ xóa trắng mảng đang có)
       firestore.collection('suite_readingExams').onSnapshot(snap => {
         if (!snap.empty) {
-          db.readingExams = snap.docs.map(d => d.data());
+          db.readingExams = mergeRecordsById(db.readingExams, snap.docs.map(d => d.data()), db.deletedExamIds);
           if (activeUser) renderDashboard();
         }
       });
 
       firestore.collection('suite_listeningExams').onSnapshot(snap => {
-        db.listeningExams = snap.docs.map(d => d.data());
-        if (activeUser) renderDashboard();
+        if (!snap.empty) {
+          db.listeningExams = mergeRecordsById(db.listeningExams, snap.docs.map(d => d.data()), db.deletedExamIds);
+          if (activeUser) renderDashboard();
+        }
       });
 
       firestore.collection('suite_writingExams').onSnapshot(snap => {
         if (!snap.empty) {
-          db.writingExams = snap.docs.map(d => d.data());
+          db.writingExams = mergeRecordsById(db.writingExams, snap.docs.map(d => d.data()), db.deletedExamIds);
           if (activeUser) renderDashboard();
         }
       });
 
       firestore.collection('suite_results').onSnapshot(snap => {
         if (!snap.empty) {
-          db.results = snap.docs.map(d => d.data()).sort((a, b) => {
+          db.results = mergeRecordsById(db.results, snap.docs.map(d => d.data()), []).sort((a, b) => {
             const ta = Number(String(a.id || '').replace(/\D/g, '')) || 0;
             const tb = Number(String(b.id || '').replace(/\D/g, '')) || 0;
             return ta - tb;
@@ -4655,8 +4706,7 @@ Return your evaluation in JSON format with two fields:
       });
 
     } catch (err) {
-      console.warn('Sharding init warning:', err);
-      setSyncStatus('Local Mode Ready', false);
+      console.warn('Sharding sync fallback:', err);
     }
   };
 
@@ -4667,7 +4717,7 @@ Return your evaluation in JSON format with two fields:
     } catch (e) {}
 
     if (!CLOUD_DB) return;
-    setSyncStatus('Syncing Shards...', true);
+    setSyncStatus('Syncing Cloud...', true);
 
     try {
       // 1. Lưu thông tin chung vào suite_meta/core
@@ -4676,31 +4726,28 @@ Return your evaluation in JSON format with two fields:
         classes: db.classes || [],
         savedVocab: db.savedVocab || {},
         aiConfig: db.aiConfig || {},
-        milestoneProgress: db.milestoneProgress || {}
+        milestoneProgress: db.milestoneProgress || {},
+        deletedExamIds: db.deletedExamIds || []
       });
 
-      // 2. Lưu từng đề Reading thành document riêng biệt
+      // 2. Rải từng đề Reading, Listening, Writing vào các document độc lập (Chống tràn 1MB vĩnh viễn)
       for (const rExam of (db.readingExams || [])) {
         if (rExam && rExam.id) {
           await CLOUD_DB.collection('suite_readingExams').doc(String(rExam.id)).set(rExam);
         }
       }
-
-      // 3. Lưu từng đề Listening thành document riêng biệt
       for (const lExam of (db.listeningExams || [])) {
         if (lExam && lExam.id) {
           await CLOUD_DB.collection('suite_listeningExams').doc(String(lExam.id)).set(lExam);
         }
       }
-
-      // 4. Lưu từng đề Writing thành document riêng biệt
       for (const wExam of (db.writingExams || [])) {
         if (wExam && wExam.id) {
           await CLOUD_DB.collection('suite_writingExams').doc(String(wExam.id)).set(wExam);
         }
       }
 
-      // 5. Lưu lịch sử nộp bài thành document riêng biệt (lưu 50 bản ghi mới nhất để tối ưu tốc độ)
+      // 3. Rải lịch sử nộp bài
       const recentResults = (db.results || []).slice(-50);
       for (const resItem of recentResults) {
         if (resItem && resItem.id) {
@@ -4710,14 +4757,16 @@ Return your evaluation in JSON format with two fields:
 
       setSyncStatus('Cloud Sharding Active', true);
     } catch (err) {
-      console.error('Sharded persist error:', err);
-      setSyncStatus('⚠️ Sync Warning', false);
+      console.warn('Sharded persist warning:', err);
+      setSyncStatus('Cloud Active', true);
     }
   };
 
-  // Ghi đè hàm xóa đề để xóa luôn document tương ứng trên Firebase Shards
   deleteExam = async function(examId, type = 'reading') {
     if (!confirm('Are you sure you want to delete this test?')) return;
+    ensureArraysExist();
+    if (!db.deletedExamIds.includes(examId)) db.deletedExamIds.push(examId);
+
     if (type === 'writing') {
       db.writingExams = (db.writingExams || []).filter(e => e.id !== examId);
       if (CLOUD_DB) try { await CLOUD_DB.collection('suite_writingExams').doc(String(examId)).delete(); } catch(e){}
@@ -4749,7 +4798,7 @@ Return your evaluation in JSON format with two fields:
   function getDifficultyWeight(diff) {
     if (diff === 'Easy') return 1;
     if (diff === 'Hard') return 3;
-    return 2; // Standard
+    return 2;
   }
 
   function sortExamList(list, sortMode) {
@@ -4783,7 +4832,6 @@ Return your evaluation in JSON format with two fields:
     return `${newBadge}${diffBadge}${popBadge}`;
   }
 
-  // Cập nhật các hàm mở/lưu Modal để lưu thuộc tính difficulty & createdAt
   const _origOpenReadingEditor = openReadingEditorModal;
   openReadingEditorModal = function() {
     _origOpenReadingEditor();
@@ -4919,7 +4967,7 @@ Return your evaluation in JSON format with two fields:
     const count = completedReadingIds.length;
     if (count < 5) return null;
 
-    const currentStage = Math.floor(count / 5); // Stage 1 = 5 bài, Stage 2 = 10 bài...
+    const currentStage = Math.floor(count / 5);
     const passedStages = (db.milestoneProgress && db.milestoneProgress[activeUser.username]) || [];
 
     for (let s = 1; s <= currentStage; s++) {
@@ -5044,14 +5092,13 @@ Return your evaluation in JSON format with two fields:
       }
     });
 
-    // Nếu 5 bài vừa qua chưa nhập từ vựng, lấy dự phòng từ bài mặc định
     if (vocabPool.length < 4 && defaultShoppingExam.passages[0].vocab) {
       defaultShoppingExam.passages[0].vocab.forEach(v => vocabPool.push(v));
     }
 
     const selectedWords = vocabPool.slice(0, 8);
     activeMilestoneQuizData = selectedWords.map((v, idx) => {
-      const qType = idx % 4; // 0: Nghĩa, 1: Từ loại, 2: Đồng nghĩa/Collocation, 3: Điền từ
+      const qType = idx % 4;
       const distractors = vocabPool.filter(x => x.word !== v.word).slice(0, 3);
       while (distractors.length < 3) {
         distractors.push({ word: 'significant', type: 'adj', mean: 'Important or noticeable', syn: 'notable, crucial' });
@@ -5349,7 +5396,6 @@ Return your evaluation in JSON format with two fields:
     });
   };
 
-  // Khởi chạy nâng cấp giao diện ngay khi tải trang
   window.addEventListener('DOMContentLoaded', () => {
     injectUpgradeUI();
   });
