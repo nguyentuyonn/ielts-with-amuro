@@ -1609,19 +1609,13 @@
         }
       });
 
-      if (firebase && firebase.firestore) {
-        const firestore = firebase.firestore();
-        CLOUD_DB = firestore;
-        
-        // Đồng bộ thời gian thực từ các collection riêng biệt
-        firestore.collection('suite_meta').doc('core').onSnapshot((doc) => {
+      if (CLOUD_DOC) {
+        // Tải trực tiếp toàn bộ dữ liệu từ bản ghi gốc main_database trên Firebase
+        CLOUD_DOC.get().then((doc) => {
           if (doc.exists) {
-            const data = doc.data();
-            if (data && data.users) {
-              db.users = data.users || db.users;
-              db.classes = data.classes || db.classes;
-              db.savedVocab = data.savedVocab || db.savedVocab;
-              db.aiConfig = data.aiConfig || db.aiConfig;
+            const cloudData = doc.data();
+            if (cloudData && cloudData.users) {
+              db = cloudData;
               ensureArraysExist();
               localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
               setSyncStatus('Cloud Real-Time Active', true);
@@ -1635,19 +1629,25 @@
               }
             }
           }
+        }).catch((err) => {
+          console.warn('Cloud fetch fallback:', err);
         });
 
-        // Tải danh sách Listening Exams từ collection riêng để tránh tràn 1MB
-        firestore.collection('suite_listening').get().then(snapshot => {
-          if (!snapshot.empty) {
-            const remoteListening = [];
-            snapshot.forEach(d => remoteListening.push(d.data()));
-            if (remoteListening.length > 0) {
-              db.listeningExams = remoteListening;
-              renderDashboard();
+        // Lắng nghe thay đổi thời gian thực
+        CLOUD_DOC.onSnapshot((doc) => {
+          if (doc.exists) {
+            const cloudData = doc.data();
+            if (cloudData && cloudData.users) {
+              // Gộp dữ liệu cloud với dữ liệu local để không bị mất bài test nào
+              if (cloudData.listeningExams && cloudData.listeningExams.length >= (db.listeningExams || []).length) {
+                db = cloudData;
+                ensureArraysExist();
+                localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
+                if (activeUser) renderDashboard();
+              }
             }
           }
-        }).catch(err => console.warn('Listening fetch sync:', err));
+        });
       }
     }
 
