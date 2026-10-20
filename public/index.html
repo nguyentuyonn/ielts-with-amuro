@@ -22,8 +22,8 @@
       --emerald-soft: #ecfdf5;
       --royal-accent: #2563eb;
       --royal-soft: #eff6ff;
-      --inspera-dark: #0f172a;
-      --inspera-border: #e2e8f0;
+      --inspera-dark: #111827;
+      --inspera-border: #d1d5db;
       --highlight-yellow: #fef08a;
       --text-main: #0f172a;
       --text-muted: #64748b;
@@ -31,25 +31,35 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; }
     body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-    /* THEME MODES FOR EXAM WORKSPACE */
+    /* THEME MODES FOR EXAM WORKSPACE (INSPERA CONTRAST MODES) */
     #examShell.theme-dark { background: #111827; color: #f9fafb; }
+    #examShell.theme-dark .inspera-top,
+    #examShell.theme-dark .inspera-instruction-banner,
+    #examShell.theme-dark .inspera-part-tabs,
     #examShell.theme-dark .passage-col,
     #examShell.theme-dark .questions-col,
-    #examShell.theme-dark .progress-container { background: #111827; color: #f9fafb; border-color: #374151; }
+    #examShell.theme-dark .progress-container,
+    #examShell.theme-dark .question { background: #111827; color: #f9fafb; border-color: #374151; }
     #examShell.theme-dark .section-title,
     #examShell.theme-dark .question-group-title,
-    #examShell.theme-dark .question-text { color: #f9fafb; }
+    #examShell.theme-dark .question-text,
+    #examShell.theme-dark .inspera-timer { color: #f9fafb; }
     #examShell.theme-dark .input-field.inline-input,
     #examShell.theme-dark .form-input,
-    #examShell.theme-dark select { background: #1f2937; color: #fff; border-color: #4b5563; }
+    #examShell.theme-dark select { background: #1f2937; color: #fff; border-color: #6b7280; }
 
     #examShell.theme-yellow { background: #000; color: #fde047; }
+    #examShell.theme-yellow .inspera-top,
+    #examShell.theme-yellow .inspera-instruction-banner,
+    #examShell.theme-yellow .inspera-part-tabs,
     #examShell.theme-yellow .passage-col,
     #examShell.theme-yellow .questions-col,
-    #examShell.theme-yellow .progress-container { background: #000; color: #fde047; border-color: #ca8a04; }
+    #examShell.theme-yellow .progress-container,
+    #examShell.theme-yellow .question { background: #000; color: #fde047; border-color: #ca8a04; }
     #examShell.theme-yellow .section-title,
     #examShell.theme-yellow .question-group-title,
-    #examShell.theme-yellow .question-text { color: #fde047; }
+    #examShell.theme-yellow .question-text,
+    #examShell.theme-yellow .inspera-timer { color: #fde047; }
     #examShell.theme-yellow .input-field.inline-input,
     #examShell.theme-yellow .form-input,
     #examShell.theme-yellow select { background: #111; color: #fde047; border-color: #eab308; }
@@ -83,7 +93,6 @@
     }
     .login-hero-desc { font-size: 15.5px; color: #475569; line-height: 1.65; max-width: 540px; margin-bottom: 24px; font-weight: 500; }
 
-    /* IELTS TRF SHOWCASE CARD ON LOGIN */
     .trf-showcase-card {
       background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(12px);
       border: 1px solid #e2e8f0; border-radius: 18px; padding: 18px 22px;
@@ -186,7 +195,7 @@
       display: inline-flex; align-items: center; gap: 6px;
     }
     .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block; }
-    .dash-user-controls { display: flex; align-items: center; gap: 12px; }
+    .dash-user-controls { display: flex; align-items: center; gap: 10px; }
     .dash-user-badge {
       background: #f8fafc; padding: 7px 16px; border-radius: 999px;
       font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #e2e8f0; color: #0f172a;
@@ -245,153 +254,224 @@
     .stat-value { font-size: 24px; font-weight: 800; color: #0f172a; }
     .stat-label { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; }
 
-    /* 3. INSPERA EXAM WORKSPACE */
-    #examShell { display: none; position: fixed; inset: 0; background: #fff; z-index: 5000; flex-direction: column; overflow: hidden; }
+    /* =================================================================
+       3. AUTHENTIC MINIMALIST INSPERA EXAM WORKSPACE (demo-ielts.inspera.com)
+       ================================================================= */
+    #examShell {
+      display: none; position: fixed; inset: 0; background: #ffffff;
+      z-index: 5000; flex-direction: column; overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif; color: #111827;
+    }
+    #examShell * { font-family: Arial, Helvetica, sans-serif; }
+    #examShell .fas, #examShell .far { font-family: "Font Awesome 6 Free" !important; }
+
     .inspera-top {
-      background: #ffffff; color: #0f172a; min-height: 56px;
-      border-bottom: 1px solid #cbd5e1;
+      background: #ffffff; color: #111827; height: 50px;
+      border-bottom: 1px solid #d1d5db;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 6px 20px; font-size: 13px; font-weight: 700; flex-shrink: 0; flex-wrap: wrap; gap: 10px;
+      padding: 0 18px; font-size: 13px; font-weight: 600; flex-shrink: 0;
+    }
+    .inspera-top-left { display: flex; align-items: center; gap: 16px; }
+    .inspera-brand-logo {
+      font-size: 16px; font-weight: 900; color: #dc2626; letter-spacing: -0.5px;
+      padding-right: 14px; border-right: 1px solid #d1d5db;
     }
     .inspera-timer {
-      background: #fef3c7; padding: 5px 14px; border-radius: 8px;
-      font-family: monospace; font-size: 15px; font-weight: 800; color: #b45309; border: 1px solid #fde68a;
+      background: transparent; padding: 4px 10px; border-radius: 3px;
+      font-size: 14px; font-weight: 700; color: #111827; border: 1px solid transparent;
     }
-    
+    .inspera-flat-btn {
+      padding: 6px 12px; border-radius: 3px; border: 1px solid #9ca3af;
+      background: #ffffff; color: #111827; font-size: 12.5px; font-weight: 600;
+      cursor: pointer; transition: 0.1s; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .inspera-flat-btn:hover { background: #f3f4f6; border-color: #4b5563; }
+    .inspera-flat-btn.primary { background: #111827; color: #ffffff; border-color: #111827; }
+    .inspera-flat-btn.primary:hover { background: #374151; }
+
+    /* INSPERA GREY PART BANNER */
     .inspera-instruction-banner {
-      background: #f8fafc; border-bottom: 1px solid #e2e8f0;
-      padding: 9px 20px; font-size: 13px; color: #1e293b; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+      background: #f3f4f6; border-bottom: 1px solid #d1d5db;
+      padding: 10px 20px; font-size: 13.5px; color: #111827;
+      display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+      margin: 8px 16px 0 16px; border: 1px solid #d1d5db; border-radius: 2px;
     }
-    .inspera-part-tabs { background: #f1f5f9; border-bottom: 1px solid #cbd5e1; padding: 6px 16px 0; display: flex; gap: 6px; flex-shrink: 0; }
+
+    /* INSPERA PART TABS */
+    .inspera-part-tabs {
+      background: #ffffff; border-bottom: 1px solid #d1d5db;
+      padding: 8px 16px 0; display: flex; gap: 4px; flex-shrink: 0;
+    }
     .part-pill {
-      padding: 8px 24px; border: 1px solid transparent; border-bottom: none;
-      border-radius: 8px 8px 0 0; background: #e2e8f0; font-size: 13px; font-weight: 700; color: #475569; cursor: pointer;
+      padding: 7px 20px; border: 1px solid #d1d5db; border-bottom: none;
+      border-radius: 2px 2px 0 0; background: #f3f4f6; font-size: 13px;
+      font-weight: 700; color: #4b5563; cursor: pointer;
     }
-    .part-pill.active { background: #fff; border-color: #cbd5e1; border-bottom-color: #fff; color: var(--emerald-accent); margin-bottom: -1px; }
+    .part-pill.active {
+      background: #ffffff; border-color: #9ca3af; border-bottom: 2px solid #ffffff;
+      color: #111827; margin-bottom: -1px;
+    }
 
     .inspera-workspace { flex: 1; display: flex; overflow: hidden; position: relative; }
-    .passage-col { width: 50%; padding: 28px 34px; overflow-y: auto; font-size: 15px; line-height: 1.8; border-right: 1px solid #cbd5e1; user-select: text; background: #ffffff; }
+    .passage-col {
+      width: 50%; padding: 24px 30px; overflow-y: auto; font-size: 15px;
+      line-height: 1.75; border-right: 1px solid #9ca3af; user-select: text; background: #ffffff;
+    }
     .passage-col p { margin-bottom: 14px; }
-    .resizer-bar { width: 8px; cursor: col-resize; background: #f1f5f9; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-    .resizer-bar::after { content: "⋮"; color: #64748b; font-weight: bold; }
-    .resizer-bar:hover { background: #cbd5e1; }
-    .questions-col { width: 50%; padding: 28px 34px; overflow-y: auto; background: #ffffff; font-size: 14.5px; user-select: text; }
+    .resizer-bar {
+      width: 8px; cursor: col-resize; background: #e5e7eb;
+      border-left: 1px solid #d1d5db; border-right: 1px solid #d1d5db;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    }
+    .resizer-bar::after { content: "⋮"; color: #4b5563; font-weight: bold; }
+    .resizer-bar:hover { background: #d1d5db; }
+    .questions-col {
+      width: 50%; padding: 24px 30px; overflow-y: auto; background: #ffffff;
+      font-size: 14.5px; line-height: 1.65; user-select: text;
+    }
 
     /* HIGHLIGHT TOOLTIP */
     #selectionTooltip {
-      display: none; position: absolute; z-index: 99999; background: #0f172a; border-radius: 8px;
-      padding: 4px 6px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); gap: 6px;
+      display: none; position: absolute; z-index: 99999; background: #111827; border-radius: 3px;
+      padding: 4px 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); gap: 6px;
     }
     #selectionTooltip button {
       background: none; border: none; color: #fff; font-size: 12px; font-weight: 700;
-      cursor: pointer; padding: 4px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;
+      cursor: pointer; padding: 4px 8px; border-radius: 2px; display: inline-flex; align-items: center; gap: 4px;
     }
-    #selectionTooltip button:hover { background: #334155; }
+    #selectionTooltip button:hover { background: #374151; }
     #selectionTooltip button.btn-hl-yellow { color: #fde047; }
-    .user-highlight-span { background-color: #fef08a !important; color: #111827 !important; border-radius: 2px; }
+    .user-highlight-span { background-color: #fef08a !important; color: #000 !important; }
 
-    /* QUESTION STYLES */
-    .section-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin-bottom: 18px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
-    .question-group { background: transparent; padding: 0; margin-bottom: 32px; }
-    .question-group-title { font-weight: 800; margin-bottom: 8px; color: #0f172a; font-size: 1.05rem; }
-    .question-group p { margin-bottom: 12px; line-height: 1.5; }
+    /* INSPERA MINIMALIST QUESTION STYLES */
+    .section-title {
+      font-size: 1.15rem; font-weight: 700; color: #111827;
+      margin-bottom: 16px; padding-bottom: 6px; border-bottom: 1px solid #d1d5db;
+    }
+    .question-group { background: transparent; padding: 0; margin-bottom: 28px; }
+    .question-group-title { font-weight: 700; margin-bottom: 6px; color: #111827; font-size: 1rem; }
+    .question-group p { margin-bottom: 10px; line-height: 1.55; }
     
-    .question { margin-bottom: 16px; padding: 12px 14px; border: 1px solid #f1f5f9; border-radius: 10px; background: #ffffff; position: relative; transition: 0.15s; }
-    .question:focus-within, .question.active-question-box { border-color: #3b82f6; background: #f8fafc; }
-    .question-text { font-weight: 600; margin-bottom: 10px; line-height: 1.5; color: #0f172a; }
+    .question {
+      margin-bottom: 14px; padding: 10px 12px; border: 1px solid transparent;
+      border-radius: 2px; background: transparent; position: relative;
+    }
+    .question:focus-within, .question.active-question-box {
+      border-color: #2563eb; background: #f8fafc;
+    }
+    .question-text { font-weight: 700; margin-bottom: 8px; line-height: 1.5; color: #111827; }
     .q-badge {
       display: inline-flex; align-items: center; justify-content: center;
-      min-width: 26px; height: 24px; padding: 0 6px; background: var(--emerald-accent); color: #fff;
-      font-size: 12px; font-weight: 800; border-radius: 6px; margin-right: 6px;
+      min-width: 24px; height: 22px; padding: 0 5px; background: #ffffff; color: #111827;
+      border: 1.5px solid #111827; font-size: 12px; font-weight: 700;
+      border-radius: 2px; margin-right: 6px;
     }
-    .options { display: flex; flex-direction: column; gap: 8px; padding-left: 6px; }
-    .options label { display: flex; align-items: center; gap: 10px; cursor: pointer; line-height: 1.45; padding: 5px 8px; border-radius: 6px; }
-    .options label:hover { background: #f1f5f9; }
-    .options input[type="radio"], .options input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--emerald-accent); cursor: pointer; }
+    .options { display: flex; flex-direction: column; gap: 6px; padding-left: 4px; }
+    .options label {
+      display: flex; align-items: center; gap: 10px; cursor: pointer;
+      line-height: 1.45; padding: 5px 8px; border-radius: 2px; font-weight: 400;
+    }
+    .options label:hover { background: #f3f4f6; }
+    .options input[type="radio"], .options input[type="checkbox"] {
+      width: 16px; height: 16px; accent-color: #1d4ed8; cursor: pointer;
+    }
 
     .input-field.inline-input {
-      display: inline-block; width: 145px; border: 1.5px solid #94a3b8;
-      border-radius: 6px; padding: 3px 8px; background: #fff; color: #0f172a;
-      font-size: 14px; text-align: center; font-weight: 700; margin: 2px 4px; vertical-align: baseline; outline: none;
+      display: inline-block; width: 140px; border: 1px solid #4b5563;
+      border-radius: 2px; padding: 3px 8px; background: #fff; color: #111827;
+      font-size: 14px; text-align: center; font-weight: 700; margin: 2px 4px;
+      vertical-align: baseline; outline: none;
     }
-    .input-field.inline-input:focus { border-color: var(--emerald-accent); box-shadow: 0 0 0 3px rgba(5,150,105,0.15); }
+    .input-field.inline-input:focus {
+      border: 2px solid #2563eb; box-shadow: none;
+    }
     .inline-select {
-      display: inline-block; min-width: 90px; border: 1.5px solid #94a3b8;
-      border-radius: 6px; padding: 3px 8px; background: #fff; font-size: 14px; font-weight: 700; margin: 2px 4px; outline: none; cursor: pointer;
+      display: inline-block; min-width: 90px; border: 1px solid #4b5563;
+      border-radius: 2px; padding: 3px 8px; background: #fff; font-size: 14px;
+      font-weight: 700; margin: 2px 4px; outline: none; cursor: pointer;
     }
 
     /* MATRIX TABLE */
     .matrix-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13.5px; }
-    .matrix-table th, .matrix-table td { border: 1px solid #cbd5e1; padding: 10px; text-align: center; }
-    .matrix-table th { background: #f8fafc; font-weight: 700; color: #1e293b; }
-    .matrix-table td.matrix-statement { text-align: left; font-weight: 500; width: 55%; }
-    .matrix-table tr:hover { background: #f8fafc; }
+    .matrix-table th, .matrix-table td { border: 1px solid #9ca3af; padding: 9px 10px; text-align: center; }
+    .matrix-table th { background: #f3f4f6; font-weight: 700; color: #111827; }
+    .matrix-table td.matrix-statement { text-align: left; font-weight: 400; width: 55%; }
+    .matrix-table tr:hover { background: #f9fafb; }
 
-    /* DRAG & DROP */
-    .drag-options { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; padding: 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; }
+    /* DRAG & DROP (INSPERA SHARP BOXES) */
+    .drag-options {
+      display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px;
+      padding: 12px; background: #f9fafb; border: 1px solid #9ca3af; border-radius: 2px;
+    }
     .drag-options.headings-bank { flex-direction: column; align-items: flex-start; }
     .drag-item {
-      padding: 6px 12px; border: 1px solid #94a3b8; border-radius: 6px; background: #fff;
-      font-size: 13.5px; font-weight: 600; cursor: grab; user-select: none; transition: 0.15s ease;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04); color: #1e293b;
+      padding: 5px 12px; border: 1px solid #4b5563; border-radius: 2px; background: #fff;
+      font-size: 13.5px; font-weight: 600; cursor: grab; user-select: none; color: #111827;
     }
-    .drag-item:hover { border-color: var(--emerald-accent); background: #ecfdf5; }
-    .drag-item:active { cursor: grabbing; transform: scale(0.98); }
+    .drag-item:hover { border-color: #1d4ed8; background: #eff6ff; }
+    .drag-item:active { cursor: grabbing; }
     .drag-item.used {
-      opacity: 0.3; pointer-events: none; background: #e2e8f0; border-style: dashed; text-decoration: line-through;
+      opacity: 0.35; pointer-events: none; background: #e5e7eb; border-style: dashed;
     }
 
     .drop-zone {
       display: inline-flex; align-items: center; justify-content: center;
-      min-width: 90px; min-height: 30px; padding: 2px 12px;
-      border: 2px dashed #64748b; border-radius: 6px; background: #f8fafc;
-      font-weight: 700; color: #475569; margin: 2px 4px; vertical-align: middle;
-      line-height: normal; transition: all 0.15s ease; cursor: pointer; font-size: 13.5px;
+      min-width: 95px; min-height: 28px; padding: 2px 10px;
+      border: 1px dashed #4b5563; border-radius: 2px; background: #ffffff;
+      font-weight: 700; color: #111827; margin: 2px 4px; vertical-align: middle;
+      line-height: normal; cursor: pointer; font-size: 13.5px;
     }
     .drop-zone.heading-drop {
-      display: flex; width: 100%; justify-content: flex-start; padding: 8px 14px;
-      margin: 10px 0 6px 0; background: #f8fafc; border-color: #3b82f6; color: #1d4ed8;
+      display: flex; width: 100%; justify-content: flex-start; padding: 6px 12px;
+      margin: 10px 0 6px 0; background: #f9fafb; border: 1px dashed #4b5563; color: #111827;
     }
-    .drop-zone.over { border-color: var(--emerald-accent); background: #d1fae5; transform: scale(1.01); }
-    .drop-zone.filled { border-style: solid; border-color: var(--emerald-accent); background: #ecfdf5; color: #065f46; }
+    .drop-zone.over { border: 2px solid #2563eb; background: #eff6ff; }
+    .drop-zone.filled { border-style: solid; border-color: #111827; background: #f3f4f6; color: #111827; }
 
     .answer-indicator {
-      display: block; margin-top: 8px; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      display: block; margin-top: 8px; padding: 8px 12px; border-radius: 3px; font-size: 13px; font-weight: 600;
     }
-    .answer-indicator.correct { background: #dcfce7; border: 1px solid #22c55e; color: #14532d; }
-    .answer-indicator.incorrect { background: #fee2e2; border: 1px solid #ef4444; color: #7f1d1d; }
+    .answer-indicator.correct { background: #f0fdf4; border: 1px solid #16a34a; color: #14532d; }
+    .answer-indicator.incorrect { background: #fef2f2; border: 1px solid #dc2626; color: #7f1d1d; }
 
     .btn-locate {
-      background: #eff6ff; border: 1px solid #3b82f6; color: #1d4ed8;
-      padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;
+      background: #ffffff; border: 1px solid #4b5563; color: #111827;
+      padding: 3px 9px; border-radius: 2px; font-size: 11px; font-weight: 700;
+      cursor: pointer; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;
     }
+    .btn-locate:hover { background: #f3f4f6; }
     .evidence-highlight-active {
-      background-color: #fef08a !important; color: #000 !important; padding: 2px 4px; border-radius: 3px;
-      box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.4);
+      background-color: #fef08a !important; color: #000 !important; padding: 1px 3px;
+      outline: 2px solid #eab308;
     }
 
-    /* FOOTER NAV */
+    /* INSPERA BOTTOM PROGRESS BAR */
     .progress-container {
-      height: 56px; background: #fff; border-top: 1px solid #cbd5e1;
-      display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0;
+      height: 50px; background: #ffffff; border-top: 1px solid #9ca3af;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0;
     }
-    .progress-items { display: flex; gap: 6px; overflow-x: auto; max-width: 78%; align-items: center; padding: 4px 0; }
+    .progress-items { display: flex; gap: 3px; overflow-x: auto; max-width: 76%; align-items: center; padding: 4px 0; }
     .progress-item {
-      min-width: 32px; height: 32px; border: 1px solid #cbd5e1; border-radius: 6px;
-      background: #f8fafc; font-size: 12.5px; font-weight: 700; color: #475569;
-      cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.1s;
+      min-width: 28px; height: 28px; border: 1px solid #9ca3af; border-radius: 2px;
+      background: #ffffff; font-size: 12px; font-weight: 700; color: #111827;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      border-top: 3px solid #d1d5db;
     }
-    .progress-item:hover { border-color: var(--emerald-accent); }
-    .progress-item.answered { background: var(--emerald-accent); color: #fff; border-color: var(--emerald-hover); }
-    .progress-item.current { outline: 2px solid #2563eb; outline-offset: 1px; }
+    .progress-item:hover { border-color: #111827; }
+    .progress-item.answered {
+      background: #374151; color: #ffffff; border-color: #111827; border-top-color: #111827;
+    }
+    .progress-item.current {
+      outline: 2px solid #2563eb; outline-offset: 1px;
+    }
     .progress-item.correct { background: #16a34a !important; color: #fff !important; border-color: #15803d !important; }
     .progress-item.incorrect { background: #dc2626 !important; color: #fff !important; border-color: #b91c1c !important; }
 
     .teacher-edit-badge {
-      display: inline-block; background: #fef3c7; border: 1px solid #f59e0b; color: #b45309;
-      font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; cursor: pointer; margin-left: 6px;
+      display: inline-block; background: #f3f4f6; border: 1px solid #6b7280; color: #111827;
+      font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 2px; cursor: pointer; margin-left: 6px;
     }
-    .teacher-edit-badge:hover { background: #fde68a; }
+    .teacher-edit-badge:hover { background: #e5e7eb; }
 
     /* MODALS */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(3px); z-index: 7000; align-items: center; justify-content: center; }
@@ -503,6 +583,7 @@
         </span>
       </div>
       <div class="dash-user-controls">
+        <button class="btn btn-secondary teacher-item" onclick="openAiConfigModal()" title="Configure Gemini AI Writing Grader">🤖 AI Grader Config</button>
         <div class="dash-user-badge" onclick="openProfileModal()" id="userProfileLabel">👤 Account</div>
         <button class="btn btn-secondary" onclick="execLogout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
       </div>
@@ -525,7 +606,7 @@
         <div class="home-hero-banner">
           <div>
             <div class="home-hero-title" id="homeWelcomeTitle">Welcome to IELTS WITH AMURO</div>
-            <div class="home-hero-sub">Official Computer-Delivered IELTS preparation suite with real-time cloud synchronization, interactive question formats, and automated band analytics.</div>
+            <div class="home-hero-sub">Official Computer-Delivered IELTS preparation suite with real-time cloud synchronization, minimalist Inspera exam interface, and AI-powered band analytics.</div>
           </div>
           <div class="hero-band-badge">
             <div style="font-size:11px; font-weight:800; color:#059669; text-transform:uppercase; letter-spacing:1px;">Target Standard</div>
@@ -630,7 +711,7 @@
           </div>
           <table>
             <thead>
-              <tr><th>Test Title</th><th>Duration</th><th>Section</th><th>Assigned Class</th><th>Actions</th></tr>
+              <tr><th>Test Title</th><th>Duration</th><th>Parts</th><th>Assigned Class</th><th>Actions</th></tr>
             </thead>
             <tbody id="listeningTbody"></tbody>
           </table>
@@ -687,7 +768,7 @@
         </div>
       </div>
 
-      <!-- TAB 6: STUDENTS (WITH EDIT STUDENT FEATURE) -->
+      <!-- TAB 6: STUDENTS -->
       <div id="tab-students" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title">
@@ -706,7 +787,7 @@
         </div>
       </div>
 
-      <!-- TAB 7: ANALYTICS (GROUPED BY STUDENT + DATE FILTER) -->
+      <!-- TAB 7: ANALYTICS -->
       <div id="tab-analytics" class="dash-pane" style="display: none;">
         <div class="card">
           <div class="card-title">
@@ -717,7 +798,6 @@
             </div>
           </div>
 
-          <!-- FILTER BAR FOR SUBMISSIONS & SCORES -->
           <div style="display:grid; grid-template-columns: 1.5fr 1fr 1fr auto; gap:10px; margin-bottom:16px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0; align-items:center;">
             <input type="text" id="filterAnalyticsSearch" class="form-input" placeholder="🔍 Search student name or exam title..." oninput="renderAnalyticsTable()">
             <select id="filterAnalyticsClass" class="form-input" onchange="renderAnalyticsTable()">
@@ -738,43 +818,47 @@
     </div>
   </div>
 
-  <!-- 3. INSPERA REAL EXAM WORKSPACE -->
+  <!-- 3. MINIMALIST INSPERA EXAM WORKSPACE -->
   <div id="examShell">
     <div class="inspera-top">
-      <div style="display:flex; align-items:center; gap:14px;">
-        <span id="insperaExamTitle" style="font-weight:800; color:#0f172a;">IELTS Assessment</span>
-        <span id="insperaCandidateTag" style="font-size:12px; color:#64748b; background:#f1f5f9; padding:3px 10px; border-radius:999px;"></span>
+      <div class="inspera-top-left">
+        <span class="inspera-brand-logo">IELTS</span>
+        <span id="insperaExamTitle" style="font-weight:700; color:#111827;">IELTS Assessment</span>
+        <span id="insperaCandidateTag" style="font-size:12px; color:#4b5563; font-weight:400;"></span>
       </div>
       
-      <!-- CLEAN TOP AUDIO BAR -->
-      <div id="listeningAudioHeaderContainer" style="display: none; align-items: center; gap: 10px; background: #f8fafc; padding: 4px 12px; border-radius: 10px; border: 1px solid #cbd5e1;">
-        <span style="font-size: 12px; color: var(--emerald-accent); font-weight: 800;"><i class="fas fa-volume-up"></i> Audio Track:</span>
-        <audio id="examAudioPlayer" controls preload="auto" style="height: 32px; width: 320px;"></audio>
-        <iframe id="examDriveAudioIframe" allow="autoplay" style="display:none; width: 340px; height: 40px; border: none; border-radius: 6px; background: #0f172a;"></iframe>
-        <a id="examAudioFallbackLink" href="#" target="_blank" style="font-size: 11px; color: #2563eb; font-weight: 700; text-decoration: none; display: none;" title="Open External Player"><i class="fas fa-external-link-alt"></i></a>
+      <!-- MINIMALIST CENTER TIMER & AUDIO -->
+      <div style="display:flex; align-items:center; gap:16px;">
+        <span class="inspera-timer" id="insperaTimer">60:00</span>
+
+        <div id="listeningAudioHeaderContainer" style="display: none; align-items: center; gap: 8px; background: #f3f4f6; padding: 3px 10px; border-radius: 3px; border: 1px solid #d1d5db;">
+          <span style="font-size: 11.5px; color: #111827; font-weight: 700;"><i class="fas fa-volume-up"></i> Audio</span>
+          <audio id="examAudioPlayer" controls preload="auto" style="height: 28px; width: 280px;"></audio>
+          <iframe id="examDriveAudioIframe" allow="autoplay" style="display:none; width: 310px; height: 36px; border: none; border-radius: 2px; background: #111827;"></iframe>
+          <a id="examAudioFallbackLink" href="#" target="_blank" style="font-size: 11px; color: #111827; font-weight: 700; text-decoration: none; display: none;" title="Open Audio"><i class="fas fa-external-link-alt"></i></a>
+        </div>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span class="inspera-timer" id="insperaTimer">60:00</span>
-        <select id="examFontSizeSelect" onchange="changeExamFontSize(this.value)" style="background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; padding:5px 10px; border-radius:8px; font-size:12px; font-weight:600;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <select id="examFontSizeSelect" onchange="changeExamFontSize(this.value)" style="background:#fff; color:#111827; border:1px solid #9ca3af; padding:5px 8px; border-radius:3px; font-size:12px; font-weight:600;">
           <option value="15px">Standard Text</option>
           <option value="17px">Large Text</option>
           <option value="19px">Extra Large</option>
         </select>
-        <select id="examThemeSelect" onchange="changeExamTheme(this.value)" style="background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; padding:5px 10px; border-radius:8px; font-size:12px; font-weight:600;">
+        <select id="examThemeSelect" onchange="changeExamTheme(this.value)" style="background:#fff; color:#111827; border:1px solid #9ca3af; padding:5px 8px; border-radius:3px; font-size:12px; font-weight:600;">
           <option value="light">Black on White</option>
           <option value="dark">White on Black</option>
           <option value="yellow">Yellow on Black</option>
         </select>
-        <button class="btn btn-secondary teacher-item" id="btnToggleTeacherMode" onclick="toggleTeacherEditMode()">✏️ Edit Keys</button>
-        <button class="btn btn-secondary" onclick="exitExamShell()">Exit</button>
-        <button class="btn btn-emerald" id="btnSubmitExam" onclick="submitExam()">Submit Test</button>
+        <button class="inspera-flat-btn teacher-item" id="btnToggleTeacherMode" onclick="toggleTeacherEditMode()">Edit Keys</button>
+        <button class="inspera-flat-btn" onclick="exitExamShell()">Exit</button>
+        <button class="inspera-flat-btn primary" id="btnSubmitExam" onclick="submitExam()">Submit</button>
       </div>
     </div>
 
     <div class="inspera-instruction-banner" id="insperaInstructionBanner">
-      <span id="insperaPartInstructionText"><b>Part 1</b> — Read the text and answer the questions.</span>
-      <span style="font-size:12px; color:#64748b; font-weight:600;"><i class="fas fa-highlighter"></i> Select any text to highlight or clear notes</span>
+      <span id="insperaPartInstructionText"><b>Part 1</b> &nbsp; Read the text and answer the questions.</span>
+      <span style="font-size:12px; color:#4b5563;">Select text to highlight</span>
     </div>
 
     <div class="inspera-part-tabs" id="insperaPartTabs"></div>
@@ -786,14 +870,47 @@
     </div>
 
     <div id="selectionTooltip">
-      <button class="btn-hl-yellow" onclick="applyUserHighlight()"><i class="fas fa-highlighter"></i> Highlight</button>
-      <button onclick="removeUserHighlight()"><i class="fas fa-eraser"></i> Clear</button>
+      <button class="btn-hl-yellow" onclick="applyUserHighlight()">Highlight</button>
+      <button onclick="removeUserHighlight()">Clear</button>
     </div>
 
     <div class="progress-container">
-      <span style="font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase;" id="footerSectionLabel">Questions</span>
+      <span style="font-size: 12px; font-weight: 700; color: #111827;" id="footerSectionLabel">Part 1</span>
       <div class="progress-items" id="insperaFooterList"></div>
-      <button class="btn btn-emerald" id="btnSubmitBottom" onclick="submitExam()">Finish Test</button>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button class="inspera-flat-btn primary" id="btnSubmitBottom" onclick="submitExam()">Finish Test ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AI GRADER SETTINGS (GEMINI API KEY) -->
+  <div class="modal-overlay" id="aiConfigModal">
+    <div class="modal-window" style="width: 520px;">
+      <div class="modal-header">
+        <span>🤖 Gemini AI Writing Grader Configuration</span>
+        <button class="btn btn-secondary" onclick="closeModal('aiConfigModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Google Gemini API Key (From aistudio.google.com)</label>
+          <input type="password" id="aiApiKeyInput" class="form-input" placeholder="AIzaSy...">
+          <small style="color:#64748b; display:block; margin-top:4px;">Stored securely in your database/browser for automated IELTS Writing evaluation.</small>
+        </div>
+        <div class="form-group">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; text-transform:none; font-size:13.5px;">
+            <input type="checkbox" id="aiAutoGradeOnSubmit" style="width:17px; height:17px; accent-color:var(--emerald-accent);">
+            Automatically grade Writing with AI immediately when a student submits
+          </label>
+        </div>
+        <div class="form-group">
+          <label>Custom Examiner Instructions (Optional)</label>
+          <textarea id="aiCustomInstructions" class="form-input" style="height:75px;" placeholder="e.g. Provide feedback in both English and Vietnamese, and include a Band 8.0 sample rewrite..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('aiConfigModal')">Cancel</button>
+        <button class="btn btn-emerald" onclick="saveAiConfig()">Save AI Settings</button>
+      </div>
     </div>
   </div>
 
@@ -811,9 +928,9 @@
     </div>
   </div>
 
-  <!-- MODAL: TEACHER GRADE WRITING SUBMISSION -->
+  <!-- MODAL: TEACHER GRADE WRITING SUBMISSION (WITH AI AUTO-GRADE) -->
   <div class="modal-overlay" id="gradeWritingModal">
-    <div class="modal-window" style="width: 980px; height: 90vh;">
+    <div class="modal-window" style="width: 1040px; height: 90vh;">
       <div class="modal-header">
         <span id="gradeWritingTitle">Writing Submission & Teacher Feedback</span>
         <button class="btn btn-secondary" onclick="closeModal('gradeWritingModal')">Close</button>
@@ -829,19 +946,25 @@
             <div id="gradeTask2Text" style="white-space:pre-wrap; line-height:1.7; font-size:14px; background:#fff; padding:12px; border-radius:8px; border:1px solid #e2e8f0; min-height:180px;"></div>
           </div>
         </div>
-        <div style="width: 320px; background:#f8fafc; border:1px solid var(--inspera-border); border-radius:12px; padding:18px; display:flex; flex-direction:column; gap:14px;">
+        <div style="width: 360px; background:#f8fafc; border:1px solid var(--inspera-border); border-radius:12px; padding:18px; display:flex; flex-direction:column; gap:12px;">
           <input type="hidden" id="gradeSubmissionId">
           <div><b>Student:</b> <span id="gradeStudentName"></span></div>
           <div><b>Assessment:</b> <span id="gradeExamTitle"></span></div>
-          <div class="form-group">
+
+          <div id="teacherAiToolsBox" style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-emerald" id="btnRunAiGrade" style="flex:1; background:#2563eb;" onclick="runAiWritingEvaluation()">🤖 AI Auto-Grade</button>
+            <button type="button" class="btn btn-secondary" onclick="copyEssayPromptForGemini()" title="Copy full prompt & essay for Gemini Pro chat">📋 Copy Prompt</button>
+          </div>
+
+          <div class="form-group" style="margin-bottom:4px;">
             <label>Overall Band Score</label>
             <input type="text" id="gradeBandInput" class="form-input" placeholder="e.g. 6.5, 7.0, 7.5">
           </div>
-          <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
-            <label>Teacher's Feedback & Corrections</label>
-            <textarea id="gradeFeedbackInput" class="form-input" style="flex:1; min-height:160px; line-height:1.6;" placeholder="Enter detailed band descriptors, lexical notes, and grammar corrections..."></textarea>
+          <div class="form-group" style="flex:1; display:flex; flex-direction:column; margin-bottom:4px;">
+            <label>Examiner / AI Feedback (TA, CC, LR, GRA)</label>
+            <textarea id="gradeFeedbackInput" class="form-input" style="flex:1; min-height:180px; line-height:1.6;" placeholder="Enter detailed band descriptors, lexical notes, and grammar corrections..."></textarea>
           </div>
-          <button class="btn btn-emerald" style="width:100%; padding:10px;" onclick="saveWritingEvaluation()">Save Evaluation</button>
+          <button class="btn btn-emerald" id="btnSaveWritingEval" style="width:100%; padding:10px;" onclick="saveWritingEvaluation()">Save Evaluation</button>
         </div>
       </div>
     </div>
@@ -991,17 +1114,17 @@
     </div>
   </div>
 
-  <!-- MODAL: CREATE LISTENING TEST -->
+  <!-- MODAL: CREATE LISTENING TEST (SUPPORTS 4 PARTS OR SINGLE PART) -->
   <div class="modal-overlay" id="listeningEditorModal">
-    <div class="modal-window" style="width: 1060px;">
+    <div class="modal-window" style="width: 1080px;">
       <div class="modal-header">
-        <span>Listening Test Builder</span>
+        <span>Listening Test Builder (Supports Part 1–4 Full Test or Single Part)</span>
         <button class="btn btn-secondary" onclick="closeModal('listeningEditorModal')">✕</button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="editingListeningId">
         <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px;">
-          <div class="form-group"><label>Exam Title</label><input type="text" id="leTitle" class="form-input" placeholder="e.g. Cambridge 19 Listening Test 1 - Part 3"></div>
+          <div class="form-group"><label>Exam Title</label><input type="text" id="leTitle" class="form-input" placeholder="e.g. Cambridge 19 Listening Test 1"></div>
           <div class="form-group"><label>Duration (Minutes)</label><input type="number" id="leDuration" class="form-input" value="30"></div>
         </div>
         <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px;">
@@ -1028,6 +1151,14 @@
         </div>
         <div class="form-group"><label>Topic / Source</label><input type="text" id="leTopic" class="form-input" placeholder="e.g. Cam 19 Test 1 / Business"></div>
 
+        <!-- 4 PART SUBTABS FOR LISTENING -->
+        <div style="display: flex; gap: 8px; margin: 8px 0 12px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
+          <button type="button" class="btn btn-secondary active-subtab" id="subtab-lp1" onclick="switchListeningPartEditor(1)">Part 1</button>
+          <button type="button" class="btn btn-secondary" id="subtab-lp2" onclick="switchListeningPartEditor(2)">Part 2</button>
+          <button type="button" class="btn btn-secondary" id="subtab-lp3" onclick="switchListeningPartEditor(3)">Part 3</button>
+          <button type="button" class="btn btn-secondary" id="subtab-lp4" onclick="switchListeningPartEditor(4)">Part 4</button>
+        </div>
+
         <div class="template-toolbar">
           <span style="font-size:11.5px; font-weight:800; color:#065f46; width:100%; margin-bottom:2px; text-transform:uppercase;">
             ⚡ Insert Listening Question Templates:
@@ -1041,18 +1172,22 @@
           <button type="button" class="btn btn-emerald" onclick="autoGenerateKeysFromHtml('le')">🔍 Auto-Detect Questions</button>
         </div>
 
+        <div class="form-group">
+          <label>Part Title</label>
+          <input type="text" id="lePTitle" class="form-input" placeholder="e.g. Part 1: Questions 1–10">
+        </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
           <div class="form-group">
-            <label>Transcript HTML (Displayed on Left Panel during Review Mode)</label>
+            <label>Transcript HTML for this Part (Displayed on Left Panel during Review Mode)</label>
             <textarea id="leTranscript" class="form-input" style="height: 150px; font-family: monospace; font-size:12px;" placeholder="<p><b>Speaker:</b> Transcript text...</p>"></textarea>
           </div>
           <div class="form-group">
-            <label>Questions HTML (Full-Screen during Test)</label>
+            <label>Questions HTML for this Part (Full-Screen during Test)</label>
             <textarea id="leQuestions" class="form-input" style="height: 150px; font-family: monospace; font-size:12px;" placeholder="Insert question templates or paste HTML here..."></textarea>
           </div>
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
-          <div class="form-group"><label>Correct Keys (q21=B)</label><textarea id="leKeys" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;"></textarea></div>
+          <div class="form-group"><label>Correct Keys (q1=answer)</label><textarea id="leKeys" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;"></textarea></div>
           <div class="form-group"><label>Explanations</label><textarea id="leExps" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;"></textarea></div>
           <div class="form-group"><label>Evidence Quotes</label><textarea id="leEvis" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;"></textarea></div>
         </div>
@@ -1122,7 +1257,7 @@
     </div>
   </div>
 
-  <!-- SINGLE STUDENT MODAL (REGISTER OR EDIT STUDENT) -->
+  <!-- SINGLE STUDENT MODAL -->
   <div class="modal-overlay" id="studentModal">
     <div class="modal-window" style="width: 440px;">
       <div class="modal-header" id="studentModalTitle">Register Student Account</div>
@@ -1411,6 +1546,7 @@
         { id: 'c2', name: 'Foundation Morning' }
       ],
       savedVocab: {},
+      aiConfig: { apiKey: '', autoGrade: false, customPrompt: '' },
       readingExams: [ defaultShoppingExam ],
       listeningExams: [],
       writingExams: [
@@ -1446,6 +1582,7 @@
       if (!db.writingExams) db.writingExams = [];
       if (!db.results) db.results = [];
       if (!db.savedVocab) db.savedVocab = {};
+      if (!db.aiConfig) db.aiConfig = { apiKey: '', autoGrade: false, customPrompt: '' };
     }
 
     function initDatabaseListener() {
@@ -1595,6 +1732,115 @@
       closeModal('profileModal');
       checkSession();
       alert('Profile updated!');
+    }
+
+    /* ========================================================
+       GEMINI AI WRITING GRADER ENGINE
+       ======================================================== */
+    function getEffectiveGeminiKey() {
+      return (db.aiConfig && db.aiConfig.apiKey) || localStorage.getItem('AMURO_GEMINI_API_KEY') || '';
+    }
+
+    function openAiConfigModal() {
+      ensureArraysExist();
+      document.getElementById('aiApiKeyInput').value = getEffectiveGeminiKey();
+      document.getElementById('aiAutoGradeOnSubmit').checked = Boolean(db.aiConfig && db.aiConfig.autoGrade);
+      document.getElementById('aiCustomInstructions').value = (db.aiConfig && db.aiConfig.customPrompt) || '';
+      openModal('aiConfigModal');
+    }
+
+    function saveAiConfig() {
+      ensureArraysExist();
+      const key = document.getElementById('aiApiKeyInput').value.trim();
+      const autoG = document.getElementById('aiAutoGradeOnSubmit').checked;
+      const customP = document.getElementById('aiCustomInstructions').value.trim();
+
+      db.aiConfig = { apiKey: key, autoGrade: autoG, customPrompt: customP };
+      if (key) localStorage.setItem('AMURO_GEMINI_API_KEY', key);
+      persist();
+      closeModal('aiConfigModal');
+      alert('AI Grader configuration saved!');
+    }
+
+    function buildIeltsExaminerPrompt(wExam, submission) {
+      const hasT1 = Boolean(submission.task1 && submission.task1.trim());
+      const hasT2 = Boolean(submission.task2 && submission.task2.trim());
+      const t1Prompt = (wExam && wExam.task1 && wExam.task1.prompt) || 'Task 1 Academic Writing';
+      const t2Prompt = (wExam && wExam.task2 && wExam.task2.prompt) || 'Task 2 Academic Essay';
+      const customRule = (db.aiConfig && db.aiConfig.customPrompt) ? `\nAdditional Teacher Instructions: ${db.aiConfig.customPrompt}\n` : '';
+
+      return `You are acertified Senior IELTS Writing Examiner. Evaluate the following student writing submission strictly according to the official IELTS Writing Band Descriptors (Task Achievement / Task Response, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy).
+${customRule}
+${hasT1 ? `--- WRITING TASK 1 ---\nPrompt: ${t1Prompt}\nStudent Response:\n${submission.task1}\n` : ''}
+${hasT2 ? `--- WRITING TASK 2 ---\nPrompt: ${t2Prompt}\nStudent Response:\n${submission.task2}\n` : ''}
+
+Return your evaluation in JSON format with two fields:
+1. "band": string (e.g. "6.5" or "7.0" - overall band score rounded to nearest 0.5)
+2. "feedback": string (Detailed breakdown of the 4 criteria with individual band scores, specific quotes of grammar/lexical errors with corrections, and high-band vocabulary suggestions).`;
+    }
+
+    async function callGeminiWritingEvaluator(wExam, submission) {
+      const apiKey = getEffectiveGeminiKey();
+      if (!apiKey) throw new Error('Missing Gemini API Key. Click "🤖 AI Grader Config" in the top header to add your key.');
+
+      const promptText = buildIeltsExaminerPrompt(wExam, submission);
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }],
+          generationConfig: { responseMimeType: 'application/json' }
+        })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Gemini API Error (${response.status}): ${errText}`);
+      }
+
+      const data = await response.json();
+      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const parsed = JSON.parse(rawText);
+      return {
+        band: String(parsed.band || '6.0').replace('Band', '').trim(),
+        feedback: parsed.feedback || rawText
+      };
+    }
+
+    async function runAiWritingEvaluation() {
+      const resId = document.getElementById('gradeSubmissionId').value;
+      const res = (db.results || []).find(r => r.id === resId);
+      if (!res || !res.writingSubmission) return;
+
+      const btn = document.getElementById('btnRunAiGrade');
+      const origText = btn.innerHTML;
+      btn.innerHTML = '⏳ AI Grading...';
+      btn.disabled = true;
+
+      try {
+        const wExam = (db.writingExams || []).find(w => w.id === res.examId) || {};
+        const evaluation = await callGeminiWritingEvaluator(wExam, res.writingSubmission);
+        document.getElementById('gradeBandInput').value = `Band ${evaluation.band}`;
+        document.getElementById('gradeFeedbackInput').value = evaluation.feedback;
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+      }
+    }
+
+    function copyEssayPromptForGemini() {
+      const resId = document.getElementById('gradeSubmissionId').value;
+      const res = (db.results || []).find(r => r.id === resId);
+      if (!res || !res.writingSubmission) return;
+      const wExam = (db.writingExams || []).find(w => w.id === res.examId) || {};
+      const text = buildIeltsExaminerPrompt(wExam, res.writingSubmission);
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied full IELTS Examiner prompt & student essay to clipboard!');
+      });
     }
 
     /* DASHBOARD CONTROLLER */
@@ -1771,12 +2017,13 @@
         const clsNames = (!e.assignedClasses || e.assignedClasses.length === 0) ? 'All Classes' : e.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
         const catBadge = `<span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; margin-right:6px;">${e.category || 'Listening'}</span>`;
         const topBadge = e.topic ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700;">🏷️ ${e.topic}</span>` : '';
+        const partCount = e.passages ? e.passages.length : 1;
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><b>${e.title}</b><div style="margin-top:4px;">${catBadge}${topBadge}</div></td>
           <td>${e.duration} mins</td>
-          <td>Audio Track</td>
+          <td>${partCount} Part(s)</td>
           <td><span style="color: #64748b; font-weight:600;">${clsNames}</span></td>
           <td style="display:flex; gap:6px; flex-wrap:wrap;">
             <button class="btn btn-emerald" onclick="launchListeningExam('${e.id}')">Start Listening</button>
@@ -1980,7 +2227,6 @@
     function matchesDateFilter(resultItem, selectedDateStr) {
       if (!selectedDateStr) return true;
       if (resultItem.isoDate) return resultItem.isoDate === selectedDateStr;
-      // Fallback parse from timestamp or id (res_1729...)
       const idMatch = String(resultItem.id || '').match(/(\d{13})/);
       if (idMatch) {
         const dt = new Date(Number(idMatch[1]));
@@ -2009,7 +2255,6 @@
       const thead = document.getElementById('analyticsThead');
       if (!tbody || !thead) return;
 
-      // Sync class filter dropdown options
       const classSelect = document.getElementById('filterAnalyticsClass');
       if (classSelect) {
         const currentVal = classSelect.value || 'ALL';
@@ -2068,11 +2313,9 @@
         return;
       }
 
-      // GROUP BY STUDENT MODE
       thead.innerHTML = `<tr><th>Student Name (Click to view submissions)</th><th>Class</th><th>Submissions</th><th>Average / Latest Band</th><th>Latest Activity</th><th>Action</th></tr>`;
 
       const studentMap = new Map();
-      // Include registered students first
       (db.users || []).filter(u => u.role === 'student').forEach(u => {
         if (classFilter !== 'ALL' && u.classId !== classFilter) return;
         studentMap.set(u.name, { userObj: u, submissions: [] });
@@ -2106,7 +2349,6 @@
         const clsObj = data.userObj ? (db.classes || []).find(c => c.id === data.userObj.classId) : null;
         const isExpanded = (expandedAnalyticsStudent === stuName);
 
-        // Calculate average numeric band if available
         const numericBands = subs
           .map(s => parseFloat(String(s.band).replace('Band', '').trim()))
           .filter(n => !isNaN(n));
@@ -2195,8 +2437,10 @@
       document.getElementById('gradeWritingTitle').textContent = 'Review & Grade Student Writing';
       document.getElementById('gradeBandInput').readOnly = false;
       document.getElementById('gradeFeedbackInput').readOnly = false;
-      const saveBtn = document.querySelector('#gradeWritingModal .btn-emerald');
+      const saveBtn = document.getElementById('btnSaveWritingEval');
       if (saveBtn) saveBtn.style.display = 'block';
+      const aiTools = document.getElementById('teacherAiToolsBox');
+      if (aiTools) aiTools.style.display = 'flex';
 
       openModal('gradeWritingModal');
     }
@@ -2204,11 +2448,13 @@
     function openStudentViewWritingModal(resId) {
       openGradeWritingModal(resId);
       const isTeacher = activeUser && activeUser.role === 'teacher';
-      document.getElementById('gradeWritingTitle').textContent = isTeacher ? 'Review & Grade Student Writing' : 'Writing Submission & Teacher Feedback';
+      document.getElementById('gradeWritingTitle').textContent = isTeacher ? 'Review & Grade Student Writing' : 'Writing Submission & Examiner Feedback';
       document.getElementById('gradeBandInput').readOnly = !isTeacher;
       document.getElementById('gradeFeedbackInput').readOnly = !isTeacher;
-      const saveBtn = document.querySelector('#gradeWritingModal .btn-emerald');
+      const saveBtn = document.getElementById('btnSaveWritingEval');
       if (saveBtn) saveBtn.style.display = isTeacher ? 'block' : 'none';
+      const aiTools = document.getElementById('teacherAiToolsBox');
+      if (aiTools) aiTools.style.display = isTeacher ? 'flex' : 'none';
     }
 
     function saveWritingEvaluation() {
@@ -2227,7 +2473,7 @@
     }
 
     /* ========================================================
-       READING & LISTENING EXAM ENGINE
+       READING & LISTENING EXAM ENGINE (MULTI-PART SUPPORT)
        ======================================================== */
     function changeExamFontSize(size) {
       document.getElementById('insperaLeftPane').style.fontSize = size;
@@ -2354,7 +2600,8 @@
       activeExamType = 'reading';
       isReviewMode = false;
       isTeacherEditMode = false;
-      activePartNum = 1;
+      const firstPart = (activeExam.passages && activeExam.passages[0]) ? activeExam.passages[0].partNum : 1;
+      activePartNum = firstPart;
       userAnswers = {};
       selectedDragItem = null;
       secondsRemaining = (activeExam.duration || 60) * 60;
@@ -2362,11 +2609,11 @@
       document.getElementById('dashboardApp').style.display = 'none';
       document.getElementById('examShell').style.display = 'flex';
       document.getElementById('insperaExamTitle').textContent = activeExam.title;
-      document.getElementById('insperaCandidateTag').textContent = `Student: ${activeUser.name}`;
+      document.getElementById('insperaCandidateTag').textContent = `Candidate: ${activeUser.name}`;
       document.getElementById('btnSubmitExam').style.display = '';
       document.getElementById('btnSubmitBottom').style.display = '';
       document.getElementById('btnToggleTeacherMode').style.display = activeUser.role === 'teacher' ? '' : 'none';
-      document.getElementById('footerSectionLabel').textContent = 'Questions';
+      document.getElementById('footerSectionLabel').textContent = `Part ${activePartNum}`;
 
       renderPartPills();
       loadPassageView(activePartNum);
@@ -2383,7 +2630,8 @@
       activeExamType = 'listening';
       isReviewMode = false;
       isTeacherEditMode = false;
-      activePartNum = 1;
+      const firstPart = (activeExam.passages && activeExam.passages[0]) ? activeExam.passages[0].partNum : 1;
+      activePartNum = firstPart;
       userAnswers = {};
       selectedDragItem = null;
       secondsRemaining = (activeExam.duration || 30) * 60;
@@ -2391,15 +2639,15 @@
       document.getElementById('dashboardApp').style.display = 'none';
       document.getElementById('examShell').style.display = 'flex';
       document.getElementById('insperaExamTitle').textContent = activeExam.title;
-      document.getElementById('insperaCandidateTag').textContent = `Student: ${activeUser.name}`;
+      document.getElementById('insperaCandidateTag').textContent = `Candidate: ${activeUser.name}`;
       document.getElementById('btnSubmitExam').style.display = '';
       document.getElementById('btnSubmitBottom').style.display = '';
       document.getElementById('btnToggleTeacherMode').style.display = activeUser.role === 'teacher' ? '' : 'none';
-      document.getElementById('footerSectionLabel').textContent = 'Questions';
+      document.getElementById('footerSectionLabel').textContent = `Part ${activePartNum}`;
 
       setupHeaderAudioPlayer(activeExam.audioUrl);
       renderPartPills();
-      loadPassageView(1);
+      loadPassageView(activePartNum);
       buildFooterNav();
       setupResizer();
       setupInExamHighlightEngine();
@@ -2408,11 +2656,12 @@
 
     function renderPartPills() {
       const nav = document.getElementById('insperaPartTabs');
-      if (activeExamType === 'listening') {
-        nav.innerHTML = `<button class="part-pill active">${activeExam.category || 'Listening Section'}</button>`;
+      const passages = activeExam.passages || [];
+      if (!passages.length) {
+        nav.innerHTML = `<button class="part-pill active">Part 1</button>`;
         return;
       }
-      nav.innerHTML = (activeExam.passages || []).map(p => `
+      nav.innerHTML = passages.map(p => `
         <button class="part-pill ${p.partNum === activePartNum ? 'active' : ''}" onclick="switchExamPassage(${p.partNum})">
           Part ${p.partNum}
         </button>
@@ -2421,6 +2670,7 @@
 
     function switchExamPassage(partNum) {
       activePartNum = partNum;
+      document.getElementById('footerSectionLabel').textContent = `Part ${partNum}`;
       renderPartPills();
       loadPassageView(activePartNum);
       updateFooterNav();
@@ -2433,20 +2683,20 @@
       const resizer = document.getElementById('insperaResizer');
 
       document.getElementById('insperaPartInstructionText').innerHTML = activeExamType === 'listening'
-        ? (isReviewMode ? `<b>Listening Review Mode</b> — Compare your responses on the right with the audio transcript on the left.` : `<b>${activeExam.category || 'IELTS Listening'}</b> — Listen to the audio track and answer all questions below.`)
-        : `<b>Part ${partNum}</b> — Read the passage on the left and answer the questions on the right.`;
+        ? (isReviewMode ? `<b>Part ${partNum} (Review Mode)</b> &nbsp; Compare your responses on the right with the audio transcript on the left.` : `<b>Part ${partNum}</b> &nbsp; Listen to the audio and answer the questions below.`)
+        : `<b>Part ${partNum}</b> &nbsp; Read the text on the left and answer the questions on the right.`;
 
       if (activeExamType === 'listening' && !isReviewMode) {
         left.style.display = 'none';
         resizer.style.display = 'none';
         right.style.width = '100%';
-        right.innerHTML = `<div style="max-width: 960px; margin: 0 auto;"><h2 class="section-title">Questions</h2>${passage.questionsHtml || ''}</div>`;
+        right.innerHTML = `<div style="max-width: 960px; margin: 0 auto;"><h2 class="section-title">${passage.title || 'Questions'}</h2>${passage.questionsHtml || ''}</div>`;
       } else {
         left.style.display = 'block';
         resizer.style.display = 'flex';
         left.style.width = '50%';
         right.style.width = '50%';
-        left.innerHTML = `<h2 class="section-title">${activeExamType === 'listening' ? '🎧 Audio Transcript' : (passage.title || 'READING PASSAGE ' + partNum)}</h2><div class="passage-content">${passage.passageHtml || '<p>No transcript/passage text provided.</p>'}</div>`;
+        left.innerHTML = `<h2 class="section-title">${activeExamType === 'listening' ? 'Audio Transcript - Part ' + partNum : (passage.title || 'READING PASSAGE ' + partNum)}</h2><div class="passage-content">${passage.passageHtml || '<p>No transcript/passage text provided.</p>'}</div>`;
         right.innerHTML = `<h2 class="section-title">Questions</h2>${passage.questionsHtml || ''}`;
       }
 
@@ -2600,7 +2850,7 @@
           if (isReviewMode || item.classList.contains('used')) return;
           items.forEach(i => i.style.outline = 'none');
           selectedDragItem = { ans: item.dataset.answer, label: item.textContent.trim() };
-          item.style.outline = '2px solid #059669';
+          item.style.outline = '2px solid #2563eb';
         };
       });
 
@@ -2663,6 +2913,16 @@
       });
     }
 
+    function findPartForQuestionKey(qKey) {
+      const passages = activeExam.passages || [];
+      for (const p of passages) {
+        const html = (p.passageHtml || '') + '\n' + (p.questionsHtml || '');
+        const rx = new RegExp(`(name|data-target)=["']${qKey}["']|data-multi-pair=["'][^"']*\\b${qKey}\\b`, 'i');
+        if (rx.test(html)) return p.partNum;
+      }
+      return null;
+    }
+
     function buildFooterNav() {
       const container = document.getElementById('insperaFooterList');
       container.innerHTML = '';
@@ -2676,13 +2936,19 @@
         btn.id = `fpill_${k}`;
         btn.textContent = num;
         btn.onclick = () => {
-          const targetEl = document.querySelector(`#insperaSplitBox [data-question="${num}"]`)
-            || document.querySelector(`#insperaSplitBox [name="${k}"]`)
-            || document.querySelector(`#insperaSplitBox .drop-zone[data-target="${k}"]`);
-          if (targetEl) {
-            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            if (targetEl.focus) targetEl.focus();
+          const targetPart = findPartForQuestionKey(k);
+          if (targetPart && targetPart !== activePartNum) {
+            switchExamPassage(targetPart);
           }
+          setTimeout(() => {
+            const targetEl = document.querySelector(`#insperaSplitBox [data-question="${num}"]`)
+              || document.querySelector(`#insperaSplitBox [name="${k}"]`)
+              || document.querySelector(`#insperaSplitBox .drop-zone[data-target="${k}"]`);
+            if (targetEl) {
+              targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              if (targetEl.focus) targetEl.focus();
+            }
+          }, 50);
         };
         container.appendChild(btn);
       });
@@ -2718,10 +2984,9 @@
         const isRight = isAnswerCorrect(k);
         const qNum = k.replace('q','');
 
-        // 1. ALL DRAG & DROP FORMATS (MATCHING HEADINGS, SENTENCE ENDINGS, SUMMARY DRAG & DROP)
         const zone = scope.querySelector(`.drop-zone[data-target="${k}"]`) || scope.querySelector(`[data-target="${k}"]`);
         if (zone) {
-          zone.style.borderColor = isRight ? '#22c55e' : '#ef4444';
+          zone.style.borderColor = isRight ? '#16a34a' : '#dc2626';
           zone.style.background = isRight ? '#dcfce7' : '#fee2e2';
 
           const matchedUserItem = scope.querySelector(`.drag-item[data-answer="${userVal}"]`);
@@ -2734,9 +2999,9 @@
             div.className = `answer-indicator ${isRight ? 'correct' : 'incorrect'}`;
             div.setAttribute('data-ind', k);
             div.innerHTML = `
-              <b>Q${qNum}:</b> ${isRight ? '✅ Correct!' : '❌ Incorrect.'} Your answer: <b>${userDisplay}</b> | Key: <b>${keyDisplay}</b>
-              ${activeExam.explanations && activeExam.explanations[k] ? `<div style="font-size:12.5px; margin-top:4px; font-weight:normal; color:#1e293b;">💡 <b>Explanation:</b> ${activeExam.explanations[k]}</div>` : ''}
-              ${activeExam.evidences && activeExam.evidences[k] ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(activeExam.evidences[k])}')">🔍 Locate in Passage/Transcript</button>` : ''}
+              <b>Q${qNum}:</b> ${isRight ? '✓ Correct' : '✗ Incorrect'} &nbsp;|&nbsp; Your answer: <b>${userDisplay}</b> &nbsp;|&nbsp; Key: <b>${keyDisplay}</b>
+              ${activeExam.explanations && activeExam.explanations[k] ? `<div style="font-size:12.5px; margin-top:4px; font-weight:normal; color:#111827;"><b>Explanation:</b> ${activeExam.explanations[k]}</div>` : ''}
+              ${activeExam.evidences && activeExam.evidences[k] ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(activeExam.evidences[k])}')">Locate Evidence</button>` : ''}
             `;
 
             const inLeftPassage = Boolean(zone.closest('#insperaLeftPane'));
@@ -2756,16 +3021,15 @@
           return;
         }
 
-        // 2. OTHER QUESTION FORMATS (MCQ, TFNG, INLINE GAP-FILL, MATRIX)
         let target = scope.querySelector(`[data-question="${qNum}"]`) || scope.querySelector(`[name="${k}"]`)?.closest('.question') || scope.querySelector(`[name="${k}"]`)?.parentNode;
         if (target && !scope.querySelector(`.answer-indicator[data-ind="${k}"]`)) {
           const div = document.createElement('div');
           div.className = `answer-indicator ${isRight ? 'correct' : 'incorrect'}`;
           div.setAttribute('data-ind', k);
           div.innerHTML = `
-            <b>Q${qNum}:</b> ${isRight ? '✅ Correct!' : '❌ Incorrect.'} Your answer: <b>${userVal || '(Blank)'}</b> | Key: <b>${keyVal}</b>
-            ${activeExam.explanations && activeExam.explanations[k] ? `<div style="font-size:12.5px; margin-top:4px; font-weight:normal; color:#1e293b;">💡 <b>Explanation:</b> ${activeExam.explanations[k]}</div>` : ''}
-            ${activeExam.evidences && activeExam.evidences[k] ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(activeExam.evidences[k])}')">🔍 Locate in Passage/Transcript</button>` : ''}
+            <b>Q${qNum}:</b> ${isRight ? '✓ Correct' : '✗ Incorrect'} &nbsp;|&nbsp; Your answer: <b>${userVal || '(Blank)'}</b> &nbsp;|&nbsp; Key: <b>${keyVal}</b>
+            ${activeExam.explanations && activeExam.explanations[k] ? `<div style="font-size:12.5px; margin-top:4px; font-weight:normal; color:#111827;"><b>Explanation:</b> ${activeExam.explanations[k]}</div>` : ''}
+            ${activeExam.evidences && activeExam.evidences[k] ? `<button class="btn-locate" onclick="locateEvidenceSnippet('${encodeURIComponent(activeExam.evidences[k])}')">Locate Evidence</button>` : ''}
           `;
           if (target.tagName === 'TR') {
             (target.closest('.question-group') || target.closest('table').parentNode).appendChild(div);
@@ -2809,7 +3073,7 @@
     function toggleTeacherEditMode() {
       isTeacherEditMode = !isTeacherEditMode;
       const btn = document.getElementById('btnToggleTeacherMode');
-      btn.textContent = isTeacherEditMode ? '✅ Done Editing' : '✏️ Edit Keys';
+      btn.textContent = isTeacherEditMode ? 'Done Editing' : 'Edit Keys';
       loadPassageView(activePartNum);
     }
 
@@ -2825,7 +3089,7 @@
           const badge = document.createElement('span');
           badge.className = 'teacher-edit-badge';
           badge.setAttribute('data-edit', k);
-          badge.textContent = `✏️ Edit ${k.toUpperCase()}`;
+          badge.textContent = `Edit ${k.toUpperCase()}`;
           badge.onclick = (e) => {
             e.stopPropagation();
             openTeacherEditModal(k);
@@ -2933,23 +3197,23 @@
       document.getElementById('dashboardApp').style.display = 'none';
       document.getElementById('examShell').style.display = 'flex';
       document.getElementById('insperaExamTitle').textContent = activeExam.title;
-      document.getElementById('insperaCandidateTag').textContent = `Student: ${activeUser.name}`;
+      document.getElementById('insperaCandidateTag').textContent = `Candidate: ${activeUser.name}`;
       document.getElementById('btnToggleTeacherMode').style.display = 'none';
       document.getElementById('btnSubmitExam').style.display = '';
       document.getElementById('btnSubmitBottom').style.display = '';
-      document.getElementById('footerSectionLabel').textContent = 'Writing Parts';
+      document.getElementById('footerSectionLabel').textContent = 'Writing';
 
       const topTabs = document.getElementById('insperaPartTabs');
       topTabs.innerHTML = `
-        ${hasT1 ? `<button class="part-pill ${activePartNum === 1 ? 'active' : ''}" id="wtab_1" onclick="switchWritingTask(1)">Part 1 (Task 1)</button>` : ''}
-        ${hasT2 ? `<button class="part-pill ${activePartNum === 2 ? 'active' : ''}" id="wtab_2" onclick="switchWritingTask(2)">Part 2 (Task 2)</button>` : ''}
+        ${hasT1 ? `<button class="part-pill ${activePartNum === 1 ? 'active' : ''}" id="wtab_1" onclick="switchWritingTask(1)">Part 1</button>` : ''}
+        ${hasT2 ? `<button class="part-pill ${activePartNum === 2 ? 'active' : ''}" id="wtab_2" onclick="switchWritingTask(2)">Part 2</button>` : ''}
       `;
 
       const footerList = document.getElementById('insperaFooterList');
       footerList.innerHTML = `
-        ${hasT1 ? `<button class="progress-item ${activePartNum === 1 ? 'current' : ''}" id="wfoot_1" onclick="switchWritingTask(1)" style="min-width:85px; height:32px;">Part 1</button>` : ''}
-        ${hasT2 ? `<button class="progress-item ${activePartNum === 2 ? 'current' : ''}" id="wfoot_2" onclick="switchWritingTask(2)" style="min-width:85px; height:32px;">Part 2</button>` : ''}
-        <span id="writingWordCountDisplay" style="margin-left: 20px; font-weight: 700; color: #1e293b; font-size: 14px;">Words: 0</span>
+        ${hasT1 ? `<button class="progress-item ${activePartNum === 1 ? 'current' : ''}" id="wfoot_1" onclick="switchWritingTask(1)" style="min-width:75px; height:28px;">Part 1</button>` : ''}
+        ${hasT2 ? `<button class="progress-item ${activePartNum === 2 ? 'current' : ''}" id="wfoot_2" onclick="switchWritingTask(2)" style="min-width:75px; height:28px;">Part 2</button>` : ''}
+        <span id="writingWordCountDisplay" style="margin-left: 16px; font-weight: 700; color: #111827; font-size: 13px;">Word count: 0</span>
       `;
 
       loadWritingWorkspace(activePartNum);
@@ -2999,36 +3263,32 @@
       right.style.width = '50%';
 
       document.getElementById('insperaPartInstructionText').innerHTML = isTask1
-        ? `<b>Academic Writing Part 1</b> — Spend about 20 minutes on this task. Write at least <b>150 words</b>.`
-        : `<b>Academic Writing Part 2</b> — Spend about 40 minutes on this task. Write at least <b>250 words</b>.`;
+        ? `<b>Part 1</b> &nbsp; You should spend about 20 minutes on this task. Write at least 150 words.`
+        : `<b>Part 2</b> &nbsp; You should spend about 40 minutes on this task. Write at least 250 words.`;
 
       left.innerHTML = `
         <h2 class="section-title">Writing Task ${taskNum}</h2>
-        <div style="font-size: 15.5px; line-height: 1.7; margin-bottom: 18px; padding: 16px; background: #f8fafc; border-left: 4px solid var(--emerald-accent); border-radius: 8px;">
+        <div style="font-size: 15px; line-height: 1.7; margin-bottom: 18px; color: #111827;">
           ${taskData.prompt}
         </div>
         ${isTask1 && taskData.image ? `
-          <div style="margin-top: 14px; text-align: center;">
-            <img src="${taskData.image}" style="max-width: 100%; border: 1px solid var(--inspera-border); border-radius: 10px; cursor: zoom-in;" alt="Task 1 Visual" onclick="window.open(this.src, '_blank')">
+          <div style="margin-top: 14px;">
+            <img src="${taskData.image}" style="max-width: 100%; border: 1px solid #9ca3af;" alt="Task 1 Visual">
           </div>
         ` : ''}
       `;
 
       right.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <span style="font-weight:700; color:#475569;">Student Response Sheet</span>
-          <span id="inlineWordBadge" style="font-weight:800; color:var(--emerald-accent); background:#ecfdf5; padding:4px 12px; border-radius:999px; border:1px solid #a7f3d0;">Word Count: 0</span>
-        </div>
         <textarea 
           id="writingEditor" 
-          class="form-input" 
           spellcheck="false"
           autocorrect="off"
           autocapitalize="off"
-          style="width: 100%; height: calc(100vh - 230px); font-size: 15.5px; line-height: 1.75; padding: 16px; resize: none; outline: none; border-radius: 12px;"
-          placeholder="Type your response here..."
+          style="width: 100%; height: calc(100vh - 210px); font-size: 15px; line-height: 1.7; padding: 14px; resize: none; outline: none; border: 1px solid #4b5563; border-radius: 2px;"
+          placeholder="Type your answer here..."
           oninput="handleWritingInput(this.value)"
         >${savedText}</textarea>
+        <div style="margin-top:8px; font-size:13px; font-weight:700; color:#111827;" id="inlineWordBadge">Word count: 0</div>
       `;
 
       updateWordCountDisplay(savedText);
@@ -3044,12 +3304,12 @@
       const words = text.trim() ? text.trim().split(/\s+/).length : 0;
       const display = document.getElementById('writingWordCountDisplay');
       const inlineBadge = document.getElementById('inlineWordBadge');
-      if (display) display.textContent = `Words: ${words}`;
-      if (inlineBadge) inlineBadge.textContent = `Word Count: ${words}`;
+      if (display) display.textContent = `Word count: ${words}`;
+      if (inlineBadge) inlineBadge.textContent = `Word count: ${words}`;
     }
 
     /* ========================================================
-       SUBMISSION & SCORING
+       SUBMISSION & SCORING (WITH AUTO AI WRITING GRADING)
        ======================================================== */
     function getTodayIsoString() {
       const now = new Date();
@@ -3059,7 +3319,7 @@
       return `${yyyy}-${mm}-${dd}`;
     }
 
-    function submitExam(forceSubmit = false) {
+    async function submitExam(forceSubmit = false) {
       if (!forceSubmit && !confirm('Are you sure you want to submit your test now?')) return;
       clearInterval(examTimer);
 
@@ -3073,25 +3333,50 @@
         const w1Count = writingAnswers.task1.trim() ? writingAnswers.task1.trim().split(/\s+/).length : 0;
         const w2Count = writingAnswers.task2.trim() ? writingAnswers.task2.trim().split(/\s+/).length : 0;
 
-        if (!db.results) db.results = [];
-        db.results.push({
+        let finalBand = 'Submitted';
+        let finalFeedback = '';
+
+        // Auto-grade with Gemini AI if enabled and API key is configured
+        if (db.aiConfig && db.aiConfig.autoGrade && getEffectiveGeminiKey()) {
+          const submitBtn = document.getElementById('btnSubmitExam');
+          if (submitBtn) submitBtn.textContent = 'AI Grading...';
+          try {
+            const evalRes = await callGeminiWritingEvaluator(activeExam, writingAnswers);
+            finalBand = `Band ${evalRes.band}`;
+            finalFeedback = evalRes.feedback;
+          } catch (aiErr) {
+            console.warn('Auto AI grading skipped:', aiErr.message);
+          } finally {
+            if (submitBtn) submitBtn.textContent = 'Submit';
+          }
+        }
+
+        const newRes = {
           id: 'res_w_' + Date.now(),
           examId: activeExam.id,
           userName: activeUser.name,
           examTitle: activeExam.title,
           score: `T1: ${w1Count}w | T2: ${w2Count}w`,
-          band: 'Submitted',
-          teacherFeedback: '',
+          band: finalBand,
+          teacherFeedback: finalFeedback,
           writingSubmission: { ...writingAnswers },
           isoDate: getTodayIsoString(),
           timestamp: new Date().toLocaleString()
-        });
+        };
+
+        if (!db.results) db.results = [];
+        db.results.push(newRes);
         persist();
 
-        alert(`Writing assessment submitted!\n- Task 1: ${w1Count} words\n- Task 2: ${w2Count} words`);
         document.getElementById('examShell').style.display = 'none';
         document.getElementById('dashboardApp').style.display = 'flex';
         renderDashboard();
+
+        if (finalFeedback) {
+          openStudentViewWritingModal(newRes.id);
+        } else {
+          alert(`Writing assessment submitted!\n- Task 1: ${w1Count} words\n- Task 2: ${w2Count} words`);
+        }
         return;
       }
 
@@ -3179,10 +3464,13 @@
     }
 
     /* ========================================================
-       BUILDER CONTROLLER & TEMPLATE GENERATOR (READING + LISTENING)
+       BUILDER CONTROLLER & TEMPLATE GENERATOR (READING + LISTENING 4 PARTS)
        ======================================================== */
     let passageDrafts = { 1: {}, 2: {}, 3: {} };
     let currentDraftTab = 1;
+
+    let listeningPartDrafts = { 1: {}, 2: {}, 3: {}, 4: {} };
+    let currentListeningDraftTab = 1;
 
     function insertQuestionTemplate(type, mode = 're') {
       const qBox = document.getElementById(mode === 'le' ? 'leQuestions' : 'rePQuestionsHtml');
@@ -3234,7 +3522,7 @@
         snippet = `\n<div class="question-group">
   <div class="question-group-title">Questions 1–5</div>
   <p>Complete the notes below. Write <strong>ONE WORD AND/OR A NUMBER</strong> for each answer.</p>
-  <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:16px; line-height:2.2;">
+  <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:4px; padding:16px; line-height:2.2;">
     <p>• First note with blank <input type="text" class="input-field inline-input" name="q1" placeholder="1" autocomplete="off"> inside the sentence.</p>
     <p>• Second note with blank <input type="text" class="input-field inline-input" name="q2" placeholder="2" autocomplete="off"> inside the sentence.</p>
   </div>
@@ -3289,9 +3577,9 @@
   <div class="question-group-title">Questions 15–17: Map / Diagram Labelling</div>
   <p>Label the map/diagram below. Write the correct letter, <strong>A–G</strong>, or word next to questions 15–17.</p>
   <div style="margin: 14px 0; text-align: center;">
-    <img src="PASTE_YOUR_MAP_OR_DIAGRAM_IMAGE_URL_HERE" style="max-width: 100%; max-height: 420px; border: 1px solid #cbd5e1; border-radius: 10px;" alt="Map / Diagram">
+    <img src="PASTE_YOUR_MAP_OR_DIAGRAM_IMAGE_URL_HERE" style="max-width: 100%; max-height: 420px; border: 1px solid #cbd5e1; border-radius: 4px;" alt="Map / Diagram">
   </div>
-  <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:16px; line-height:2.4;">
+  <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:4px; padding:16px; line-height:2.4;">
     <div><span class="q-badge">15</span> Library Entrance: <input type="text" class="input-field inline-input" name="q15" placeholder="15" autocomplete="off"></div>
     <div><span class="q-badge">16</span> Main Lecture Hall: <input type="text" class="input-field inline-input" name="q16" placeholder="16" autocomplete="off"></div>
     <div><span class="q-badge">17</span> Student Cafeteria: <input type="text" class="input-field inline-input" name="q17" placeholder="17" autocomplete="off"></div>
@@ -3306,7 +3594,10 @@
       const foundKeys = new Set();
       let combinedHtml = '';
       if (mode === 'le') {
-        combinedHtml = document.getElementById('leQuestions').value;
+        saveActiveListeningDraftCard(currentListeningDraftTab);
+        [1, 2, 3, 4].forEach(pNum => {
+          combinedHtml += (listeningPartDrafts[pNum]?.passageHtml || '') + '\n' + (listeningPartDrafts[pNum]?.questionsHtml || '');
+        });
       } else {
         saveActiveDraftCards(currentDraftTab);
         [1, 2, 3].forEach(pNum => {
@@ -3525,20 +3816,47 @@
     }
 
     /* ========================================================
-       LISTENING TEST CRUD
+       LISTENING TEST CRUD (4 PARTS SUPPORT)
        ======================================================== */
+    function switchListeningPartEditor(pNum) {
+      saveActiveListeningDraftCard(currentListeningDraftTab);
+      currentListeningDraftTab = pNum;
+      [1, 2, 3, 4].forEach(n => {
+        const btn = document.getElementById(`subtab-lp${n}`);
+        if (btn) btn.classList.toggle('active-subtab', n === pNum);
+      });
+      loadListeningDraftToEditor(pNum);
+    }
+
+    function saveActiveListeningDraftCard(pNum) {
+      listeningPartDrafts[pNum] = {
+        title: document.getElementById('lePTitle').value.trim(),
+        passageHtml: document.getElementById('leTranscript').value.trim(),
+        questionsHtml: document.getElementById('leQuestions').value.trim()
+      };
+    }
+
+    function loadListeningDraftToEditor(pNum) {
+      const d = listeningPartDrafts[pNum] || {};
+      document.getElementById('lePTitle').value = d.title || `Part ${pNum}`;
+      document.getElementById('leTranscript').value = d.passageHtml || '';
+      document.getElementById('leQuestions').value = d.questionsHtml || '';
+    }
+
     function openListeningEditorModal() {
       document.getElementById('editingListeningId').value = '';
+      listeningPartDrafts = { 1: {}, 2: {}, 3: {}, 4: {} };
       document.getElementById('leTitle').value = '';
       document.getElementById('leDuration').value = 30;
       document.getElementById('leAudioUrl').value = '';
       document.getElementById('leCategory').value = 'Listening Full';
       document.getElementById('leTopic').value = '';
-      document.getElementById('leTranscript').value = '';
-      document.getElementById('leQuestions').value = '';
       document.getElementById('leKeys').value = '';
       document.getElementById('leExps').value = '';
       document.getElementById('leEvis').value = '';
+      currentListeningDraftTab = 1;
+      [1, 2, 3, 4].forEach(n => document.getElementById(`subtab-lp${n}`)?.classList.toggle('active-subtab', n === 1));
+      loadListeningDraftToEditor(1);
       openModal('listeningEditorModal');
     }
 
@@ -3551,24 +3869,35 @@
       document.getElementById('leAudioUrl').value = exam.audioUrl || '';
       document.getElementById('leCategory').value = exam.category || 'Listening Full';
       document.getElementById('leTopic').value = exam.topic || '';
-      const p = (exam.passages || [])[0] || {};
-      document.getElementById('leTranscript').value = p.passageHtml || '';
-      document.getElementById('leQuestions').value = p.questionsHtml || '';
+
+      listeningPartDrafts = { 1: {}, 2: {}, 3: {}, 4: {} };
+      (exam.passages || []).forEach(p => {
+        const pNum = p.partNum || 1;
+        listeningPartDrafts[pNum] = {
+          title: p.title || `Part ${pNum}`,
+          passageHtml: p.passageHtml || '',
+          questionsHtml: p.questionsHtml || ''
+        };
+      });
+
       document.getElementById('leKeys').value = Object.keys(exam.correctAnswers || {}).map(k => `${k}=${exam.correctAnswers[k]}`).join('\n');
       document.getElementById('leExps').value = Object.keys(exam.explanations || {}).map(k => `${k}=${exam.explanations[k]}`).join('\n');
       document.getElementById('leEvis').value = Object.keys(exam.evidences || {}).map(k => `${k}=${exam.evidences[k]}`).join('\n');
+
+      currentListeningDraftTab = 1;
+      [1, 2, 3, 4].forEach(n => document.getElementById(`subtab-lp${n}`)?.classList.toggle('active-subtab', n === 1));
+      loadListeningDraftToEditor(1);
       openModal('listeningEditorModal');
     }
 
     function saveListeningExam() {
+      saveActiveListeningDraftCard(currentListeningDraftTab);
       const editId = document.getElementById('editingListeningId').value;
       const title = document.getElementById('leTitle').value.trim();
       const duration = Number(document.getElementById('leDuration').value) || 30;
       const audioUrl = document.getElementById('leAudioUrl').value.trim();
       const category = document.getElementById('leCategory').value;
       const topic = document.getElementById('leTopic').value.trim();
-      const transcript = document.getElementById('leTranscript').value.trim();
-      const questionsHtml = document.getElementById('leQuestions').value.trim();
       const rawKeys = document.getElementById('leKeys').value.trim();
       const rawExps = document.getElementById('leExps').value.trim();
       const rawEvis = document.getElementById('leEvis').value.trim();
@@ -3594,6 +3923,21 @@
         if (idx > 0) evidences[line.substring(0, idx).trim()] = line.substring(idx + 1).trim();
       });
 
+      const passages = [];
+      [1, 2, 3, 4].forEach(pNum => {
+        const d = listeningPartDrafts[pNum];
+        if (d && (d.questionsHtml || d.passageHtml)) {
+          passages.push({
+            partNum: pNum,
+            title: d.title || `Part ${pNum}`,
+            passageHtml: d.passageHtml || '<p>No transcript provided for this part.</p>',
+            questionsHtml: d.questionsHtml || ''
+          });
+        }
+      });
+
+      if (!passages.length) return alert('Please enter questions for at least one Listening Part!');
+
       const examObj = {
         id: editId || ('le_' + Date.now()),
         title,
@@ -3605,7 +3949,7 @@
         correctAnswers,
         explanations,
         evidences,
-        passages: [{ partNum: 1, title: 'Listening Transcript', passageHtml: transcript || '<p>No transcript provided.</p>', questionsHtml }]
+        passages
       };
 
       if (!db.listeningExams) db.listeningExams = [];
@@ -3775,7 +4119,6 @@
         stu.pass = pass;
         stu.classId = classId;
 
-        // Update student name across past submissions so history stays linked
         if (oldName && oldName !== name) {
           (db.results || []).forEach(r => {
             if (r.userName === oldName) r.userName = name;
