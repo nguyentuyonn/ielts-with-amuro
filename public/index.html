@@ -1585,6 +1585,8 @@
       if (!db.aiConfig) db.aiConfig = { apiKey: '', autoGrade: false, customPrompt: '' };
     }
 
+    let CLOUD_DB = null;
+
     function initDatabaseListener() {
       try {
         const cached = localStorage.getItem('AMURO_IELTS_DB_BACKUP');
@@ -1607,12 +1609,19 @@
         }
       });
 
-      if (CLOUD_DOC) {
-        CLOUD_DOC.onSnapshot((doc) => {
+      if (firebase && firebase.firestore) {
+        const firestore = firebase.firestore();
+        CLOUD_DB = firestore;
+        
+        // Đồng bộ thời gian thực từ các collection riêng biệt
+        firestore.collection('suite_meta').doc('core').onSnapshot((doc) => {
           if (doc.exists) {
-            const cloudData = doc.data();
-            if (cloudData && cloudData.users) {
-              db = cloudData;
+            const data = doc.data();
+            if (data && data.users) {
+              db.users = data.users || db.users;
+              db.classes = data.classes || db.classes;
+              db.savedVocab = data.savedVocab || db.savedVocab;
+              db.aiConfig = data.aiConfig || db.aiConfig;
               ensureArraysExist();
               localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
               setSyncStatus('Cloud Real-Time Active', true);
@@ -1625,25 +1634,33 @@
                 renderDashboard();
               }
             }
-          } else {
-            persist();
           }
-        }, (err) => {
-          console.warn('Firestore Realtime fallback:', err.message);
-          setSyncStatus('Local Sync Active', false);
         });
+
+        // Tải danh sách Listening Exams từ collection riêng để tránh tràn 1MB
+        firestore.collection('suite_listening').get().then(snapshot => {
+          if (!snapshot.empty) {
+            const remoteListening = [];
+            snapshot.forEach(d => remoteListening.push(d.data()));
+            if (remoteListening.length > 0) {
+              db.listeningExams = remoteListening;
+              renderDashboard();
+            }
+          }
+        }).catch(err => console.warn('Listening fetch sync:', err));
       }
     }
 
     async function persist() {
       ensureArraysExist();
       try {
-        // Lưu trữ cơ bản vào localStorage
         const lightDb = {
           users: db.users,
           classes: db.classes,
           savedVocab: db.savedVocab,
           aiConfig: db.aiConfig,
+          readingExams: db.readingExams,
+          writingExams: db.writingExams,
           results: (db.results || []).slice(-50)
         };
         localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(lightDb));
@@ -1651,27 +1668,33 @@
         console.warn('LocalStorage quota warning:', e);
       }
 
-      if (CLOUD_DOC) {
+      if (CLOUD_DB) {
         setSyncStatus('Syncing...', true);
         try {
-          // Tách riêng các phần nặng để tránh vượt quá 1MB của một Document Firebase
-          const payload = {
+          // 1. Lưu thông tin chung vào doc 'core'
+          await CLOUD_DB.collection('suite_meta').doc('core').set({
             users: db.users,
             classes: db.classes,
             savedVocab: db.savedVocab || {},
             aiConfig: db.aiConfig || {},
             readingExams: db.readingExams || [],
-            listeningExams: db.listeningExams || [],
             writingExams: db.writingExams || [],
             results: (db.results || []).slice(-50)
-          };
-          
-          await CLOUD_DOC.set(payload);
+          });
+
+          // 2. Lưu từng bài Listening thành các document riêng biệt trong collection 'suite_listening'
+          const listeningList = db.listeningExams || [];
+          for (const item of listeningList) {
+            if (item && item.id) {
+              await CLOUD_DB.collection('suite_listening').doc(item.id).set(item);
+            }
+          }
+
           setSyncStatus('Cloud Real-Time Active', true);
         } catch (err) {
-          console.error('Firestore save error:', err);
-          setSyncStatus('⚠️ Cloud Sync Error (Data too large)', false);
-          alert('Cảnh báo: Dữ liệu đang vượt quá giới hạn 1MB của một bản ghi Firebase. Anh hãy rút gọn bớt các đoạn văn bản transcript quá dài hoặc xóa bớt lịch sử kết quả cũ!');
+          console.error('Firestore distributed save error:', err);
+          setSyncStatus('⚠️ Cloud Sync Error', false);
+          alert('Lỗi đồng bộ Cloud: Dữ liệu bài thi quá lớn. Anh hãy kiểm tra lại kết nối mạng.');
         }
       }
     }
