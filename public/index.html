@@ -1661,28 +1661,27 @@
           aiConfig: db.aiConfig,
           readingExams: db.readingExams,
           writingExams: db.writingExams,
-          results: (db.results || []).slice(-50)
+          results: (db.results || []).slice(-40)
         };
         localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(lightDb));
-      } catch (e) {
-        console.warn('LocalStorage quota warning:', e);
-      }
+      } catch (e) {}
 
-      if (CLOUD_DB) {
+      if (CLOUD_DOC && CLOUD_DB) {
         setSyncStatus('Syncing...', true);
         try {
-          // 1. Lưu thông tin chung vào doc 'core'
-          await CLOUD_DB.collection('suite_meta').doc('core').set({
+          // 1. Lưu phần chung (Học sinh, Lớp, Reading, Writing) vào bản ghi chính (đã được lược bớt listening để siêu nhẹ)
+          const corePayload = {
             users: db.users,
             classes: db.classes,
             savedVocab: db.savedVocab || {},
             aiConfig: db.aiConfig || {},
             readingExams: db.readingExams || [],
             writingExams: db.writingExams || [],
-            results: (db.results || []).slice(-50)
-          });
+            results: (db.results || []).slice(-40)
+          };
+          await CLOUD_DOC.set(corePayload);
 
-          // 2. Lưu từng bài Listening thành các document riêng biệt trong collection 'suite_listening'
+          // 2. Lưu từng bài Listening thành các document độc lập trong collection 'suite_listening'
           const listeningList = db.listeningExams || [];
           for (const item of listeningList) {
             if (item && item.id) {
@@ -1692,10 +1691,19 @@
 
           setSyncStatus('Cloud Real-Time Active', true);
         } catch (err) {
-          console.error('Firestore distributed save error:', err);
+          console.error('Distributed save error:', err);
           setSyncStatus('⚠️ Cloud Sync Error', false);
-          alert('Lỗi đồng bộ Cloud: Dữ liệu bài thi quá lớn. Anh hãy kiểm tra lại kết nối mạng.');
+          alert('Cảnh báo: Dữ liệu bài thi đang quá lớn. Anh hãy kiểm tra lại kết nối mạng.');
         }
+      } else if (CLOUD_DOC) {
+        // Fallback nếu dùng 1 doc đơn
+        const cleanData = JSON.parse(JSON.stringify(db));
+        if (cleanData.results && cleanData.results.length > 40) cleanData.results = cleanData.results.slice(-40);
+        CLOUD_DOC.set(cleanData).then(() => {
+          setSyncStatus('Cloud Real-Time Active', true);
+        }).catch(err => {
+          setSyncStatus('Saved Locally', false);
+        });
       }
     }
 
