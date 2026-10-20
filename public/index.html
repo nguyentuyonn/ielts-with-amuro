@@ -1635,34 +1635,44 @@
       }
     }
 
-    function persist() {
+    async function persist() {
       ensureArraysExist();
       try {
-        // Chỉ lưu các phần dữ liệu cốt lõi vào LocalStorage để tiết kiệm dung lượng tối đa
+        // Lưu trữ cơ bản vào localStorage
         const lightDb = {
           users: db.users,
           classes: db.classes,
           savedVocab: db.savedVocab,
           aiConfig: db.aiConfig,
-          readingExams: db.readingExams,
-          listeningExams: db.listeningExams,
-          writingExams: db.writingExams,
-          results: (db.results || []).slice(-100) // Chỉ giữ lại 100 kết quả gần nhất để nhẹ bộ nhớ
+          results: (db.results || []).slice(-50)
         };
         localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(lightDb));
       } catch (e) {
-        console.warn('LocalStorage quota reached, relying on cloud sync:', e);
+        console.warn('LocalStorage quota warning:', e);
       }
 
       if (CLOUD_DOC) {
         setSyncStatus('Syncing...', true);
-        const cleanData = JSON.parse(JSON.stringify(db));
-        CLOUD_DOC.set(cleanData).then(() => {
+        try {
+          // Tách riêng các phần nặng để tránh vượt quá 1MB của một Document Firebase
+          const payload = {
+            users: db.users,
+            classes: db.classes,
+            savedVocab: db.savedVocab || {},
+            aiConfig: db.aiConfig || {},
+            readingExams: db.readingExams || [],
+            listeningExams: db.listeningExams || [],
+            writingExams: db.writingExams || [],
+            results: (db.results || []).slice(-50)
+          };
+          
+          await CLOUD_DOC.set(payload);
           setSyncStatus('Cloud Real-Time Active', true);
-        }).catch(err => {
-          console.error('Failed to sync to Firestore:', err);
-          setSyncStatus('Saved Locally', false);
-        });
+        } catch (err) {
+          console.error('Firestore save error:', err);
+          setSyncStatus('⚠️ Cloud Sync Error (Data too large)', false);
+          alert('Cảnh báo: Dữ liệu đang vượt quá giới hạn 1MB của một bản ghi Firebase. Anh hãy rút gọn bớt các đoạn văn bản transcript quá dài hoặc xóa bớt lịch sử kết quả cũ!');
+        }
       }
     }
 
