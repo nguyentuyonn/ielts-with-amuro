@@ -3243,17 +3243,37 @@ Return your evaluation in JSON format with two fields:
       const expVal = document.getElementById('editKeyExp').value.trim();
       const eviVal = document.getElementById('editKeyEvi').value.trim();
 
+      // Đảm bảo khởi tạo đủ các nhánh dữ liệu
+      if (!activeExam.correctAnswers) activeExam.correctAnswers = {};
       if (!activeExam.explanations) activeExam.explanations = {};
       if (!activeExam.evidences) activeExam.evidences = {};
 
+      // Cập nhật giá trị hiện tại vào exam đang chọn
       activeExam.correctAnswers[k] = keyVal;
       activeExam.explanations[k] = expVal;
       activeExam.evidences[k] = eviVal;
 
+      // Đồng bộ trực tiếp vào mảng dữ liệu tổng (db) tùy theo loại bài test
+      if (activeExamType === 'listening') {
+        const list = db.listeningExams || [];
+        const idx = list.findIndex(e => e.id === activeExam.id);
+        if (idx >= 0) {
+          db.listeningExams[idx] = JSON.parse(JSON.stringify(activeExam));
+        }
+      } else {
+        const list = db.readingExams || [];
+        const idx = list.findIndex(e => e.id === activeExam.id);
+        if (idx >= 0) {
+          db.readingExams[idx] = JSON.parse(JSON.stringify(activeExam));
+        }
+      }
+
+      // Gọi persist() để đẩy thẳng toàn bộ thay đổi lên mây (Firebase) ngay lập tức
       persist();
+
       closeModal('teacherEditModal');
       loadPassageView(activePartNum);
-      alert(`Updated solution for ${k.toUpperCase()}!`);
+      alert(`Đã lưu và đồng bộ thành công đáp án câu ${k.toUpperCase()} lên mây vĩnh viễn!`);
     }
 
     function setupResizer() {
@@ -4404,14 +4424,12 @@ Return your evaluation in JSON format with two fields:
   .badge-diff-Easy { background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
   .badge-diff-Standard { background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
   .badge-diff-Hard { background: #ffedd5; color: #c2410c; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
-
   .skill-progress-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
   .skill-progress-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 20px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02); }
   .skill-progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 800; font-size: 14px; }
   .skill-progress-bar-bg { width: 100%; height: 10px; background: #f1f5f9; border-radius: 999px; overflow: hidden; margin-bottom: 8px; }
   .skill-progress-bar-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
   .skill-progress-meta { font-size: 12px; color: #64748b; font-weight: 600; display: flex; justify-content: space-between; }
-
   .milestone-banner {
     background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
     border: 1.5px solid #f59e0b; border-radius: 14px; padding: 16px 20px;
@@ -4427,27 +4445,27 @@ Return your evaluation in JSON format with two fields:
 </style>
 
 <!-- MODAL: VOCAB MILESTONE QUIZ (40 QUESTIONS - 6 FORMATS + REVIEW + AUTO VAULT) -->
-  <div class="modal-overlay" id="vocabQuizModal" style="z-index: 99999;">
-    <div class="modal-window" style="width: 960px; height: 90vh;">
-      <div class="modal-header" style="background:#0f172a; color:#fff;">
-        <div>
-          <span id="vocabQuizModalTitle" style="font-size:16px; font-weight:800;">🎯 Milestone Vocabulary Review (40 Questions)</span>
-          <div id="vocabQuizSubHeader" style="font-size:12px; color:#cbd5e1; font-weight:500; margin-top:2px;">
-            Hoàn thành tối thiểu 60% (24/40 câu) để mở khóa chặng Reading tiếp theo. Từ làm sai sẽ tự động lưu vào Vocabulary Vault!
-          </div>
+<div class="modal-overlay" id="vocabQuizModal" style="z-index: 99999;">
+  <div class="modal-window" style="width: 960px; height: 90vh;">
+    <div class="modal-header" style="background:#0f172a; color:#fff;">
+      <div>
+        <span id="vocabQuizModalTitle" style="font-size:16px; font-weight:800;">🎯 Milestone Vocabulary Review (40 Questions)</span>
+        <div id="vocabQuizSubHeader" style="font-size:12px; color:#cbd5e1; font-weight:500; margin-top:2px;">
+          Hoàn thành tối thiểu 60% (24/40 câu) để mở khóa chặng Reading tiếp theo. Từ làm sai sẽ tự động lưu vào Vocabulary Vault!
         </div>
-        <button class="btn btn-secondary" onclick="closeModal('vocabQuizModal')">✕ Đóng</button>
       </div>
-      <div class="modal-body" id="vocabQuizBody" style="padding: 24px; background:#f8fafc; overflow-y:auto;"></div>
-      <div class="modal-footer" style="justify-content: space-between;">
-        <span id="vocabQuizResultSummary" style="font-weight:800; font-size:14px; color:#0f172a;">Tiến độ: 40 câu hỏi (Parts A – F)</span>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-secondary" id="btnRetryVocabQuiz" style="display:none;" onclick="retryCurrentVocabQuiz()">🔄 Làm lại đề mới</button>
-          <button class="btn btn-emerald" id="btnSubmitVocabQuiz" onclick="submitVocabQuizAnswers()">✅ Nộp bài & Chấm điểm</button>
-        </div>
+      <button class="btn btn-secondary" onclick="closeModal('vocabQuizModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" id="vocabQuizBody" style="padding: 24px; background:#f8fafc; overflow-y:auto;"></div>
+    <div class="modal-footer" style="justify-content: space-between;">
+      <span id="vocabQuizResultSummary" style="font-weight:800; font-size:14px; color:#0f172a;">Tiến độ: 40 câu hỏi (Parts A – F)</span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-secondary" id="btnRetryVocabQuiz" style="display:none;" onclick="retryCurrentVocabQuiz()">🔄 Làm lại đề mới (AI)</button>
+        <button class="btn btn-emerald" id="btnSubmitVocabQuiz" onclick="submitVocabQuizAnswers()">✅ Nộp bài & Chấm điểm</button>
       </div>
     </div>
   </div>
+</div>
 
 <script>
   /* ==========================================================================
@@ -4479,8 +4497,8 @@ Return your evaluation in JSON format with two fields:
     }
 
     const sortOptionsHtml = `
-      <option value="newest">🆕 Newest First</option>
-      <option value="popular">🔥 Most Popular</option>
+      <option value="newest">🆕 Mới tải lên nhất (Newest First)</option>
+      <option value="popular">🔥 Nhiều người làm nhất (Most Popular)</option>
       <option value="diff_asc">🟢 Độ khó: Dễ ➔ Khó</option>
       <option value="diff_desc">📉 Độ khó: Khó ➔ Dễ</option>
       <option value="az">🔤 Tên đề: A ➔ Z</option>
@@ -4596,7 +4614,7 @@ Return your evaluation in JSON format with two fields:
   }
 
   /* ==========================================================================
-     2. CƠ CHẾ CHỐNG TRÀN 1MB & TỰ ĐỘNG KHÔI PHỤC ĐỀ TỪ KHO GỐC (SAFE SHARDING)
+     2. CƠ CHẾ CHỐNG TRÀN 1MB & EDIT KEYS LƯU VĨNH VIỄN KHÔNG MẤT KHI F5
      ========================================================================== */
   const _origEnsureArrays = ensureArraysExist;
   ensureArraysExist = function() {
@@ -4606,6 +4624,7 @@ Return your evaluation in JSON format with two fields:
     if (!db.deletedExamIds) db.deletedExamIds = [];
   };
 
+  // Gộp bản ghi ưu tiên dữ liệu mới nhất ở shardList (đảm bảo Edit Keys không bao giờ bị ghi đè lại bởi bản cũ)
   function mergeRecordsById(legacyList = [], shardList = [], deletedIds = []) {
     const deletedSet = new Set(deletedIds || []);
     const map = new Map();
@@ -4613,7 +4632,10 @@ Return your evaluation in JSON format with two fields:
       if (item && item.id && !deletedSet.has(item.id)) map.set(item.id, item);
     });
     (shardList || []).forEach(item => {
-      if (item && item.id && !deletedSet.has(item.id)) map.set(item.id, item);
+      if (item && item.id && !deletedSet.has(item.id)) {
+        const oldItem = map.get(item.id) || {};
+        map.set(item.id, { ...oldItem, ...item });
+      }
     });
     return Array.from(map.values());
   }
@@ -4623,9 +4645,7 @@ Return your evaluation in JSON format with two fields:
       const cached = localStorage.getItem('AMURO_IELTS_DB_BACKUP');
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (parsed && parsed.users) {
-          db = parsed;
-        }
+        if (parsed && parsed.users) db = parsed;
       }
     } catch (e) {}
     ensureArraysExist();
@@ -4682,6 +4702,7 @@ Return your evaluation in JSON format with two fields:
 
       db.readingExams   = mergeRecordsById(legacyData.readingExams || db.readingExams || [], shardReading, deletedIds);
       if (!db.readingExams.length) db.readingExams = [defaultShoppingExam];
+
       db.listeningExams = mergeRecordsById(legacyData.listeningExams || db.listeningExams || [], shardListening, deletedIds);
       db.writingExams   = mergeRecordsById(legacyData.writingExams || db.writingExams || [], shardWriting, deletedIds);
       db.results        = mergeRecordsById(legacyData.results || db.results || [], shardResults, []).sort((a, b) => {
@@ -4694,7 +4715,6 @@ Return your evaluation in JSON format with two fields:
       try { localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db)); } catch (e) {}
       setSyncStatus('Cloud Sharding Active', true);
       if (activeUser) renderDashboard();
-
       persist();
 
       firestore.collection('suite_meta').doc('core').onSnapshot(doc => {
@@ -4717,18 +4737,21 @@ Return your evaluation in JSON format with two fields:
           if (activeUser) renderDashboard();
         }
       });
+
       firestore.collection('suite_listeningExams').onSnapshot(snap => {
         if (!snap.empty) {
           db.listeningExams = mergeRecordsById(db.listeningExams, snap.docs.map(d => d.data()), db.deletedExamIds);
           if (activeUser) renderDashboard();
         }
       });
+
       firestore.collection('suite_writingExams').onSnapshot(snap => {
         if (!snap.empty) {
           db.writingExams = mergeRecordsById(db.writingExams, snap.docs.map(d => d.data()), db.deletedExamIds);
           if (activeUser) renderDashboard();
         }
       });
+
       firestore.collection('suite_results').onSnapshot(snap => {
         if (!snap.empty) {
           db.results = mergeRecordsById(db.results, snap.docs.map(d => d.data()), []).sort((a, b) => {
@@ -4749,7 +4772,6 @@ Return your evaluation in JSON format with two fields:
     try {
       localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
     } catch (e) {}
-
     if (!CLOUD_DB) return;
     setSyncStatus('Syncing Cloud...', true);
     try {
@@ -4765,7 +4787,6 @@ Return your evaluation in JSON format with two fields:
           deletedExamIds: db.deletedExamIds || []
         })
       );
-
       for (const rExam of (db.readingExams || [])) {
         if (rExam && rExam.id) {
           writePromises.push(CLOUD_DB.collection('suite_readingExams').doc(String(rExam.id)).set(rExam));
@@ -4787,7 +4808,6 @@ Return your evaluation in JSON format with two fields:
           writePromises.push(CLOUD_DB.collection('suite_results').doc(String(resItem.id)).set(resItem));
         }
       }
-
       await Promise.all(writePromises);
       setSyncStatus('Cloud Sharding Active', true);
     } catch (err) {
@@ -4796,11 +4816,63 @@ Return your evaluation in JSON format with two fields:
     }
   };
 
+  // Đảm bảo khi bấm Save trong Edit Keys sẽ ghi trực tiếp lên document của đề đó trên Firebase ngay lập tức
+  saveTeacherKeyUpdate = async function() {
+    const k = document.getElementById('editKeyName').value;
+    const keyVal = document.getElementById('editKeyVal').value.trim();
+    const expVal = document.getElementById('editKeyExp').value.trim();
+    const eviVal = document.getElementById('editKeyEvi').value.trim();
+
+    if (!activeExam.correctAnswers) activeExam.correctAnswers = {};
+    if (!activeExam.explanations) activeExam.explanations = {};
+    if (!activeExam.evidences) activeExam.evidences = {};
+
+    activeExam.correctAnswers[k] = keyVal;
+    activeExam.explanations[k] = expVal;
+    activeExam.evidences[k] = eviVal;
+    activeExam.updatedAt = Date.now();
+
+    const clonedExam = JSON.parse(JSON.stringify(activeExam));
+    if (activeExamType === 'listening') {
+      const list = db.listeningExams || [];
+      const idx = list.findIndex(e => e.id === activeExam.id);
+      if (idx >= 0) db.listeningExams[idx] = clonedExam;
+      if (CLOUD_DB) {
+        try { await CLOUD_DB.collection('suite_listeningExams').doc(String(activeExam.id)).set(clonedExam); } catch(e) {}
+      }
+    } else {
+      const list = db.readingExams || [];
+      const idx = list.findIndex(e => e.id === activeExam.id);
+      if (idx >= 0) db.readingExams[idx] = clonedExam;
+      if (CLOUD_DB) {
+        try { await CLOUD_DB.collection('suite_readingExams').doc(String(activeExam.id)).set(clonedExam); } catch(e) {}
+      }
+    }
+
+    // Đồng bộ cập nhật cả vào main_database nếu tồn tại để không bao giờ bị dữ liệu cũ ghi đè khi F5
+    if (CLOUD_DB) {
+      try {
+        const mainRef = CLOUD_DB.collection('suite').doc('main_database');
+        const mainSnap = await mainRef.get();
+        if (mainSnap.exists) {
+          await mainRef.update({
+            readingExams: db.readingExams || [],
+            listeningExams: db.listeningExams || []
+          });
+        }
+      } catch (e) {}
+    }
+
+    await persist();
+    closeModal('teacherEditModal');
+    loadPassageView(activePartNum);
+    alert(`Đã lưu và đồng bộ vĩnh viễn đáp án câu ${k.toUpperCase()}! Khi F5 trang sẽ giữ nguyên 100%.`);
+  };
+
   deleteExam = async function(examId, type = 'reading') {
     if (!confirm('Are you sure you want to delete this test?')) return;
     ensureArraysExist();
     if (!db.deletedExamIds.includes(examId)) db.deletedExamIds.push(examId);
-
     if (type === 'writing') {
       db.writingExams = (db.writingExams || []).filter(e => e.id !== examId);
       if (CLOUD_DB) try { await CLOUD_DB.collection('suite_writingExams').doc(String(examId)).delete(); } catch(e){}
@@ -4992,13 +5064,12 @@ Return your evaluation in JSON format with two fields:
   };
 
   /* ==========================================================================
-     5. PHÂN QUYỀN HỌC SINH PRO + AI TỰ SINH ĐỀ VOCAB QUIZ MỚI MỖI LẦN LÀM
+     5. PHÂN QUYỀN HỌC SINH PRO + AI TỰ SINH ĐỀ VOCAB QUIZ 40 CÂU TỪ 5 BÀI ĐỌC
      ========================================================================== */
   let currentVocabQuizQuestions = [];
   let currentActiveMilestoneNum = 5;
   let isVocabQuizReviewed = false;
 
-  // Kiểm tra học sinh có phải tài khoản PRO không
   function isStudentPro(userObj = activeUser) {
     if (!userObj) return false;
     if (userObj.role === 'teacher') return true;
@@ -5006,17 +5077,15 @@ Return your evaluation in JSON format with two fields:
     return Boolean((latestInDb && latestInDb.isPro) || userObj.isPro);
   }
 
-  // Nút bật/tắt quyền PRO cho học sinh ngay trong bảng Students của Giáo viên
   window.toggleStudentProStatus = function(userId) {
     const stu = (db.users || []).find(u => u.id === userId);
     if (!stu) return;
     stu.isPro = !stu.isPro;
     persist();
     renderStudentTable();
-    alert(`Đã chuyển tài khoản "${stu.name}" sang chế độ: ${stu.isPro ? '👑 PRO (Miễn khóa Vocab Quiz)' : '👤 Standard (Bắt buộc làm Vocab Quiz sau mỗi 5 bài Reading)'}!`);
+    alert(`Đã chuyển tài khoản "${stu.name}" sang chế độ: ${stu.isPro ? '👑 PRO (Được lựa chọn không bắt buộc làm Vocab Quiz)' : '👤 Standard (Bắt buộc làm Vocab Quiz sau mỗi 5 bài Reading)'}!`);
   };
 
-  // Nâng cấp bảng Students để có nút cấp quyền PRO 1 chạm
   renderStudentTable = function() {
     const tbody = document.getElementById('studentTbody');
     if (!tbody) return;
@@ -5094,19 +5163,12 @@ Return your evaluation in JSON format with two fields:
     const completed = getStudentReadingCompletedCount();
     const passedList = getPassedMilestonesList();
     const proStatus = isStudentPro(activeUser);
-
     for (let m = 5; m <= completed; m += 5) {
       if (!passedList.includes(m)) {
-        // Nếu là học sinh PRO: Không bị khóa (locked: false), nhưng vẫn báo có bài Quiz tùy chọn
         return { locked: !proStatus, hasOptionalQuiz: proStatus, isPro: proStatus, milestoneNum: m, completedCount: completed };
       }
     }
     return { locked: false, isPro: proStatus, milestoneNum: Math.floor(completed / 5) * 5, completedCount: completed };
-  }
-
-  function openMilestoneVocabQuizModal() {
-    const st = getMilestoneQuizStatus();
-    triggerVocabMilestoneQuiz(st.milestoneNum || 5);
   }
 
   const _origLaunchExam = launchExam;
@@ -5114,7 +5176,7 @@ Return your evaluation in JSON format with two fields:
     const st = getMilestoneQuizStatus();
     const completedIds = getStudentCompletedExamIds('reading');
     if (st.locked && !completedIds.includes(examId)) {
-      if (confirm(`🔒 KHÓA TIẾN ĐỘ READING!\n\nBạn đã hoàn thành ${st.completedCount} bài Reading (Chặng ${st.milestoneNum} bài).\nTheo quy định dành cho tài khoản Standard, bạn bắt buộc phải vượt qua bài Vocab Quiz 40 câu (đạt >= 60%) để mở khóa các bài Reading tiếp theo.\n\nBấm OK để AI tạo đề Vocab Quiz ngay bây giờ!`)) {
+      if (confirm(`🔒 KHÓA TIẾN ĐỘ READING!\n\nBạn đã hoàn thành ${st.completedCount} bài Reading (Chặng ${st.milestoneNum} bài).\nTheo quy định dành cho tài khoản Standard, bạn bắt buộc phải vượt qua bài Vocab Quiz 40 câu (đạt >= 60%) để mở khóa các bài Reading tiếp theo.\n\nBấm OK để AI tạo đề Vocab Quiz từ 5 bài đọc vừa làm ngay bây giờ!`)) {
         triggerVocabMilestoneQuiz(st.milestoneNum);
       }
       return;
@@ -5127,19 +5189,15 @@ Return your evaluation in JSON format with two fields:
     const progBox = document.getElementById('studentSkillProgressBox');
     const bannerBox = document.getElementById('readingMilestoneBannerBox');
     if (!activeUser) return;
-
     const rTotal = getVisibleExams(db.readingExams).length;
     const lTotal = getVisibleExams(db.listeningExams).length;
     const wTotal = getVisibleExams(db.writingExams).length;
-
     const rDone = getStudentCompletedExamIds('reading').length;
     const lDone = getStudentCompletedExamIds('listening').length;
     const wDone = getStudentCompletedExamIds('writing').length;
-
     const rPct = rTotal > 0 ? Math.min(100, Math.round((rDone / rTotal) * 100)) : 0;
     const lPct = lTotal > 0 ? Math.min(100, Math.round((lDone / lTotal) * 100)) : 0;
     const wPct = wTotal > 0 ? Math.min(100, Math.round((wDone / wTotal) * 100)) : 0;
-
     const st = getMilestoneQuizStatus();
 
     if (progBox) {
@@ -5148,17 +5206,17 @@ Return your evaluation in JSON format with two fields:
           <div class="milestone-banner">
             <div>
               <div style="font-weight:800; font-size:15px; color:#92400e;">🔒 Milestone Vocabulary Quiz Required (Chặng ${st.milestoneNum} bài Reading)</div>
-              <div style="font-size:13px; color:#b45309; margin-top:4px;">Bạn đã hoàn thành ${st.completedCount} đề Reading! Hãy hoàn thành bài Quiz 40 câu từ vựng do AI tạo mới để mở khóa các đề Reading tiếp theo.</div>
+              <div style="font-size:13px; color:#b45309; margin-top:4px;">Bạn đã hoàn thành ${st.completedCount} đề Reading! Hãy hoàn thành bài Quiz 40 câu từ vựng do AI tạo mới từ 5 bài vừa qua để mở khóa đề tiếp theo.</div>
             </div>
             <button class="btn btn-emerald" style="background:#d97706;" onclick="triggerVocabMilestoneQuiz(${st.milestoneNum})">🎯 Làm Quiz Mở Khóa Ngay</button>
           </div>
         ` : (st.isPro && rDone >= 5 ? `
           <div class="milestone-banner" style="background:linear-gradient(135deg,#ecfdf5,#eff6ff); border-color:#10b981;">
             <div>
-              <div style="font-weight:800; font-size:15px; color:#065f46;">👑 Đặc quyền Học sinh PRO: Đã miễn khóa tự động Reading!</div>
-              <div style="font-size:13px; color:#047857; margin-top:4px;">Tài khoản PRO của bạn có thể làm tiếp mọi đề Reading không giới hạn, hoặc bấm bên phải để AI tạo đề Vocab Quiz 40 câu ôn tập bất cứ lúc nào.</div>
+              <div style="font-weight:800; font-size:15px; color:#065f46;">👑 Đặc quyền Học sinh PRO: Được lựa chọn không cần làm Vocab Quiz!</div>
+              <div style="font-size:13px; color:#047857; margin-top:4px;">Tài khoản PRO của bạn có thể làm tiếp mọi đề Reading không bị khóa, hoặc tự chọn bấm bên phải để AI tạo đề Vocab Quiz 40 câu ôn tập từ 5 bài vừa làm.</div>
             </div>
-            <button class="btn btn-emerald" onclick="triggerVocabMilestoneQuiz(${st.milestoneNum || 5})">🤖 Tạo Đề Vocab Quiz Mới (AI)</button>
+            <button class="btn btn-emerald" onclick="triggerVocabMilestoneQuiz(${st.milestoneNum || 5})">🤖 Tự Chọn Làm Vocab Quiz (AI)</button>
           </div>
         ` : '')}
         <div class="skill-progress-grid">
@@ -5211,9 +5269,19 @@ Return your evaluation in JSON format with two fields:
           <div class="milestone-banner">
             <div>
               <div style="font-weight:800; font-size:15px; color:#92400e;">🔒 Chặng ${st.milestoneNum} bài Reading: Mở khóa đề tiếp theo</div>
-              <div style="font-size:13px; color:#b45309; margin-top:4px;">Hệ thống đang tạm khóa các bài Reading mới. Bạn cần vượt qua bài Quiz 40 câu từ vựng (>= 60%) để tiếp tục.</div>
+              <div style="font-size:13px; color:#b45309; margin-top:4px;">Hệ thống đang tạm khóa các bài Reading mới. Bạn cần vượt qua bài Quiz 40 câu từ vựng (>= 60%) lấy từ 5 bài đọc vừa qua để tiếp tục.</div>
             </div>
             <button class="btn btn-emerald" style="background:#d97706;" onclick="triggerVocabMilestoneQuiz(${st.milestoneNum})">🎯 Start Milestone Vocab Quiz (40 câu)</button>
+          </div>
+        `;
+      } else if (st.isPro && rDone >= 5) {
+        bannerBox.innerHTML = `
+          <div class="milestone-banner" style="background:linear-gradient(135deg,#ecfdf5,#eff6ff); border-color:#10b981;">
+            <div>
+              <div style="font-weight:800; font-size:15px; color:#065f46;">👑 Tài khoản PRO: Đã mở khóa toàn bộ đề Reading (Tùy chọn làm Vocab Quiz)</div>
+              <div style="font-size:13px; color:#047857; margin-top:4px;">Bạn không bắt buộc làm Vocab Quiz, nhưng có thể bấm nút bên cạnh bất cứ lúc nào để AI tạo đề 40 câu ôn tập từ vựng của 5 bài đọc vừa làm.</div>
+            </div>
+            <button class="btn btn-emerald" onclick="triggerVocabMilestoneQuiz(${st.milestoneNum || 5})">🤖 Làm Vocab Quiz Tùy Chọn (40 câu)</button>
           </div>
         `;
       } else {
@@ -5233,7 +5301,6 @@ Return your evaluation in JSON format with two fields:
     { sec: 'A', type: 'word_form', stem: 'Supporters say vertical farming is more __________ than traditional farming. (SUSTAIN)', answer: 'sustainable', word: 'sustainable', pos: 'adj', mean: 'Bền vững, thân thiện với môi trường lâu dài', syn: 'eco-friendly, viable' },
     { sec: 'A', type: 'word_form', stem: 'Too much fertiliser can be __________ to the environment. (DETRIMENT)', answer: 'detrimental', word: 'detrimental', pos: 'adj', mean: 'Có hại, gây tổn hại', syn: 'harmful, damaging, injurious' },
     { sec: 'A', type: 'word_form', stem: 'Boiled water for tea reduced the __________ of water-borne diseases. (PREVALENT)', answer: 'prevalence', word: 'prevalence', pos: 'noun', mean: 'Sự phổ biến, mức độ lưu hành rộng', syn: 'commonness, ubiquity' },
-
     { sec: 'B', type: 'bank_fill', stem: 'Many stepwells are now __________ and full of rubbish.', answer: 'derelict', word: 'derelict', pos: 'adj', mean: 'Hoang phế, đổ nát, bị bỏ hoang', syn: 'dilapidated, ruined, abandoned' },
     { sec: 'B', type: 'bank_fill', stem: 'Every winter, thousands of tourists __________ the famous stepwells of Rajasthan.', answer: 'flock to', word: 'flock to', pos: 'phr.v', mean: 'Đổ xô, kéo đến đông đảo', syn: 'gather at, swarm to' },
     { sec: 'B', type: 'bank_fill', stem: 'Chand Baori is __________ its hundreds of zigzagging steps.', answer: 'renowned for', word: 'renowned for', pos: 'adj', mean: 'Nổi tiếng, lừng danh về', syn: 'famous for, celebrated for' },
@@ -5244,7 +5311,6 @@ Return your evaluation in JSON format with two fields:
     { sec: 'B', type: 'bank_fill', stem: 'Monks managed to __________ silkworm eggs out of China.', answer: 'smuggle', word: 'smuggle', pos: 'verb', mean: 'Buôn lậu, lén mang ra/vào', syn: 'traffic illegally, sneak' },
     { sec: 'B', type: 'bank_fill', stem: 'Growing food in cities could __________ for long-distance transport.', answer: 'cut out the need', word: 'cut out the need', pos: 'phrase', mean: 'Loại bỏ nhu cầu cần đến', syn: 'eliminate the need' },
     { sec: 'B', type: 'bank_fill', stem: 'Industry did not really __________ in Britain until the 18th century.', answer: 'take off', word: 'take off', pos: 'phr.v', mean: 'Phát triển bùng nổ, cất cánh thành công', syn: 'boom, flourish, thrive' },
-
     { sec: 'C', type: 'mcq', stem: 'The walls of the stepwell are covered in __________ carvings of gods and animals.', options: ['far-flung', 'derelict', 'relentless', 'intricate'], answer: 'intricate', word: 'intricate', pos: 'adj', mean: 'Tinh xảo, phức tạp nhiều chi tiết', syn: 'complex, elaborate, detailed' },
     { sec: 'C', type: 'mcq', stem: 'The pavilions sheltered visitors from the __________ heat of the desert.', options: ['utilitarian', 'pristine', 'relentless', 'colonnaded'], answer: 'relentless', word: 'relentless', pos: 'adj', mean: 'Khắc nghiệt, không ngừng nghỉ, dai dẳng', syn: 'unrelenting, persistent, harsh' },
     { sec: 'C', type: 'mcq', stem: 'A long __________ caused the water level in the well to drop.', options: ['hallmark', 'marvel', 'dry spell', 'heyday'], answer: 'dry spell', word: 'dry spell', pos: 'noun', mean: 'Đợt khô hạn kéo dài', syn: 'drought, dry period' },
@@ -5255,21 +5321,18 @@ Return your evaluation in JSON format with two fields:
     { sec: 'C', type: 'mcq', stem: 'For centuries, China had a __________ on silk production.', options: ['monopoly', 'merchandise', 'middleman', 'fabric'], answer: 'monopoly', word: 'monopoly', pos: 'noun', mean: 'Sự độc quyền kiểm soát sản xuất/thương mại', syn: 'exclusive control' },
     { sec: 'C', type: 'mcq', stem: 'For most countries, vertical farms are still __________ expensive.', options: ['prohibitively', 'drastically', 'undoubtedly', 'mass-produced'], answer: 'prohibitively', word: 'prohibitively', pos: 'adv', mean: '(Đắt) đến mức ngất ngưởng không kham nổi', syn: 'excessively, unaffordably' },
     { sec: 'C', type: 'mcq', stem: 'Drinking tea helped people avoid __________ diseases such as dysentery.', options: ['labour-saving', 'water-borne', 'static', 'optimum'], answer: 'water-borne', word: 'water-borne', pos: 'adj', mean: 'Lây truyền qua đường nước', syn: 'water-transmitted' },
-
     { sec: 'D', type: 'collocation', stem: 'Firefighters are trying to __________ the blaze before it spreads.', options: ['hold', 'keep', 'contain', 'stop up'], answer: 'contain', word: 'contain the blaze', pos: 'collocation', mean: 'Khống chế ngọn lửa không cho lan rộng', syn: 'control the fire' },
     { sec: 'D', type: 'collocation', stem: 'Experts give California high __________ for its preparedness.', options: ['points', 'scores', 'grades', 'marks'], answer: 'marks', word: 'give high marks for', pos: 'collocation', mean: 'Đánh giá cao, khen ngợi về việc gì', syn: 'praise highly, commend' },
     { sec: 'D', type: 'collocation', stem: 'Silk became a __________ of status in ancient China.', options: ['symbol', 'logo', 'label', 'badge'], answer: 'symbol', word: 'symbol of status', pos: 'collocation', mean: 'Biểu tượng của địa vị xã hội', syn: 'status symbol, indicator of rank' },
     { sec: 'D', type: 'collocation', stem: 'Many stepwells have fallen into __________ over the centuries.', options: ['misuse', 'disuse', 'overuse', 'unuse'], answer: 'disuse', word: 'fall into disuse', pos: 'collocation', mean: 'Rơi vào cảnh bị bỏ không, ngừng được sử dụng', syn: 'become obsolete, be abandoned' },
     { sec: 'D', type: 'collocation', stem: 'Too much dry tinder __________ for bigger, hotter fires.', options: ['makes', 'does', 'takes', 'gets'], answer: 'makes', word: 'make for', pos: 'collocation', mean: 'Tạo điều kiện dẫn đến, góp phần tạo ra', syn: 'contribute to, result in' },
     { sec: 'D', type: 'collocation', stem: 'Which word does NOT collocate naturally with "pose"? (pose a threat / a danger / a challenge / an effort)', options: ['a threat', 'a danger', 'a challenge', 'an effort'], answer: 'an effort', word: 'pose a threat/challenge', pos: 'collocation', mean: 'Đặt ra mối đe dọa / thách thức (không đi với effort)', syn: 'present a risk' },
-
     { sec: 'E', type: 'pair', stem: 'The (prevalent / prevalence) of water-borne diseases fell after tea became popular.', options: ['prevalent', 'prevalence'], answer: 'prevalence', word: 'prevalence', pos: 'noun', mean: 'Sự phổ biến (Danh từ đứng sau The và trước of)', syn: 'widespread occurrence' },
     { sec: 'E', type: 'pair', stem: 'The roof had collapsed, but the walls of the old well were still (intact / pristine).', options: ['intact', 'pristine'], answer: 'intact', word: 'intact', pos: 'adj', mean: 'Còn nguyên vẹn, chưa bị sập/hư hỏng', syn: 'undamaged, whole' },
     { sec: 'E', type: 'pair', stem: 'After a long restoration, the stepwell is now in (intact / pristine) condition, as if it were new.', options: ['intact', 'pristine'], answer: 'pristine', word: 'pristine', pos: 'adj', mean: 'Mới tinh nguyên sơ, sạch đẹp như ban đầu', syn: 'immaculate, spotless' },
     { sec: 'E', type: 'pair', stem: 'A dry summer can (affect / effect) how often wildfires start.', options: ['affect', 'effect'], answer: 'affect', word: 'affect', pos: 'verb', mean: 'Ảnh hưởng, tác động đến (Động từ đứng sau can)', syn: 'influence, impact' },
     { sec: 'E', type: 'pair', stem: 'The twins were (reared / risen) by different adoptive families.', options: ['reared', 'risen'], answer: 'reared', word: 'rear', pos: 'verb', mean: 'Nuôi dưỡng, nuôi nấng (con cái/động vật)', syn: 'bring up, raise' },
     { sec: 'E', type: 'pair', stem: 'Francis Galton (coined / invented) the phrase "nature and nurture".', options: ['coined', 'invented'], answer: 'coined', word: 'coin a phrase/term', pos: 'verb', mean: 'Đặt ra, sáng tạo ra một thuật ngữ/cụm từ mới', syn: 'create a term' },
-
     { sec: 'F', type: 'error', stem: 'At first, only royalty were entitled FOR wear silk. (Sửa giới từ in hoa bị sai thành từ đúng)', answer: 'to', word: 'be entitled to', pos: 'phrase', mean: 'Có quyền, được phép làm gì (be entitled to do sth)', syn: 'have the right to' },
     { sec: 'F', type: 'error', stem: 'Thousands of tourists flock AT the stepwells every winter. (Sửa giới từ in hoa bị sai thành từ đúng)', answer: 'to', word: 'flock to', pos: 'phr.v', mean: 'Đổ xô đến đâu (flock to + địa điểm)', syn: 'stream to' },
     { sec: 'F', type: 'error', stem: 'Tea drinkers could drink boiled water without succumbing WITH dysentery. (Sửa giới từ in hoa bị sai)', answer: 'to', word: 'succumb to', pos: 'verb', mean: 'Chịu khuất phục, mắc phải bệnh gì (succumb to sth)', syn: 'yield to, fall victim to' },
@@ -5278,71 +5341,83 @@ Return your evaluation in JSON format with two fields:
     { sec: 'F', type: 'error', stem: 'Many stepwells were neglected and fell into MISUSE. (Sửa từ in hoa bị sai nghĩa thành từ đúng)', answer: 'disuse', word: 'fall into disuse', pos: 'collocation', mean: 'Bị bỏ hoang không còn dùng đến (khác với misuse là lạm dụng sai mục đích)', syn: 'abandonment' }
   ];
 
-  // Hàm gọi Gemini AI để tự động sinh mới câu hỏi Vocab mỗi lần mở Quiz
-  async function generateAiVocabQuestionsFromPassages(milestoneNum) {
-    const apiKey = getEffectiveGeminiKey();
-    if (!apiKey) return null;
-
-    // Lấy danh sách từ vựng & trích đoạn từ 5 bài Reading của chặng này
+  // Lấy kho từ vựng & ngữ cảnh của đúng 5 bài đọc trong chặng Milestone
+  function getStageReadingExamsForMilestone(milestoneNum) {
     const completedIds = getStudentCompletedExamIds('reading');
     const startIndex = Math.max(0, milestoneNum - 5);
     const stageIds = completedIds.slice(startIndex, milestoneNum);
     const targetExams = stageIds.length
       ? (db.readingExams || []).filter(e => stageIds.includes(e.id))
       : (db.readingExams || []).slice(0, 5);
+    return targetExams.length ? targetExams : (db.readingExams || []);
+  }
 
+  // Gọi Gemini AI tự động sinh đề từ vựng mới mỗi lần làm dựa trên 5 bài đọc của chặng đó
+  async function generateAiVocabQuestionsFromPassages(milestoneNum) {
+    const apiKey = getEffectiveGeminiKey();
+    if (!apiKey) return null;
+
+    const targetExams = getStageReadingExamsForMilestone(milestoneNum);
     const vocabPool = [];
     const snippets = [];
     targetExams.forEach(ex => {
       (ex.passages || []).forEach(p => {
         (p.vocab || []).forEach(v => vocabPool.push(`${v.word} (${v.type}): ${v.mean} [Syn: ${v.syn || ''}]`));
         const cleanTxt = String(p.passageHtml || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-        if (cleanTxt) snippets.push(`Passage "${ex.title}": ${cleanTxt.substring(0, 550)}...`);
+        if (cleanTxt) snippets.push(cleanTxt.substring(0, 350));
       });
     });
 
-    const prompt = `You are an IELTS Academic Vocabulary Test Creator. Generate a fresh, unique set of 24 IELTS vocabulary questions based on the following Reading passages and vocabulary list (Random Seed: ${Date.now()}).
+    const randomSeed = Math.floor(Math.random() * 100000);
+    const prompt = `You are an IELTS Academic Vocabulary Examiner (Random Seed #${randomSeed}). Based on the following 5 Reading passages and vocabulary list, generate a unique set of 40 IELTS vocabulary questions across 6 sections:
+- Section "A" (8 questions, type: "word_form"): sentence with blank + root word in capitals in parentheses at the end, e.g. "... (NEGLECT)".
+- Section "B" (8 questions, type: "bank_fill"): sentence with blank "__________" where answer is a word/phrase from the passages.
+- Section "C" (8 questions, type: "mcq"): sentence or definition with 4 options ["opt1","opt2","opt3","opt4"].
+- Section "D" (6 questions, type: "collocation"): collocation question with 4 options ["opt1","opt2","opt3","opt4"].
+- Section "E" (5 questions, type: "pair"): sentence with two confusable words "(word1 / word2)" and 2 options ["word1","word2"].
+- Section "F" (5 questions, type: "error"): sentence with ONE wrong word in ALL CAPS and instruction to type the corrected word.
+
 Passages context:
 ${snippets.join('\n')}
-Vocabulary list:
-${vocabPool.slice(0, 40).join('\n')}
+Vocabulary list from passages:
+${vocabPool.slice(0, 45).join('; ')}
 
-Return ONLY a valid JSON array of 24 question objects divided into 6 sections:
-- 4 items with "sec":"A", "type":"word_form" (Sentence with __________ and (ROOT WORD IN CAPS) at the end; "answer" is the transformed word).
-- 4 items with "sec":"B", "type":"bank_fill" (Sentence with __________ where "answer" is an academic word/phrase).
-- 4 items with "sec":"C", "type":"mcq" (Sentence with __________, "options": array of 4 strings, "answer": exact matching option string).
-- 4 items with "sec":"D", "type":"collocation" (Collocation multiple choice sentence with __________, "options": array of 4 strings, "answer": exact matching option string).
-- 4 items with "sec":"E", "type":"pair" (Sentence containing "(word1 / word2)" confusing pair, "options": ["word1", "word2"], "answer": correct word).
-- 4 items with "sec":"F", "type":"error" (Sentence with ONE WRONG WORD IN CAPS + instruction in Vietnamese "(Sửa từ in hoa bị sai thành từ đúng)", "answer": the corrected word).
+Return ONLY a valid JSON array of question objects:
+[{"sec":"A"|"B"|"C"|"D"|"E"|"F","type":"word_form"|"bank_fill"|"mcq"|"collocation"|"pair"|"error","stem":"...","options":["..."],"answer":"...","word":"...","pos":"...","mean":"Vietnamese explanation","syn":"..."}]`;
 
-Each object MUST have: {"sec": "A"|"B"|"C"|"D"|"E"|"F", "type": string, "stem": string, "options": array (for C,D,E), "answer": string, "word": string, "pos": string, "mean": "Vietnamese meaning", "syn": "English synonyms"}.`;
-
-    const candidateModels = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.0-flash', 'gemini-2.5-flash'];
+    const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.8-flash', 'gemini-flash-latest'];
     for (const modelName of candidateModels) {
       try {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 9000);
         const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { responseMimeType: 'application/json' }
-          })
+            generationConfig: { responseMimeType: 'application/json', temperature: 0.85 }
+          }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
         if (!res.ok) continue;
         const data = await res.json();
         const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
         const parsed = JSON.parse(rawText.replace(/```json|```/g, '').trim());
-        if (Array.isArray(parsed) && parsed.length >= 12) return parsed;
+        if (Array.isArray(parsed) && parsed.length >= 10) return parsed;
       } catch (e) {}
     }
     return null;
   }
 
-  function buildDynamic40VocabQuestions(aiItems = null) {
+  // Tự động biến danh sách từ vựng của 5 bài đọc thành đủ các dạng A, B, C, D, E, F (ngay cả khi chưa nhập API Key)
+  function buildDynamic40VocabQuestions(aiItems = null, milestoneNum = 5) {
     const questions = [];
     const customVocabList = [];
-    (db.readingExams || []).forEach(exam => {
+    const stageExams = getStageReadingExamsForMilestone(milestoneNum);
+
+    stageExams.forEach(exam => {
       (exam.passages || []).forEach(p => {
         (p.vocab || []).forEach(v => {
           if (v && v.word && v.mean) customVocabList.push({ ...v, examTitle: exam.title });
@@ -5350,67 +5425,188 @@ Each object MUST have: {"sec": "A"|"B"|"C"|"D"|"E"|"F", "type": string, "stem": 
       });
     });
 
-    // Xáo trộn ngẫu nhiên kho câu hỏi gốc mỗi lần gọi để đề luôn mới
     const shuffledBank = JSON.parse(JSON.stringify(MASTER_VOCAB_QUIZ_BANK)).sort(() => Math.random() - 0.5);
-    const combinedPool = Array.isArray(aiItems) ? [...aiItems, ...shuffledBank] : shuffledBank;
+    const dynamicFromPassages = [];
 
-    if (customVocabList.length >= 4) {
-      customVocabList.sort(() => Math.random() - 0.5).slice(0, 6).forEach((cv) => {
+    if (customVocabList.length > 0) {
+      const shuffledCustom = customVocabList.slice().sort(() => Math.random() - 0.5);
+      shuffledCustom.forEach((cv, idx) => {
         const distractors = shuffledBank.filter(x => x.word !== cv.word).map(x => x.word).sort(() => Math.random() - 0.5).slice(0, 3);
-        const opts = [cv.word, ...distractors].sort(() => Math.random() - 0.5);
-        combinedPool.unshift({
-          sec: 'C',
-          type: 'mcq',
-          stem: `Which academic word (${cv.type || 'vocab'}) means "${cv.mean}"${cv.syn ? ` (Synonyms: ${cv.syn})` : ''}?`,
-          options: opts,
-          answer: cv.word,
-          word: cv.word,
-          pos: cv.type || 'vocab',
-          mean: cv.mean,
-          syn: cv.syn || ''
-        });
+        const mode = idx % 3;
+        if (mode === 0) {
+          dynamicFromPassages.push({
+            sec: 'B',
+            type: 'bank_fill',
+            stem: `[${cv.examTitle || 'Reading'}] Complete with the exact term (${cv.type || 'vocab'}) meaning "${cv.mean}": __________`,
+            answer: cv.word,
+            word: cv.word,
+            pos: cv.type || 'vocab',
+            mean: cv.mean,
+            syn: cv.syn || ''
+          });
+        } else if (mode === 1) {
+          const opts = [cv.word, ...distractors].sort(() => Math.random() - 0.5);
+          dynamicFromPassages.push({
+            sec: 'C',
+            type: 'mcq',
+            stem: `Which academic word (${cv.type || 'vocab'}) from the reading passages means "${cv.mean}"${cv.syn ? ` (Synonyms: ${cv.syn})` : ''}?`,
+            options: opts,
+            answer: cv.word,
+            word: cv.word,
+            pos: cv.type || 'vocab',
+            mean: cv.mean,
+            syn: cv.syn || ''
+          });
+        } else {
+          const synWord = cv.syn ? cv.syn.split(',')[0].trim() : distractors[0];
+          const pairOpts = [cv.word, synWord].sort(() => Math.random() - 0.5);
+          dynamicFromPassages.push({
+            sec: 'E',
+            type: 'pair',
+            stem: `Choose the exact target vocabulary word from the passage meaning "${cv.mean}": (${pairOpts[0]} / ${pairOpts[1]})`,
+            options: pairOpts,
+            answer: cv.word,
+            word: cv.word,
+            pos: cv.type || 'vocab',
+            mean: cv.mean,
+            syn: cv.syn || ''
+          });
+        }
       });
     }
+
+    const combinedPool = Array.isArray(aiItems) && aiItems.length
+      ? [...aiItems, ...dynamicFromPassages, ...shuffledBank]
+      : [...dynamicFromPassages, ...shuffledBank];
 
     const secOrder = ['A', 'B', 'C', 'D', 'E', 'F'];
     const limits = { A: 8, B: 8, C: 8, D: 6, E: 5, F: 5 }; // Tổng = 40 câu
     secOrder.forEach(secKey => {
-      const items = combinedPool.filter(x => x.sec === secKey).slice(0, limits[secKey]);
+      const items = combinedPool.filter(x => String(x.sec || '').toUpperCase() === secKey).slice(0, limits[secKey]);
       items.forEach(it => {
         questions.push({
           ...it,
+          sec: secKey,
           id: 'vq_' + (questions.length + 1),
           qNum: questions.length + 1
         });
       });
     });
+
     return questions;
+  }
+
+  function renderVocabQuizDOM(userResMap = null) {
+    const body = document.getElementById('vocabQuizBody');
+    if (!body) return;
+    const sectionMeta = {
+      A: { title: 'A. Word Formation (Biến đổi từ loại)', desc: 'Dùng từ in hoa trong ngoặc để tạo dạng từ đúng điền vào chỗ trống.' },
+      B: { title: 'B. Fill in the Blanks (Điền từ trong khung)', desc: 'Chọn từ hoặc cụm từ phù hợp trong khung Word Bank để hoàn thành câu.' },
+      C: { title: 'C. Multiple Choice (Trắc nghiệm từ vựng)', desc: 'Chọn đáp án đúng (A, B, C hoặc D) theo ngữ cảnh.' },
+      D: { title: 'D. Collocations (Cụm từ cố định)', desc: 'Chọn từ đi kèm tự nhiên nhất cho mỗi câu dưới đây.' },
+      E: { title: 'E. Choose the Right Word (Phân biệt từ dễ nhầm lẫn)', desc: 'Chọn một từ phù hợp nhất trong cặp từ gợi ý.' },
+      F: { title: 'F. Error Correction (Tìm và sửa lỗi dùng từ)', desc: 'Mỗi câu có MỘT từ viết hoa bị dùng sai, hãy gõ từ đúng vào ô.' }
+    };
+
+    const bankWordsB = currentVocabQuizQuestions
+      .filter(q => q.sec === 'B')
+      .map(q => q.answer)
+      .concat(['vast', 'drawback'])
+      .sort(() => Math.random() - 0.5);
+
+    let html = '';
+    ['A', 'B', 'C', 'D', 'E', 'F'].forEach(secKey => {
+      const secQuestions = currentVocabQuizQuestions.filter(q => q.sec === secKey);
+      if (!secQuestions.length) return;
+      html += `
+        <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; padding:18px 20px; margin-bottom:20px; box-shadow:0 2px 6px rgba(15,23,42,0.03);">
+          <div style="font-size:15px; font-weight:800; color:#0f172a; margin-bottom:4px;">${sectionMeta[secKey].title}</div>
+          <div style="font-size:12.5px; color:#64748b; margin-bottom:14px;">${sectionMeta[secKey].desc}</div>
+          ${secKey === 'B' ? `
+            <div style="background:#f0fdf4; border:1px dashed #059669; border-radius:8px; padding:10px 14px; margin-bottom:16px; display:flex; flex-wrap:wrap; gap:8px;">
+              <span style="width:100%; font-size:11px; font-weight:800; color:#065f46; text-transform:uppercase;">Word Bank:</span>
+              ${bankWordsB.map(w => `<span style="background:#fff; border:1px solid #a7f3d0; padding:3px 10px; border-radius:6px; font-weight:700; font-size:12.5px; color:#0f172a;">${w}</span>`).join('')}
+            </div>
+          ` : ''}
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            ${secQuestions.map(q => {
+              const uVal = userResMap ? (userResMap[q.id] || '') : '';
+              const isCorrect = userResMap ? (uVal.trim().toLowerCase() === String(q.answer).trim().toLowerCase()) : false;
+              const borderStyle = !userResMap ? '1px solid #e2e8f0' : (isCorrect ? '2px solid #16a34a' : '2px solid #dc2626');
+              const bgStyle = !userResMap ? '#f8fafc' : (isCorrect ? '#f0fdf4' : '#fef2f2');
+              let inputControlHtml = '';
+              if (q.type === 'word_form' || q.type === 'bank_fill' || q.type === 'error' || !q.options || !q.options.length) {
+                inputControlHtml = `
+                  <input type="text" id="input_${q.id}" value="${uVal.replace(/"/g, '&quot;')}" ${userResMap ? 'readonly' : ''} 
+                    class="form-input" style="max-width:260px; font-weight:700; margin-top:6px; background:#fff;" 
+                    placeholder="Nhập đáp án câu ${q.qNum}...">
+                `;
+              } else {
+                inputControlHtml = `
+                  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:8px; margin-top:8px;">
+                    ${(q.options || []).map((opt, oIdx) => {
+                      const letter = String.fromCharCode(65 + oIdx);
+                      const checked = (uVal.trim().toLowerCase() === String(opt).trim().toLowerCase()) ? 'checked' : '';
+                      return `
+                        <label style="display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #cbd5e1; padding:7px 10px; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px;">
+                          <input type="radio" name="radio_${q.id}" value="${String(opt).replace(/"/g, '&quot;')}" ${checked} ${userResMap ? 'disabled' : ''}>
+                          <span><b>${letter}.</b> ${opt}</span>
+                        </label>
+                      `;
+                    }).join('')}
+                  </div>
+                `;
+              }
+              const posLabel = q.pos || 'vocab';
+              const reviewBoxHtml = userResMap ? `
+                <div style="margin-top:10px; padding-top:8px; border-top:1px dashed #cbd5e1; font-size:12.5px;">
+                  ${isCorrect 
+                    ? `<span style="color:#15803d; font-weight:800;">✅ Chính xác!</span>` 
+                    : `<span style="color:#dc2626; font-weight:800;">❌ Sai! Bạn chọn: "${uVal || '(Bỏ trống)'}" ➔ Đáp án đúng: "${q.answer}" (Đã lưu vào Vocabulary Vault ⭐)</span>`
+                  }
+                  <div style="color:#334155; margin-top:4px;">
+                    📖 <b>Từ vựng:</b> <b style="color:#059669;">${q.word || q.answer}</b> (${posLabel}) — ${q.mean || 'N/A'}
+                  </div>
+                </div>
+              ` : '';
+              return `
+                <div style="background:${bgStyle}; border:${borderStyle}; border-radius:8px; padding:12px 14px;">
+                  <div style="font-weight:700; color:#0f172a; font-size:13.5px; line-height:1.5;">
+                    <span class="q-badge">${q.qNum}</span> ${q.stem}
+                  </div>
+                  ${inputControlHtml}${reviewBoxHtml}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    });
+    body.innerHTML = html;
   }
 
   async function triggerVocabMilestoneQuiz(milestoneNum = 5) {
     currentActiveMilestoneNum = milestoneNum;
     isVocabQuizReviewed = false;
     openModal('vocabQuizModal');
-
     document.getElementById('vocabQuizModalTitle').textContent = `🎯 Milestone Vocabulary Review - Chặng ${milestoneNum} Bài Reading (40 Câu)`;
     document.getElementById('btnSubmitVocabQuiz').style.display = 'none';
     document.getElementById('btnRetryVocabQuiz').style.display = 'none';
-
     const body = document.getElementById('vocabQuizBody');
-    if (getEffectiveGeminiKey()) {
-      body.innerHTML = `
-        <div style="text-align:center; padding:60px 20px;">
-          <div style="font-size:36px; margin-bottom:14px;">🤖</div>
-          <div style="font-size:16px; font-weight:800; color:#0f172a;">AI đang tự động biên soạn đề Vocab Quiz 40 câu mới từ 5 bài Reading vừa học...</div>
-          <div style="font-size:13px; color:#64748b; margin-top:6px;">Vui lòng đợi khoảng 3–5 giây (Mỗi lần làm là một đề mới hoàn toàn).</div>
-        </div>
-      `;
-      const aiGenerated = await generateAiVocabQuestionsFromPassages(milestoneNum);
-      currentVocabQuizQuestions = buildDynamic40VocabQuestions(aiGenerated);
-    } else {
-      currentVocabQuizQuestions = buildDynamic40VocabQuestions(null);
-    }
+    body.innerHTML = `
+      <div style="text-align:center; padding:40px 20px;">
+        <div style="font-size:28px; margin-bottom:10px;">🤖</div>
+        <div style="font-size:15px; font-weight:800; color:#0f172a;">AI đang tự động tạo bộ đề Vocab Quiz 40 câu mới từ 5 bài đọc của bạn...</div>
+        <div style="font-size:12.5px; color:#64748b; margin-top:6px;">Mỗi lần mở đều sinh câu hỏi khác nhau theo đúng 6 dạng chuẩn (Parts A – F)</div>
+      </div>
+    `;
 
+    let aiItems = null;
+    try {
+      aiItems = await generateAiVocabQuestionsFromPassages(milestoneNum);
+    } catch (e) {}
+
+    currentVocabQuizQuestions = buildDynamic40VocabQuestions(aiItems, milestoneNum);
     document.getElementById('btnSubmitVocabQuiz').style.display = 'inline-flex';
     document.getElementById('vocabQuizResultSummary').textContent = `Tổng số: ${currentVocabQuizQuestions.length} câu hỏi (Đạt >= 60% để mở khóa)`;
     renderVocabQuizDOM();
@@ -5418,6 +5614,79 @@ Each object MUST have: {"sec": "A"|"B"|"C"|"D"|"E"|"F", "type": string, "stem": 
 
   function retryCurrentVocabQuiz() {
     triggerVocabMilestoneQuiz(currentActiveMilestoneNum);
+  }
+
+  function autoSaveWrongWordToVault(qItem) {
+    if (!activeUser || !qItem || !qItem.word) return false;
+    if (!db.savedVocab) db.savedVocab = {};
+    if (!db.savedVocab[activeUser.username]) db.savedVocab[activeUser.username] = [];
+    const vault = db.savedVocab[activeUser.username];
+    const exists = vault.some(x => String(x.word || '').toLowerCase() === String(qItem.word).toLowerCase());
+    if (!exists) {
+      vault.push({
+        word: `${qItem.word} (${qItem.pos || 'vocab'})`,
+        mean: qItem.mean || `Đáp án câu: ${qItem.stem}`,
+        syn: qItem.syn || 'N/A',
+        passageTitle: `Milestone Vocab Quiz #${currentActiveMilestoneNum}`
+      });
+      return true;
+    }
+    return false;
+  }
+
+  function submitVocabQuizAnswers() {
+    if (isVocabQuizReviewed) return;
+    const userResMap = {};
+    let correctCount = 0;
+    let newlySavedWordsCount = 0;
+    currentVocabQuizQuestions.forEach(q => {
+      let val = '';
+      if (q.type === 'word_form' || q.type === 'bank_fill' || q.type === 'error' || !q.options || !q.options.length) {
+        const inp = document.getElementById(`input_${q.id}`);
+        val = inp ? inp.value.trim() : '';
+      } else {
+        const checked = document.querySelector(`input[name="radio_${q.id}"]:checked`);
+        val = checked ? checked.value.trim() : '';
+      }
+      userResMap[q.id] = val;
+      if (val.toLowerCase() === String(q.answer).trim().toLowerCase()) {
+        correctCount++;
+      } else {
+        if (autoSaveWrongWordToVault(q)) newlySavedWordsCount++;
+      }
+    });
+
+    const total = currentVocabQuizQuestions.length;
+    const pct = Math.round((correctCount / total) * 100);
+    const passed = pct >= 60;
+    isVocabQuizReviewed = true;
+    renderVocabQuizDOM(userResMap);
+    document.getElementById('btnSubmitVocabQuiz').style.display = 'none';
+    document.getElementById('btnRetryVocabQuiz').style.display = 'inline-flex';
+    document.getElementById('vocabQuizBody').scrollTop = 0;
+
+    if (!db.results) db.results = [];
+    db.results.push({
+      id: 'vq_res_' + Date.now(),
+      examId: `vq_milestone_${currentActiveMilestoneNum}`,
+      userName: activeUser.name,
+      examTitle: `Milestone Vocabulary Review (Chặng ${currentActiveMilestoneNum} bài Reading)`,
+      score: `${correctCount}/${total} (${pct}%)`,
+      band: passed ? 'PASSED' : 'RETRY',
+      isoDate: new Date().toISOString().split('T')[0],
+      timestamp: new Date().toLocaleString()
+    });
+
+    if (passed) {
+      markMilestoneAsPassed(currentActiveMilestoneNum);
+      document.getElementById('vocabQuizResultSummary').innerHTML = `<span style="color:#15803d;">🎉 ĐẠT: ${correctCount}/${total} (${pct}%) — Đã mở khóa Reading! (Lưu ${newlySavedWordsCount} từ sai vào Vault)</span>`;
+      alert(`🎉 Chúc mừng! Bạn đạt ${correctCount}/${total} câu (${pct}%).\n\n• Đã mở khóa các bài Reading tiếp theo!\n• Đã tự động lưu ${newlySavedWordsCount} từ vựng làm sai vào "⭐ Vocabulary Vault".`);
+    } else {
+      persist();
+      document.getElementById('vocabQuizResultSummary').innerHTML = `<span style="color:#dc2626;">⚠️ CHƯA ĐẠT: ${correctCount}/${total} (${pct}%) — Cần >= 60% (Lưu ${newlySavedWordsCount} từ sai vào Vault)</span>`;
+      alert(`⚠️ Kết quả: ${correctCount}/${total} câu (${pct}%).\n\nBạn cần đạt tối thiểu 60% (24/40 câu) để mở khóa bài Reading tiếp theo.\n• Đã tự động lưu ${newlySavedWordsCount} từ làm sai vào "⭐ Vocabulary Vault".`);
+    }
+    renderDashboard();
   }
 
   /* ==========================================================================
@@ -5435,12 +5704,10 @@ Each object MUST have: {"sec": "A"|"B"|"C"|"D"|"E"|"F", "type": string, "stem": 
     const tbody = document.getElementById('readingTbody');
     if (!tbody) return;
     tbody.innerHTML = '';
-
     const searchKw = (document.getElementById('filterReadingSearch')?.value || '').toLowerCase().trim();
     const partFilter = document.getElementById('filterReadingPart')?.value || 'ALL';
     const topicKw = (document.getElementById('filterReadingTopic')?.value || '').toLowerCase().trim();
     const sortMode = document.getElementById('sortReadingSelect')?.value || 'newest';
-
     let list = getVisibleExams(db.readingExams || []).filter(e => {
       const hay = `${e.title || ''} ${e.topic || ''} ${e.category || ''}`.toLowerCase();
       const matchSearch = !searchKw || hay.includes(searchKw);
@@ -5448,16 +5715,13 @@ Each object MUST have: {"sec": "A"|"B"|"C"|"D"|"E"|"F", "type": string, "stem": 
       const matchPart = !partFilter || partFilter === 'ALL' || (e.category || 'Full Test') === partFilter;
       return matchSearch && matchTopic && matchPart;
     });
-
     list = sortExamList(list, sortMode);
     if (!list.length) {
       tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">No matching reading tests found.</td></tr>`;
       return;
     }
-
     const completedIds = getStudentCompletedExamIds('reading');
     const st = getMilestoneQuizStatus();
-
     list.forEach((e, idx) => {
       const clsNames = (!e.assignedClasses || e.assignedClasses.length === 0)
         ? 'All Classes'
@@ -5467,7 +5731,6 @@ Each object MUST have: {"sec": "A"|"B"|"C"|"D"|"E"|"F", "type": string, "stem": 
       const smartBadges = renderSmartBadges(e, sortMode === 'newest' && idx === 0);
       const isDone = completedIds.includes(e.id);
       const isLockedForStudent = st.locked && !isDone;
-
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
