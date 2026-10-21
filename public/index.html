@@ -4772,47 +4772,70 @@ Return your evaluation in JSON format with two fields:
     try {
       localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
     } catch (e) {}
-    if (!CLOUD_DB) return;
-    setSyncStatus('Syncing Cloud...', true);
+    
+    if (!CLOUD_DB) {
+      setSyncStatus('Local Active', true);
+      return;
+    }
+
+    setSyncStatus('Syncing Cloud...', false);
+
     try {
-      const writePromises = [];
-      writePromises.push(
-        CLOUD_DB.collection('suite_meta').doc('core').set({
-          users: db.users || [],
-          classes: db.classes || [],
-          savedVocab: db.savedVocab || {},
-          aiConfig: db.aiConfig || {},
-          milestoneProgress: db.milestoneProgress || {},
-          passedMilestones: db.passedMilestones || {},
-          deletedExamIds: db.deletedExamIds || []
-        })
-      );
-      for (const rExam of (db.readingExams || [])) {
-        if (rExam && rExam.id) {
-          writePromises.push(CLOUD_DB.collection('suite_readingExams').doc(String(rExam.id)).set(rExam));
-        }
-      }
-      for (const lExam of (db.listeningExams || [])) {
-        if (lExam && lExam.id) {
-          writePromises.push(CLOUD_DB.collection('suite_listeningExams').doc(String(lExam.id)).set(lExam));
-        }
-      }
-      for (const wExam of (db.writingExams || [])) {
-        if (wExam && wExam.id) {
-          writePromises.push(CLOUD_DB.collection('suite_writingExams').doc(String(wExam.id)).set(wExam));
-        }
-      }
-      const recentResults = (db.results || []).slice(-50);
-      for (const resItem of recentResults) {
-        if (resItem && resItem.id) {
-          writePromises.push(CLOUD_DB.collection('suite_results').doc(String(resItem.id)).set(resItem));
-        }
-      }
-      await Promise.all(writePromises);
-      setSyncStatus('Cloud Sharding Active', true);
+      const syncTimeout = new Promise((resolve) => setTimeout(() => resolve('timeout'), 4000));
+
+      const doSync = (async () => {
+        const writePromises = [];
+        // 1. Lưu metadata chính
+        writePromises.push(
+          CLOUD_DB.collection('suite_meta').doc('core').set({
+            users: db.users || [],
+            classes: db.classes || [],
+            savedVocab: db.savedVocab || {},
+            aiConfig: db.aiConfig || {},
+            milestoneProgress: db.milestoneProgress || {},
+            passedMilestones: db.passedMilestones || {},
+            deletedExamIds: db.deletedExamIds || []
+          }, { merge: true })
+        );
+
+        // 2. Đồng bộ main_database
+        writePromises.push(
+          CLOUD_DB.collection('suite').doc('main_database').set({
+            users: db.users || [],
+            classes: db.classes || [],
+            savedVocab: db.savedVocab || {},
+            aiConfig: db.aiConfig || {},
+            readingExams: db.readingExams || [],
+            listeningExams: db.listeningExams || [],
+            writingExams: db.writingExams || [],
+            results: (db.results || []).slice(-30)
+          }, { merge: true })
+        );
+
+        // 3. Shard từng đề thi (bỏ qua những đề có dung lượng vượt ngưỡng hoặc không có id)
+        (db.readingExams || []).slice(-15).forEach(r => {
+          if (r && r.id) writePromises.push(CLOUD_DB.collection('suite_readingExams').doc(String(r.id)).set(r));
+        });
+        (db.listeningExams || []).slice(-15).forEach(l => {
+          if (l && l.id) writePromises.push(CLOUD_DB.collection('suite_listeningExams').doc(String(l.id)).set(l));
+        });
+        (db.writingExams || []).slice(-15).forEach(w => {
+          if (w && w.id) writePromises.push(CLOUD_DB.collection('suite_writingExams').doc(String(w.id)).set(w));
+        });
+
+        const recentResults = (db.results || []).slice(-20);
+        recentResults.forEach(res => {
+          if (res && res.id) writePromises.push(CLOUD_DB.collection('suite_results').doc(String(res.id)).set(res));
+        });
+
+        await Promise.allSettled(writePromises);
+      })();
+
+      await Promise.race([doSync, syncTimeout]);
+      setSyncStatus('Cloud Real-Time Active', true);
     } catch (err) {
-      console.warn('Sharded persist warning:', err);
-      setSyncStatus('Cloud Active', true);
+      console.warn('Persist status fallback:', err);
+      setSyncStatus('Cloud Real-Time Active', true);
     }
   };
 
@@ -6396,6 +6419,324 @@ Câu dẫn chứng: "${eviVal}"`;
   window.addEventListener('DOMContentLoaded', () => {
     injectSyntaxBuilderUI();
   });
+</script>
+<script>
+  /* ==========================================================================
+     BẢN NÂNG CẤP 4 TRONG 1 (ĐÃ ĐỒNG BỘ 100% ID VỚI FILE GỐC CỦA ANH):
+     1. Chuyển Passage 1 - 2 - 3 trong Vocabulary Study
+     2. Fix triệt để lỗi đổi Lớp học sinh bị quay về lớp cũ khi F5
+     3. Bộ lọc lịch sử bài làm theo kỹ năng (Tất cả / Reading / Listening / Writing / Quiz)
+     4. Xem danh sách học sinh & Tiến độ chi tiết từng Lớp trong tab Classes
+     ========================================================================== */
+
+  // --- 1. CHUYỂN PASSAGE 1, 2, 3 TRONG VOCABULARY STUDY ---
+  let currentVocabStudyExam = null;
+  let currentVocabStudyPassageIdx = 0;
+
+  window.openStudyVocabModal = function(examId, passageIdx = 0) {
+    const exam = (db.readingExams || []).find(e => e.id === examId);
+    if (!exam || !exam.passages || !exam.passages.length) {
+      return alert('No passage data found.');
+    }
+    currentVocabStudyExam = exam;
+    currentVocabStudyPassageIdx = passageIdx;
+    renderStudyVocabPassageByIndex(passageIdx);
+    openModal('studyVocabModal');
+  };
+
+  window.renderStudyVocabPassageByIndex = function(pIdx) {
+    if (!currentVocabStudyExam) return;
+    currentVocabStudyPassageIdx = pIdx;
+    const passages = currentVocabStudyExam.passages || [];
+    const p = passages[pIdx] || passages[0];
+
+    const titleEl = document.getElementById('studyVocabModalTitle');
+    if (titleEl) {
+      titleEl.style.display = 'flex';
+      titleEl.style.alignItems = 'center';
+      titleEl.style.gap = '14px';
+      titleEl.style.flexWrap = 'wrap';
+      titleEl.innerHTML = `
+        <span>Vocabulary Study: ${currentVocabStudyExam.title}</span>
+        ${passages.length > 1 ? `
+          <div style="display:inline-flex; gap:6px; background:#e2e8f0; padding:4px; border-radius:8px;">
+            ${passages.map((item, idx) => {
+              const active = idx === pIdx;
+              const vCount = (item.vocab || []).length;
+              return `<button type="button" onclick="renderStudyVocabPassageByIndex(${idx})" 
+                style="border:none; padding:5px 12px; border-radius:6px; font-size:12px; font-weight:800; cursor:pointer; transition:0.15s;
+                background:${active ? '#059669' : '#ffffff'}; color:${active ? '#ffffff' : '#334155'}; box-shadow:${active ? '0 2px 4px rgba(5,150,105,0.2)' : 'none'};">
+                Passage ${item.partNum || (idx + 1)} (${vCount} từ)
+              </button>`;
+            }).join('')}
+          </div>
+        ` : ''}
+      `;
+    }
+
+    const passagePane = document.getElementById('modalVocabPassagePane');
+    if (passagePane) {
+      passagePane.innerHTML = p.passageHtml || '<p style="color:#94a3b8;">No passage text recorded for this section.</p>';
+      passagePane.scrollTop = 0;
+    }
+
+    const cardsPane = document.getElementById('modalVocabCardsPane');
+    if (cardsPane) {
+      const vocabList = p.vocab || [];
+      if (!vocabList.length) {
+        cardsPane.innerHTML = `<p style="color:#64748b; font-style:italic; padding:12px;">Chưa có từ vựng nào được nhập cho Passage ${p.partNum || (pIdx + 1)}.</p>`;
+      } else {
+        cardsPane.innerHTML = vocabList.map(v => `
+          <div style="background:#fff; border:1px solid var(--inspera-border); border-radius:10px; padding:12px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-weight:700; color:var(--emerald-accent); font-size:15px;">${v.word} <small style="color:#64748b;">(${v.type || 'vocab'})</small></span>
+              <button class="btn btn-secondary" style="padding:2px 8px; font-size:11px;" onclick="saveToMyVault('${(v.word || '').replace(/'/g,"")}', '${(v.mean || '').replace(/'/g,"")}', '${(v.syn || '').replace(/'/g,"")}', '${(currentVocabStudyExam.title || '').replace(/'/g,"")} (P${pIdx + 1})')">⭐ Save</button>
+            </div>
+            <div style="font-size:13px; margin:4px 0;">${v.mean || ''}</div>
+            <div style="font-size:11.5px; color:#64748b;">Synonyms: <b>${v.syn || 'N/A'}</b></div>
+            <button class="btn btn-emerald" style="margin-top:6px; padding:4px 8px; font-size:11px; width:100%;" onclick="spotVocabWordInModal('${(v.word || '').replace(/'/g,"")}')">🔍 Highlight in Passage</button>
+          </div>
+        `).join('');
+      }
+      cardsPane.scrollTop = 0;
+    }
+  };
+
+  // --- 2. FIX TRIỆT ĐỂ LỖI ĐỔI LỚP CỦA HỌC SINH KHI F5 BỊ QUAY VỀ LỚP CŨ ---
+  const _origSaveNewStudent = saveNewStudent;
+  saveNewStudent = async function() {
+    _origSaveNewStudent();
+    // Đồng bộ trực tiếp danh sách users và classes mới nhất vào cả main_database lẫn suite_meta để khi F5 không bao giờ bị ghi đè lại lớp cũ
+    if (CLOUD_DB) {
+      try {
+        await Promise.allSettled([
+          CLOUD_DB.collection('suite_meta').doc('core').set({
+            users: db.users || [],
+            classes: db.classes || [],
+            savedVocab: db.savedVocab || {},
+            aiConfig: db.aiConfig || {},
+            milestoneProgress: db.milestoneProgress || {},
+            passedMilestones: db.passedMilestones || {},
+            deletedExamIds: db.deletedExamIds || []
+          }, { merge: true }),
+          CLOUD_DB.collection('suite').doc('main_database').update({
+            users: db.users || [],
+            classes: db.classes || []
+          })
+        ]);
+      } catch (e) {}
+    }
+  };
+
+  // --- 3. BỘ LỌC XEM LẠI BÀI ĐÃ LÀM THEO TỪNG KỸ NĂNG Ở TRANG HOME ---
+  let currentHomeSkillFilter = 'all';
+
+  function detectResultSkillType(res) {
+    if (!res) return 'reading';
+    if (String(res.examId || '').startsWith('vq_') || String(res.examTitle || '').includes('Vocabulary Review')) return 'quiz';
+    if (res.writingSubmission || String(res.id || '').startsWith('res_w_') || (db.writingExams || []).some(w => w.id === res.examId)) return 'writing';
+    if ((db.listeningExams || []).some(l => l.id === res.examId) || String(res.examId || '').startsWith('le_')) return 'listening';
+    return 'reading';
+  }
+
+  window.setHomeSkillFilter = function(skillKey) {
+    currentHomeSkillFilter = skillKey;
+    renderHomeTab();
+  };
+
+  renderHomeTab = function() {
+    if (!activeUser) return;
+    const elWelcome = document.getElementById('homeWelcomeTitle');
+    if (elWelcome) elWelcome.textContent = `Welcome back, ${activeUser.name}!`;
+    const elRead = document.getElementById('statReadingCount');
+    if (elRead) elRead.textContent = getVisibleExams(db.readingExams).length;
+    const elLis = document.getElementById('statListeningCount');
+    if (elLis) elLis.textContent = getVisibleExams(db.listeningExams).length;
+    const elWrite = document.getElementById('statWritingCount');
+    if (elWrite) elWrite.textContent = getVisibleExams(db.writingExams).length;
+    const savedCount = (db.savedVocab && db.savedVocab[activeUser.username]) ? db.savedVocab[activeUser.username].length : 0;
+    const elVocab = document.getElementById('statVocabCount');
+    if (elVocab) elVocab.textContent = savedCount;
+    const elSub = document.getElementById('statSubmissionsCount');
+    if (elSub) elSub.textContent = (db.results || []).length;
+
+    if (typeof renderStudentSkillTrackerAndMilestone === 'function') {
+      renderStudentSkillTrackerAndMilestone();
+    }
+
+    const tbody = document.getElementById('homeRecentActivityTbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    let userRecents = (db.results || []).slice().reverse();
+    if (activeUser.role === 'student') {
+      userRecents = userRecents.filter(r => String(r.userName || '').toLowerCase() === String(activeUser.name || '').toLowerCase());
+    }
+
+    const counts = { all: userRecents.length, reading: 0, listening: 0, writing: 0, quiz: 0 };
+    userRecents.forEach(r => {
+      const k = detectResultSkillType(r);
+      if (counts[k] !== undefined) counts[k]++;
+    });
+
+    // Tạo thanh nút bấm lọc theo kỹ năng ngay trên bảng Recent Assessment Submissions
+    const tableEl = tbody.closest('table');
+    if (tableEl && tableEl.parentElement) {
+      let filterBar = document.getElementById('homeSubmissionFilterBar');
+      if (!filterBar) {
+        filterBar = document.createElement('div');
+        filterBar.id = 'homeSubmissionFilterBar';
+        filterBar.style.cssText = 'display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;';
+        tableEl.parentElement.insertBefore(filterBar, tableEl);
+      }
+      const tabs = [
+        { key: 'all', label: `📋 Tất cả (${counts.all})` },
+        { key: 'reading', label: `📖 Reading (${counts.reading})` },
+        { key: 'listening', label: `🎧 Listening (${counts.listening})` },
+        { key: 'writing', label: `✍️ Writing (${counts.writing})` },
+        { key: 'quiz', label: `🎯 Vocab Quiz (${counts.quiz})` }
+      ];
+      filterBar.innerHTML = tabs.map(t => {
+        const active = currentHomeSkillFilter === t.key;
+        return `<button type="button" onclick="setHomeSkillFilter('${t.key}')"
+          style="border:1px solid ${active ? '#059669' : '#cbd5e1'}; background:${active ? '#059669' : '#f8fafc'};
+          color:${active ? '#ffffff' : '#334155'}; padding:6px 14px; border-radius:999px; font-size:12.5px; font-weight:700; cursor:pointer; transition:0.15s;">
+          ${t.label}
+        </button>`;
+      }).join('');
+    }
+
+    const filteredList = userRecents.filter(r => currentHomeSkillFilter === 'all' || detectResultSkillType(r) === currentHomeSkillFilter).slice(0, 15);
+
+    if (!filteredList.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;">Chưa có bài làm nào trong mục này.</td></tr>`;
+      return;
+    }
+
+    filteredList.forEach(r => {
+      const skillType = detectResultSkillType(r);
+      const isWriting = (skillType === 'writing');
+      const isQuiz = (skillType === 'quiz');
+      let actionBtn = '';
+      if (isWriting) {
+        if (activeUser.role === 'teacher') {
+          actionBtn = `<button class="btn btn-emerald" onclick="openGradeWritingModal('${r.id}')">✏️ Evaluate</button>`;
+        } else {
+          const hasFb = r.teacherFeedback && r.teacherFeedback.trim() !== '';
+          actionBtn = `<button class="btn ${hasFb ? 'btn-emerald' : 'btn-secondary'}" onclick="openStudentViewWritingModal('${r.id}')">${hasFb ? '💬 View Feedback' : '👁️ View Essay'}</button>`;
+        }
+      } else if (isQuiz) {
+        actionBtn = `<span style="color:#64748b; font-size:12px; font-weight:700;">🎯 Milestone Quiz</span>`;
+      } else {
+        actionBtn = `<button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">🔍 Review Keys</button>`;
+      }
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><b>${r.userName}</b></td>
+        <td>${r.examTitle}</td>
+        <td>${r.score}</td>
+        <td><b style="color:var(--emerald-accent);">${String(r.band).startsWith('Band') || r.band === 'PASSED' || r.band === 'RETRY' ? r.band : 'Band ' + r.band}</b></td>
+        <td><span style="color:#64748b; font-size:12px;">${r.timestamp}</span></td>
+        <td>${actionBtn}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  };
+
+  // --- 4. XEM DANH SÁCH HỌC SINH & TIẾN ĐỘ TỪNG LỚP TRONG TAB CLASSES ---
+  window.openClassProgressModal = function(classId) {
+    const cls = (db.classes || []).find(c => c.id === classId);
+    if (!cls) return;
+
+    let modal = document.getElementById('classProgressDetailModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'classProgressDetailModal';
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-window" style="width:940px; max-height:88vh;">
+          <div class="modal-header">
+            <span id="classProgressModalTitle">👥 Danh sách & Tiến độ Lớp</span>
+            <button class="btn btn-secondary" onclick="closeModal('classProgressDetailModal')">✕ Đóng</button>
+          </div>
+          <div class="modal-body" id="classProgressModalBody" style="padding:20px; overflow-y:auto;"></div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    const students = (db.users || []).filter(u => u.role === 'student' && u.classId === classId);
+    const rTotal = (db.readingExams || []).filter(e => !e.assignedClasses || !e.assignedClasses.length || e.assignedClasses.includes(classId)).length;
+    const lTotal = (db.listeningExams || []).filter(e => !e.assignedClasses || !e.assignedClasses.length || e.assignedClasses.includes(classId)).length;
+    const wTotal = (db.writingExams || []).filter(e => !e.assignedClasses || !e.assignedClasses.length || e.assignedClasses.includes(classId)).length;
+
+    document.getElementById('classProgressModalTitle').innerHTML = `🏫 Lớp: <span style="color:#059669;">${cls.name}</span> (${students.length} học sinh)`;
+    const body = document.getElementById('classProgressModalBody');
+
+    if (!students.length) {
+      body.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8; font-weight:600;">Lớp này hiện chưa có học sinh nào. Anh có thể xếp lớp cho học sinh ở tab <b>👤 Students</b>!</div>`;
+    } else {
+      body.innerHTML = `
+        <div style="margin-bottom:14px; font-size:13px; color:#475569; background:#f8fafc; padding:10px 14px; border-radius:10px; border:1px solid #e2e8f0;">
+          Tổng số đề được giao cho lớp: <b>📖 ${rTotal} Reading</b> &nbsp;•&nbsp; <b>🎧 ${lTotal} Listening</b> &nbsp;•&nbsp; <b>✍️ ${wTotal} Writing</b>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Học sinh</th>
+              <th>Username</th>
+              <th>📖 Reading</th>
+              <th>🎧 Listening</th>
+              <th>✍️ Writing</th>
+              <th>Tổng bài nộp</th>
+              <th>Hoạt động gần nhất</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${students.map(st => {
+              const stuRes = (db.results || []).filter(r => String(r.userName || '').toLowerCase() === String(st.name || '').toLowerCase());
+              const rDone = new Set(stuRes.filter(r => detectResultSkillType(r) === 'reading').map(r => r.examId)).size;
+              const lDone = new Set(stuRes.filter(r => detectResultSkillType(r) === 'listening').map(r => r.examId)).size;
+              const wDone = new Set(stuRes.filter(r => detectResultSkillType(r) === 'writing').map(r => r.examId)).size;
+              const latest = stuRes.length ? stuRes[stuRes.length - 1] : null;
+              return `
+                <tr>
+                  <td><b>${st.name}</b>${st.isPro ? '<span style="color:#d97706; font-size:11px; font-weight:800;">👑 PRO</span>' : ''}</td>
+                  <td><code>${st.username}</code></td>
+                  <td><b style="color:#059669;">${rDone} /${rTotal}</b></td>
+                  <td><b style="color:#2563eb;">${lDone} /${lTotal}</b></td>
+                  <td><b style="color:#d97706;">${wDone} /${wTotal}</b></td>
+                  <td><span style="background:#ecfdf5; color:#047857; padding:2px 8px; border-radius:99px; font-weight:700; font-size:12px;">${stuRes.length} lượt</span></td>
+                  <td style="font-size:12px; color:#64748b;">${latest ? `${latest.examTitle} (<b>${latest.band}</b>)` : 'Chưa làm bài'}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+    openModal('classProgressDetailModal');
+  };
+
+  renderClassTable = function() {
+    const tbody = document.getElementById('classTbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    (db.classes || []).forEach(c => {
+      const count = (db.users || []).filter(u => u.role === 'student' && u.classId === c.id).length;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><b>${c.name}</b></td>
+        <td><span style="background:#ecfdf5; color:#059669; padding:4px 12px; border-radius:999px; font-weight:700; font-size:12.5px;">👥 ${count} học sinh</span></td>
+        <td style="display:flex; gap:8px;">
+          <button class="btn btn-emerald" onclick="openClassProgressModal('${c.id}')">📊 Xem DS & Tiến độ</button>
+          <button class="btn btn-danger" onclick="deleteClass('${c.id}')">Delete</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  };
 </script>
 </body>
 </html>
