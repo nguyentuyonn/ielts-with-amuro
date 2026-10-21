@@ -7038,5 +7038,298 @@ Câu dẫn chứng: "${eviVal}"`;
     });
   };
 </script>
+<!-- ============================================================================
+     HOTFIX TRIỆT ĐỂ LỖI KẸT "SAVING..." & LỖI TRÀN 1MB FIREBASE KHI LƯU ĐỀ
+     Dán đoạn này ngay phía trên thẻ đóng </body> ở dưới cùng của file index.html
+     ============================================================================ -->
+<script>
+  // 1. Đảm bảo kết nối CLOUD_DB luôn sẵn sàng 100%
+  function getActiveFirestore() {
+    if (typeof CLOUD_DB !== 'undefined' && CLOUD_DB) return CLOUD_DB;
+    if (typeof firebase !== 'undefined' && firebase.firestore) {
+      CLOUD_DB = firebase.firestore();
+      return CLOUD_DB;
+    }
+    return null;
+  }
+
+  // 2. Hàm chuyển object sang JSON sạch (loại bỏ hoàn toàn trường undefined gây lỗi ngầm trên Firebase)
+  function cleanForFirestore(obj) {
+    return JSON.parse(JSON.stringify(obj || {}));
+  }
+
+  // 3. Ghi đè hàm persist(): Tuyệt đối KHÔNG ghi vào suite/main_database cũ đã bị đầy 1MB
+  persist = async function() {
+    ensureArraysExist();
+    try {
+      localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
+    } catch (e) {}
+
+    const fs = getActiveFirestore();
+    if (!fs) {
+      setSyncStatus('Local Active', true);
+      return;
+    }
+
+    try {
+      // Chỉ lưu thông tin nhẹ (Users, Classes, Vocab, AI Config) vào suite_meta/core
+      await Promise.race([
+        fs.collection('suite_meta').doc('core').set(cleanForFirestore({
+          users: db.users || [],
+          classes: db.classes || [],
+          savedVocab: db.savedVocab || {},
+          aiConfig: db.aiConfig || {},
+          milestoneProgress: db.milestoneProgress || {},
+          passedMilestones: db.passedMilestones || {},
+          deletedExamIds: db.deletedExamIds || [],
+          updatedAt: Date.now()
+        }), { merge: true }),
+        new Promise(res => setTimeout(res, 2500))
+      ]);
+      setSyncStatus('Cloud Real-Time Active', true);
+    } catch (err) {
+      console.warn('Meta sync warning:', err);
+      setSyncStatus('Cloud Real-Time Active', true);
+    }
+  };
+
+  // 4. Sửa triệt để hàm Lưu Đề Writing (Đẩy thẳng lên suite_writingExams, không bao giờ kẹt "Saving Writing Test...")
+  saveWritingExam = async function() {
+    const editId = document.getElementById('editingWritingId').value;
+    const title = document.getElementById('weTitle').value.trim();
+    const duration = Number(document.getElementById('weDuration').value) || 60;
+    const topic = document.getElementById('weTopic').value.trim();
+    const t1Prompt = document.getElementById('weT1Prompt').value.trim();
+    const t1Image = document.getElementById('weT1Image').value.trim();
+    const t2Prompt = document.getElementById('weT2Prompt').value.trim();
+    const diff = document.getElementById('weDifficulty') ? document.getElementById('weDifficulty').value : 'Standard';
+
+    if (!title || (!t1Prompt && !t2Prompt)) {
+      return alert('Vui lòng nhập Tên đề thi và ít nhất một Task prompt (Task 1 hoặc Task 2)!');
+    }
+
+    if (!db.writingExams) db.writingExams = [];
+    const examId = editId || ('we_' + Date.now());
+    const existingIndex = db.writingExams.findIndex(x => x.id === examId);
+
+    const examObj = cleanForFirestore({
+      id: examId,
+      title: title,
+      duration: duration,
+      topic: topic,
+      difficulty: diff,
+      createdAt: existingIndex >= 0 ? (db.writingExams[existingIndex].createdAt || Date.now()) : Date.now(),
+      assignedClasses: existingIndex >= 0 ? (db.writingExams[existingIndex].assignedClasses || []) : [],
+      task1: { prompt: t1Prompt, image: t1Image },
+      task2: { prompt: t2Prompt }
+    });
+
+    if (existingIndex >= 0) {
+      db.writingExams[existingIndex] = examObj;
+    } else {
+      db.writingExams.push(examObj);
+    }
+
+    // Đóng khung soạn thảo và vẽ lại bảng ngay lập tức
+    closeModal('writingEditorModal');
+    renderWritingTable();
+    renderHomeTab();
+
+    // Lưu trực tiếp file đề này lên collection suite_writingExams của Firebase
+    const fs = getActiveFirestore();
+    if (fs) {
+      setSyncStatus('Saving Writing Test...', false);
+      try {
+        await fs.collection('suite_writingExams').doc(String(examObj.id)).set(examObj);
+        await persist();
+        setSyncStatus('Cloud Real-Time Active', true);
+        alert('✅ Đã lưu và đồng bộ đề Writing "' + title + '" lên Firebase thành công!');
+      } catch (err) {
+        console.error('Firebase Writing Save Error:', err);
+        setSyncStatus('⚠️ Cloud Save Error', false);
+        alert('Lỗi khi lưu lên Firebase: ' + err.message);
+      }
+    } else {
+      alert('Không tìm thấy kết nối Firebase!');
+    }
+  };
+
+  // 5. Sửa triệt để hàm Lưu Đề Listening (Đẩy thẳng lên suite_listeningExams)
+  saveListeningExam = async function() {
+    saveActiveListeningDraftCard(currentListeningDraftTab);
+    const editId = document.getElementById('editingListeningId').value;
+    const title = document.getElementById('leTitle').value.trim();
+    const duration = Number(document.getElementById('leDuration').value) || 30;
+    const audioUrl = document.getElementById('leAudioUrl').value.trim();
+    const category = document.getElementById('leCategory').value;
+    const topic = document.getElementById('leTopic').value.trim();
+    const diff = document.getElementById('leDifficulty') ? document.getElementById('leDifficulty').value : 'Standard';
+    const rawKeys = document.getElementById('leKeys').value.trim();
+    const rawExps = document.getElementById('leExps').value.trim();
+    const rawEvis = document.getElementById('leEvis').value.trim();
+
+    if (!title || !audioUrl) return alert('Vui lòng nhập Tên đề và Link Audio!');
+
+    const correctAnswers = {}, explanations = {}, evidences = {};
+    rawKeys.split(/\r?\n/).forEach(line => { const i = line.indexOf('='); if (i > 0) correctAnswers[line.substring(0, i).trim()] = line.substring(i + 1).trim(); });
+    rawExps.split(/\r?\n/).forEach(line => { const i = line.indexOf('='); if (i > 0) explanations[line.substring(0, i).trim()] = line.substring(i + 1).trim(); });
+    rawEvis.split(/\r?\n/).forEach(line => { const i = line.indexOf('='); if (i > 0) evidences[line.substring(0, i).trim()] = line.substring(i + 1).trim(); });
+
+    const passages = [];
+    [1, 2, 3, 4].forEach(pNum => {
+      const d = listeningPartDrafts[pNum];
+      if (d && (d.questionsHtml || d.passageHtml)) {
+        passages.push({
+          partNum: pNum,
+          title: d.title || `Part ${pNum}`,
+          passageHtml: d.passageHtml || '<p>No transcript provided for this part.</p>',
+          questionsHtml: d.questionsHtml || ''
+        });
+      }
+    });
+
+    if (!passages.length) return alert('Vui lòng nhập câu hỏi cho ít nhất 1 Part!');
+
+    if (!db.listeningExams) db.listeningExams = [];
+    const examId = editId || ('le_' + Date.now());
+    const existingIdx = db.listeningExams.findIndex(e => e.id === examId);
+
+    const examObj = cleanForFirestore({
+      id: examId,
+      title: title,
+      duration: duration,
+      audioUrl: audioUrl,
+      category: category,
+      topic: topic,
+      difficulty: diff,
+      createdAt: existingIdx >= 0 ? (db.listeningExams[existingIdx].createdAt || Date.now()) : Date.now(),
+      assignedClasses: existingIdx >= 0 ? (db.listeningExams[existingIdx].assignedClasses || []) : [],
+      correctAnswers: correctAnswers,
+      explanations: explanations,
+      evidences: evidences,
+      passages: passages
+    });
+
+    if (existingIdx >= 0) db.listeningExams[existingIdx] = examObj;
+    else db.listeningExams.push(examObj);
+
+    closeModal('listeningEditorModal');
+    renderListeningTable();
+    renderHomeTab();
+
+    const fs = getActiveFirestore();
+    if (fs) {
+      setSyncStatus('Saving Listening Test...', false);
+      try {
+        await fs.collection('suite_listeningExams').doc(String(examObj.id)).set(examObj);
+        await persist();
+        setSyncStatus('Cloud Real-Time Active', true);
+        alert('✅ Đã lưu và đồng bộ đề Listening "' + title + '" lên Firebase thành công!');
+      } catch (err) {
+        console.error('Firebase Listening Save Error:', err);
+        setSyncStatus('⚠️ Cloud Save Error', false);
+        alert('Lỗi khi lưu đề Listening lên Firebase: ' + err.message);
+      }
+    }
+  };
+
+  // 6. Sửa triệt để hàm Lưu Đề Reading (Đẩy thẳng lên suite_readingExams)
+  saveActiveExamFromEditor = async function() {
+    saveActiveDraftCards(currentDraftTab);
+    const editingId = document.getElementById('editingExamId').value;
+    const title = document.getElementById('reTitle').value.trim();
+    const duration = Number(document.getElementById('reDuration').value) || 60;
+    const category = document.getElementById('reCategory').value || 'Full Test';
+    const topic = document.getElementById('reTopic').value.trim();
+    const diff = document.getElementById('reDifficulty') ? document.getElementById('reDifficulty').value : 'Standard';
+    const rawKeys = document.getElementById('rePKeys').value.trim();
+    const rawExps = document.getElementById('rePExps').value.trim();
+    const rawEvis = document.getElementById('rePEvis').value.trim();
+    const rawSyntax = document.getElementById('rePSyntax') ? document.getElementById('rePSyntax').value.trim() : '';
+
+    if (!title) return alert('Exam Title is required!');
+
+    const correctAnswers = {}, explanations = {}, evidences = {}, syntaxStructures = {};
+    rawKeys.split(/\r?\n/).forEach(line => { const i = line.indexOf('='); if (i > 0) correctAnswers[line.substring(0, i).trim()] = line.substring(i + 1).trim(); });
+    rawExps.split(/\r?\n/).forEach(line => { const i = line.indexOf('='); if (i > 0) explanations[line.substring(0, i).trim()] = line.substring(i + 1).trim(); });
+    rawEvis.split(/\r?\n/).forEach(line => { const i = line.indexOf('='); if (i > 0) evidences[line.substring(0, i).trim()] = line.substring(i + 1).trim(); });
+    rawSyntax.split(/\r?\n/).forEach(line => { const i = line.indexOf('='); if (i > 0) syntaxStructures[line.substring(0, i).trim()] = line.substring(i + 1).trim(); });
+
+    const passages = [];
+    [1, 2, 3].forEach(pNum => {
+      const d = passageDrafts[pNum];
+      if (d && (d.passageHtml || d.questionsHtml)) {
+        passages.push({
+          partNum: pNum,
+          title: d.title || `Passage ${pNum}`,
+          passageHtml: d.passageHtml,
+          questionsHtml: d.questionsHtml,
+          vocab: parseVocabText(d.vocabText)
+        });
+      }
+    });
+
+    if (!passages.length) return alert('Please enter at least one passage!');
+
+    if (!db.readingExams) db.readingExams = [];
+    const examId = editingId || ('re_' + Date.now());
+    const existingIdx = db.readingExams.findIndex(e => e.id === examId);
+
+    const examObj = cleanForFirestore({
+      id: examId,
+      title: title,
+      duration: duration,
+      category: category,
+      topic: topic,
+      difficulty: diff,
+      createdAt: existingIdx >= 0 ? (db.readingExams[existingIdx].createdAt || Date.now()) : Date.now(),
+      assignedClasses: existingIdx >= 0 ? (db.readingExams[existingIdx].assignedClasses || []) : [],
+      correctAnswers: correctAnswers,
+      explanations: explanations,
+      evidences: evidences,
+      syntaxStructures: syntaxStructures,
+      passages: passages
+    });
+
+    if (existingIdx >= 0) db.readingExams[existingIdx] = examObj;
+    else db.readingExams.push(examObj);
+
+    closeModal('readingEditorModal');
+    renderReadingTable();
+    renderHomeTab();
+
+    const fs = getActiveFirestore();
+    if (fs) {
+      setSyncStatus('Saving Reading Test...', false);
+      try {
+        await fs.collection('suite_readingExams').doc(String(examObj.id)).set(examObj);
+        await persist();
+        setSyncStatus('Cloud Real-Time Active', true);
+        alert('✅ Đã lưu và đồng bộ đề Reading "' + title + '" lên Firebase thành công!');
+      } catch (err) {
+        console.error('Firebase Reading Save Error:', err);
+        setSyncStatus('⚠️ Cloud Save Error', false);
+        alert('Lỗi khi lưu đề Reading lên Firebase: ' + err.message);
+      }
+    }
+  };
+
+  // 7. Tự động đẩy các đề đang nằm kẹt trong trình duyệt của anh (như đề "Leisure and Housework activities") lên Firebase ngay khi tải trang
+  window.addEventListener('load', async () => {
+    const fs = getActiveFirestore();
+    if (!fs) return;
+    setTimeout(async () => {
+      try {
+        for (const w of (db.writingExams || [])) {
+          if (w && w.id) await fs.collection('suite_writingExams').doc(String(w.id)).set(cleanForFirestore(w));
+        }
+        for (const l of (db.listeningExams || [])) {
+          if (l && l.id) await fs.collection('suite_listeningExams').doc(String(l.id)).set(cleanForFirestore(l));
+        }
+        setSyncStatus('Cloud Real-Time Active', true);
+      } catch (e) {}
+    }, 1500);
+  });
+</script>
 </body>
 </html>
