@@ -4497,8 +4497,8 @@ Return your evaluation in JSON format with two fields:
     }
 
     const sortOptionsHtml = `
-      <option value="newest">🆕 Mới tải lên nhất (Newest First)</option>
-      <option value="popular">🔥 Nhiều người làm nhất (Most Popular)</option>
+      <option value="newest">🆕 Newest First</option>
+      <option value="popular">🔥 Most Popular</option>
       <option value="diff_asc">🟢 Độ khó: Dễ ➔ Khó</option>
       <option value="diff_desc">📉 Độ khó: Khó ➔ Dễ</option>
       <option value="az">🔤 Tên đề: A ➔ Z</option>
@@ -5864,6 +5864,537 @@ Return ONLY a valid JSON array of question objects:
 
   window.addEventListener('DOMContentLoaded', () => {
     injectUpgradeUI();
+  });
+</script>
+<!-- ============================================================================
+     MODULE GẠCH CHÂN CẤU TRÚC CÂU TRỰC TIẾP TRÊN ĐOẠN VĂN (CLEAN & DUAL-ACTIVE)
+     Dán đoạn code này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* NÚT BẤM TRONG KHUNG REVIEW CÂU HỎI */
+  .btn-syntax {
+    background: #eff6ff; border: 1px solid #2563eb; color: #1d4ed8;
+    padding: 3px 9px; border-radius: 2px; font-size: 11px; font-weight: 700;
+    cursor: pointer; margin-top: 6px; margin-left: 6px;
+    display: inline-flex; align-items: center; gap: 4px; transition: 0.15s;
+  }
+  .btn-syntax:hover, .btn-syntax.active-syntax {
+    background: #2563eb; color: #ffffff; border-color: #1e40af;
+  }
+
+  /* KHUNG CÂU DẪN CHỨNG ĐANG ĐƯỢC PHÂN TÍCH TRÊN ĐOẠN VĂN BÊN TRÁI */
+  .passage-syntax-sentence-focus {
+    background-color: rgba(248, 250, 252, 0.6);
+    outline: 1.5px dashed #3b82f6;
+    border-radius: 3px;
+    padding: 1px 2px;
+    transition: 0.2s;
+  }
+
+  /* GẠCH CHÂN & TÔ MÀU TRỰC TIẾP TỪNG THÀNH PHẦN (KHÔNG HIỆN NHÃN S, V, O/C, M) */
+  .inline-syn-seg {
+    padding: 1px 2px;
+    margin: 0;
+    border-radius: 2px;
+    font-weight: 600;
+    transition: 0.15s;
+  }
+  .inline-syn-seg.syn-s {
+    background: rgba(59, 130, 246, 0.14);
+    border-bottom: 2.5px solid #2563eb;
+    color: #1e3a8a;
+  }
+  .inline-syn-seg.syn-v {
+    background: rgba(22, 163, 74, 0.15);
+    border-bottom: 3px double #15803d;
+    color: #14532d;
+  }
+  .inline-syn-seg.syn-o {
+    background: rgba(245, 158, 11, 0.16);
+    border-bottom: 2.5px solid #d97706;
+    color: #78350f;
+  }
+  .inline-syn-seg.syn-m {
+    background: rgba(147, 51, 234, 0.12);
+    border-bottom: 2px dashed #7e22ce;
+    color: #581c87;
+  }
+
+  /* KHI CẢ LOCATE EVIDENCE (TÔ VÀNG) VÀ GẠCH CHÂN CẤU TRÚC CÙNG BẬT */
+  .evidence-highlight-active .inline-syn-seg {
+    background-color: rgba(255, 255, 255, 0.45) !important;
+  }
+</style>
+
+<script>
+  /* 1. BỘ DỮ LIỆU CẤU TRÚC MẪU KHỚP CHÍNH XÁC VĂN BẢN GỐC (THE SCIENCE OF SHOPPING Q27-Q40) */
+  const DEFAULT_SHOPPING_SYNTAX = {
+    q27: "S: they | V: are all well-versed | O/C: in the science of persuading people to buy things",
+    q28: "S: People | V: need to make | O/C: a gentle start and take stock of the surroundings",
+    q29: "S: selecting wholesome fresh food | V: is | O/C: an uplifting way to start shopping | M: and it makes people feel less guilty",
+    q30: "S: Shoppers | V: have worked out | O/C: that everyday items, like milk, will invariably be placed | M: in an aisle towards the back of a store",
+    q31: "S: stores | V: encourage | O/C: customers to buy expensive branded products | M: by arranging them at eye-level, with cheaper ones lower down",
+    q32: "M: Often | S: head offices | V: specify | O/C: where everything has to be placed",
+    q33: "M: Despite all the academic papers written on how best to stack shelves | S: retailers | V: have | O/C: their own views",
+    q34: "S: Pictures showing shoppers | M: while they are making their selections | V: can now be analysed",
+    q35: "S: This low-tech approach | V: has become | O/C: widespread | M: following comments from stores that data collected electronically tells them little",
+    q36: "S: People | V: tell | O/C: market researchers that they make decisions about what to buy | M: based on logic and common sense",
+    q37: "S: other factors | V: play | O/C: a role | M: such as certain feelings and memories which individuals are not fully aware of",
+    q38: "S: scanners | V: reveal | O/C: their brain activity | M: as they respond",
+    q39: "S: major contradictions | V: are | O/C: apparent | M: between what they say and what they are thinking",
+    q40: "S: Eight out of ten new consumer products | M: launched on the market | V: do not succeed"
+  };
+
+  function ensureDefaultSyntaxLoaded() {
+    if (typeof defaultShoppingExam !== 'undefined') {
+      defaultShoppingExam.syntaxStructures = { ...DEFAULT_SHOPPING_SYNTAX, ...(defaultShoppingExam.syntaxStructures || {}) };
+    }
+    if (typeof db !== 'undefined' && Array.isArray(db.readingExams)) {
+      const shopEx = db.readingExams.find(e => e.id === 'reading_science_of_shopping');
+      if (shopEx) {
+        shopEx.syntaxStructures = { ...DEFAULT_SHOPPING_SYNTAX, ...(shopEx.syntaxStructures || {}) };
+      }
+    }
+  }
+
+  /* 2. CHÈN Ô NHẬP CẤU TRÚC CÂU + NÚT AI BÓC TÁCH VÀO MODAL TẠO ĐỀ & EDIT KEYS */
+  function injectSyntaxBuilderUI() {
+    ensureDefaultSyntaxLoaded();
+
+    // 2.1. Chèn vào Modal Tạo / Sửa đề Reading (readingEditorModal)
+    const rePVocab = document.getElementById('rePVocab');
+    if (rePVocab && !document.getElementById('rePSyntax')) {
+      const vocabGroup = rePVocab.parentElement;
+      const syntaxDiv = document.createElement('div');
+      syntaxDiv.className = 'form-group';
+      syntaxDiv.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <label style="margin-bottom:0;">🧩 Gạch chân cấu trúc câu trên đoạn văn (q1=S: cụm chủ ngữ | V: cụm động từ | O/C: cụm tân ngữ | M: mệnh đề phụ)</label>
+          <button type="button" class="btn btn-secondary" id="btnAiSyntaxBatch" style="padding:4px 10px; font-size:11.5px; background:#eff6ff; color:#1d4ed8; border-color:#93c5fd;" onclick="aiGenerateBatchSyntaxForEditor()">
+            🤖 AI Tự Bóc Tách Từ Ô Evidence Quotes
+          </button>
+        </div>
+        <textarea id="rePSyntax" class="form-input" style="height: 80px; font-family: monospace; font-size:12px;" placeholder="q1=S: Chủ ngữ | V: Động từ | O/C: Tân ngữ/Bổ ngữ | M: Mệnh đề phụ"></textarea>
+      `;
+      vocabGroup.parentNode.insertBefore(syntaxDiv, vocabGroup);
+    }
+
+    // 2.2. Chèn vào Modal Edit Keys trực tiếp trong phòng thi (teacherEditModal)
+    const editKeyEvi = document.getElementById('editKeyEvi');
+    if (editKeyEvi && !document.getElementById('editKeySyntax')) {
+      const eviGroup = editKeyEvi.parentElement;
+      const singleSyntaxDiv = document.createElement('div');
+      singleSyntaxDiv.className = 'form-group';
+      singleSyntaxDiv.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <label style="margin-bottom:0;">🧩 Cấu trúc câu (Gạch chân trực tiếp trên Passage)</label>
+          <button type="button" class="btn btn-secondary" id="btnAiSyntaxSingle" style="padding:3px 8px; font-size:11px; background:#eff6ff; color:#1d4ed8; border-color:#93c5fd;" onclick="aiGenerateSingleSyntaxForKeyModal()">
+            🤖 AI Tự Bóc Tách Câu Này
+          </button>
+        </div>
+        <textarea id="editKeySyntax" class="form-input" style="height: 75px; font-size:12.5px;" placeholder="S: ... | V: ... | O/C: ... | M: ..."></textarea>
+      `;
+      eviGroup.parentNode.insertBefore(singleSyntaxDiv, eviGroup.nextSibling);
+    }
+  }
+
+  /* 3. BỘ PHÂN TÍCH CHUỖI CẤU TRÚC & HIỂN THỊ SONG SONG VỚI LOCATE EVIDENCE */
+  function parseSyntaxSegments(rawSyntaxStr) {
+    const result = { segments: [] };
+    if (!rawSyntaxStr) return result;
+
+    const parts = String(rawSyntaxStr).split('|').map(s => s.trim()).filter(Boolean);
+    parts.forEach(part => {
+      const colonIdx = part.indexOf(':');
+      if (colonIdx > 0 && colonIdx < 24) {
+        const rawLabel = part.substring(0, colonIdx).trim();
+        let phrase = part.substring(colonIdx + 1).trim();
+        const cleanPhrase = phrase.replace(/\([^)]*\)/g, '').replace(/^["']|["']$/g, '').trim();
+        const low = rawLabel.toLowerCase();
+
+        if (low === 's' || low.includes('chủ ngữ') || low.includes('subject')) {
+          result.segments.push({ role: 's', text: cleanPhrase });
+        } else if (low === 'v' || low.includes('động từ') || low.includes('verb') || low.includes('vị ngữ')) {
+          result.segments.push({ role: 'v', text: cleanPhrase });
+        } else if (low === 'o' || low === 'c' || low === 'o/c' || low.includes('tân ngữ') || low.includes('bổ ngữ')) {
+          result.segments.push({ role: 'o', text: cleanPhrase });
+        } else if (low === 'm' || low.includes('mệnh đề') || low.includes('trạng ngữ') || low.includes('bổ nghĩa')) {
+          result.segments.push({ role: 'm', text: cleanPhrase });
+        }
+      }
+    });
+    return result;
+  }
+
+  function clearInlinePassageSyntax(leftPane) {
+    if (!leftPane) return;
+    leftPane.querySelectorAll('.inline-syn-badge').forEach(b => b.remove());
+    leftPane.querySelectorAll('.inline-syn-seg').forEach(seg => {
+      seg.outerHTML = seg.innerHTML;
+    });
+    leftPane.querySelectorAll('.passage-syntax-sentence-focus').forEach(box => {
+      box.outerHTML = box.innerHTML;
+    });
+  }
+
+  function clearEvidenceHighlightOnly(leftPane) {
+    if (!leftPane) return;
+    leftPane.querySelectorAll('.evidence-highlight-active').forEach(el => {
+      el.outerHTML = el.innerHTML;
+    });
+  }
+
+  function buildExactWordsRegex(textStr) {
+    const words = String(textStr || '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/[^a-zA-Z0-9\s-]/g, ' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    if (!words.length) return null;
+    const sep = '(?:<[^>]*>|[^a-zA-Z0-9])+?';
+    return new RegExp(`(${words.map(w => escapeRegex(w)).join(sep)})`, 'i');
+  }
+
+  // Lưu trạng thái của cả 2 chế độ để hiển thị cùng nhau không bị xung đột
+  let currentActiveSyntaxKey = null;
+  let currentActiveEvidenceQuote = null;
+
+  function renderCombinedPassageHighlights(scrollMode) {
+    const leftPane = document.getElementById('insperaLeftPane');
+    if (!leftPane || !activeExam) return;
+
+    // 1. Dọn sạch các thẻ span tạm để lấy lại văn bản gốc sạch sẽ trước khi vẽ lại cả 2 lớp
+    clearInlinePassageSyntax(leftPane);
+    clearEvidenceHighlightOnly(leftPane);
+
+    // 2. Lớp 1: Nếu đang bật Locate Evidence -> Tô vàng câu dẫn chứng trước
+    if (currentActiveEvidenceQuote) {
+      const snippet = currentActiveEvidenceQuote;
+      const eviRx = buildExactWordsRegex(snippet);
+      if (eviRx && eviRx.test(leftPane.innerHTML)) {
+        leftPane.innerHTML = leftPane.innerHTML.replace(eviRx, `<span class="evidence-highlight-active" id="activeLocateTarget">$1</span>`);
+      } else {
+        const shortSnippet = snippet.substring(0, Math.min(snippet.length, 45));
+        const shortRx = buildExactWordsRegex(shortSnippet);
+        if (shortRx && shortRx.test(leftPane.innerHTML)) {
+          leftPane.innerHTML = leftPane.innerHTML.replace(shortRx, `<span class="evidence-highlight-active" id="activeLocateTarget">$1</span>`);
+        }
+      }
+    }
+
+    // 3. Lớp 2: Nếu đang bật Gạch chân cấu trúc -> Vẽ gạch chân màu lên các thành phần câu (không hiện chữ S, V, O/C, M)
+    if (currentActiveSyntaxKey) {
+      const qKey = currentActiveSyntaxKey;
+      const rawSyntax = (activeExam.syntaxStructures && activeExam.syntaxStructures[qKey]) || '';
+      const rawEvidence = (activeExam.evidences && activeExam.evidences[qKey]) || '';
+      const parsed = parseSyntaxSegments(rawSyntax);
+
+      function applySegmentsToHtml(htmlChunk) {
+        let updated = htmlChunk;
+        parsed.segments.forEach(seg => {
+          const subChunks = String(seg.text || '').split(/\s*(?:\.\.\.|\/)\s*/).filter(Boolean);
+          subChunks.forEach(chunk => {
+            const rx = buildExactWordsRegex(chunk);
+            if (rx && rx.test(updated)) {
+              updated = updated.replace(rx, `<span class="inline-syn-seg syn-${seg.role}">$1</span>`);
+            }
+          });
+        });
+        return updated;
+      }
+
+      let highlightedInPassage = false;
+
+      if (rawEvidence) {
+        const eviParts = rawEvidence.split(/\s*(?:\|\||\/\/)\s*/).filter(Boolean);
+        eviParts.forEach(eviPart => {
+          const eviRx = buildExactWordsRegex(eviPart);
+          if (eviRx && eviRx.test(leftPane.innerHTML)) {
+            leftPane.innerHTML = leftPane.innerHTML.replace(eviRx, (matchedQuote) => {
+              highlightedInPassage = true;
+              return `<span class="passage-syntax-sentence-focus" id="activeSyntaxScrollTarget">${applySegmentsToHtml(matchedQuote)}</span>`;
+            });
+          }
+        });
+      }
+
+      if (!highlightedInPassage && parsed.segments.length > 0) {
+        let firstMatched = false;
+        parsed.segments.forEach(seg => {
+          const subChunks = String(seg.text || '').split(/\s*(?:\.\.\.|\/)\s*/).filter(Boolean);
+          subChunks.forEach(chunk => {
+            if (chunk.length < 3) return;
+            const rx = buildExactWordsRegex(chunk);
+            if (rx && rx.test(leftPane.innerHTML)) {
+              leftPane.innerHTML = leftPane.innerHTML.replace(rx, (m) => {
+                const idAttr = !firstMatched ? 'id="activeSyntaxScrollTarget"' : '';
+                firstMatched = true;
+                highlightedInPassage = true;
+                return `<span class="inline-syn-seg syn-${seg.role}" ${idAttr}>${m}</span>`;
+              });
+            }
+          });
+        });
+      }
+    }
+
+    // Khôi phục sự kiện kéo thả trên bài đọc nếu có
+    if (typeof setupDragDropEngine === 'function') setupDragDropEngine();
+    if (typeof restoreUserAnswersInDOM === 'function') restoreUserAnswersInDOM(document.getElementById('insperaSplitBox'));
+
+    // Cuộn mượt tới đúng vị trí vừa bấm
+    if (scrollMode === 'evidence') {
+      document.getElementById('activeLocateTarget')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (scrollMode === 'syntax') {
+      const target = document.getElementById('activeSyntaxScrollTarget') || leftPane.querySelector('.inline-syn-seg');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  // Ghi đè hàm locateEvidenceSnippet để tương thích 100% khi đang mở Gạch chân cấu trúc
+  window.locateEvidenceSnippet = function(encodedSnippet) {
+    const snippet = decodeURIComponent(encodedSnippet || '').trim();
+    if (!snippet) return;
+    currentActiveEvidenceQuote = snippet;
+    renderCombinedPassageHighlights('evidence');
+  };
+
+  window.highlightSyntaxInPassage = function(qKey) {
+    const btn = document.querySelector(`.btn-syntax[data-syn-btn="${qKey}"]`);
+
+    // Nếu bấm lại vào đúng nút đang bật thì tắt gạch chân cấu trúc (nhưng vẫn giữ Locate Evidence nếu đang có)
+    if (currentActiveSyntaxKey === qKey) {
+      currentActiveSyntaxKey = null;
+      if (btn) btn.classList.remove('active-syntax');
+      renderCombinedPassageHighlights(null);
+      return;
+    }
+
+    document.querySelectorAll('.btn-syntax.active-syntax').forEach(el => el.classList.remove('active-syntax'));
+    currentActiveSyntaxKey = qKey;
+    if (btn) btn.classList.add('active-syntax');
+
+    renderCombinedPassageHighlights('syntax');
+  };
+
+  // Reset trạng thái khi chuyển sang Passage/Part khác
+  if (typeof switchExamPassage === 'function') {
+    const _origSwitchPassage = switchExamPassage;
+    switchExamPassage = function(partNum) {
+      currentActiveSyntaxKey = null;
+      currentActiveEvidenceQuote = null;
+      _origSwitchPassage(partNum);
+    };
+  }
+
+  /* 4. TỰ ĐỘNG GẮN NÚT "🧩 GẠCH CHÂN CẤU TRÚC" VÀO CHẾ ĐỘ REVIEW (KHÔNG HIỆN BẢNG CHÚ THÍCH BÊN PHẢI) */
+  const _origShowReviewAnswers = showReviewAnswersInDOM;
+  showReviewAnswersInDOM = function(scope) {
+    ensureDefaultSyntaxLoaded();
+    _origShowReviewAnswers(scope);
+
+    if (!activeExam || activeExamType === 'writing') return;
+    const syntaxMap = activeExam.syntaxStructures || {};
+
+    Object.keys(activeExam.correctAnswers || {}).forEach(k => {
+      const syntaxText = syntaxMap[k];
+      if (!syntaxText || !String(syntaxText).trim()) return;
+
+      const indBox = scope.querySelector(`.answer-indicator[data-ind="${k}"]`);
+      if (indBox && !indBox.querySelector(`.btn-syntax[data-syn-btn="${k}"]`)) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-syntax' + (currentActiveSyntaxKey === k ? ' active-syntax' : '');
+        btn.setAttribute('data-syn-btn', k);
+        btn.innerHTML = `🧩 Gạch chân cấu trúc`;
+        btn.onclick = () => highlightSyntaxInPassage(k);
+
+        const locateBtn = indBox.querySelector('.btn-locate');
+        if (locateBtn) {
+          locateBtn.insertAdjacentElement('afterend', btn);
+        } else {
+          indBox.appendChild(btn);
+        }
+      }
+    });
+  };
+
+  /* 5. ĐỒNG BỘ LƯU & ĐỌC DỮ LIỆU CẤU TRÚC CÂU TRONG TRÌNH TẠO ĐỀ VÀ EDIT KEYS */
+  const _syntaxOrigOpenReadingEditor = openReadingEditorModal;
+  openReadingEditorModal = function() {
+    _syntaxOrigOpenReadingEditor();
+    injectSyntaxBuilderUI();
+    if (document.getElementById('rePSyntax')) document.getElementById('rePSyntax').value = '';
+  };
+
+  const _syntaxOrigOpenEditExam = openEditExamModal;
+  openEditExamModal = function(examId) {
+    _syntaxOrigOpenEditExam(examId);
+    injectSyntaxBuilderUI();
+    const exam = (db.readingExams || []).find(e => e.id === examId);
+    if (exam && document.getElementById('rePSyntax')) {
+      const synObj = exam.syntaxStructures || {};
+      document.getElementById('rePSyntax').value = Object.keys(synObj).map(k => `${k}=${synObj[k]}`).join('\n');
+    }
+  };
+
+  const _syntaxOrigSaveReadingExam = saveActiveExamFromEditor;
+  saveActiveExamFromEditor = function() {
+    injectSyntaxBuilderUI();
+    const editingId = document.getElementById('editingExamId').value;
+    const rawSyntax = document.getElementById('rePSyntax') ? document.getElementById('rePSyntax').value.trim() : '';
+    const syntaxStructures = {};
+    rawSyntax.split(/\r?\n/).forEach(line => {
+      const idx = line.indexOf('=');
+      if (idx > 0) {
+        const k = line.substring(0, idx).trim();
+        const v = line.substring(idx + 1).trim();
+        if (k && v) syntaxStructures[k] = v;
+      }
+    });
+
+    const prevLen = (db.readingExams || []).length;
+    _syntaxOrigSaveReadingExam();
+    if (!editingId && (db.readingExams || []).length <= prevLen) return;
+
+    const target = editingId
+      ? (db.readingExams || []).find(e => e.id === editingId)
+      : (db.readingExams || [])[db.readingExams.length - 1];
+
+    if (target) {
+      target.syntaxStructures = syntaxStructures;
+      persist();
+    }
+  };
+
+  const _syntaxOrigOpenTeacherEdit = openTeacherEditModal;
+  openTeacherEditModal = function(k) {
+    _syntaxOrigOpenTeacherEdit(k);
+    injectSyntaxBuilderUI();
+    ensureDefaultSyntaxLoaded();
+    const synInput = document.getElementById('editKeySyntax');
+    if (synInput && activeExam) {
+      synInput.value = (activeExam.syntaxStructures && activeExam.syntaxStructures[k]) || '';
+    }
+  };
+
+  const _syntaxOrigSaveTeacherKey = saveTeacherKeyUpdate;
+  saveTeacherKeyUpdate = async function() {
+    injectSyntaxBuilderUI();
+    const k = document.getElementById('editKeyName').value;
+    const synInput = document.getElementById('editKeySyntax');
+    if (activeExam && synInput) {
+      if (!activeExam.syntaxStructures) activeExam.syntaxStructures = {};
+      activeExam.syntaxStructures[k] = synInput.value.trim();
+    }
+    await _syntaxOrigSaveTeacherKey();
+  };
+
+  /* 6. TRỢ LÝ AI DÀNH CHO GIÁO VIÊN LÚC SOẠN ĐỀ */
+  window.aiGenerateBatchSyntaxForEditor = async function() {
+    const apiKey = getEffectiveGeminiKey();
+    if (!apiKey) return alert('Anh vui lòng nhập Gemini API Key ở nút "🤖 AI Grader Config" trên thanh công cụ trước nhé!');
+
+    const rawEvis = document.getElementById('rePEvis') ? document.getElementById('rePEvis').value.trim() : '';
+    if (!rawEvis) return alert('Anh hãy nhập các câu dẫn chứng vào ô "Evidence Quotes (q1=Exact quote)" trước, AI sẽ dựa vào đó để tách thành phần gạch chân tự động!');
+
+    const btn = document.getElementById('btnAiSyntaxBatch');
+    const origText = btn.innerHTML;
+    btn.innerHTML = '⏳ AI đang tách thành phần câu...';
+    btn.disabled = true;
+
+    const prompt = `Bạn là chuyên gia ngữ pháp IELTS Reading. Hãy tách từng câu dẫn chứng dưới đây thành các cụm từ NGUYÊN VĂN (exact substrings trong câu tiếng Anh gốc, không thêm chú thích vào giữa cụm tiếng Anh) để hệ thống gạch chân trực tiếp trên bài đọc.
+Với mỗi câu (q1, q2...), trả về đúng 1 dòng theo định dạng:
+q1=S: [cụm chủ ngữ nguyên văn] | V: [cụm động từ chính nguyên văn] | O/C: [cụm tân ngữ/bổ ngữ nguyên văn] | M: [mệnh đề phụ/trạng ngữ nguyên văn nếu có]
+
+Danh sách câu dẫn chứng:
+${rawEvis}
+
+CHỈ TRẢ VỀ văn bản thuần túy theo định dạng qX=... trên từng dòng, tuyệt đối không dùng ký hiệu Markdown (\`\`\`, **, #).`;
+
+    const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.8-flash', 'gemini-flash-latest'];
+    let successText = '';
+
+    for (const modelName of candidateModels) {
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        if (!res.ok) continue;
+        const data = await res.json();
+        const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (raw.trim()) {
+          successText = raw.replace(/```[a-z]*|```/gi, '').replace(/\*\*/g, '').trim();
+          break;
+        }
+      } catch (e) {}
+    }
+
+    btn.innerHTML = origText;
+    btn.disabled = false;
+
+    if (successText) {
+      document.getElementById('rePSyntax').value = successText;
+      alert('✅ AI đã tách xong các thành phần câu để gạch chân trên đoạn văn! Anh bấm "Save & Publish" để lưu vĩnh viễn nhé.');
+    } else {
+      alert('Không thể kết nối AI lúc này. Anh kiểm tra lại API Key hoặc thử lại sau giây lát nhé!');
+    }
+  };
+
+  window.aiGenerateSingleSyntaxForKeyModal = async function() {
+    const apiKey = getEffectiveGeminiKey();
+    if (!apiKey) return alert('Anh vui lòng nhập Gemini API Key ở nút "🤖 AI Grader Config" trước nhé!');
+
+    const eviVal = document.getElementById('editKeyEvi') ? document.getElementById('editKeyEvi').value.trim() : '';
+    if (!eviVal) return alert('Anh hãy điền câu dẫn chứng vào ô "Evidence Quote" phía trên trước nhé!');
+
+    const btn = document.getElementById('btnAiSyntaxSingle');
+    const origText = btn.innerHTML;
+    btn.innerHTML = '⏳ Đang bóc tách...';
+    btn.disabled = true;
+
+    const prompt = `Tách câu tiếng Anh sau thành các cụm từ NGUYÊN VĂN (exact substrings trong câu gốc, không tự ý thêm từ hay ngoặc đơn vào cụm tiếng Anh) để hệ thống gạch chân trực tiếp trên bài đọc. Trả về đúng 1 dòng theo định dạng:
+S: [cụm chủ ngữ nguyên văn] | V: [cụm động từ chính nguyên văn] | O/C: [cụm tân ngữ/bổ ngữ nguyên văn] | M: [mệnh đề phụ/cụm bổ nghĩa nguyên văn]
+Không dùng ký hiệu Markdown (** hay #).
+Câu dẫn chứng: "${eviVal}"`;
+
+    const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.8-flash', 'gemini-flash-latest'];
+    let resultLine = '';
+
+    for (const modelName of candidateModels) {
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        if (!res.ok) continue;
+        const data = await res.json();
+        const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (raw.trim()) {
+          resultLine = raw.replace(/\r?\n/g, ' ').replace(/\*\*/g, '').trim();
+          break;
+        }
+      } catch (e) {}
+    }
+
+    btn.innerHTML = origText;
+    btn.disabled = false;
+
+    if (resultLine) {
+      document.getElementById('editKeySyntax').value = resultLine;
+    } else {
+      alert('Không thể gọi AI lúc này, anh kiểm tra lại API Key nhé!');
+    }
+  };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    injectSyntaxBuilderUI();
   });
 </script>
 </body>
