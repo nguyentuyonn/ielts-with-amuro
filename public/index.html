@@ -7800,5 +7800,72 @@ Câu dẫn chứng: "${eviVal}"`;
     setTimeout(initOnlinePresenceEngine, 1200);
   });
 </script>
+<script>
+  /* ==========================================================================
+     FIX TRIỆT ĐỂ LƯU ĐIỂM CHẤM WRITING (NHẬN CẢ ĐIỂM 0, 1 & GIỮ VĨNH VIỄN KHI F5)
+     ========================================================================== */
+  saveWritingEvaluation = async function() {
+    const resId = document.getElementById('gradeSubmissionId').value;
+    const res = (db.results || []).find(r => r.id === resId);
+    if (!res) return;
+
+    const bandVal = document.getElementById('gradeBandInput').value.trim();
+    const fbVal = document.getElementById('gradeFeedbackInput').value.trim();
+
+    // Nhận mọi giá trị điểm kể cả "0", "0.0", "1" miễn là ô không bị bỏ trống
+    if (bandVal !== '') {
+      res.band = bandVal.toLowerCase().startsWith('band') ? bandVal : `Band ${bandVal}`;
+    } else {
+      res.band = 'Submitted';
+    }
+    res.teacherFeedback = fbVal;
+    res.gradedAt = Date.now();
+
+    // Đóng bảng chấm điểm và cập nhật giao diện ngay lập tức
+    closeModal('gradeWritingModal');
+    renderAnalyticsTable();
+    renderHomeTab();
+
+    // Lưu trực tiếp bài vừa chấm lên thẳng collection suite_results của Firebase
+    const fs = (typeof getActiveFirestore === 'function')
+      ? getActiveFirestore()
+      : (typeof CLOUD_DB !== 'undefined' ? CLOUD_DB : null);
+
+    if (fs && res.id) {
+      setSyncStatus('Saving Grade...', false);
+      try {
+        const cleanRes = JSON.parse(JSON.stringify(res));
+        await fs.collection('suite_results').doc(String(res.id)).set(cleanRes);
+
+        // Đồng bộ vào cả main_database (nếu bài nộp cũ nằm trong kho legacy) để khi F5 không bị đè lại chữ Submitted
+        try {
+          const mainRef = fs.collection('suite').doc('main_database');
+          const mainSnap = await mainRef.get();
+          if (mainSnap.exists) {
+            const mData = mainSnap.data() || {};
+            if (Array.isArray(mData.results)) {
+              const idx = mData.results.findIndex(x => x && x.id === res.id);
+              if (idx >= 0) {
+                mData.results[idx] = cleanRes;
+                await mainRef.update({ results: mData.results });
+              }
+            }
+          }
+        } catch (legacyErr) {}
+
+        await persist();
+        setSyncStatus('Cloud Real-Time Active', true);
+        alert(`✅ Đã lưu điểm (${res.band}) và nhận xét lên Cloud vĩnh viễn!`);
+      } catch (err) {
+        console.error('Save grade error:', err);
+        setSyncStatus('⚠️ Cloud Save Error', false);
+        alert('Lỗi khi lưu điểm lên Firebase: ' + err.message);
+      }
+    } else {
+      await persist();
+      alert('Writing evaluation saved!');
+    }
+  };
+</script>
 </body>
 </html>
