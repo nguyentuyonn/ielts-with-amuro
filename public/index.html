@@ -7331,5 +7331,474 @@ Câu dẫn chứng: "${eviVal}"`;
     }, 1500);
   });
 </script>
+<!-- ============================================================================
+     MODULE NÂNG CẤP VIP PRO & THEO DÕI HỌC SINH ONLINE (4 TRONG 1):
+     1. Chỉ tài khoản PRO mới được AI tự động chấm Writing khi nộp bài
+     2. Dàn ý mẫu (Outline) & Bài mẫu (Sample) Writing khóa riêng cho PRO
+     3. Tô màu sửa lỗi thông minh (Smart Correction Highlight) trong Writing Feedback
+     4. Hiển thị danh sách Học sinh đang Online theo thời gian thực (Chỉ Giáo viên thấy)
+     ============================================================================ -->
+<style>
+  .online-monitor-bar {
+    background: #ffffff; border: 1px solid #bbf7d0; border-radius: 14px;
+    padding: 12px 18px; margin-bottom: 20px; display: flex; align-items: center;
+    justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.05);
+  }
+  .online-user-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #ecfdf5; border: 1px solid #6ee7b7; color: #065f46;
+    padding: 4px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 700;
+  }
+  .online-pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  }
+  .smart-err-bad {
+    background: #fee2e2; color: #b91c1c; padding: 1px 6px;
+    border-radius: 4px; text-decoration: line-through; font-weight: 700;
+  }
+  .smart-err-good {
+    background: #dcfce7; color: #15803d; padding: 1px 6px;
+    border-radius: 4px; font-weight: 800; border: 1px solid #86efac;
+  }
+  .pro-sample-box {
+    background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%);
+    border: 1.5px solid #6ee7b7; border-radius: 12px; padding: 16px; margin-top: 14px;
+  }
+  .pro-locked-card {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px dashed #f59e0b; border-radius: 12px; padding: 18px;
+    text-align: center; color: #92400e; margin-top: 14px;
+  }
+</style>
+
+<script>
+  /* --------------------------------------------------------------------------
+     1. CHÈN Ô NHẬP DÀN Ý (OUTLINE) & BÀI MẪU (SAMPLE) VÀO TRÌNH TẠO ĐỀ WRITING
+     -------------------------------------------------------------------------- */
+  function injectWritingSampleBuilderFields() {
+    const t1ImageInput = document.getElementById('weT1Image');
+    if (t1ImageInput && !document.getElementById('weT1Outline')) {
+      const t1Box = t1ImageInput.closest('div[style*="background"]');
+      if (t1Box) {
+        const extraT1 = document.createElement('div');
+        extraT1.innerHTML = `
+          <div class="form-group" style="margin-top:10px;">
+            <label>👑 Task 1 Outline / Hướng đi mẫu (Chỉ hiện cho Học sinh PRO)</label>
+            <textarea id="weT1Outline" class="form-input" style="height:65px;" placeholder="Nhập dàn ý mẫu, cách chia đoạn Overview, Body 1, Body 2..."></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>👑 Task 1 Sample Essay / Bài mẫu Band 8.0+ (Chỉ hiện cho Học sinh PRO)</label>
+            <textarea id="weT1Sample" class="form-input" style="height:100px;" placeholder="Nhập bài mẫu Task 1 hoàn chỉnh..."></textarea>
+          </div>
+        `;
+        t1Box.appendChild(extraT1);
+      }
+    }
+
+    const t2PromptInput = document.getElementById('weT2Prompt');
+    if (t2PromptInput && !document.getElementById('weT2Outline')) {
+      const t2Box = t2PromptInput.closest('div[style*="background"]');
+      if (t2Box) {
+        const extraT2 = document.createElement('div');
+        extraT2.innerHTML = `
+          <div class="form-group" style="margin-top:10px;">
+            <label>👑 Task 2 Outline / Dàn ý & Từ vựng ăn điểm (Chỉ hiện cho Học sinh PRO)</label>
+            <textarea id="weT2Outline" class="form-input" style="height:65px;" placeholder="Nhập dàn ý mẫu, luận điểm chính và collocations chủ đề..."></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>👑 Task 2 Sample Essay / Bài mẫu Band 8.0+ (Chỉ hiện cho Học sinh PRO)</label>
+            <textarea id="weT2Sample" class="form-input" style="height:110px;" placeholder="Nhập bài mẫu Task 2 hoàn chỉnh..."></textarea>
+          </div>
+        `;
+        t2Box.appendChild(extraT2);
+      }
+    }
+  }
+
+  const _proOrigOpenWritingEditor = openWritingEditorModal;
+  openWritingEditorModal = function() {
+    _proOrigOpenWritingEditor();
+    injectWritingSampleBuilderFields();
+    if (document.getElementById('weT1Outline')) document.getElementById('weT1Outline').value = '';
+    if (document.getElementById('weT1Sample')) document.getElementById('weT1Sample').value = '';
+    if (document.getElementById('weT2Outline')) document.getElementById('weT2Outline').value = '';
+    if (document.getElementById('weT2Sample')) document.getElementById('weT2Sample').value = '';
+  };
+
+  const _proOrigOpenEditWriting = openEditWritingModal;
+  openEditWritingModal = function(wId) {
+    _proOrigOpenEditWriting(wId);
+    injectWritingSampleBuilderFields();
+    const w = (db.writingExams || []).find(x => x.id === wId);
+    if (w) {
+      if (document.getElementById('weT1Outline')) document.getElementById('weT1Outline').value = (w.task1 && w.task1.outline) || '';
+      if (document.getElementById('weT1Sample')) document.getElementById('weT1Sample').value = (w.task1 && w.task1.sample) || '';
+      if (document.getElementById('weT2Outline')) document.getElementById('weT2Outline').value = (w.task2 && w.task2.outline) || '';
+      if (document.getElementById('weT2Sample')) document.getElementById('weT2Sample').value = (w.task2 && w.task2.sample) || '';
+    }
+  };
+
+  // Cập nhật hàm lưu đề Writing để lưu kèm cả Outline & Sample lên Firebase
+  saveWritingExam = async function() {
+    injectWritingSampleBuilderFields();
+    const editId = document.getElementById('editingWritingId').value;
+    const title = document.getElementById('weTitle').value.trim();
+    const duration = Number(document.getElementById('weDuration').value) || 60;
+    const topic = document.getElementById('weTopic').value.trim();
+    const t1Prompt = document.getElementById('weT1Prompt').value.trim();
+    const t1Image = document.getElementById('weT1Image').value.trim();
+    const t1Outline = document.getElementById('weT1Outline') ? document.getElementById('weT1Outline').value.trim() : '';
+    const t1Sample = document.getElementById('weT1Sample') ? document.getElementById('weT1Sample').value.trim() : '';
+    const t2Prompt = document.getElementById('weT2Prompt').value.trim();
+    const t2Outline = document.getElementById('weT2Outline') ? document.getElementById('weT2Outline').value.trim() : '';
+    const t2Sample = document.getElementById('weT2Sample') ? document.getElementById('weT2Sample').value.trim() : '';
+    const diff = document.getElementById('weDifficulty') ? document.getElementById('weDifficulty').value : 'Standard';
+
+    if (!title || (!t1Prompt && !t2Prompt)) {
+      return alert('Vui lòng nhập Tên đề thi và ít nhất một Task prompt (Task 1 hoặc Task 2)!');
+    }
+
+    if (!db.writingExams) db.writingExams = [];
+    const examId = editId || ('we_' + Date.now());
+    const existingIndex = db.writingExams.findIndex(x => x.id === examId);
+
+    const examObj = cleanForFirestore({
+      id: examId,
+      title: title,
+      duration: duration,
+      topic: topic,
+      difficulty: diff,
+      createdAt: existingIndex >= 0 ? (db.writingExams[existingIndex].createdAt || Date.now()) : Date.now(),
+      assignedClasses: existingIndex >= 0 ? (db.writingExams[existingIndex].assignedClasses || []) : [],
+      task1: { prompt: t1Prompt, image: t1Image, outline: t1Outline, sample: t1Sample },
+      task2: { prompt: t2Prompt, outline: t2Outline, sample: t2Sample }
+    });
+
+    if (existingIndex >= 0) db.writingExams[existingIndex] = examObj;
+    else db.writingExams.push(examObj);
+
+    closeModal('writingEditorModal');
+    renderWritingTable();
+    renderHomeTab();
+
+    const fs = getActiveFirestore();
+    if (fs) {
+      setSyncStatus('Saving Writing Test...', false);
+      try {
+        await fs.collection('suite_writingExams').doc(String(examObj.id)).set(examObj);
+        await persist();
+        setSyncStatus('Cloud Real-Time Active', true);
+        alert('✅ Đã lưu đề Writing (kèm Dàn ý & Sample PRO) lên Firebase thành công!');
+      } catch (err) {
+        setSyncStatus('⚠️ Cloud Save Error', false);
+        alert('Lỗi khi lưu lên Firebase: ' + err.message);
+      }
+    }
+  };
+
+  /* --------------------------------------------------------------------------
+     2. CHỈ TÀI KHOẢN PRO MỚI ĐƯỢC TỰ ĐỘNG CHẤM WRITING BẰNG AI KHI NỘP BÀI
+     -------------------------------------------------------------------------- */
+  const _proOrigSubmitExam = submitExam;
+  submitExam = async function(forceSubmit = false) {
+    if (activeExamType !== 'writing') {
+      return _proOrigSubmitExam(forceSubmit);
+    }
+    if (!forceSubmit && !confirm('Bạn có chắc chắn muốn nộp bài Writing ngay bây giờ?')) return;
+    clearInterval(examTimer);
+
+    const currentEditor = document.getElementById('writingEditor');
+    if (currentEditor) {
+      if (activePartNum === 1) writingAnswers.task1 = currentEditor.value;
+      else writingAnswers.task2 = currentEditor.value;
+    }
+
+    const w1Count = writingAnswers.task1.trim() ? writingAnswers.task1.trim().split(/\s+/).length : 0;
+    const w2Count = writingAnswers.task2.trim() ? writingAnswers.task2.trim().split(/\s+/).length : 0;
+    let finalBand = 'Submitted';
+    let finalFeedback = '';
+
+    const canUseAutoAi = isStudentPro(activeUser) && db.aiConfig && db.aiConfig.autoGrade && getEffectiveGeminiKey();
+
+    if (canUseAutoAi) {
+      const submitBtn = document.getElementById('btnSubmitExam');
+      if (submitBtn) submitBtn.textContent = '⏳ AI Examiner Grading...';
+      try {
+        const evalRes = await callGeminiWritingEvaluator(activeExam, writingAnswers);
+        finalBand = `Band ${evalRes.band}`;
+        finalFeedback = evalRes.feedback;
+      } catch (aiErr) {
+        console.warn('Auto AI grading skipped:', aiErr.message);
+      } finally {
+        if (submitBtn) submitBtn.textContent = 'Submit';
+      }
+    }
+
+    const newRes = cleanForFirestore({
+      id: 'res_w_' + Date.now(),
+      examId: activeExam.id,
+      userName: activeUser.name,
+      examTitle: activeExam.title,
+      score: `T1: ${w1Count}w | T2: ${w2Count}w`,
+      band: finalBand,
+      teacherFeedback: finalFeedback,
+      writingSubmission: { ...writingAnswers },
+      isoDate: getTodayIsoString(),
+      timestamp: new Date().toLocaleString()
+    });
+
+    if (!db.results) db.results = [];
+    db.results.push(newRes);
+
+    const fs = getActiveFirestore();
+    if (fs) {
+      try { await fs.collection('suite_results').doc(String(newRes.id)).set(newRes); } catch (e) {}
+    }
+    await persist();
+
+    document.getElementById('examShell').style.display = 'none';
+    document.getElementById('dashboardApp').style.display = 'flex';
+    renderDashboard();
+
+    openStudentViewWritingModal(newRes.id);
+    if (!isStudentPro(activeUser)) {
+      alert(`✅ Đã nộp bài Writing thành công!\n• Task 1: ${w1Count} words\n• Task 2: ${w2Count} words\n\n💡 Lưu ý: Tính năng AI chấm tự động tức thì và mở khóa Bài mẫu Band 8.0+ chỉ dành cho tài khoản 👑 PRO. Bài của bạn đã được gửi tới giáo viên!`);
+    }
+  };
+
+  /* --------------------------------------------------------------------------
+     3. HIỂN THỊ SMART CORRECTION HIGHLIGHT & KHUNG DÀN Ý / SAMPLE CHO PRO
+     -------------------------------------------------------------------------- */
+  function formatSmartFeedbackHtml(rawText) {
+    if (!rawText) return '<span style="color:#94a3b8; font-style:italic;">Chưa có nhận xét cho bài viết này.</span>';
+    let safe = String(rawText)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Tô sáng các tiêu đề [1. TASK RESPONSE]...
+    safe = safe.replace(/\[([^\]]+)\]/g, '<div style="font-weight:800; color:#0f172a; background:#e2e8f0; padding:5px 10px; border-radius:6px; margin-top:10px; margin-bottom:4px;">📌 $1</div>');
+
+    // Tô màu cặp sửa lỗi "cụm sai" -> "cụm đúng"
+    safe = safe.replace(/["“]([^"”\n]{1,90})["”]\s*(?:->|➔|=>)\s*["“]([^"”\n]{1,90})["”]/g,
+      '<span class="smart-err-bad">$1</span> ➔ <span class="smart-err-good">✨ $2</span>');
+
+    return safe;
+  }
+
+  function renderWritingProSampleAndSmartFeedback(resId) {
+    const res = (db.results || []).find(r => r.id === resId);
+    if (!res) return;
+    const wExam = (db.writingExams || []).find(w => w.id === res.examId) || {};
+    const isTeacher = activeUser && activeUser.role === 'teacher';
+    const hasProAccess = isStudentPro(activeUser);
+
+    // 3.1. Hiển thị khung Smart Highlight cho học sinh dễ đọc sửa lỗi
+    const fbTextarea = document.getElementById('gradeFeedbackInput');
+    if (fbTextarea) {
+      let smartBox = document.getElementById('smartFeedbackPreviewBox');
+      if (!smartBox) {
+        smartBox = document.createElement('div');
+        smartBox.id = 'smartFeedbackPreviewBox';
+        smartBox.style.cssText = 'flex:1; min-height:200px; max-height:360px; overflow-y:auto; background:#ffffff; border:1.5px solid #cbd5e1; border-radius:10px; padding:12px; font-size:13px; line-height:1.65; white-space:pre-wrap;';
+        fbTextarea.parentNode.insertBefore(smartBox, fbTextarea.nextSibling);
+      }
+      if (isTeacher) {
+        fbTextarea.style.display = 'block';
+        smartBox.style.display = 'none';
+      } else {
+        fbTextarea.style.display = 'none';
+        smartBox.style.display = 'block';
+        smartBox.innerHTML = formatSmartFeedbackHtml(res.teacherFeedback);
+      }
+    }
+
+    // 3.2. Hiển thị Dàn ý mẫu (Outline) & Bài mẫu (Sample) bên dưới bài làm của học sinh
+    const leftCol = document.getElementById('gradeTask1Text')?.parentElement?.parentElement;
+    if (!leftCol) return;
+
+    let sampleContainer = document.getElementById('proSampleAndOutlineContainer');
+    if (!sampleContainer) {
+      sampleContainer = document.createElement('div');
+      sampleContainer.id = 'proSampleAndOutlineContainer';
+      leftCol.appendChild(sampleContainer);
+    }
+
+    const t1Outline = wExam.task1?.outline || '';
+    const t1Sample  = wExam.task1?.sample || '';
+    const t2Outline = wExam.task2?.outline || '';
+    const t2Sample  = wExam.task2?.sample || '';
+    const hasAnySample = Boolean(t1Outline || t1Sample || t2Outline || t2Sample);
+
+    if (!hasAnySample) {
+      sampleContainer.innerHTML = '';
+      return;
+    }
+
+    if (hasProAccess) {
+      sampleContainer.innerHTML = `
+        <div class="pro-sample-box">
+          <div style="font-weight:800; font-size:15px; color:#065f46; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between;">
+            <span>👑 Dàn Ý Hướng Đi & Bài Mẫu Band 8.0+ (PRO Exclusive)</span>
+            <span style="background:#059669; color:#fff; font-size:11px; padding:2px 8px; border-radius:99px;">Unlocked</span>
+          </div>
+          ${(t1Outline || t1Sample) ? `
+            <div style="background:#ffffff; border:1px solid #a7f3d0; border-radius:8px; padding:12px; margin-bottom:10px;">
+              <div style="font-weight:800; color:#047857; margin-bottom:6px;">📊 Task 1 — Dàn ý & Bài mẫu:</div>
+              ${t1Outline ? `<div style="font-size:13px; color:#334155; margin-bottom:8px; white-space:pre-wrap; background:#f8fafc; padding:8px; border-radius:6px;"><b>🧭 Dàn ý / Hướng đi:</b>\n${t1Outline}</div>` : ''}
+              ${t1Sample ? `<div style="font-size:13.5px; color:#0f172a; white-space:pre-wrap; line-height:1.7;"><b>📝 Bài mẫu tham khảo:</b>\n${t1Sample}</div>` : ''}
+            </div>
+          ` : ''}
+          ${(t2Outline || t2Sample) ? `
+            <div style="background:#ffffff; border:1px solid #bfdbfe; border-radius:8px; padding:12px;">
+              <div style="font-weight:800; color:#1d4ed8; margin-bottom:6px;">💡 Task 2 — Dàn ý & Bài mẫu:</div>
+              ${t2Outline ? `<div style="font-size:13px; color:#334155; margin-bottom:8px; white-space:pre-wrap; background:#f8fafc; padding:8px; border-radius:6px;"><b>🧭 Dàn ý & Từ vựng:</b>\n${t2Outline}</div>` : ''}
+              ${t2Sample ? `<div style="font-size:13.5px; color:#0f172a; white-space:pre-wrap; line-height:1.7;"><b>📝 Bài mẫu Band 8.0+:</b>\n${t2Sample}</div>` : ''}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    } else {
+      sampleContainer.innerHTML = `
+        <div class="pro-locked-card">
+          <div style="font-size:22px; margin-bottom:6px;">🔒 👑</div>
+          <div style="font-weight:800; font-size:14.5px;">Dàn Ý Chi Tiết & Bài Mẫu Band 8.0+ (Chỉ dành cho học sinh PRO)</div>
+          <div style="font-size:12.5px; margin-top:4px; color:#b45309;">
+            Đề thi này đã có sẵn Dàn ý hướng đi và Bài mẫu chuẩn từ Giáo viên. Hãy liên hệ thầy Amuro để nâng cấp tài khoản <b>PRO</b> và mở khóa toàn bộ tài liệu + AI chấm Writing tự động!
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  const _proOrigOpenGradeModal = openGradeWritingModal;
+  openGradeWritingModal = function(resId) {
+    _proOrigOpenGradeModal(resId);
+    renderWritingProSampleAndSmartFeedback(resId);
+  };
+
+  const _proOrigOpenStudentViewModal = openStudentViewWritingModal;
+  openStudentViewWritingModal = function(resId) {
+    _proOrigOpenStudentViewModal(resId);
+    renderWritingProSampleAndSmartFeedback(resId);
+  };
+
+  /* --------------------------------------------------------------------------
+     4. THEO DÕI HỌC SINH ĐANG ONLINE THEO THỜI GIAN THỰC (CHỈ GIÁO VIÊN THẤY)
+     -------------------------------------------------------------------------- */
+  let onlinePresenceMap = {};
+
+  function getCurrentStudentActivityLabel() {
+    const examShell = document.getElementById('examShell');
+    if (examShell && examShell.style.display !== 'none' && activeExam) {
+      const skillIcon = activeExamType === 'reading' ? '📖' : (activeExamType === 'listening' ? '🎧' : '✍️');
+      return `Đang làm ${skillIcon} ${activeExam.title}`;
+    }
+    return 'Đang ở Dashboard';
+  }
+
+  async function sendStudentHeartbeat() {
+    if (!activeUser) return;
+    const fs = getActiveFirestore();
+    if (!fs) return;
+    try {
+      const cls = (db.classes || []).find(c => c.id === activeUser.classId);
+      await fs.collection('suite_presence').doc(String(activeUser.username)).set({
+        username: activeUser.username,
+        name: activeUser.name,
+        role: activeUser.role,
+        isPro: Boolean(isStudentPro(activeUser)),
+        className: cls ? cls.name : '',
+        activity: getCurrentStudentActivityLabel(),
+        lastSeen: Date.now()
+      });
+    } catch (e) {}
+  }
+
+  function renderTeacherOnlineMonitor() {
+    const existingBar = document.getElementById('teacherOnlineMonitorBar');
+    if (!activeUser || activeUser.role !== 'teacher') {
+      if (existingBar) existingBar.style.display = 'none';
+      return;
+    }
+
+    const homeTab = document.getElementById('tab-home');
+    if (!homeTab) return;
+
+    let bar = existingBar;
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'teacherOnlineMonitorBar';
+      bar.className = 'online-monitor-bar';
+      homeTab.insertBefore(bar, homeTab.firstChild);
+    }
+    bar.style.display = 'flex';
+
+    const now = Date.now();
+    // Lọc các học sinh có tín hiệu hoạt động trong vòng 3 phút (180 giây) gần nhất
+    const activeStudents = Object.values(onlinePresenceMap).filter(p =>
+      p && p.role === 'student' && (now - (p.lastSeen || 0)) < 180000
+    );
+
+    if (!activeStudents.length) {
+      bar.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="online-pulse-dot" style="background:#94a3b8; box-shadow:none;"></span>
+          <span style="font-weight:800; font-size:13.5px; color:#475569;">🟢 Học sinh đang Online (0):</span>
+          <span style="font-size:13px; color:#94a3b8;">Hiện chưa có học sinh nào đang mở trang web.</span>
+        </div>
+      `;
+      return;
+    }
+
+    bar.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%;">
+        <span style="font-weight:800; font-size:13.5px; color:#065f46; margin-right:6px;">
+          🟢 Học sinh đang Online (${activeStudents.length}):
+        </span>
+        ${activeStudents.map(st => `
+          <div class="online-user-pill" title="${st.className || 'Unassigned'}">
+            <span class="online-pulse-dot"></span>
+            <span>${st.name}${st.isPro ? '👑' : ''}</span>
+            <span style="font-weight:500; color:#047857; font-size:11.5px;">• ${st.activity || 'Online'}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function initOnlinePresenceEngine() {
+    const fs = getActiveFirestore();
+    if (!fs) return;
+
+    // Gửi nhịp tim ngay khi mở trang và lặp lại mỗi 45 giây
+    sendStudentHeartbeat();
+    setInterval(sendStudentHeartbeat, 45000);
+
+    // Lắng nghe danh sách online thời gian thực
+    fs.collection('suite_presence').onSnapshot(snap => {
+      onlinePresenceMap = {};
+      snap.forEach(doc => {
+        onlinePresenceMap[doc.id] = doc.data();
+      });
+      renderTeacherOnlineMonitor();
+    });
+
+    setInterval(renderTeacherOnlineMonitor, 20000);
+  }
+
+  const _proOrigRenderDashboard = renderDashboard;
+  renderDashboard = function() {
+    _proOrigRenderDashboard();
+    renderTeacherOnlineMonitor();
+  };
+
+  window.addEventListener('load', () => {
+    injectWritingSampleBuilderFields();
+    setTimeout(initOnlinePresenceEngine, 1200);
+  });
+</script>
 </body>
 </html>
