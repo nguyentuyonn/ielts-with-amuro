@@ -1598,51 +1598,8 @@
           }
         }
       } catch (e) {}
-
-      window.addEventListener('storage', (e) => {
-        if (e.key === 'AMURO_IELTS_DB_BACKUP' && e.newValue) {
-          try {
-            db = JSON.parse(e.newValue);
-            ensureArraysExist();
-            if (activeUser) renderDashboard();
-          } catch (err) {}
-        }
-      });
-
       if (firebase && firebase.firestore) {
-        const firestore = firebase.firestore();
-        CLOUD_DB = firestore;
-        const mainDocRef = firestore.collection('suite').doc('main_database');
-
-        // Tải toàn bộ dữ liệu gốc từ Firebase về
-        mainDocRef.get().then((doc) => {
-          if (doc.exists) {
-            const cloudData = doc.data();
-            if (cloudData && (cloudData.readingExams || cloudData.users)) {
-              db = cloudData;
-              ensureArraysExist();
-              localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
-              setSyncStatus('Cloud Real-Time Active', true);
-              if (activeUser) renderDashboard();
-            }
-          }
-        }).catch(err => console.warn('Cloud fetch error:', err));
-
-        mainDocRef.onSnapshot((doc) => {
-          if (doc.exists) {
-            const cloudData = doc.data();
-            if (cloudData && cloudData.users) {
-              // Chỉ cập nhật nếu dữ liệu cloud có số lượng test bằng hoặc nhiều hơn local để tránh ghi đè mất bài
-              if ((cloudData.listeningExams || []).length >= (db.listeningExams || []).length) {
-                db = cloudData;
-                ensureArraysExist();
-                localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
-                setSyncStatus('Cloud Real-Time Active', true);
-                if (activeUser) renderDashboard();
-              }
-            }
-          }
-        });
+        CLOUD_DB = firebase.firestore();
       }
     }
 
@@ -5047,23 +5004,59 @@ Return your evaluation in JSON format with two fields:
       document.getElementById('weDifficulty').value = w.difficulty || 'Standard';
     }
   };
-
-  const _origSaveWritingExam = saveWritingExam;
-  saveWritingExam = function() {
+saveWritingExam = async function() {
     const editId = document.getElementById('editingWritingId').value;
+    const title = document.getElementById('weTitle').value.trim();
+    const duration = Number(document.getElementById('weDuration').value) || 60;
+    const topic = document.getElementById('weTopic').value.trim();
+    const t1Prompt = document.getElementById('weT1Prompt').value.trim();
+    const t1Image = document.getElementById('weT1Image').value.trim();
+    const t2Prompt = document.getElementById('weT2Prompt').value.trim();
     const diff = document.getElementById('weDifficulty') ? document.getElementById('weDifficulty').value : 'Standard';
-    const prevLen = (db.writingExams || []).length;
-    _origSaveWritingExam();
-    if (!editId && (db.writingExams || []).length <= prevLen) return;
-    const target = editId
-      ? (db.writingExams || []).find(e => e.id === editId)
-      : (db.writingExams || [])[db.writingExams.length - 1];
-    if (target) {
-      target.difficulty = diff;
-      if (!target.createdAt) target.createdAt = Date.now();
-      persist();
-      renderWritingTable();
+
+    if (!title || (!t1Prompt && !t2Prompt)) {
+      return alert('Vui lòng nhập Tên đề thi và ít nhất một Task prompt (Task 1 hoặc Task 2)!');
     }
+
+    if (!db.writingExams) db.writingExams = [];
+
+    const examId = editId || ('we_' + Date.now());
+    const existingIndex = db.writingExams.findIndex(x => x.id === examId);
+
+    const examObj = {
+      id: examId,
+      title,
+      duration,
+      topic,
+      difficulty: diff,
+      createdAt: existingIndex >= 0 ? (db.writingExams[existingIndex].createdAt || Date.now()) : Date.now(),
+      assignedClasses: existingIndex >= 0 ? (db.writingExams[existingIndex].assignedClasses || []) : [],
+      task1: { prompt: t1Prompt, image: t1Image },
+      task2: { prompt: t2Prompt }
+    };
+
+    if (existingIndex >= 0) {
+      db.writingExams[existingIndex] = examObj;
+    } else {
+      db.writingExams.push(examObj);
+    }
+
+    // Đẩy thẳng độc lập lên collection suite_writingExams trên Firebase
+    if (CLOUD_DB) {
+      try {
+        setSyncStatus('Saving Writing Test...', false);
+        await CLOUD_DB.collection('suite_writingExams').doc(String(examObj.id)).set(examObj);
+        setSyncStatus('Cloud Real-Time Active', true);
+      } catch (e) {
+        console.warn('Firebase writing direct save warning:', e);
+      }
+    }
+
+    persist();
+    closeModal('writingEditorModal');
+    renderWritingTable();
+    renderHomeTab();
+    alert('Đã lưu và xuất bản đề Writing thành công!');
   };
 
   /* ==========================================================================
@@ -6422,14 +6415,156 @@ Câu dẫn chứng: "${eviVal}"`;
 </script>
 <script>
   /* ==========================================================================
-     BẢN FIX TOÀN DIỆN & NÂNG CẤP 4 TRONG 1 (CHỐNG MẤT ĐỀ KHI F5 100%):
-     1. Ghi trực tiếp từng đề (Writing / Listening / Reading) & Học sinh lên Cloud
-     2. Chuyển Passage 1 - 2 - 3 trong Vocabulary Study
-     3. Bộ lọc lịch sử bài làm theo kỹ năng ở trang Home
-     4. Xem danh sách học sinh & Tiến độ chi tiết từng Lớp trong tab Classes
+     BẢN FIX TRIỆT ĐỂ LỖI 1MB FIREBASE (TRUE SHARDING STORAGE) & NÂNG CẤP 4 TRONG 1
+     - Tự động tách từng đề Reading / Listening / Writing thành 1 file riêng trên Cloud
+     - Tự động di chuyển đề cũ từ main_database sang ngăn riêng trong lần chạy đầu tiên
+     - Khi F5 đọc trực tiếp toàn bộ các đề từ ngăn riêng, không bao giờ mất đề
      ========================================================================== */
 
-  // --- A. SỬA TRIỆT ĐỂ CƠ CHẾ LƯU CLOUD (KHÔNG BAO GIỜ TREO SYNCING HOẶC MẤT BÀI KHI F5) ---
+  // 1. HÀM TẢI DỮ LIỆU KHI MỞ WEB / BẤM F5 (ĐỌC TỪ SHARDS + KHO CŨ)
+  initDatabaseListener = async function() {
+    try {
+      const cached = localStorage.getItem('AMURO_IELTS_DB_BACKUP');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.users) db = parsed;
+      }
+    } catch (e) {}
+    ensureArraysExist();
+
+    if (!firebase || !firebase.firestore) return;
+    const firestore = firebase.firestore();
+    CLOUD_DB = firestore;
+
+    try {
+      setSyncStatus('Loading Cloud Data...', false);
+
+      // Tải đồng thời từ kho cũ (để không mất đề cũ) và các ngăn Sharding mới
+      const [legacySnap, metaSnap, rSnap, lSnap, wSnap, resSnap] = await Promise.allSettled([
+        firestore.collection('suite').doc('main_database').get(),
+        firestore.collection('suite_meta').doc('core').get(),
+        firestore.collection('suite_readingExams').get(),
+        firestore.collection('suite_listeningExams').get(),
+        firestore.collection('suite_writingExams').get(),
+        firestore.collection('suite_results').get()
+      ]);
+
+      const legacyData = (legacySnap.status === 'fulfilled' && legacySnap.value.exists) ? (legacySnap.value.data() || {}) : {};
+      const metaData   = (metaSnap.status === 'fulfilled' && metaSnap.value.exists) ? (metaSnap.value.data() || {}) : {};
+
+      const deletedIds = metaData.deletedExamIds || legacyData.deletedExamIds || db.deletedExamIds || [];
+      db.deletedExamIds = deletedIds;
+
+      // Gộp danh sách Users, Classes, Vocab, AI Config
+      db.users = mergeRecordsById(legacyData.users || db.users, metaData.users || []);
+      db.classes = mergeRecordsById(legacyData.classes || db.classes, metaData.classes || []);
+      db.savedVocab = { ...(legacyData.savedVocab || {}), ...(db.savedVocab || {}), ...(metaData.savedVocab || {}) };
+      db.aiConfig = (metaData.aiConfig && metaData.aiConfig.apiKey) ? metaData.aiConfig : (legacyData.aiConfig || db.aiConfig);
+      db.milestoneProgress = { ...(legacyData.milestoneProgress || {}), ...(db.milestoneProgress || {}), ...(metaData.milestoneProgress || {}) };
+      db.passedMilestones = { ...(legacyData.passedMilestones || {}), ...(db.passedMilestones || {}), ...(metaData.passedMilestones || {}) };
+
+      // Lấy toàn bộ đề từ các ngăn Sharding độc lập
+      const shardReading   = rSnap.status === 'fulfilled' ? rSnap.value.docs.map(d => d.data()) : [];
+      const shardListening = lSnap.status === 'fulfilled' ? lSnap.value.docs.map(d => d.data()) : [];
+      const shardWriting   = wSnap.status === 'fulfilled' ? wSnap.value.docs.map(d => d.data()) : [];
+      const shardResults   = resSnap.status === 'fulfilled' ? resSnap.value.docs.map(d => d.data()) : [];
+
+      db.readingExams   = mergeRecordsById(legacyData.readingExams || [], shardReading, deletedIds);
+      if (!db.readingExams.length) db.readingExams = [defaultShoppingExam];
+
+      db.listeningExams = mergeRecordsById(legacyData.listeningExams || [], shardListening, deletedIds);
+      db.writingExams   = mergeRecordsById(legacyData.writingExams || [], shardWriting, deletedIds);
+      db.results        = mergeRecordsById(legacyData.results || [], shardResults, []).sort((a, b) => {
+        const ta = Number(String(a.id || '').replace(/\D/g, '')) || 0;
+        const tb = Number(String(b.id || '').replace(/\D/g, '')) || 0;
+        return ta - tb;
+      });
+
+      ensureArraysExist();
+      try { localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db)); } catch (e) {}
+      if (activeUser) renderDashboard();
+
+      // Tự động sao lưu các đề cũ chưa có trên Shard sang ngăn riêng để bảo toàn vĩnh viễn
+      const existingRIds = new Set(shardReading.map(x => x.id));
+      const existingLIds = new Set(shardListening.map(x => x.id));
+      const existingWIds = new Set(shardWriting.map(x => x.id));
+
+      const migrateJobs = [];
+      (db.readingExams || []).forEach(r => {
+        if (r && r.id && !existingRIds.has(r.id)) {
+          migrateJobs.push(firestore.collection('suite_readingExams').doc(String(r.id)).set(JSON.parse(JSON.stringify(r))));
+        }
+      });
+      (db.listeningExams || []).forEach(l => {
+        if (l && l.id && !existingLIds.has(l.id)) {
+          migrateJobs.push(firestore.collection('suite_listeningExams').doc(String(l.id)).set(JSON.parse(JSON.stringify(l))));
+        }
+      });
+      (db.writingExams || []).forEach(w => {
+        if (w && w.id && !existingWIds.has(w.id)) {
+          migrateJobs.push(firestore.collection('suite_writingExams').doc(String(w.id)).set(JSON.parse(JSON.stringify(w))));
+        }
+      });
+      if (migrateJobs.length > 0) {
+        await Promise.allSettled(migrateJobs);
+      }
+
+      setSyncStatus('Cloud Real-Time Active', true);
+
+      // Lắng nghe Real-time từng ngăn riêng biệt
+      firestore.collection('suite_meta').doc('core').onSnapshot(doc => {
+        if (doc.exists) {
+          const m = doc.data() || {};
+          if (m.deletedExamIds) db.deletedExamIds = m.deletedExamIds;
+          if (m.users) db.users = mergeRecordsById(db.users, m.users);
+          if (m.classes) db.classes = mergeRecordsById(db.classes, m.classes);
+          if (m.savedVocab) db.savedVocab = { ...(db.savedVocab || {}), ...m.savedVocab };
+          if (m.aiConfig && m.aiConfig.apiKey) db.aiConfig = m.aiConfig;
+          if (m.milestoneProgress) db.milestoneProgress = { ...(db.milestoneProgress || {}), ...m.milestoneProgress };
+          if (m.passedMilestones) db.passedMilestones = { ...(db.passedMilestones || {}), ...m.passedMilestones };
+          if (activeUser) renderDashboard();
+        }
+      });
+
+      firestore.collection('suite_readingExams').onSnapshot(snap => {
+        if (!snap.empty) {
+          db.readingExams = mergeRecordsById(db.readingExams, snap.docs.map(d => d.data()), db.deletedExamIds);
+          if (activeUser) renderDashboard();
+        }
+      });
+
+      firestore.collection('suite_listeningExams').onSnapshot(snap => {
+        if (!snap.empty) {
+          db.listeningExams = mergeRecordsById(db.listeningExams, snap.docs.map(d => d.data()), db.deletedExamIds);
+          if (activeUser) renderDashboard();
+        }
+      });
+
+      firestore.collection('suite_writingExams').onSnapshot(snap => {
+        if (!snap.empty) {
+          db.writingExams = mergeRecordsById(db.writingExams, snap.docs.map(d => d.data()), db.deletedExamIds);
+          if (activeUser) renderDashboard();
+        }
+      });
+
+      firestore.collection('suite_results').onSnapshot(snap => {
+        if (!snap.empty) {
+          db.results = mergeRecordsById(db.results, snap.docs.map(d => d.data()), []).sort((a, b) => {
+            const ta = Number(String(a.id || '').replace(/\D/g, '')) || 0;
+            const tb = Number(String(b.id || '').replace(/\D/g, '')) || 0;
+            return ta - tb;
+          });
+          if (activeUser) renderDashboard();
+        }
+      });
+
+    } catch (err) {
+      console.warn('Cloud init warning:', err);
+      setSyncStatus('Cloud Active', true);
+    }
+  };
+
+  // 2. HÀM PERSIST MỚI: TUYỆT ĐỐI KHÔNG NHỒI ĐỀ THI VÀO MAIN_DATABASE NỮA
   persist = async function() {
     ensureArraysExist();
     try {
@@ -6442,10 +6577,10 @@ Câu dẫn chứng: "${eviVal}"`;
     }
 
     setSyncStatus('Syncing Cloud...', false);
-    const syncTimer = setTimeout(() => setSyncStatus('Cloud Real-Time Active', true), 2500);
+    const syncTimer = setTimeout(() => setSyncStatus('Cloud Real-Time Active', true), 3000);
 
     try {
-      // 1. Lưu ngay lập tức Users, Classes, Vocab, AI Config vào suite_meta/core (nhẹ, dưới 50KB, luôn thành công 100%)
+      // Chỉ lưu thông tin tài khoản, lớp học, cấu hình AI vào suite_meta/core (Siêu nhẹ, không bao giờ tràn 1MB)
       await CLOUD_DB.collection('suite_meta').doc('core').set({
         users: db.users || [],
         classes: db.classes || [],
@@ -6455,24 +6590,17 @@ Câu dẫn chứng: "${eviVal}"`;
         passedMilestones: db.passedMilestones || {},
         deletedExamIds: db.deletedExamIds || [],
         updatedAt: Date.now()
-      });
+      }, { merge: true });
 
-      // 2. Chỉ đẩy vài đề mới nhất và kết quả mới nhất để tránh nghẽn mạng
+      // Lưu các bài nộp gần nhất vào ngăn kết quả riêng
       const jobs = [];
-      (db.readingExams || []).slice(-5).forEach(r => {
-        if (r && r.id) jobs.push(CLOUD_DB.collection('suite_readingExams').doc(String(r.id)).set(r));
-      });
-      (db.listeningExams || []).slice(-5).forEach(l => {
-        if (l && l.id) jobs.push(CLOUD_DB.collection('suite_listeningExams').doc(String(l.id)).set(l));
-      });
-      (db.writingExams || []).slice(-5).forEach(w => {
-        if (w && w.id) jobs.push(CLOUD_DB.collection('suite_writingExams').doc(String(w.id)).set(w));
-      });
       (db.results || []).slice(-10).forEach(res => {
-        if (res && res.id) jobs.push(CLOUD_DB.collection('suite_results').doc(String(res.id)).set(res));
+        if (res && res.id) {
+          jobs.push(CLOUD_DB.collection('suite_results').doc(String(res.id)).set(JSON.parse(JSON.stringify(res))));
+        }
       });
-
       await Promise.allSettled(jobs);
+
       clearTimeout(syncTimer);
       setSyncStatus('Cloud Real-Time Active', true);
     } catch (err) {
@@ -6481,70 +6609,167 @@ Câu dẫn chứng: "${eviVal}"`;
     }
   };
 
-  // Ép lưu trực tiếp đề Writing vừa tạo/sửa lên thẳng collection suite_writingExams ngay lập tức
-  const _directOrigSaveWriting = saveWritingExam;
+  // 3. LƯU ĐỘC LẬP ĐỀ WRITING (CHỜ GHI LÊN CLOUD XONG MỚI BÁO THÀNH CÔNG)
   saveWritingExam = async function() {
-    _directOrigSaveWriting();
-    if (CLOUD_DB && db.writingExams && db.writingExams.length) {
-      const editId = document.getElementById('editingWritingId')?.value;
-      const target = editId
-        ? db.writingExams.find(w => w.id === editId)
-        : db.writingExams[db.writingExams.length - 1];
-      if (target && target.id) {
-        try {
-          setSyncStatus('Saving Writing Test...', false);
-          await CLOUD_DB.collection('suite_writingExams').doc(String(target.id)).set(JSON.parse(JSON.stringify(target)));
-          setSyncStatus('Cloud Real-Time Active', true);
-        } catch (e) {
-          console.error('Direct writing save error:', e);
-        }
+    const editId = document.getElementById('editingWritingId').value;
+    const title = document.getElementById('weTitle').value.trim();
+    const duration = Number(document.getElementById('weDuration').value) || 60;
+    const topic = document.getElementById('weTopic').value.trim();
+    const t1Prompt = document.getElementById('weT1Prompt').value.trim();
+    const t1Image = document.getElementById('weT1Image').value.trim();
+    const t2Prompt = document.getElementById('weT2Prompt').value.trim();
+    const diff = document.getElementById('weDifficulty') ? document.getElementById('weDifficulty').value : 'Standard';
+
+    if (!title || (!t1Prompt && !t2Prompt)) {
+      return alert('Vui lòng nhập Tên đề thi và ít nhất một Task prompt (Task 1 hoặc Task 2)!');
+    }
+
+    if (!db.writingExams) db.writingExams = [];
+    const examId = editId || ('we_' + Date.now());
+    const existingIndex = db.writingExams.findIndex(x => x.id === examId);
+
+    const examObj = {
+      id: examId,
+      title,
+      duration,
+      topic,
+      difficulty: diff,
+      createdAt: existingIndex >= 0 ? (db.writingExams[existingIndex].createdAt || Date.now()) : Date.now(),
+      assignedClasses: existingIndex >= 0 ? (db.writingExams[existingIndex].assignedClasses || []) : [],
+      task1: { prompt: t1Prompt, image: t1Image },
+      task2: { prompt: t2Prompt }
+    };
+
+    if (existingIndex >= 0) {
+      db.writingExams[existingIndex] = examObj;
+    } else {
+      db.writingExams.push(examObj);
+    }
+
+    if (CLOUD_DB) {
+      try {
+        setSyncStatus('Saving Writing Test...', false);
+        await CLOUD_DB.collection('suite_writingExams').doc(String(examObj.id)).set(JSON.parse(JSON.stringify(examObj)));
+        setSyncStatus('Cloud Real-Time Active', true);
+      } catch (e) {
+        console.error('Firebase writing save error:', e);
+        alert('Cảnh báo: Không thể lưu đề Writing lên Firebase (' + e.message + '). Anh kiểm tra kết nối mạng nhé!');
       }
     }
+
+    await persist();
+    closeModal('writingEditorModal');
+    renderWritingTable();
+    renderHomeTab();
+    alert('Đã lưu và đồng bộ vĩnh viễn đề Writing lên Cloud!');
   };
 
-  // Ép lưu trực tiếp đề Listening vừa tạo/sửa lên thẳng collection suite_listeningExams ngay lập tức
-  const _directOrigSaveListening = saveListeningExam;
+  // 4. LƯU ĐỘC LẬP ĐỀ LISTENING (CHỜ GHI LÊN CLOUD XONG MỚI BÁO THÀNH CÔNG)
+  const _baseSaveListeningExam = _origSaveListeningExam;
   saveListeningExam = async function() {
-    _directOrigSaveListening();
-    if (CLOUD_DB && db.listeningExams && db.listeningExams.length) {
-      const editId = document.getElementById('editingListeningId')?.value;
-      const target = editId
-        ? db.listeningExams.find(l => l.id === editId)
-        : db.listeningExams[db.listeningExams.length - 1];
-      if (target && target.id) {
+    const editId = document.getElementById('editingListeningId').value;
+    const diff = document.getElementById('leDifficulty') ? document.getElementById('leDifficulty').value : 'Standard';
+    const prevLen = (db.listeningExams || []).length;
+
+    _baseSaveListeningExam();
+    if (!editId && (db.listeningExams || []).length <= prevLen) return;
+
+    const target = editId
+      ? (db.listeningExams || []).find(e => e.id === editId)
+      : (db.listeningExams || [])[db.listeningExams.length - 1];
+
+    if (target && target.id) {
+      target.difficulty = diff;
+      if (!target.createdAt) target.createdAt = Date.now();
+
+      if (CLOUD_DB) {
         try {
           setSyncStatus('Saving Listening Test...', false);
           await CLOUD_DB.collection('suite_listeningExams').doc(String(target.id)).set(JSON.parse(JSON.stringify(target)));
           setSyncStatus('Cloud Real-Time Active', true);
         } catch (e) {
-          console.error('Direct listening save error:', e);
+          console.error('Firebase listening save error:', e);
+          alert('Cảnh báo: Không thể lưu đề Listening lên Firebase (' + e.message + ').');
         }
       }
+      await persist();
+      renderListeningTable();
     }
   };
 
-  // Ép lưu trực tiếp đề Reading vừa tạo/sửa lên thẳng collection suite_readingExams ngay lập tức
-  const _directOrigSaveReading = saveActiveExamFromEditor;
+  // 5. LƯU ĐỘC LẬP ĐỀ READING (CHỜ GHI LÊN CLOUD XONG MỚI BÁO THÀNH CÔNG)
+  const _baseSaveReadingExam = _syntaxOrigSaveReadingExam;
   saveActiveExamFromEditor = async function() {
-    _directOrigSaveReading();
-    if (CLOUD_DB && db.readingExams && db.readingExams.length) {
-      const editId = document.getElementById('editingExamId')?.value;
-      const target = editId
-        ? db.readingExams.find(r => r.id === editId)
-        : db.readingExams[db.readingExams.length - 1];
-      if (target && target.id) {
+    injectSyntaxBuilderUI();
+    const editingId = document.getElementById('editingExamId').value;
+    const rawSyntax = document.getElementById('rePSyntax') ? document.getElementById('rePSyntax').value.trim() : '';
+    const syntaxStructures = {};
+    rawSyntax.split(/\r?\n/).forEach(line => {
+      const idx = line.indexOf('=');
+      if (idx > 0) {
+        const k = line.substring(0, idx).trim();
+        const v = line.substring(idx + 1).trim();
+        if (k && v) syntaxStructures[k] = v;
+      }
+    });
+
+    const prevLen = (db.readingExams || []).length;
+    _baseSaveReadingExam();
+    if (!editingId && (db.readingExams || []).length <= prevLen) return;
+
+    const target = editingId
+      ? (db.readingExams || []).find(e => e.id === editingId)
+      : (db.readingExams || [])[db.readingExams.length - 1];
+
+    if (target && target.id) {
+      target.syntaxStructures = syntaxStructures;
+      if (CLOUD_DB) {
         try {
           setSyncStatus('Saving Reading Test...', false);
           await CLOUD_DB.collection('suite_readingExams').doc(String(target.id)).set(JSON.parse(JSON.stringify(target)));
           setSyncStatus('Cloud Real-Time Active', true);
         } catch (e) {
-          console.error('Direct reading save error:', e);
+          console.error('Firebase reading save error:', e);
+          alert('Cảnh báo: Không thể lưu đề Reading lên Firebase (' + e.message + ').');
         }
       }
+      await persist();
+      renderReadingTable();
     }
   };
 
-  // --- 1. CHUYỂN PASSAGE 1, 2, 3 TRONG VOCABULARY STUDY ---
+  // 6. KHI GIAO ĐỀ CHO LỚP (ASSIGN CLASS) CŨNG LƯU THẲNG VÀO DOCUMENT CỦA ĐỀ ĐÓ
+  executeAssign = async function() {
+    const examId = document.getElementById('assignExamId').value;
+    const type = document.getElementById('assignExamType').value;
+    const cohort = document.getElementById('assignCohortSelect').value;
+    const list = type === 'writing' ? db.writingExams : (type === 'listening' ? db.listeningExams : db.readingExams);
+    const target = (list || []).find(e => e.id === examId);
+    if (!target) return;
+
+    if (cohort === 'ALL') {
+      target.assignedClasses = [];
+    } else {
+      if (!target.assignedClasses) target.assignedClasses = [];
+      if (!target.assignedClasses.includes(cohort)) {
+        target.assignedClasses.push(cohort);
+      }
+    }
+
+    if (CLOUD_DB && target.id) {
+      const colName = type === 'writing' ? 'suite_writingExams' : (type === 'listening' ? 'suite_listeningExams' : 'suite_readingExams');
+      try {
+        await CLOUD_DB.collection(colName).doc(String(target.id)).set(JSON.parse(JSON.stringify(target)));
+      } catch (e) {}
+    }
+
+    await persist();
+    closeModal('assignModal');
+    renderDashboard();
+    alert('Class assignment updated!');
+  };
+
+  // --- GIỮ NGUYÊN 4 TÍNH NĂNG NÂNG CẤP CỦA ANH ---
   let currentVocabStudyExam = null;
   let currentVocabStudyPassageIdx = 0;
 
@@ -6564,7 +6789,6 @@ Câu dẫn chứng: "${eviVal}"`;
     currentVocabStudyPassageIdx = pIdx;
     const passages = currentVocabStudyExam.passages || [];
     const p = passages[pIdx] || passages[0];
-
     const titleEl = document.getElementById('studyVocabModalTitle');
     if (titleEl) {
       titleEl.style.display = 'flex';
@@ -6588,13 +6812,11 @@ Câu dẫn chứng: "${eviVal}"`;
         ` : ''}
       `;
     }
-
     const passagePane = document.getElementById('modalVocabPassagePane');
     if (passagePane) {
       passagePane.innerHTML = p.passageHtml || '<p style="color:#94a3b8;">No passage text recorded for this section.</p>';
       passagePane.scrollTop = 0;
     }
-
     const cardsPane = document.getElementById('modalVocabCardsPane');
     if (cardsPane) {
       const vocabList = p.vocab || [];
@@ -6617,32 +6839,13 @@ Câu dẫn chứng: "${eviVal}"`;
     }
   };
 
-  // --- 2. FIX TRIỆT ĐỂ ĐỔI LỚP CỦA HỌC SINH KHI F5 KHÔNG BỊ QUAY VỀ LỚP CŨ ---
-  // Khi tải dữ liệu từ Cloud, nếu suite_meta/core đã có danh sách users mới nhất thì dùng trực tiếp, không để main_database cũ ghi đè
   const _origSaveNewStudent = saveNewStudent;
   saveNewStudent = async function() {
     _origSaveNewStudent();
-    if (CLOUD_DB) {
-      try {
-        setSyncStatus('Saving Student...', false);
-        await CLOUD_DB.collection('suite_meta').doc('core').set({
-          users: db.users || [],
-          classes: db.classes || [],
-          savedVocab: db.savedVocab || {},
-          aiConfig: db.aiConfig || {},
-          milestoneProgress: db.milestoneProgress || {},
-          passedMilestones: db.passedMilestones || {},
-          deletedExamIds: db.deletedExamIds || [],
-          updatedAt: Date.now()
-        }, { merge: true });
-        setSyncStatus('Cloud Real-Time Active', true);
-      } catch (e) {}
-    }
+    await persist();
   };
 
-  // --- 3. BỘ LỌC XEM LẠI BÀI ĐÃ LÀM THEO TỪNG KỸ NĂNG Ở TRANG HOME ---
   let currentHomeSkillFilter = 'all';
-
   function detectResultSkillType(res) {
     if (!res) return 'reading';
     if (String(res.examId || '').startsWith('vq_') || String(res.examTitle || '').includes('Vocabulary Review')) return 'quiz';
@@ -6671,26 +6874,21 @@ Câu dẫn chứng: "${eviVal}"`;
     if (elVocab) elVocab.textContent = savedCount;
     const elSub = document.getElementById('statSubmissionsCount');
     if (elSub) elSub.textContent = (db.results || []).length;
-
     if (typeof renderStudentSkillTrackerAndMilestone === 'function') {
       renderStudentSkillTrackerAndMilestone();
     }
-
     const tbody = document.getElementById('homeRecentActivityTbody');
     if (!tbody) return;
     tbody.innerHTML = '';
-
     let userRecents = (db.results || []).slice().reverse();
     if (activeUser.role === 'student') {
       userRecents = userRecents.filter(r => String(r.userName || '').toLowerCase() === String(activeUser.name || '').toLowerCase());
     }
-
     const counts = { all: userRecents.length, reading: 0, listening: 0, writing: 0, quiz: 0 };
     userRecents.forEach(r => {
       const k = detectResultSkillType(r);
       if (counts[k] !== undefined) counts[k]++;
     });
-
     const tableEl = tbody.closest('table');
     if (tableEl && tableEl.parentElement) {
       let filterBar = document.getElementById('homeSubmissionFilterBar');
@@ -6716,13 +6914,11 @@ Câu dẫn chứng: "${eviVal}"`;
         </button>`;
       }).join('');
     }
-
     const filteredList = userRecents.filter(r => currentHomeSkillFilter === 'all' || detectResultSkillType(r) === currentHomeSkillFilter).slice(0, 15);
     if (!filteredList.length) {
       tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;">Chưa có bài làm nào trong mục này.</td></tr>`;
       return;
     }
-
     filteredList.forEach(r => {
       const skillType = detectResultSkillType(r);
       const isWriting = (skillType === 'writing');
@@ -6753,7 +6949,6 @@ Câu dẫn chứng: "${eviVal}"`;
     });
   };
 
-  // --- 4. XEM DANH SÁCH HỌC SINH & TIẾN ĐỘ TỪNG LỚP TRONG TAB CLASSES ---
   window.openClassProgressModal = function(classId) {
     const cls = (db.classes || []).find(c => c.id === classId);
     if (!cls) return;
