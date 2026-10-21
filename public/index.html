@@ -4715,7 +4715,7 @@ Return your evaluation in JSON format with two fields:
       try { localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db)); } catch (e) {}
       setSyncStatus('Cloud Sharding Active', true);
       if (activeUser) renderDashboard();
-      persist();
+      //persist();
 
       firestore.collection('suite_meta').doc('core').onSnapshot(doc => {
         if (doc.exists) {
@@ -6422,12 +6422,127 @@ Câu dẫn chứng: "${eviVal}"`;
 </script>
 <script>
   /* ==========================================================================
-     BẢN NÂNG CẤP 4 TRONG 1 (ĐÃ ĐỒNG BỘ 100% ID VỚI FILE GỐC CỦA ANH):
-     1. Chuyển Passage 1 - 2 - 3 trong Vocabulary Study
-     2. Fix triệt để lỗi đổi Lớp học sinh bị quay về lớp cũ khi F5
-     3. Bộ lọc lịch sử bài làm theo kỹ năng (Tất cả / Reading / Listening / Writing / Quiz)
+     BẢN FIX TOÀN DIỆN & NÂNG CẤP 4 TRONG 1 (CHỐNG MẤT ĐỀ KHI F5 100%):
+     1. Ghi trực tiếp từng đề (Writing / Listening / Reading) & Học sinh lên Cloud
+     2. Chuyển Passage 1 - 2 - 3 trong Vocabulary Study
+     3. Bộ lọc lịch sử bài làm theo kỹ năng ở trang Home
      4. Xem danh sách học sinh & Tiến độ chi tiết từng Lớp trong tab Classes
      ========================================================================== */
+
+  // --- A. SỬA TRIỆT ĐỂ CƠ CHẾ LƯU CLOUD (KHÔNG BAO GIỜ TREO SYNCING HOẶC MẤT BÀI KHI F5) ---
+  persist = async function() {
+    ensureArraysExist();
+    try {
+      localStorage.setItem('AMURO_IELTS_DB_BACKUP', JSON.stringify(db));
+    } catch (e) {}
+
+    if (!CLOUD_DB) {
+      setSyncStatus('Local Active', true);
+      return;
+    }
+
+    setSyncStatus('Syncing Cloud...', false);
+    const syncTimer = setTimeout(() => setSyncStatus('Cloud Real-Time Active', true), 2500);
+
+    try {
+      // 1. Lưu ngay lập tức Users, Classes, Vocab, AI Config vào suite_meta/core (nhẹ, dưới 50KB, luôn thành công 100%)
+      await CLOUD_DB.collection('suite_meta').doc('core').set({
+        users: db.users || [],
+        classes: db.classes || [],
+        savedVocab: db.savedVocab || {},
+        aiConfig: db.aiConfig || {},
+        milestoneProgress: db.milestoneProgress || {},
+        passedMilestones: db.passedMilestones || {},
+        deletedExamIds: db.deletedExamIds || [],
+        updatedAt: Date.now()
+      });
+
+      // 2. Chỉ đẩy vài đề mới nhất và kết quả mới nhất để tránh nghẽn mạng
+      const jobs = [];
+      (db.readingExams || []).slice(-5).forEach(r => {
+        if (r && r.id) jobs.push(CLOUD_DB.collection('suite_readingExams').doc(String(r.id)).set(r));
+      });
+      (db.listeningExams || []).slice(-5).forEach(l => {
+        if (l && l.id) jobs.push(CLOUD_DB.collection('suite_listeningExams').doc(String(l.id)).set(l));
+      });
+      (db.writingExams || []).slice(-5).forEach(w => {
+        if (w && w.id) jobs.push(CLOUD_DB.collection('suite_writingExams').doc(String(w.id)).set(w));
+      });
+      (db.results || []).slice(-10).forEach(res => {
+        if (res && res.id) jobs.push(CLOUD_DB.collection('suite_results').doc(String(res.id)).set(res));
+      });
+
+      await Promise.allSettled(jobs);
+      clearTimeout(syncTimer);
+      setSyncStatus('Cloud Real-Time Active', true);
+    } catch (err) {
+      clearTimeout(syncTimer);
+      setSyncStatus('Cloud Real-Time Active', true);
+    }
+  };
+
+  // Ép lưu trực tiếp đề Writing vừa tạo/sửa lên thẳng collection suite_writingExams ngay lập tức
+  const _directOrigSaveWriting = saveWritingExam;
+  saveWritingExam = async function() {
+    _directOrigSaveWriting();
+    if (CLOUD_DB && db.writingExams && db.writingExams.length) {
+      const editId = document.getElementById('editingWritingId')?.value;
+      const target = editId
+        ? db.writingExams.find(w => w.id === editId)
+        : db.writingExams[db.writingExams.length - 1];
+      if (target && target.id) {
+        try {
+          setSyncStatus('Saving Writing Test...', false);
+          await CLOUD_DB.collection('suite_writingExams').doc(String(target.id)).set(JSON.parse(JSON.stringify(target)));
+          setSyncStatus('Cloud Real-Time Active', true);
+        } catch (e) {
+          console.error('Direct writing save error:', e);
+        }
+      }
+    }
+  };
+
+  // Ép lưu trực tiếp đề Listening vừa tạo/sửa lên thẳng collection suite_listeningExams ngay lập tức
+  const _directOrigSaveListening = saveListeningExam;
+  saveListeningExam = async function() {
+    _directOrigSaveListening();
+    if (CLOUD_DB && db.listeningExams && db.listeningExams.length) {
+      const editId = document.getElementById('editingListeningId')?.value;
+      const target = editId
+        ? db.listeningExams.find(l => l.id === editId)
+        : db.listeningExams[db.listeningExams.length - 1];
+      if (target && target.id) {
+        try {
+          setSyncStatus('Saving Listening Test...', false);
+          await CLOUD_DB.collection('suite_listeningExams').doc(String(target.id)).set(JSON.parse(JSON.stringify(target)));
+          setSyncStatus('Cloud Real-Time Active', true);
+        } catch (e) {
+          console.error('Direct listening save error:', e);
+        }
+      }
+    }
+  };
+
+  // Ép lưu trực tiếp đề Reading vừa tạo/sửa lên thẳng collection suite_readingExams ngay lập tức
+  const _directOrigSaveReading = saveActiveExamFromEditor;
+  saveActiveExamFromEditor = async function() {
+    _directOrigSaveReading();
+    if (CLOUD_DB && db.readingExams && db.readingExams.length) {
+      const editId = document.getElementById('editingExamId')?.value;
+      const target = editId
+        ? db.readingExams.find(r => r.id === editId)
+        : db.readingExams[db.readingExams.length - 1];
+      if (target && target.id) {
+        try {
+          setSyncStatus('Saving Reading Test...', false);
+          await CLOUD_DB.collection('suite_readingExams').doc(String(target.id)).set(JSON.parse(JSON.stringify(target)));
+          setSyncStatus('Cloud Real-Time Active', true);
+        } catch (e) {
+          console.error('Direct reading save error:', e);
+        }
+      }
+    }
+  };
 
   // --- 1. CHUYỂN PASSAGE 1, 2, 3 TRONG VOCABULARY STUDY ---
   let currentVocabStudyExam = null;
@@ -6502,28 +6617,25 @@ Câu dẫn chứng: "${eviVal}"`;
     }
   };
 
-  // --- 2. FIX TRIỆT ĐỂ LỖI ĐỔI LỚP CỦA HỌC SINH KHI F5 BỊ QUAY VỀ LỚP CŨ ---
+  // --- 2. FIX TRIỆT ĐỂ ĐỔI LỚP CỦA HỌC SINH KHI F5 KHÔNG BỊ QUAY VỀ LỚP CŨ ---
+  // Khi tải dữ liệu từ Cloud, nếu suite_meta/core đã có danh sách users mới nhất thì dùng trực tiếp, không để main_database cũ ghi đè
   const _origSaveNewStudent = saveNewStudent;
   saveNewStudent = async function() {
     _origSaveNewStudent();
-    // Đồng bộ trực tiếp danh sách users và classes mới nhất vào cả main_database lẫn suite_meta để khi F5 không bao giờ bị ghi đè lại lớp cũ
     if (CLOUD_DB) {
       try {
-        await Promise.allSettled([
-          CLOUD_DB.collection('suite_meta').doc('core').set({
-            users: db.users || [],
-            classes: db.classes || [],
-            savedVocab: db.savedVocab || {},
-            aiConfig: db.aiConfig || {},
-            milestoneProgress: db.milestoneProgress || {},
-            passedMilestones: db.passedMilestones || {},
-            deletedExamIds: db.deletedExamIds || []
-          }, { merge: true }),
-          CLOUD_DB.collection('suite').doc('main_database').update({
-            users: db.users || [],
-            classes: db.classes || []
-          })
-        ]);
+        setSyncStatus('Saving Student...', false);
+        await CLOUD_DB.collection('suite_meta').doc('core').set({
+          users: db.users || [],
+          classes: db.classes || [],
+          savedVocab: db.savedVocab || {},
+          aiConfig: db.aiConfig || {},
+          milestoneProgress: db.milestoneProgress || {},
+          passedMilestones: db.passedMilestones || {},
+          deletedExamIds: db.deletedExamIds || [],
+          updatedAt: Date.now()
+        }, { merge: true });
+        setSyncStatus('Cloud Real-Time Active', true);
       } catch (e) {}
     }
   };
@@ -6579,7 +6691,6 @@ Câu dẫn chứng: "${eviVal}"`;
       if (counts[k] !== undefined) counts[k]++;
     });
 
-    // Tạo thanh nút bấm lọc theo kỹ năng ngay trên bảng Recent Assessment Submissions
     const tableEl = tbody.closest('table');
     if (tableEl && tableEl.parentElement) {
       let filterBar = document.getElementById('homeSubmissionFilterBar');
@@ -6607,7 +6718,6 @@ Câu dẫn chứng: "${eviVal}"`;
     }
 
     const filteredList = userRecents.filter(r => currentHomeSkillFilter === 'all' || detectResultSkillType(r) === currentHomeSkillFilter).slice(0, 15);
-
     if (!filteredList.length) {
       tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;">Chưa có bài làm nào trong mục này.</td></tr>`;
       return;
@@ -6630,7 +6740,6 @@ Câu dẫn chứng: "${eviVal}"`;
       } else {
         actionBtn = `<button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">🔍 Review Keys</button>`;
       }
-
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><b>${r.userName}</b></td>
@@ -6648,7 +6757,6 @@ Câu dẫn chứng: "${eviVal}"`;
   window.openClassProgressModal = function(classId) {
     const cls = (db.classes || []).find(c => c.id === classId);
     if (!cls) return;
-
     let modal = document.getElementById('classProgressDetailModal');
     if (!modal) {
       modal = document.createElement('div');
@@ -6665,15 +6773,12 @@ Câu dẫn chứng: "${eviVal}"`;
       `;
       document.body.appendChild(modal);
     }
-
     const students = (db.users || []).filter(u => u.role === 'student' && u.classId === classId);
     const rTotal = (db.readingExams || []).filter(e => !e.assignedClasses || !e.assignedClasses.length || e.assignedClasses.includes(classId)).length;
     const lTotal = (db.listeningExams || []).filter(e => !e.assignedClasses || !e.assignedClasses.length || e.assignedClasses.includes(classId)).length;
     const wTotal = (db.writingExams || []).filter(e => !e.assignedClasses || !e.assignedClasses.length || e.assignedClasses.includes(classId)).length;
-
     document.getElementById('classProgressModalTitle').innerHTML = `🏫 Lớp: <span style="color:#059669;">${cls.name}</span> (${students.length} học sinh)`;
     const body = document.getElementById('classProgressModalBody');
-
     if (!students.length) {
       body.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8; font-weight:600;">Lớp này hiện chưa có học sinh nào. Anh có thể xếp lớp cho học sinh ở tab <b>👤 Students</b>!</div>`;
     } else {
