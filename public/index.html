@@ -8298,5 +8298,896 @@ Câu dẫn chứng: "${eviVal}"`;
     color: #ffffff !important;
   }
 </style>
+<!-- ============================================================================
+     MODULE NÂNG CẤP 5 TRONG 1: CUSTOM ROLE, PERSONAL STATS, STATUS FILTER,
+     TOP LEADERBOARD & FLOATING DISCORD STUDY CHAT
+     Dán ngay phía trên thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* 1. BẢNG VINH DANH TOP CHĂM CHỈ (LEADERBOARD) */
+  .leaderboard-card {
+    background: #fcfcfa; border: 1px solid #d8e0d5; border-radius: 16px;
+    padding: 18px 22px; margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(31, 46, 39, 0.03);
+  }
+  .leaderboard-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px; margin-top: 12px;
+  }
+  .leader-item {
+    background: #f4f5f0; border: 1px solid #e2e8df; border-radius: 12px;
+    padding: 12px 14px; display: flex; align-items: center; gap: 12px;
+    transition: 0.2s;
+  }
+  .leader-item:hover { background: #ffffff; border-color: #8fa899; transform: translateY(-2px); }
+  .leader-rank {
+    width: 32px; height: 32px; border-radius: 50%; font-weight: 800; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    background: #e2e8df; color: #2d4a3e;
+  }
+  .leader-rank.rank-1 { background: linear-gradient(135deg, #fde68a, #f59e0b); color: #78350f; }
+  .leader-rank.rank-2 { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #1e293b; }
+  .leader-rank.rank-3 { background: linear-gradient(135deg, #fed7aa, #d97706); color: #7c2d12; }
+
+  /* 2. DISCORD FLOATING CHAT WIDGET (GÓC DƯỚI BÊN PHẢI) */
+  #discordChatLauncher {
+    position: fixed; bottom: 24px; right: 24px; z-index: 4500;
+    background: linear-gradient(135deg, #2d4a3e 0%, #3f5e50 100%);
+    color: #fcfcfa; border: 1px solid #6b8e7b; border-radius: 999px;
+    padding: 12px 20px; font-size: 13.5px; font-weight: 800; cursor: pointer;
+    display: none; align-items: center; gap: 10px;
+    box-shadow: 0 10px 28px rgba(31, 46, 39, 0.28); transition: all 0.2s ease;
+  }
+  #discordChatLauncher:hover { transform: translateY(-2px); background: #22382f; }
+  .chat-unread-badge {
+    background: #dc2626; color: #fff; font-size: 11px; font-weight: 800;
+    padding: 2px 7px; border-radius: 999px; display: none;
+  }
+
+  #discordChatWindow {
+    position: fixed; bottom: 80px; right: 24px; z-index: 4600;
+    width: 390px; max-width: calc(100vw - 32px); height: 520px; max-height: 75vh;
+    background: #fcfcfa; border: 1.5px solid #cbd5c8; border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(31, 46, 39, 0.22);
+    display: none; flex-direction: column; overflow: hidden;
+  }
+  .dchat-header {
+    background: #2d4a3e; color: #fcfcfa; padding: 13px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 800; font-size: 14px;
+  }
+  .dchat-channels {
+    background: #eef2eb; border-bottom: 1px solid #d8e0d5;
+    padding: 8px 12px; display: flex; gap: 6px; overflow-x: auto;
+  }
+  .dchat-chan-btn {
+    border: 1px solid transparent; background: transparent; color: #5c7065;
+    padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; transition: 0.15s;
+  }
+  .dchat-chan-btn.active {
+    background: #2d4a3e; color: #fcfcfa;
+  }
+  .dchat-messages {
+    flex: 1; padding: 14px; overflow-y: auto; display: flex;
+    flex-direction: column; gap: 10px; background: #f4f5f0;
+  }
+  .dchat-msg-box {
+    background: #fcfcfa; border: 1px solid #e2e8df; border-radius: 12px;
+    padding: 9px 12px; font-size: 13px; line-height: 1.45; position: relative;
+  }
+  .dchat-msg-box.msg-teacher {
+    background: #eef5f0; border-color: #8fa899; border-left: 3.5px solid #2d4a3e;
+  }
+  .dchat-msg-meta {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 6px; margin-bottom: 4px; font-size: 11.5px;
+  }
+  .dchat-role-pill {
+    padding: 1px 7px; border-radius: 99px; font-size: 10px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .dchat-role-teacher { background: #2d4a3e; color: #fcfcfa; }
+  .dchat-role-pro { background: #d97706; color: #ffffff; }
+  .dchat-role-student { background: #e2e8df; color: #3f5248; }
+  .dchat-input-bar {
+    padding: 10px 12px; background: #fcfcfa; border-top: 1px solid #d8e0d5;
+    display: flex; gap: 8px; align-items: center;
+  }
+</style>
+
+<!-- GIAO DIỆN FLOATING CHAT WIDGET -->
+<button id="discordChatLauncher" onclick="toggleDiscordChatWindow()">
+  <i class="fas fa-comments"></i>
+  <span>Study Lounge Chat</span>
+  <span class="chat-unread-badge" id="chatUnreadBadge">0</span>
+</button>
+
+<div id="discordChatWindow">
+  <div class="dchat-header">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <i class="fas fa-hashtag" style="color:#a7f3d0;"></i>
+      <span>IELTS Study Lounge</span>
+    </div>
+    <div style="display:flex; gap:6px; align-items:center;">
+      <button onclick="clearCurrentChannelMessages()" class="teacher-item" title="Xóa lịch sử kênh này" style="background:rgba(255,255,255,0.15); border:none; color:#fff; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:11px;">🗑️</button>
+      <button onclick="toggleDiscordChatWindow()" style="background:none; border:none; color:#fff; font-size:16px; cursor:pointer;">✕</button>
+    </div>
+  </div>
+  <div class="dchat-channels">
+    <button class="dchat-chan-btn active" id="chanbtn_general" onclick="switchDiscordChannel('general')"># general-chat</button>
+    <button class="dchat-chan-btn" id="chanbtn_reading" onclick="switchDiscordChannel('reading')"># reading-listening</button>
+    <button class="dchat-chan-btn" id="chanbtn_writing" onclick="switchDiscordChannel('writing')"># writing-qa</button>
+  </div>
+  <div class="dchat-messages" id="discordMessagesContainer">
+    <div style="text-align:center; color:#64748b; font-size:12px; padding:20px;">Đang tải tin nhắn...</div>
+  </div>
+  <div class="dchat-input-bar">
+    <input type="text" id="discordChatInput" class="form-input" placeholder="Nhắn tin hoặc hỏi bài tại đây..." autocomplete="off" onkeydown="if(event.key==='Enter') sendDiscordChatMessage()">
+    <button class="btn btn-emerald" style="padding:9px 14px;" onclick="sendDiscordChatMessage()"><i class="fas fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<script>
+  /* ==========================================================================
+     1. TÍNH NĂNG ĐỔI VAI TRÒ / DANH XƯNG TÙY Ý (CUSTOM ROLE / TITLE)
+     ========================================================================== */
+  function getDisplayRoleTitle(userObj) {
+    if (!userObj) return 'MEMBER';
+    const inDb = (db.users || []).find(u => u.id === userObj.id || u.username === userObj.username) || userObj;
+    if (inDb.customTitle && String(inDb.customTitle).trim() !== '') {
+      return String(inDb.customTitle).trim();
+    }
+    return inDb.role === 'teacher' ? 'TEACHER' : (inDb.isPro ? 'PRO STUDENT' : 'STUDENT');
+  }
+
+  function injectCustomRoleFields() {
+    // 1.1. Thêm ô tự nhập Danh xưng vào cửa sổ Account Profile (cho cả Anh và học sinh)
+    const profPass = document.getElementById('profPassInput');
+    if (profPass && !document.getElementById('profCustomTitleInput')) {
+      const div = document.createElement('div');
+      div.className = 'form-group';
+      div.innerHTML = `
+        <label>👑 Danh xưng / Vai trò hiển thị (Custom Role / Title)</label>
+        <input type="text" id="profCustomTitleInput" class="form-input" placeholder="VD: Lead Examiner, Head Mentor, Founder, Scholar...">
+        <small style="color:#5c7065; display:block; margin-top:4px; font-size:11.5px;">Để trống nếu muốn dùng mặc định. Danh xưng này sẽ hiển thị trên thanh tài khoản và trong phòng Chat.</small>
+      `;
+      profPass.parentElement.parentNode.insertBefore(div, profPass.parentElement);
+    }
+
+    // 1.2. Thêm ô đặt Danh xưng cho học sinh trong cửa sổ Edit Student của Giáo viên
+    const stuClassSel = document.getElementById('newStuClassSelect');
+    if (stuClassSel && !document.getElementById('newStuCustomTitle')) {
+      const div = document.createElement('div');
+      div.className = 'form-group';
+      div.innerHTML = `
+        <label>🏷️ Danh xưng riêng (Optional Custom Title)</label>
+        <input type="text" id="newStuCustomTitle" class="form-input" placeholder="VD: Captain, Target 8.0, Class Monitor...">
+      `;
+      stuClassSel.parentElement.parentNode.appendChild(div);
+    }
+  }
+
+  function refreshHeaderRoleBadge() {
+    if (!activeUser) return;
+    const syncedUser = (db.users || []).find(u => u.id === activeUser.id || u.username === activeUser.username);
+    if (syncedUser && syncedUser.customTitle !== undefined) {
+      activeUser.customTitle = syncedUser.customTitle;
+    }
+    const roleLabel = getDisplayRoleTitle(activeUser);
+    const badgeEl = document.getElementById('userProfileLabel');
+    if (badgeEl) {
+      badgeEl.textContent = `👤 ${activeUser.name} (${roleLabel.toUpperCase()})`;
+    }
+  }
+
+  const _roleOrigOpenProfile = openProfileModal;
+  openProfileModal = function() {
+    injectCustomRoleFields();
+    _roleOrigOpenProfile();
+    const titleInp = document.getElementById('profCustomTitleInput');
+    if (titleInp && activeUser) {
+      const inDb = (db.users || []).find(u => u.id === activeUser.id || u.username === activeUser.username) || activeUser;
+      titleInp.value = inDb.customTitle || '';
+    }
+  };
+
+  saveProfileChanges = async function() {
+    injectCustomRoleFields();
+    const n = document.getElementById('profNameInput').value.trim();
+    const p = document.getElementById('profPassInput').value.trim();
+    const cTitle = document.getElementById('profCustomTitleInput') ? document.getElementById('profCustomTitleInput').value.trim() : '';
+    if (!n) return alert('Name is required!');
+
+    activeUser.name = n;
+    activeUser.customTitle = cTitle;
+    if (p) activeUser.pass = p;
+
+    const target = (db.users || []).find(u => u.id === activeUser.id || u.username === activeUser.username);
+    if (target) {
+      target.name = n;
+      target.customTitle = cTitle;
+      if (p) target.pass = p;
+    }
+
+    sessionStorage.setItem('AMURO_CURRENT_USER', JSON.stringify(activeUser));
+    await persist();
+    closeModal('profileModal');
+    refreshHeaderRoleBadge();
+    renderDashboard();
+    alert(`✅ Đã cập nhật hồ sơ & danh xưng thành: ${getDisplayRoleTitle(activeUser)}!`);
+  };
+
+  const _roleOrigOpenCreateStu = openCreateStudentModal;
+  openCreateStudentModal = function() {
+    injectCustomRoleFields();
+    _roleOrigOpenCreateStu();
+    if (document.getElementById('newStuCustomTitle')) document.getElementById('newStuCustomTitle').value = '';
+  };
+
+  const _roleOrigOpenEditStu = openEditStudentModal;
+  openEditStudentModal = function(stuId) {
+    injectCustomRoleFields();
+    _roleOrigOpenEditStu(stuId);
+    const stu = (db.users || []).find(u => u.id === stuId);
+    if (stu && document.getElementById('newStuCustomTitle')) {
+      document.getElementById('newStuCustomTitle').value = stu.customTitle || '';
+    }
+  };
+
+  const _roleOrigSaveNewStu = saveNewStudent;
+  saveNewStudent = async function() {
+    injectCustomRoleFields();
+    const editId = document.getElementById('editingStudentId').value;
+    const customT = document.getElementById('newStuCustomTitle') ? document.getElementById('newStuCustomTitle').value.trim() : '';
+    await _roleOrigSaveNewStu();
+    const username = document.getElementById('newStuUsername')?.value.trim();
+    const target = editId
+      ? (db.users || []).find(u => u.id === editId)
+      : (db.users || []).find(u => u.username && u.username.toLowerCase() === String(username || '').toLowerCase());
+    if (target) {
+      target.customTitle = customT;
+      await persist();
+      renderStudentTable();
+    }
+  };
+
+  /* ==========================================================================
+     2. BỘ LỌC "CHƯA LÀM / ĐÃ LÀM" CHO READING, LISTENING & WRITING
+     ========================================================================== */
+  function injectDoneStatusFilters() {
+    const statusOptions = `
+      <option value="ALL">📌 Trạng thái: Tất cả</option>
+      <option value="TODO">⏳ Chưa làm (To-Do)</option>
+      <option value="DONE">✅ Đã hoàn thành (Done)</option>
+    `;
+
+    const rSearch = document.getElementById('filterReadingSearch');
+    if (rSearch && !document.getElementById('filterReadingDoneStatus')) {
+      rSearch.parentElement.style.gridTemplateColumns = '1.4fr 1fr 1fr 1fr 1.1fr';
+      const sel = document.createElement('select');
+      sel.id = 'filterReadingDoneStatus';
+      sel.className = 'form-input';
+      sel.innerHTML = statusOptions;
+      sel.onchange = () => renderReadingTable();
+      rSearch.parentElement.appendChild(sel);
+    }
+
+    const lSearch = document.getElementById('filterListeningSearch');
+    if (lSearch && !document.getElementById('filterListeningDoneStatus')) {
+      lSearch.parentElement.style.gridTemplateColumns = '1.4fr 1fr 1fr 1fr 1.1fr';
+      const sel = document.createElement('select');
+      sel.id = 'filterListeningDoneStatus';
+      sel.className = 'form-input';
+      sel.innerHTML = statusOptions;
+      sel.onchange = () => renderListeningTable();
+      lSearch.parentElement.appendChild(sel);
+    }
+
+    const wSearch = document.getElementById('filterWritingSearch');
+    if (wSearch && !document.getElementById('filterWritingDoneStatus')) {
+      wSearch.parentElement.style.gridTemplateColumns = '1.4fr 1fr 1fr 1fr 1.1fr';
+      const sel = document.createElement('select');
+      sel.id = 'filterWritingDoneStatus';
+      sel.className = 'form-input';
+      sel.innerHTML = statusOptions;
+      sel.onchange = () => renderWritingTable();
+      wSearch.parentElement.appendChild(sel);
+    }
+  }
+
+  function applyRowDoneFilter(tbodyId, selectId) {
+    const statusVal = document.getElementById(selectId)?.value || 'ALL';
+    if (statusVal === 'ALL') return;
+    const tbody = document.getElementById(tbodyId);
+    if (!tbody) return;
+    let visibleCount = 0;
+    Array.from(tbody.querySelectorAll('tr')).forEach(tr => {
+      if (tr.cells.length <= 1) return;
+      const isDoneRow = tr.innerHTML.includes('✓ Done');
+      const show = (statusVal === 'DONE' && isDoneRow) || (statusVal === 'TODO' && !isDoneRow);
+      tr.style.display = show ? '' : 'none';
+      if (show) visibleCount++;
+    });
+    if (visibleCount === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:18px;">Không có đề thi nào ở trạng thái "${statusVal === 'DONE' ? 'Đã hoàn thành' : 'Chưa làm'}".</td></tr>`;
+    }
+  }
+
+  const _filterOrigRenderReading = renderReadingTable;
+  renderReadingTable = function() {
+    injectDoneStatusFilters();
+    _filterOrigRenderReading();
+    applyRowDoneFilter('readingTbody', 'filterReadingDoneStatus');
+  };
+
+  const _filterOrigRenderListening = renderListeningTable;
+  renderListeningTable = function() {
+    injectDoneStatusFilters();
+    _filterOrigRenderListening();
+    applyRowDoneFilter('listeningTbody', 'filterListeningDoneStatus');
+  };
+
+  const _filterOrigRenderWriting = renderWritingTable;
+  renderWritingTable = function() {
+    injectDoneStatusFilters();
+    _filterOrigRenderWriting();
+    applyRowDoneFilter('writingTbody', 'filterWritingDoneStatus');
+  };
+
+  /* ==========================================================================
+     3. CÁ NHÂN HÓA BANNER, 5 STAT CARDS CHO HỌC SINH & BẢNG TOP CHĂM CHỈ
+     ========================================================================== */
+  function updatePersonalizedHomeAndLeaderboard() {
+    if (!activeUser) return;
+    refreshHeaderRoleBadge();
+
+    const statCards = document.querySelectorAll('#tab-home .stat-grid .stat-card');
+    const heroSub = document.querySelector('#tab-home .home-hero-sub');
+
+    const rTotal = getVisibleExams(db.readingExams).length;
+    const lTotal = getVisibleExams(db.listeningExams).length;
+    const wTotal = getVisibleExams(db.writingExams).length;
+
+    if (activeUser.role === 'student') {
+      const rDone = getStudentCompletedExamIds('reading').length;
+      const lDone = getStudentCompletedExamIds('listening').length;
+      const wDone = getStudentCompletedExamIds('writing').length;
+
+      const mySubs = (db.results || []).filter(r =>
+        String(r.userName || '').toLowerCase() === String(activeUser.name || '').toLowerCase()
+      );
+      const numericBands = mySubs
+        .map(s => parseFloat(String(s.band || '').replace('Band', '').trim()))
+        .filter(n => !isNaN(n) && n > 0);
+      const avgBand = numericBands.length
+        ? (numericBands.reduce((a, b) => a + b, 0) / numericBands.length).toFixed(1)
+        : '—';
+
+      if (heroSub) {
+        heroSub.innerHTML = `🎯 <b>Lộ trình cá nhân của ${activeUser.name}:</b> Bạn đã hoàn thành <b>${rDone + lDone + wDone}</b> đề luyện tập (Điểm trung bình hiện tại: <b>Band ${avgBand}</b>). Hãy duy trì thói quen luyện đề và lưu từ vựng mỗi ngày nhé!`;
+      }
+
+      if (statCards.length >= 5) {
+        statCards[0].querySelector('.stat-value').textContent = `${rDone} / ${rTotal}`;
+        statCards[0].querySelector('.stat-label').textContent = 'Reading Completed';
+
+        statCards[1].querySelector('.stat-value').textContent = `${lDone} / ${lTotal}`;
+        statCards[1].querySelector('.stat-label').textContent = 'Listening Completed';
+
+        statCards[2].querySelector('.stat-value').textContent = `${wDone} / ${wTotal}`;
+        statCards[2].querySelector('.stat-label').textContent = 'Writing Completed';
+
+        statCards[4].querySelector('.stat-value').textContent = avgBand === '—' ? `${mySubs.length}` : `Band ${avgBand}`;
+        statCards[4].querySelector('.stat-label').textContent = avgBand === '—' ? 'My Submissions' : `Avg Band (${mySubs.length} bài)`;
+      }
+    } else {
+      if (heroSub) {
+        heroSub.innerHTML = `Hệ thống quản trị học thuật của <b>${activeUser.name} (${getDisplayRoleTitle(activeUser)})</b> • Kho học liệu hiện có <b>${rTotal + lTotal + wTotal}</b> đề thi chuẩn CD-IELTS.`;
+      }
+      if (statCards.length >= 5) {
+        statCards[0].querySelector('.stat-label').textContent = 'Reading Tests';
+        statCards[1].querySelector('.stat-label').textContent = 'Listening Tests';
+        statCards[2].querySelector('.stat-label').textContent = 'Writing Tests';
+        statCards[4].querySelector('.stat-label').textContent = 'Total Submissions';
+      }
+    }
+
+    // Render Bảng Vinh Danh Top Học Sinh Chăm Chỉ (Weekly / All-time Leaderboard)
+    const homeTab = document.getElementById('tab-home');
+    const recentCard = document.getElementById('homeRecentActivityTbody')?.closest('.card');
+    if (homeTab && recentCard) {
+      let lbBox = document.getElementById('topDiligentLeaderboardBox');
+      if (!lbBox) {
+        lbBox = document.createElement('div');
+        lbBox.id = 'topDiligentLeaderboardBox';
+        lbBox.className = 'leaderboard-card';
+        homeTab.insertBefore(lbBox, recentCard);
+      }
+
+      const countMap = {};
+      (db.results || []).forEach(r => {
+        const uName = String(r.userName || '').trim();
+        if (!uName) return;
+        const matchedUser = (db.users || []).find(u => u.name.toLowerCase() === uName.toLowerCase());
+        if (matchedUser && matchedUser.role === 'teacher') return;
+        if (!countMap[uName]) countMap[uName] = { name: uName, count: 0, bands: [], userObj: matchedUser };
+        countMap[uName].count++;
+        const bNum = parseFloat(String(r.band || '').replace('Band', '').trim());
+        if (!isNaN(bNum) && bNum > 0) countMap[uName].bands.push(bNum);
+      });
+
+      const topList = Object.values(countMap).sort((a, b) => b.count - a.count).slice(0, 5);
+
+      if (!topList.length) {
+        lbBox.style.display = 'none';
+      } else {
+        lbBox.style.display = 'block';
+        lbBox.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div style="font-size:15.5px; font-weight:800; color:#1f2e27;">
+              🏆 Bảng Vinh Danh Học Viên Chăm Chỉ Nhất (Top Diligent Scholars)
+            </div>
+            <span style="font-size:12px; color:#5c7065; font-weight:600;">Xếp hạng theo tổng số bài luyện tập đã hoàn thành</span>
+          </div>
+          <div class="leaderboard-grid">
+            ${topList.map((item, idx) => {
+              const avg = item.bands.length ? (item.bands.reduce((a, b) => a + b, 0) / item.bands.length).toFixed(1) : null;
+              const rankClass = idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''));
+              const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
+              return `
+                <div class="leader-item">
+                  <div class="leader-rank ${rankClass}">${medal}</div>
+                  <div style="overflow:hidden;">
+                    <div style="font-weight:800; font-size:13.5px; color:#1f2e27; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                      ${item.name}${item.userObj && item.userObj.isPro ? '👑' : ''}
+                    </div>
+                    <div style="font-size:12px; color:#5c7065; font-weight:600; margin-top:2px;">
+                      🔥 <b>${item.count}</b> bài nộp ${avg ? `• TB: <b>${avg}</b>` : ''}
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+    }
+  }
+
+  /* ==========================================================================
+     4. DISCORD STUDY LOUNGE CHAT ENGINE (REAL-TIME FIREBASE)
+     ========================================================================== */
+  let activeChatChannel = 'general';
+  let allChatMessages = [];
+  let isChatWindowOpen = false;
+  let lastSeenChatCount = 0;
+
+  function updateChatLauncherVisibility() {
+    const launcher = document.getElementById('discordChatLauncher');
+    const win = document.getElementById('discordChatWindow');
+    const inExam = document.getElementById('examShell')?.style.display === 'flex';
+    if (!activeUser || inExam) {
+      if (launcher) launcher.style.display = 'none';
+      if (win) win.style.display = 'none';
+    } else {
+      if (launcher) launcher.style.display = 'inline-flex';
+    }
+  }
+
+  window.toggleDiscordChatWindow = function() {
+    const win = document.getElementById('discordChatWindow');
+    if (!win) return;
+    isChatWindowOpen = !isChatWindowOpen;
+    win.style.display = isChatWindowOpen ? 'flex' : 'none';
+    if (isChatWindowOpen) {
+      lastSeenChatCount = allChatMessages.length;
+      const badge = document.getElementById('chatUnreadBadge');
+      if (badge) badge.style.display = 'none';
+      renderDiscordChatMessages();
+      setTimeout(() => document.getElementById('discordChatInput')?.focus(), 80);
+    }
+  };
+
+  window.switchDiscordChannel = function(chan) {
+    activeChatChannel = chan;
+    ['general', 'reading', 'writing'].forEach(c => {
+      document.getElementById('chanbtn_' + c)?.classList.toggle('active', c === chan);
+    });
+    renderDiscordChatMessages();
+  };
+
+  function renderDiscordChatMessages() {
+    const box = document.getElementById('discordMessagesContainer');
+    if (!box) return;
+    const list = allChatMessages.filter(m => (m.channel || 'general') === activeChatChannel);
+    if (!list.length) {
+      box.innerHTML = `<div style="text-align:center; color:#5c7065; font-size:12.5px; padding:32px 16px;">Chưa có tin nhắn nào trong kênh <b>#${activeChatChannel}</b>.<br>Hãy gửi lời chào hoặc đặt câu hỏi bài tập đầu tiên nhé!</div>`;
+      return;
+    }
+    box.innerHTML = list.map(m => {
+      const isTeacherMsg = m.role === 'teacher';
+      const roleClass = isTeacherMsg ? 'dchat-role-teacher' : (m.isPro ? 'dchat-role-pro' : 'dchat-role-student');
+      const safeText = String(m.text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `
+        <div class="dchat-msg-box ${isTeacherMsg ? 'msg-teacher' : ''}">
+          <div class="dchat-msg-meta">
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              <b style="color:#1f2e27;">${m.senderName}</b>
+              <span class="dchat-role-pill ${roleClass}">${isTeacherMsg ? '👑 ' : (m.isPro ? '⭐ ' : '')}${m.roleTitle || 'STUDENT'}</span>
+            </div>
+            <span style="color:#94a3b8; font-size:10.5px;">${m.timeStr || ''}</span>
+          </div>
+          <div style="color:#1f2e27; word-break:break-word;">${safeText}</div>
+        </div>
+      `;
+    }).join('');
+    box.scrollTop = box.scrollHeight;
+  }
+
+  window.sendDiscordChatMessage = async function() {
+    if (!activeUser) return;
+    const inp = document.getElementById('discordChatInput');
+    const text = inp ? inp.value.trim() : '';
+    if (!text) return;
+    inp.value = '';
+
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const msgObj = {
+      id: 'msg_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      channel: activeChatChannel,
+      senderUsername: activeUser.username,
+      senderName: activeUser.name,
+      role: activeUser.role,
+      isPro: Boolean(isStudentPro(activeUser)),
+      roleTitle: getDisplayRoleTitle(activeUser),
+      text: text,
+      timeStr: timeStr,
+      createdAt: Date.now()
+    };
+
+    allChatMessages.push(msgObj);
+    renderDiscordChatMessages();
+
+    const fs = getActiveFirestore();
+    if (fs) {
+      try {
+        await fs.collection('suite_chat').doc(msgObj.id).set(msgObj);
+      } catch (e) {
+        console.warn('Chat send error:', e);
+      }
+    }
+  };
+
+  window.clearCurrentChannelMessages = async function() {
+    if (!activeUser || activeUser.role !== 'teacher') return;
+    if (!confirm(`Xóa toàn bộ tin nhắn trong kênh #${activeChatChannel}?`)) return;
+    const fs = getActiveFirestore();
+    const toDelete = allChatMessages.filter(m => (m.channel || 'general') === activeChatChannel);
+    allChatMessages = allChatMessages.filter(m => (m.channel || 'general') !== activeChatChannel);
+    renderDiscordChatMessages();
+    if (fs) {
+      for (const item of toDelete) {
+        try { await fs.collection('suite_chat').doc(item.id).delete(); } catch (e) {}
+      }
+    }
+  };
+
+  function initDiscordChatListener() {
+    const fs = getActiveFirestore();
+    if (!fs) return;
+    fs.collection('suite_chat').onSnapshot(snap => {
+      const items = [];
+      snap.forEach(doc => items.push(doc.data()));
+      items.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      allChatMessages = items.slice(-80);
+      if (isChatWindowOpen) {
+        lastSeenChatCount = allChatMessages.length;
+        renderDiscordChatMessages();
+      } else if (allChatMessages.length > lastSeenChatCount) {
+        const diff = allChatMessages.length - lastSeenChatCount;
+        const badge = document.getElementById('chatUnreadBadge');
+        if (badge) {
+          badge.textContent = diff > 9 ? '9+' : diff;
+          badge.style.display = 'inline-block';
+        }
+      }
+    });
+  }
+
+  /* KẾT NỐI ĐỒNG BỘ VÀO VÒNG ĐỜI DASHBOARD */
+  const _pack5OrigCheckSession = checkSession;
+  checkSession = function() {
+    _pack5OrigCheckSession();
+    refreshHeaderRoleBadge();
+    updateChatLauncherVisibility();
+  };
+
+  const _pack5OrigRenderHome = renderHomeTab;
+  renderHomeTab = function() {
+    _pack5OrigRenderHome();
+    updatePersonalizedHomeAndLeaderboard();
+    updateChatLauncherVisibility();
+  };
+
+  const _pack5OrigLaunchExam = launchExam;
+  launchExam = function(examId) {
+    _pack5OrigLaunchExam(examId);
+    updateChatLauncherVisibility();
+  };
+
+  const _pack5OrigLaunchListening = launchListeningExam;
+  launchListeningExam = function(examId) {
+    _pack5OrigLaunchListening(examId);
+    updateChatLauncherVisibility();
+  };
+
+  const _pack5OrigLaunchWriting = launchWritingExam;
+  launchWritingExam = function(examId) {
+    _pack5OrigLaunchWriting(examId);
+    updateChatLauncherVisibility();
+  };
+
+  const _pack5OrigExitExam = exitExamShell;
+  exitExamShell = function() {
+    _pack5OrigExitExam();
+    updateChatLauncherVisibility();
+  };
+
+  window.addEventListener('load', () => {
+    injectCustomRoleFields();
+    injectDoneStatusFilters();
+    updatePersonalizedHomeAndLeaderboard();
+    updateChatLauncherVisibility();
+    setTimeout(initDiscordChatListener, 1400);
+  });
+</script>
+<!-- ============================================================================
+     LIVE STUDY FEED (NHẬT KÝ HOẠT ĐỘNG HỌC VIÊN THEO CHIỀU DỌC - KHÔNG HIỆN ĐIỂM)
+     Dán ngay phía trên thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  .live-feed-list {
+    display: flex; flex-direction: column; gap: 8px; margin-top: 12px;
+  }
+  .live-feed-row {
+    background: #f4f5f0; border: 1px solid #e2e8df; border-radius: 11px;
+    padding: 10px 16px; display: flex; align-items: center;
+    justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    transition: all 0.2s ease;
+  }
+  .live-feed-row:hover {
+    background: #ffffff; border-color: #8fa899; transform: translateX(3px);
+  }
+  .live-feed-left {
+    display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: #1f2e27;
+  }
+  .live-feed-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #2d4a3e;
+    box-shadow: 0 0 0 3px rgba(45, 74, 62, 0.15); flex-shrink: 0;
+  }
+  .live-feed-skill-tag {
+    background: #eef2eb; border: 1px solid #cfd8cb; color: #2d4a3e;
+    padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;
+  }
+  .live-feed-time {
+    font-size: 12px; color: #5c7065; font-weight: 600; white-space: nowrap;
+  }
+</style>
+
+<script>
+  // Kiểm tra chính xác xem bài nộp có phải của tài khoản Giáo viên / Amuro hay không
+  function isTeacherOrAdminResult(res) {
+    if (!res || !res.userName) return true;
+    const rawName = String(res.userName).trim().toLowerCase();
+    if (rawName.includes('amuro') || rawName.includes('teacher') || rawName === 'admin') {
+      return true;
+    }
+    const matchedUser = (db.users || []).find(u =>
+      String(u.name || '').trim().toLowerCase() === rawName ||
+      String(u.username || '').trim().toLowerCase() === rawName
+    );
+    if (matchedUser && matchedUser.role === 'teacher') return true;
+    if (activeUser && activeUser.role === 'teacher' && String(activeUser.name || '').trim().toLowerCase() === rawName) {
+      return true;
+    }
+    return false;
+  }
+
+  function renderVerticalLiveStudyFeed() {
+    const homeTab = document.getElementById('tab-home');
+    const recentCard = document.getElementById('homeRecentActivityTbody')?.closest('.card');
+    if (!homeTab || !recentCard) return;
+
+    let feedBox = document.getElementById('topDiligentLeaderboardBox');
+    if (!feedBox) {
+      feedBox = document.createElement('div');
+      feedBox.id = 'topDiligentLeaderboardBox';
+      feedBox.className = 'leaderboard-card';
+      homeTab.insertBefore(feedBox, recentCard);
+    }
+
+    // Lọc lấy các bài nộp mới nhất của riêng Học sinh (loại bỏ hoàn toàn bài test của Anh)
+    const studentActivities = (db.results || [])
+      .slice()
+      .reverse()
+      .filter(r => !isTeacherOrAdminResult(r))
+      .slice(0, 5);
+
+    if (!studentActivities.length) {
+      feedBox.style.display = 'none';
+      return;
+    }
+
+    feedBox.style.display = 'block';
+    feedBox.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div style="font-size:15px; font-weight:800; color:#1f2e27; display:flex; align-items:center; gap:8px;">
+          <span>⚡ Nhật Ký Học Tập Trực Tiếp (Live Study Feed)</span>
+        </div>
+        <span style="font-size:12px; color:#5c7065; font-weight:600;">Cập nhật hoạt động luyện đề mới nhất của học viên</span>
+      </div>
+      <div class="live-feed-list">
+        ${studentActivities.map(item => {
+          const sType = (typeof detectResultSkillType === 'function') ? detectResultSkillType(item) : 'reading';
+          const skillBadge = sType === 'writing' ? '✍️ Writing'
+            : (sType === 'listening' ? '🎧 Listening'
+            : (sType === 'quiz' ? '🎯 Vocab Quiz' : '📖 Reading'));
+          const stuObj = (db.users || []).find(u => String(u.name || '').toLowerCase() === String(item.userName || '').toLowerCase());
+          const proIcon = (stuObj && stuObj.isPro) ? ' <span title="PRO Scholar">👑</span>' : '';
+
+          return `
+            <div class="live-feed-row">
+              <div class="live-feed-left">
+                <span class="live-feed-dot"></span>
+                <div>
+                  <b>${item.userName}</b>${proIcon} vừa hoàn thành bài
+                  <span class="live-feed-skill-tag">${skillBadge}</span>
+                  <b style="color:#2d4a3e;">${item.examTitle}</b>
+                </div>
+              </div>
+              <div class="live-feed-time">🕒 ${item.timestamp || 'Vừa xong'}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  // Ghi đè hàm cập nhật trang Home để hiển thị Live Study Feed dọc thay cho bảng xếp hạng cũ
+  const _feedOrigUpdateHome = updatePersonalizedHomeAndLeaderboard;
+  updatePersonalizedHomeAndLeaderboard = function() {
+    _feedOrigUpdateHome();
+    renderVerticalLiveStudyFeed();
+  };
+
+  window.addEventListener('load', () => {
+    renderVerticalLiveStudyFeed();
+  });
+</script>
+<!-- ============================================================================
+     LIVE STUDY FEED (NHẬT KÝ HOẠT ĐỘNG HỌC VIÊN THEO CHIỀU DỌC - KHÔNG HIỆN ĐIỂM)
+     Dán ngay phía trên thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  .live-feed-list {
+    display: flex; flex-direction: column; gap: 8px; margin-top: 12px;
+  }
+  .live-feed-row {
+    background: #f4f5f0; border: 1px solid #e2e8df; border-radius: 11px;
+    padding: 10px 16px; display: flex; align-items: center;
+    justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    transition: all 0.2s ease;
+  }
+  .live-feed-row:hover {
+    background: #ffffff; border-color: #8fa899; transform: translateX(3px);
+  }
+  .live-feed-left {
+    display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: #1f2e27;
+  }
+  .live-feed-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #2d4a3e;
+    box-shadow: 0 0 0 3px rgba(45, 74, 62, 0.15); flex-shrink: 0;
+  }
+  .live-feed-skill-tag {
+    background: #eef2eb; border: 1px solid #cfd8cb; color: #2d4a3e;
+    padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;
+  }
+  .live-feed-time {
+    font-size: 12px; color: #5c7065; font-weight: 600; white-space: nowrap;
+  }
+</style>
+
+<script>
+  // Kiểm tra chính xác xem bài nộp có phải của tài khoản Giáo viên / Amuro hay không
+  function isTeacherOrAdminResult(res) {
+    if (!res || !res.userName) return true;
+    const rawName = String(res.userName).trim().toLowerCase();
+    if (rawName.includes('amuro') || rawName.includes('teacher') || rawName === 'admin') {
+      return true;
+    }
+    const matchedUser = (db.users || []).find(u =>
+      String(u.name || '').trim().toLowerCase() === rawName ||
+      String(u.username || '').trim().toLowerCase() === rawName
+    );
+    if (matchedUser && matchedUser.role === 'teacher') return true;
+    if (activeUser && activeUser.role === 'teacher' && String(activeUser.name || '').trim().toLowerCase() === rawName) {
+      return true;
+    }
+    return false;
+  }
+
+  function renderVerticalLiveStudyFeed() {
+    const homeTab = document.getElementById('tab-home');
+    const recentCard = document.getElementById('homeRecentActivityTbody')?.closest('.card');
+    if (!homeTab || !recentCard) return;
+
+    let feedBox = document.getElementById('topDiligentLeaderboardBox');
+    if (!feedBox) {
+      feedBox = document.createElement('div');
+      feedBox.id = 'topDiligentLeaderboardBox';
+      feedBox.className = 'leaderboard-card';
+      homeTab.insertBefore(feedBox, recentCard);
+    }
+
+    // Lọc lấy các bài nộp mới nhất của riêng Học sinh (loại bỏ hoàn toàn bài test của Anh)
+    const studentActivities = (db.results || [])
+      .slice()
+      .reverse()
+      .filter(r => !isTeacherOrAdminResult(r))
+      .slice(0, 5);
+
+    if (!studentActivities.length) {
+      feedBox.style.display = 'none';
+      return;
+    }
+
+    feedBox.style.display = 'block';
+    feedBox.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div style="font-size:15px; font-weight:800; color:#1f2e27; display:flex; align-items:center; gap:8px;">
+          <span>⚡ Nhật Ký Học Tập Trực Tiếp (Live Study Feed)</span>
+        </div>
+        <span style="font-size:12px; color:#5c7065; font-weight:600;">Cập nhật hoạt động luyện đề mới nhất của học viên</span>
+      </div>
+      <div class="live-feed-list">
+        ${studentActivities.map(item => {
+          const sType = (typeof detectResultSkillType === 'function') ? detectResultSkillType(item) : 'reading';
+          const skillBadge = sType === 'writing' ? '✍️ Writing'
+            : (sType === 'listening' ? '🎧 Listening'
+            : (sType === 'quiz' ? '🎯 Vocab Quiz' : '📖 Reading'));
+          const stuObj = (db.users || []).find(u => String(u.name || '').toLowerCase() === String(item.userName || '').toLowerCase());
+          const proIcon = (stuObj && stuObj.isPro) ? ' <span title="PRO Scholar">👑</span>' : '';
+
+          return `
+            <div class="live-feed-row">
+              <div class="live-feed-left">
+                <span class="live-feed-dot"></span>
+                <div>
+                  <b>${item.userName}</b>${proIcon} vừa hoàn thành bài
+                  <span class="live-feed-skill-tag">${skillBadge}</span>
+                  <b style="color:#2d4a3e;">${item.examTitle}</b>
+                </div>
+              </div>
+              <div class="live-feed-time">🕒 ${item.timestamp || 'Vừa xong'}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  // Ghi đè hàm cập nhật trang Home để hiển thị Live Study Feed dọc thay cho bảng xếp hạng cũ
+  const _feedOrigUpdateHome = updatePersonalizedHomeAndLeaderboard;
+  updatePersonalizedHomeAndLeaderboard = function() {
+    _feedOrigUpdateHome();
+    renderVerticalLiveStudyFeed();
+  };
+
+  window.addEventListener('load', () => {
+    renderVerticalLiveStudyFeed();
+  });
+</script>
 </body>
 </html>
