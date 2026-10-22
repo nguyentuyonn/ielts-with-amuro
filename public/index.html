@@ -8082,5 +8082,221 @@ Câu dẫn chứng: "${eviVal}"`;
     applyMatchaEditorialLogin();
   }
 </script>
+<!-- ============================================================================
+     ĐỒNG BỘ BẢNG MÀU MATCHA TRẦM & KEM ẤM CHO TOÀN BỘ DASHBOARD
+     Dán ngay phía trên thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* 1. ĐỔI BIẾN MÀU GỐC SANG TÔNG MATCHA TRẦM & KEM YẾN MẠCH */
+  :root {
+    --bg-main: #f4f5f0 !important;
+    --surface: #fcfcfa !important;
+    --emerald-dark: #1f2e27 !important;
+    --emerald-accent: #2d4a3e !important;
+    --emerald-hover: #22382f !important;
+    --emerald-soft: #eef2eb !important;
+    --royal-accent: #3b5978 !important;
+    --royal-soft: #eef2f6 !important;
+    --text-main: #1f2e27 !important;
+    --text-muted: #5c7065 !important;
+  }
+
+  /* 2. NỀN TỔNG THỂ, HEADER, TABS VÀ CÁC THẺ CARD */
+  body {
+    background: var(--bg-main) !important;
+    color: var(--text-main) !important;
+  }
+  header.dash-header {
+    background: #fcfcfa !important;
+    border-bottom: 1px solid #d8e0d5 !important;
+  }
+  .brand-icon-box {
+    background: linear-gradient(135deg, #2d4a3e 0%, #4a6b5b 100%) !important;
+  }
+  .sync-badge {
+    background: #eef2eb !important;
+    border-color: #c5d1c1 !important;
+    color: #2d4a3e !important;
+  }
+  .sync-dot {
+    background: #3b5a4b !important;
+  }
+  .dash-user-badge {
+    background: #f4f5f0 !important;
+    border-color: #d8e0d5 !important;
+    color: #1f2e27 !important;
+  }
+  .dash-tabs {
+    background: #fcfcfa !important;
+    border-color: #d8e0d5 !important;
+  }
+  .dash-tab-btn {
+    color: #5c7065 !important;
+  }
+  .dash-tab-btn:hover {
+    background: #f4f5f0 !important;
+    color: #1f2e27 !important;
+  }
+  .dash-tab-btn.active {
+    background: #2d4a3e !important;
+    color: #fcfcfa !important;
+    box-shadow: 0 4px 12px rgba(45, 74, 62, 0.18) !important;
+  }
+
+  /* 3. BANNER WELCOME & THẺ THỐNG KÊ (STAT CARDS) */
+  .home-hero-banner {
+    background: linear-gradient(135deg, #eef2eb 0%, #e7ece4 100%) !important;
+    border: 1px solid #cfd8cb !important;
+  }
+  .home-hero-title {
+    color: #1f2e27 !important;
+    font-family: 'Cormorant Garamond', Georgia, serif !important;
+    font-size: 30px !important;
+    letter-spacing: -0.3px !important;
+  }
+  .home-hero-sub {
+    color: #4a6356 !important;
+  }
+  .hero-band-badge {
+    background: #fcfcfa !important;
+    border: 1px solid #cfd8cb !important;
+    box-shadow: 0 8px 20px rgba(31, 46, 39, 0.05) !important;
+  }
+  .hero-band-badge div:first-child {
+    color: #52796f !important;
+  }
+  .hero-band-badge div:last-child {
+    font-family: 'Cormorant Garamond', Georgia, serif !important;
+    color: #2d4a3e !important;
+  }
+  .card, .stat-card, .skill-progress-card, .modal-window {
+    background: #fcfcfa !important;
+    border-color: #d8e0d5 !important;
+  }
+  .modal-header, .modal-footer, th {
+    background: #f4f5f0 !important;
+    border-color: #e2e8df !important;
+    color: #3f5248 !important;
+  }
+  td {
+    border-bottom: 1px solid #edf0ea !important;
+  }
+  tbody tr:hover {
+    background: #f7f8f5 !important;
+  }
+
+  /* 4. LÀM DỊU CÁC MÀU PHỤ (LISTENING, WRITING, VOCAB, BADGES) SANG TÔNG ĐẤT TRẦM */
+  .stat-icon {
+    background: #eef2eb !important;
+    color: #2d4a3e !important;
+  }
+  /* Listening Icon & Progress -> Xanh Slate trầm */
+  .stat-card:nth-child(2) .stat-icon {
+    background: #ebf0f5 !important;
+    color: #3b5978 !important;
+  }
+  /* Writing Icon & Progress -> Nâu Caramel / Hổ phách trầm */
+  .stat-card:nth-child(3) .stat-icon {
+    background: #f5efe6 !important;
+    color: #9c6631 !important;
+  }
+  /* Saved Words Icon -> Tím khói trầm */
+  .stat-card:nth-child(4) .stat-icon {
+    background: #f2eef5 !important;
+    color: #644d78 !important;
+  }
+
+  /* Thanh Progress Bar của 3 kỹ năng */
+  .skill-progress-bar-bg {
+    background: #e9ede6 !important;
+  }
+  .skill-progress-card:nth-child(1) .skill-progress-bar-fill {
+    background: #2d4a3e !important;
+  }
+  .skill-progress-card:nth-child(1) .skill-progress-header span:last-child {
+    color: #2d4a3e !important;
+  }
+  .skill-progress-card:nth-child(2) .skill-progress-bar-fill {
+    background: #3b5978 !important;
+  }
+  .skill-progress-card:nth-child(2) .skill-progress-header span:last-child {
+    color: #3b5978 !important;
+  }
+  .skill-progress-card:nth-child(3) .skill-progress-bar-fill {
+    background: #9c6631 !important;
+  }
+  .skill-progress-card:nth-child(3) .skill-progress-header span:last-child {
+    color: #9c6631 !important;
+  }
+
+  /* Banner PRO & Thanh Online Monitor */
+  .online-monitor-bar {
+    background: #fcfcfa !important;
+    border-color: #cfd8cb !important;
+  }
+  .online-user-pill {
+    background: #eef2eb !important;
+    border-color: #b8c7b4 !important;
+    color: #2d4a3e !important;
+  }
+  .milestone-banner {
+    background: linear-gradient(135deg, #f3f6f0 0%, #eef2ec 100%) !important;
+    border: 1px solid #b8c7b4 !important;
+  }
+  .milestone-banner div {
+    color: #2d4a3e !important;
+  }
+
+  /* Nút bấm và Nhãn phân loại đề thi (Badges) */
+  .btn-emerald {
+    background: #2d4a3e !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(45, 74, 62, 0.16) !important;
+  }
+  .btn-emerald:hover {
+    background: #22382f !important;
+  }
+  .btn-secondary {
+    background: #f0f2ec !important;
+    color: #2d4a3e !important;
+    border-color: #cfd8cb !important;
+  }
+  .btn-secondary:hover {
+    background: #e4e9df !important;
+  }
+  .btn-danger {
+    background: #9e3a3a !important;
+  }
+  .btn-danger:hover {
+    background: #822d2d !important;
+  }
+  .badge-new {
+    background: #f7e6e6 !important;
+    color: #8c2d2d !important;
+  }
+  .badge-pop {
+    background: #f0ebf5 !important;
+    color: #5c4373 !important;
+  }
+  .badge-diff-Easy {
+    background: #e6efe9 !important;
+    color: #2d4a3e !important;
+  }
+  .badge-diff-Standard {
+    background: #e8eef5 !important;
+    color: #3b5978 !important;
+  }
+  .badge-diff-Hard {
+    background: #f5ebe1 !important;
+    color: #8f5322 !important;
+  }
+
+  /* Thanh lọc kỹ năng ở bảng Recent Submissions */
+  #homeSubmissionFilterBar button[style*="#059669"] {
+    background: #2d4a3e !important;
+    border-color: #2d4a3e !important;
+    color: #ffffff !important;
+  }
+</style>
 </body>
 </html>
