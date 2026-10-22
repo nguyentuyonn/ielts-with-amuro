@@ -7867,5 +7867,220 @@ Câu dẫn chứng: "${eviVal}"`;
     }
   };
 </script>
+<!-- ============================================================================
+     GIAO DIỆN LOGIN MATCHA TRẦM HIỆN ĐẠI + BẰNG IELTS 9.0 + COLLAB THE EZ
+     Thay thế cho đoạn Login Pastel cũ ngay phía trên thẻ đóng </body>
+     ============================================================================ -->
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+<style>
+  /* 1. BẢNG MÀU MATCHA TRẦM & NỀN VÂN GIẤY MỸ THUẬT */
+  #loginScreen {
+    background: 
+      radial-gradient(circle at 14% 22%, rgba(122, 154, 139, 0.16) 0%, transparent 48%),
+      radial-gradient(circle at 86% 78%, rgba(163, 177, 155, 0.15) 0%, transparent 48%),
+      linear-gradient(135deg, #f4f5f0 0%, #f7f6f2 52%, #eff2ec 100%) !important;
+  }
+  .login-left-banner {
+    background-image: radial-gradient(#cbd5c8 0.85px, transparent 0.85px) !important;
+    background-size: 30px 30px !important;
+    padding: 52px 72px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+  }
+
+  /* 2. HUY HIỆU HỢP TÁC THE EZ TRANG NHÃ */
+  .matcha-collab-pill {
+    display: inline-flex; align-items: center; gap: 10px; width: fit-content;
+    background: rgba(255, 255, 255, 0.85); border: 1px solid #d5ddd3;
+    padding: 7px 16px; border-radius: 999px; font-size: 11.5px; font-weight: 700;
+    color: #3f5248; box-shadow: 0 4px 14px rgba(45, 74, 62, 0.04);
+    margin-bottom: 22px; letter-spacing: 0.2px;
+  }
+  .matcha-ez-tag {
+    background: #7c2d2e; color: #ffffff; font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700; font-size: 11.5px; padding: 2px 8px; border-radius: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* 3. TIÊU ĐỀ & CÂU CHÂM NGÔN PHONG CÁCH EDITORIAL */
+  .login-hero-logo {
+    font-size: 52px !important; font-weight: 800 !important;
+    letter-spacing: -1.3px !important; margin-bottom: 10px !important;
+    color: #1f2e27 !important; line-height: 1.05 !important;
+  }
+  .login-hero-logo span {
+    background: linear-gradient(135deg, #2d4a3e 0%, #52796f 100%) !important;
+    -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important;
+  }
+  .matcha-editorial-motto {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 21px; font-style: italic; font-weight: 600;
+    color: #4a6356; margin-bottom: 30px; padding-left: 14px;
+    border-left: 3px solid #6b8e7b; letter-spacing: 0.2px;
+  }
+
+  /* 4. THẺ CHỨNG CHỈ IELTS 9.0 DẬP NỔI TỐI GIẢN */
+  .matcha-trf-card {
+    background: #fcfcfa;
+    border: 1px solid #d8e0d5; border-radius: 20px; padding: 24px 28px;
+    max-width: 530px; position: relative;
+    box-shadow: 
+      0 20px 45px rgba(31, 46, 39, 0.06),
+      inset 0 0 0 4px #f4f5f0;
+  }
+  .matcha-trf-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 16px; margin-bottom: 18px; border-bottom: 1px dashed #cbd5c8;
+  }
+  .matcha-trf-badge-icon {
+    width: 42px; height: 42px; border-radius: 11px;
+    background: #eef2eb; border: 1px solid #d5ddd3; color: #2d4a3e;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .matcha-overall-pill {
+    background: #2d4a3e; color: #f4f5f0; padding: 7px 16px;
+    border-radius: 12px; text-align: right;
+    box-shadow: 0 4px 12px rgba(45, 74, 62, 0.15);
+  }
+  .matcha-score-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;
+  }
+  .matcha-skill-box {
+    background: #f4f5f0; border: 1px solid #e2e8df; border-radius: 13px;
+    padding: 13px 8px; text-align: center; transition: all 0.25s ease;
+  }
+  .matcha-skill-box:hover {
+    background: #ffffff; border-color: #8fa899; transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(45, 74, 62, 0.06);
+  }
+  .matcha-skill-label {
+    font-size: 11px; font-weight: 700; color: #5c7065; margin-bottom: 4px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .matcha-skill-num {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 26px; font-weight: 700; color: #2d4a3e; line-height: 1.1;
+  }
+  .matcha-trf-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11.5px; color: #64746b; font-weight: 600; padding-top: 12px;
+    border-top: 1px solid #edf0ea;
+  }
+  .matcha-partner-footnote {
+    font-size: 12px; color: #5c7065; font-weight: 600; margin-top: 28px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* 5. ĐỒNG BỘ KHUNG ĐĂNG NHẬP BÊN PHẢI SANG TÔNG MATCHA TRẦM */
+  .login-card {
+    background: #fcfcfa !important;
+    border-radius: 24px !important; border: 1px solid #d8e0d5 !important;
+    box-shadow: 0 22px 50px rgba(31, 46, 39, 0.07) !important;
+  }
+  .login-card::before {
+    background: linear-gradient(90deg, #2d4a3e 0%, #6b8e7b 50%, #c8a97e 100%) !important;
+    height: 5px !important;
+  }
+  .login-card-visual {
+    background: linear-gradient(135deg, #2d4a3e 0%, #3f5e50 100%) !important;
+    border: 1px solid #243c32 !important; color: #f4f5f0 !important;
+  }
+  .login-card-visual div { color: #f4f5f0 !important; }
+  .login-card .form-input {
+    background: #f7f8f5 !important; border-color: #d5ddd3 !important;
+  }
+  .login-card .form-input:focus {
+    background: #ffffff !important; border-color: #3b5a4b !important;
+    box-shadow: 0 0 0 3px rgba(59, 90, 75, 0.12) !important;
+  }
+  .login-card .btn-emerald {
+    background: #2d4a3e !important; color: #ffffff !important;
+    border-radius: 12px !important; transition: all 0.25s ease !important;
+    box-shadow: 0 6px 16px rgba(45, 74, 62, 0.2) !important;
+  }
+  .login-card .btn-emerald:hover {
+    background: #22382f !important; transform: translateY(-1px) !important;
+  }
+</style>
+
+<script>
+  function applyMatchaEditorialLogin() {
+    const leftBanner = document.querySelector('#loginScreen .login-left-banner');
+    if (!leftBanner) return;
+
+    leftBanner.innerHTML = `
+      <div>
+        <!-- BADGE HỢP TÁC -->
+        <div class="matcha-collab-pill">
+          <span style="color:#2d4a3e;"><i class="fas fa-feather-alt"></i> Official CD-IELTS Suite</span>
+          <span style="color:#cbd5c8;">•</span>
+          <span>In collaboration with</span>
+          <span class="matcha-ez-tag">THE EZ</span>
+          <span style="font-weight:800; color:#7c2d2e;">ENGLISH CENTER</span>
+        </div>
+
+        <!-- THƯƠNG HIỆU & CHÂM NGÔN CÂN ĐỐI -->
+        <div class="login-hero-logo">IELTS WITH <span>AMURO</span></div>
+        <div class="matcha-editorial-motto">
+          “Let justice be done though the heavens fall”
+        </div>
+
+        <!-- THẺ BẰNG CHỨNG NHẬN IELTS 9.0 TỐI GIẢN -->
+        <div class="matcha-trf-card">
+          <div class="matcha-trf-header">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="matcha-trf-badge-icon"><i class="fas fa-award"></i></div>
+              <div>
+                <div style="font-size:10.5px; font-weight:800; color:#52796f; text-transform:uppercase; letter-spacing:1px;">Target Test Report Form</div>
+                <div style="font-size:16px; font-weight:800; color:#1f2e27; margin-top:2px;">IELTS Academic Certification</div>
+              </div>
+            </div>
+            <div class="matcha-overall-pill">
+              <div style="font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#d5ddd3;">Overall Band</div>
+              <div style="font-family:'Cormorant Garamond', Georgia, serif; font-size:24px; font-weight:700; line-height:1.05; color:#ffffff;">9.0</div>
+            </div>
+          </div>
+
+          <div class="matcha-score-grid">
+            <div class="matcha-skill-box">
+              <div class="matcha-skill-label">Listening</div>
+              <div class="matcha-skill-num">9.0</div>
+            </div>
+            <div class="matcha-skill-box">
+              <div class="matcha-skill-label">Reading</div>
+              <div class="matcha-skill-num">9.0</div>
+            </div>
+            <div class="matcha-skill-box">
+              <div class="matcha-skill-label">Writing</div>
+              <div class="matcha-skill-num">9.0</div>
+            </div>
+            <div class="matcha-skill-box">
+              <div class="matcha-skill-label">Speaking</div>
+              <div class="matcha-skill-num">9.0</div>
+            </div>
+          </div>
+
+          <div class="matcha-trf-footer">
+            <span><i class="fas fa-check-circle" style="color:#3b5a4b;"></i> CEFR Level: <b style="color:#1f2e27;">C2 Mastery</b></span>
+            <span>Academic Standard: <b style="color:#2d4a3e;">AMURO × THE EZ</b></span>
+          </div>
+        </div>
+
+        <!-- DÒNG HỢP TÁC NHỎ GỌN BÊN DƯỚI -->
+        <div class="matcha-partner-footnote">
+          <span style="width:7px; height:7px; border-radius:50%; background:#52796f; display:inline-block;"></span>
+          <span>Academic Partnership with <b style="color:#7c2d2e;">THE EZ ENGLISH CENTER</b> (theez.com.vn)</span>
+        </div>
+      </div>
+    `;
+  }
+
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', applyMatchaEditorialLogin);
+  } else {
+    applyMatchaEditorialLogin();
+  }
+</script>
 </body>
 </html>
