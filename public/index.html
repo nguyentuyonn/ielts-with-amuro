@@ -10654,48 +10654,72 @@ Câu dẫn chứng: "${eviVal}"`;
   });
 </script>
 <!-- ============================================================================
-     MODULE UPDATE 23.10 (PRO EDITION):
-     1. Sửa dứt điểm 100% Locate Evidence cho Listening (Chuẩn hóa I'd, you'll, that's...)
-     2. Phiếu điểm Chẩn đoán Thực chiến (Bóc tách bẫy sai, Paraphrase & Từ vựng cần nạp)
-     3. Điểm bài cũ trên danh sách đề + Phân tích tỷ lệ đúng/sai theo dạng câu hỏi
-     4. Daily Vocab Drill (10 từ cần ôn hôm nay - Flashcard & Phản xạ 2 phút)
-     5. Popup chọn Exam Mode vs. Practice Mode (PRO xem Outline khi luyện viết, mở Sample sau khi nộp)
-     6. Kệ "🔥 Đề Mới Cập Nhật & Đề HOT Tuần Này" trên Trang Chủ + Gom thư mục Bộ sách (Folder Accordion)
+     MODULE UPDATE 23.10 FINAL (COMPLETE EDITION):
+     1. Sửa dứt điểm Locate Evidence Listening (Tách mệnh đề + Chuẩn hóa nháy & viết tắt)
+     2. Phiếu điểm Chẩn đoán đồng bộ màu Emerald Green của Web + 4 tiêu chí Writing
+     3. Phân trang (8 dòng/trang) & Lọc ngày cho Recent Assessment Submissions
+     4. Live Study Feed gọn 5 dòng (bỏ ngày giờ) + Mục tiêu ngày (Khóa 24h, chống nộp khống >=60%)
+     5. Bật/Tắt bắt buộc Vocab Quiz theo Lớp học (Độc lập 100% với quyền Writing PRO)
+     6. Giao Bài Tập Cố Định kèm Deadline cho Lớp & Bảng Theo Dõi Ai Đã Làm / Chưa Làm
      Dán đoạn code này ngay trước thẻ đóng </body> ở cuối file index.html
      ============================================================================ -->
 <style>
-  /* 1. KỆ ĐỀ HOT & MỚI TRÊN TRANG CHỦ */
+  /* 1. KỆ ĐỀ HOT, BANNER BÀI TẬP ĐƯỢC GIAO & BẢNG MỤC TIÊU NGÀY */
   .hot-new-showcase {
     background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
-    border: 1.5px solid #a7f3d0; border-radius: 18px; padding: 20px 24px;
-    margin-bottom: 24px; box-shadow: 0 8px 24px rgba(5, 150, 105, 0.05);
+    border: 1.5px solid #a7f3d0; border-radius: 18px; padding: 18px 22px;
+    margin-bottom: 20px; box-shadow: 0 6px 20px rgba(5, 150, 105, 0.05);
   }
   .hot-new-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 14px; margin-top: 14px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px; margin-top: 12px;
   }
   .hot-exam-card {
     background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px;
     padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between;
-    gap: 10px; transition: 0.2s; position: relative;
+    gap: 10px; transition: 0.2s;
   }
   .hot-exam-card:hover { transform: translateY(-2px); border-color: #10b981; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06); }
 
+  .homework-alert-banner {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px solid #f59e0b; border-radius: 16px; padding: 16px 20px;
+    margin-bottom: 20px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.08);
+  }
+  .homework-item-row {
+    background: #ffffff; border: 1px solid #fde68a; border-radius: 10px;
+    padding: 10px 14px; margin-top: 8px; display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+
+  /* BẢNG MỤC TIÊU HÀNG NGÀY (DAILY GOALS) */
+  .daily-goal-card {
+    background: #ffffff; border: 1.5px solid #a7f3d0; border-radius: 16px;
+    padding: 18px 22px; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(5, 150, 105, 0.04);
+  }
+  .goal-progress-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px; margin-top: 12px;
+  }
+  .goal-skill-box {
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px;
+  }
+  .goal-bar-bg { width: 100%; height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; margin-top: 8px; }
+  .goal-bar-fill { height: 100%; border-radius: 99px; transition: width 0.35s ease; }
+
   /* 2. KHỐI PHÂN TÍCH DẠNG CÂU SAI NHIỀU / ĐÚNG NHIỀU & DAILY VOCAB DRILL */
   .analytics-drill-row {
-    display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; margin-bottom: 24px;
+    display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; margin-bottom: 22px;
   }
   @media (max-width: 960px) { .analytics-drill-row { grid-template-columns: 1fr; } }
   .qtype-stat-row {
     display: flex; align-items: center; justify-content: space-between;
     gap: 12px; margin-bottom: 10px; font-size: 13px;
   }
-  .qtype-bar-wrap {
-    flex: 1; height: 9px; background: #f1f5f9; border-radius: 999px; overflow: hidden;
-  }
+  .qtype-bar-wrap { flex: 1; height: 9px; background: #f1f5f9; border-radius: 999px; overflow: hidden; }
   .qtype-bar-fill { height: 100%; border-radius: 999px; transition: width 0.35s ease; }
 
-  /* 3. FOLDER ACCORDION CHO BỘ ĐỀ (CAMBRIDGE / VOL) */
+  /* 3. FOLDER ACCORDION & PHÂN TRANG SUBMISSIONS */
   .folder-accordion-box {
     border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px;
     overflow: hidden; background: #ffffff;
@@ -10710,6 +10734,18 @@ Câu dẫn chứng: "${eviVal}"`;
   .folder-accordion-box.open .folder-accordion-header { border-bottom-color: #e2e8f0; background: #ecfdf5; color: #065f46; }
   .folder-accordion-box.open .folder-accordion-body { display: block; }
 
+  .sub-pagination-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 14px; margin-top: 10px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+  }
+  .page-num-btn {
+    min-width: 32px; height: 32px; padding: 0 8px; border-radius: 8px;
+    border: 1px solid #cbd5e1; background: #ffffff; color: #334155;
+    font-weight: 700; font-size: 12.5px; cursor: pointer; transition: 0.15s;
+  }
+  .page-num-btn:hover { background: #f1f5f9; }
+  .page-num-btn.active { background: #059669; color: #ffffff; border-color: #059669; }
+
   /* 4. FLASHCARD & POPUP CHỌN CHẾ ĐỘ THI / LUYỆN TẬP */
   .mode-choice-card {
     border: 2px solid #e2e8f0; border-radius: 14px; padding: 18px; cursor: pointer;
@@ -10718,11 +10754,11 @@ Câu dẫn chứng: "${eviVal}"`;
   .mode-choice-card:hover { border-color: #059669; background: #f0fdf4; transform: translateY(-2px); }
   .mode-choice-card.exam-mode:hover { border-color: #dc2626; background: #fef2f2; }
   .flashcard-box {
-    background: linear-gradient(135deg, #064e3b 0%, #1e3a8a 100%);
+    background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
     color: #ffffff; border-radius: 16px; padding: 32px 24px; min-height: 210px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center; cursor: pointer; user-select: none;
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15); margin-bottom: 16px;
+    box-shadow: 0 12px 30px rgba(6, 78, 59, 0.15); margin-bottom: 16px;
   }
   .writing-live-outline-drawer {
     margin-top: 16px; background: #f0fdf4; border: 1.5px solid #6ee7b7;
@@ -10777,9 +10813,41 @@ Câu dẫn chứng: "${eviVal}"`;
   </div>
 </div>
 
+<!-- MODAL 3: THIẾT LẬP MỤC TIÊU HÀNG NGÀY (KHÓA CỐ ĐỊNH TRONG NGÀY) -->
+<div class="modal-overlay" id="dailyGoalConfigModal" style="z-index: 96500;">
+  <div class="modal-window" style="width: 480px;">
+    <div class="modal-header" style="background:#064e3b; color:#fff;">
+      <span>🎯 Thiết Lập Mục Tiêu Học Tập Hôm Nay</span>
+      <button class="btn btn-secondary" onclick="closeModal('dailyGoalConfigModal')">✕</button>
+    </div>
+    <div class="modal-body" style="padding: 22px;">
+      <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; margin-bottom:16px; font-size:12.5px; color:#92400e; line-height:1.5;">
+        ⚠️ <b>Quy tắc kỷ luật:</b> Sau khi bấm <b>"Khóa & Lưu Mục Tiêu"</b>, chỉ tiêu hôm nay sẽ được khóa cố định đến 24:00 đêm (ngày mai mới được đổi lại).<br>
+        • Bài <b>Reading / Listening</b> phải đạt tối thiểu <b>≥ 60% số câu đúng</b> mới được tính hoàn thành (chống nộp bài trắng).
+      </div>
+      <div class="form-group">
+        <label>📖 Số đề Reading mục tiêu hôm nay</label>
+        <input type="number" id="goalInputReading" class="form-input" min="0" max="10" value="1">
+      </div>
+      <div class="form-group">
+        <label>🎧 Số đề Listening mục tiêu hôm nay</label>
+        <input type="number" id="goalInputListening" class="form-input" min="0" max="10" value="1">
+      </div>
+      <div class="form-group" style="margin-bottom:4px;">
+        <label>✍️ Số bài Writing mục tiêu hôm nay</label>
+        <input type="number" id="goalInputWriting" class="form-input" min="0" max="10" value="1">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('dailyGoalConfigModal')">Hủy</button>
+      <button class="btn btn-emerald" onclick="saveAndLockDailyGoal()">🔒 Khóa & Lưu Mục Tiêu Hôm Nay</button>
+    </div>
+  </div>
+</div>
+
 <script>
   /* ==========================================================================
-     1. HỆ THỐNG LƯU CHI TIẾT ĐÚNG/SAI TỪNG DẠNG BÀI & ĐIỂM BÀI CŨ TRÊN BẢNG ĐỀ
+     1. BIẾN TRẠNG THÁI & QUẢN LÝ CHẾ ĐỘ VOCAB QUIZ THEO LỚP HỌC (CLASS-LEVEL)
      ========================================================================== */
   let currentExecutionMode = 'exam'; // 'exam' | 'practice'
   let isPracticePaused = false;
@@ -10787,72 +10855,66 @@ Câu dẫn chứng: "${eviVal}"`;
   let pendingLaunchConfig = null;
   let folderViewEnabled = { reading: false, listening: false, writing: false };
 
-  function getLatestUserSubmissionForExam(examId, examTitle) {
-    if (!activeUser) return null;
-    const all = (db.results || []).slice().reverse();
-    return all.find(r =>
-      String(r.userName || '').toLowerCase() === String(activeUser.name || '').toLowerCase() &&
-      (r.examId === examId || (examTitle && r.examTitle === examTitle))
-    ) || null;
+  // Phân trang & lọc ngày cho Recent Submissions trên trang Home
+  let homeSubCurrentPage = 1;
+  const HOME_SUB_PAGE_SIZE = 8;
+  let homeSubDateRangeMode = 'all'; // 'all' | 'today' | '7days' | 'custom'
+  let homeSubCustomDate = '';
+
+  // Kho lưu trữ siêu nhẹ cho Mục tiêu ngày & Bài tập lớp (Lưu riêng ở suite_meta/daily_goals & suite_meta/class_homeworks)
+  let cloudDailyGoalsMap = {};
+  let cloudClassHomeworks = [];
+
+  // Kiểm tra xem học sinh hiện tại có thuộc Lớp bắt buộc làm Vocab Quiz hay được Miễn theo Lớp
+  function isVocabQuizRequiredForStudent(userObj = activeUser) {
+    if (!userObj || userObj.role === 'teacher') return false;
+    if (isStudentPro(userObj)) return false; // Học sinh PRO luôn được quyền tự chọn
+    const stuInDb = (db.users || []).find(u => u.id === userObj.id || u.username === userObj.username) || userObj;
+    if (stuInDb.classId) {
+      const cls = (db.classes || []).find(c => c.id === stuInDb.classId);
+      if (cls && cls.requireVocabQuiz === false) {
+        return false; // Lớp luyện đề / Cấp tốc đã tắt bắt buộc Vocab Quiz
+      }
+    }
+    return true; // Mặc định các lớp nền tảng yêu cầu làm Vocab Quiz sau mỗi 5 bài Reading
   }
 
-  function detectQuestionCategoryFromExam(exam, qKey) {
-    if (!exam) return 'Gap-Fill / Completion';
-    const keyVal = String((exam.correctAnswers && exam.correctAnswers[qKey]) || '').trim().toUpperCase();
+  // Ghi đè hàm kiểm tra khóa đề Reading để tôn trọng cài đặt của Lớp học (nhưng không ảnh hưởng đặc quyền Writing PRO)
+  getMilestoneQuizStatus = function() {
+    if (!activeUser || activeUser.role === 'teacher') return { locked: false, isPro: true, milestoneNum: 0, completedCount: 0 };
+    const completed = getStudentReadingCompletedCount();
+    const passedList = getPassedMilestonesList();
+    const proStatus = isStudentPro(activeUser);
+    const classRequiresQuiz = isVocabQuizRequiredForStudent(activeUser);
 
-    if (['TRUE', 'FALSE', 'NOT GIVEN', 'YES', 'NO'].includes(keyVal)) {
-      return 'TRUE/FALSE/NOT GIVEN & YES/NO';
+    for (let m = 5; m <= completed; m += 5) {
+      if (!passedList.includes(m)) {
+        return {
+          locked: classRequiresQuiz && !proStatus,
+          hasOptionalQuiz: !classRequiresQuiz || proStatus,
+          isPro: proStatus,
+          classExempt: !classRequiresQuiz,
+          milestoneNum: m,
+          completedCount: completed
+        };
+      }
     }
-    let fullHtml = '';
-    (exam.passages || []).forEach(p => {
-      fullHtml += (p.passageHtml || '') + '\n' + (p.questionsHtml || '');
-    });
+    return { locked: false, isPro: proStatus, classExempt: !classRequiresQuiz, milestoneNum: Math.floor(completed / 5) * 5, completedCount: completed };
+  };
 
-    if (new RegExp(`data-target=["']${qKey}["']`, 'i').test(fullHtml)) {
-      return 'Matching / Drag & Drop';
-    }
-    if (new RegExp(`data-multi-pair=["'][^"']*\\b${qKey}\\b`, 'i').test(fullHtml)) {
-      return 'Multiple Choice (Choose TWO)';
-    }
-    if (new RegExp(`type=["']radio["'][^>]*name=["']${qKey}["']`, 'i').test(fullHtml)) {
-      return 'Multiple Choice (A, B, C, D)';
-    }
-    return 'Note / Summary / Gap-Fill';
-  }
-
-  function computeStudentQuestionTypeAnalytics() {
-    if (!activeUser) return [];
-    const stats = {};
-    const myResults = (db.results || []).filter(r =>
-      activeUser.role === 'teacher' ? true : (String(r.userName || '').toLowerCase() === String(activeUser.name || '').toLowerCase())
-    );
-
-    myResults.forEach(res => {
-      if (!res.userAnswersCopy) return;
-      const exam = (db.readingExams || []).find(e => e.id === res.examId)
-        || (db.listeningExams || []).find(e => e.id === res.examId);
-      if (!exam || !exam.correctAnswers) return;
-
-      Object.keys(exam.correctAnswers).forEach(qKey => {
-        const cat = detectQuestionCategoryFromExam(exam, qKey);
-        if (!stats[cat]) stats[cat] = { correct: 0, total: 0 };
-        stats[cat].total++;
-
-        const uAns = String(res.userAnswersCopy[qKey] || '').trim().toLowerCase();
-        const rawKey = String(exam.correctAnswers[qKey] || '').trim().toLowerCase();
-        const isRight = uAns && (rawKey.includes('|') ? rawKey.split('|').map(x => x.trim()).includes(uAns) : uAns === rawKey);
-        if (isRight) stats[cat].correct++;
-      });
-    });
-
-    return Object.entries(stats).map(([name, obj]) => {
-      const pct = obj.total > 0 ? Math.round((obj.correct / obj.total) * 100) : 0;
-      return { name, correct: obj.correct, total: obj.total, pct };
-    }).sort((a, b) => a.pct - b.pct);
-  }
+  window.toggleClassVocabQuizRequirement = async function(classId) {
+    const cls = (db.classes || []).find(c => c.id === classId);
+    if (!cls) return;
+    cls.requireVocabQuiz = (cls.requireVocabQuiz === false) ? true : false;
+    await persist();
+    renderClassTable();
+    alert(`Đã chuyển chế độ Lớp "${cls.name}" sang: ${cls.requireVocabQuiz !== false ? '🎯 Bắt buộc làm Vocab Quiz sau mỗi 5 đề Reading' : '⚡ Miễn bắt buộc Vocab Quiz (Học sinh làm đề liên tục không bị khóa)'}!`);
+  };
 
   /* ==========================================================================
-     2. SỬA DỨT ĐIỂM 100% LOCATE EVIDENCE CHO LISTENING (XỬ LÝ I'D, YOU'LL, THAT'S...)
+     2. SỬA DỨT ĐIỂM 100% LOCATE EVIDENCE CHO LISTENING
+        - Xử lý câu nhiều vế như "OK. So it's silver in colour. That's right."
+        - Chuẩn hóa nháy cong ’ -> ', viết tắt I'd / you'll / that's / it's
      ========================================================================== */
   const CONTRACTION_EXPANSIONS = {
     "i'd": "(?:i\\s*['’`]?d|i\\s+would|i\\s+had)",
@@ -10898,68 +10960,103 @@ Câu dẫn chứng: "${eviVal}"`;
     "weren't": "(?:weren\\s*['’`]?t|were\\s+not)",
     "haven't": "(?:haven\\s*['’`]?t|have\\s+not)",
     "hasn't": "(?:hasn\\s*['’`]?t|has\\s+not)",
-    "hadn't": "(?:hadn\\s*['’`]?t|had\\s+not)"
+    "hadn't": "(?:hadn\\s*['’`]?t|had\\s+not)",
+    "colour": "(?:colour|color)",
+    "color": "(?:colour|color)"
   };
 
+  const FILLER_CLAUSES_SET = new Set([
+    "ok", "okay", "right", "that's right", "thats right", "yes", "yeah",
+    "no", "well", "so", "oh", "uh", "um", "sure", "i see", "thank you", "thanks", "great", "fine"
+  ]);
+
   function tokenToFlexiblePattern(rawToken) {
-    // Chuẩn hóa mọi dấu nháy cong (’, ‘, `) về dấu nháy thẳng (')
-    const norm = String(rawToken || '').replace(/[’‘`]/g, "'").replace(/^'+|'+$/g, '').toLowerCase();
+    const norm = String(rawToken || '').replace(/[’‘`′]/g, "'").replace(/^'+|'+$/g, '').toLowerCase();
     if (!norm) return '';
-    if (CONTRACTION_EXPANSIONS[norm]) {
-      return CONTRACTION_EXPANSIONS[norm];
-    }
+    if (CONTRACTION_EXPANSIONS[norm]) return CONTRACTION_EXPANSIONS[norm];
     if (norm.includes("'")) {
       const parts = norm.split("'").map(p => escapeRegex(p));
-      return parts.join("(?:['’`]|&#39;|&apos;)?");
+      return parts.join("(?:['’`′]|&#39;|&apos;|\\s)*");
     }
     return escapeRegex(norm);
   }
 
+  function buildTokensRegexFromWords(wordArray) {
+    if (!wordArray || !wordArray.length) return null;
+    const flexSep = '(?:\\s|<[^>]*>|&nbsp;|&#160;|[,.;:!?"“”\'’`()\\[\\]\\-—]|\\b[A-Z][A-Za-z0-9\\s]{0,14}:){1,75}?';
+    return new RegExp(`(${wordArray.map(tokenToFlexiblePattern).join(flexSep)})`, 'i');
+  }
+
   function buildSmartAnchorRegex(quoteStr) {
-    // 1. Dọn sạch thẻ HTML, mã &nbsp;, và tên người nói (MAN:, WOMAN:, Speaker 1:...)
     const cleaned = String(quoteStr || '')
       .replace(/<[^>]+>/g, ' ')
       .replace(/&nbsp;|&#160;/gi, ' ')
-      .replace(/[’‘`]/g, "'")
+      .replace(/[’‘`′]/g, "'")
       .replace(/\b[A-Z][A-Z0-9\s]{1,16}:\s*/g, ' ')
       .trim();
 
-    // 2. Tách từ nhưng giữ nguyên các từ viết tắt có dấu nháy đơn (I'd, you'll, that's...)
-    const tokens = cleaned
+    if (!cleaned) return [];
+    const patterns = [];
+
+    // 1. Thử khớp nguyên chuỗi đầy đủ trước (tối đa 18 từ)
+    const allTokens = cleaned
       .replace(/[^a-zA-Z0-9'\s]/g, ' ')
       .split(/\s+/)
       .map(w => w.replace(/^'+|'+$/g, ''))
       .filter(Boolean);
 
-    if (!tokens.length) return [];
-
-    // Cho phép giữa các từ có khoảng trắng, xuống dòng, thẻ HTML (<p>, <br>, <span>, <b>), hoặc tên người nói xen vào
-    const flexSep = '(?:\\s|<[^>]*>|&nbsp;|&#160;|[,.;:!?"“”()\\[\\]\\-—]|\\b[A-Z]{2,14}:){1,65}?';
-    const patterns = [];
-
-    // Bậc 1: Khớp cả câu dẫn chứng (tối đa 18 từ đầu) với bộ mở rộng từ viết tắt I'd <-> I would...
-    const mainSlice = tokens.slice(0, 18);
-    if (mainSlice.length >= 2) {
-      patterns.push(new RegExp(`(${mainSlice.map(tokenToFlexiblePattern).join(flexSep)})`, 'i'));
+    if (allTokens.length >= 2) {
+      const fullRx = buildTokensRegexFromWords(allTokens.slice(0, 18));
+      if (fullRx) patterns.push(fullRx);
     }
 
-    // Bậc 2: Nếu câu dẫn chứng dài, lấy các cụm 5 từ ở đầu, giữa và cuối câu (vượt qua mọi chỗ ngắt câu)
-    if (tokens.length >= 5) {
-      const midIdx = Math.max(0, Math.floor((tokens.length - 5) / 2));
-      const midChunk = tokens.slice(midIdx, midIdx + 5);
-      const endChunk = tokens.slice(-5);
-      patterns.push(new RegExp(`(${midChunk.map(tokenToFlexiblePattern).join(flexSep)})`, 'i'));
-      patterns.push(new RegExp(`(${endChunk.map(tokenToFlexiblePattern).join(flexSep)})`, 'i'));
-      patterns.push(new RegExp(`(${tokens.slice(0, 5).map(tokenToFlexiblePattern).join(flexSep)})`, 'i'));
-    }
+    // 2. TÁCH CÂU DẪN CHỨNG THEO DẤU CHẤM / CHẤM HỎI / CHẤM THAN (Ví dụ: "OK. So it's silver in colour. That's right.")
+    // Lọc bỏ các vế cảm thán ngắn ("OK", "That's right") và ưu tiên vế chứa nhiều thông tin nhất ("So it's silver in colour")
+    const rawClauses = cleaned
+      .split(/[.?!;]+/)
+      .map(c => c.trim())
+      .filter(c => {
+        const low = c.toLowerCase().replace(/[^a-z0-9'\s]/g, '').trim();
+        return low.length >= 3 && !FILLER_CLAUSES_SET.has(low);
+      })
+      .sort((a, b) => b.length - a.length);
 
-    // Bậc 3: Lọc bỏ các từ viết tắt & hư từ để lấy 3–4 từ khóa thực (content words) đứng gần nhau nhất
-    const pureWords = tokens.filter(w => !w.includes("'") && w.length >= 3);
-    if (pureWords.length >= 3) {
-      const pureSep = '(?:\\s|<[^>]*>|&nbsp;|[^a-zA-Z0-9]){1,85}?';
-      const midP = Math.max(0, Math.floor((pureWords.length - 3) / 2));
-      patterns.push(new RegExp(`(${pureWords.slice(midP, midP + 3).map(escapeRegex).join(pureSep)})`, 'i'));
-      patterns.push(new RegExp(`(${pureWords.slice(0, 3).map(escapeRegex).join(pureSep)})`, 'i'));
+    rawClauses.forEach(clause => {
+      const cTokens = clause
+        .replace(/[^a-zA-Z0-9'\s]/g, ' ')
+        .split(/\s+/)
+        .map(w => w.replace(/^'+|'+$/g, ''))
+        .filter(Boolean);
+
+      if (cTokens.length >= 2) {
+        const rx = buildTokensRegexFromWords(cTokens);
+        if (rx) patterns.push(rx);
+        // Nếu vế bắt đầu bằng từ đệm như "So", "And", "But", "Well", tạo thêm 1 mẫu bỏ từ đệm đầu câu
+        if (cTokens.length >= 3 && ['so','and','but','well','now','then','actually','oh'].includes(cTokens[0].toLowerCase())) {
+          const rxNoLead = buildTokensRegexFromWords(cTokens.slice(1));
+          if (rxNoLead) patterns.push(rxNoLead);
+        }
+      }
+      // Lấy các cụm 3-4 từ bên trong vế câu này (ví dụ "silver in colour")
+      const nonContractionWords = cTokens.filter(w => !w.includes("'") && w.length >= 2);
+      if (nonContractionWords.length >= 2) {
+        const rxPure = buildTokensRegexFromWords(nonContractionWords.slice(0, 5));
+        if (rxPure) patterns.push(rxPure);
+      }
+    });
+
+    // 3. Bậc dự phòng: Bắt neo 2–4 từ khóa thực (content words) không chứa dấu nháy
+    const stopSet = new Set(['the','and','for','that','this','with','from','have','has','had','were','was','are','you','your','they','their','what','when','where','which','will','would','could','should','about','into','right','okay','well']);
+    const contentWords = allTokens.filter(w => !w.includes("'") && w.length >= 3 && !stopSet.has(w.toLowerCase()));
+    if (contentWords.length >= 2) {
+      const rxContent = buildTokensRegexFromWords(contentWords.slice(0, 3));
+      if (rxContent) patterns.push(rxContent);
+    }
+    if (contentWords.length >= 1) {
+      const bestWord = contentWords.slice().sort((a, b) => b.length - a.length)[0];
+      if (bestWord && bestWord.length >= 4) {
+        patterns.push(new RegExp(`(\\b${tokenToFlexiblePattern(bestWord)}\\b)`, 'i'));
+      }
     }
 
     return patterns;
@@ -11004,7 +11101,6 @@ Câu dẫn chứng: "${eviVal}"`;
     if (firstTarget) {
       firstTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
-      // Tự động dò sang các Part khác nếu câu dẫn chứng nằm ở Part khác
       if (activeExam && Array.isArray(activeExam.passages) && activeExam.passages.length > 1) {
         for (const p of activeExam.passages) {
           if (p.partNum === activePartNum) continue;
@@ -11022,7 +11118,857 @@ Câu dẫn chứng: "${eviVal}"`;
   };
 
   /* ==========================================================================
-     3. CHẾ ĐỘ THI THẬT (EXAM MODE) VS. LUYỆN TẬP (PRACTICE MODE) CHO CẢ 3 KỸ NĂNG
+     3. THIẾT KẾ LẠI BÁO CÁO / PHIẾU ĐIỂM (ĐỒNG BỘ MÀU EMERALD GREEN CỦA WEB)
+        - Nền sáng thanh lịch (#f8fafc), khung viền Emerald Green (#064e3b / #059669)
+        - Có bảng 4 tiêu chí chuẩn cho Writing (TR, CC, LR, GRA)
+        - Làm sạch dấu ngoặc kép thừa, bóc tách câu sai thực tế & từ vựng cần nạp
+     ========================================================================== */
+  function wrapCanvasLines(ctx, text, maxWidth) {
+    const words = String(text || '').split(/\s+/);
+    const lines = [];
+    let currentLine = '';
+    words.forEach(w => {
+      const testLine = currentLine ? (currentLine + ' ' + w) : w;
+      if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = w;
+      } else {
+        currentLine = testLine;
+      }
+    });
+    if (currentLine) lines.push(currentLine);
+    return lines;
+  }
+
+  function cleanQuoteTrash(str) {
+    return String(str || '')
+      .replace(/^[\s•\-\*'"“”‘’]+|[\s•\-\*'"“”‘’]+$/g, '')
+      .replace(/['"“”]{2,}/g, '"')
+      .trim();
+  }
+
+  function buildDetailedDiagnosticData(res) {
+    const rExam = (db.readingExams || []).find(e => e.id === res.examId);
+    const lExam = (db.listeningExams || []).find(e => e.id === res.examId);
+    const wExam = (db.writingExams || []).find(e => e.id === res.examId);
+    const exam = rExam || lExam || wExam;
+    const isWriting = Boolean(res.writingSubmission || wExam || String(res.id || '').startsWith('res_w_'));
+
+    const report = {
+      isWriting,
+      skillLabel: isWriting ? 'ACADEMIC WRITING ASSESSMENT' : (lExam ? 'IELTS LISTENING ASSESSMENT' : 'ACADEMIC READING ASSESSMENT'),
+      sectionStats: [],
+      typeStats: [],
+      missedTraps: [],
+      mustLearnVocab: [],
+      writingFixes: [],
+      writingCriteria: { TR: '—', CC: '—', LR: '—', GRA: '—' }
+    };
+
+    if (isWriting) {
+      const fb = String(res.teacherFeedback || '');
+      const overallNum = parseFloat(String(res.band || '').replace(/[^0-9.]/g, '')) || 6.5;
+
+      // Trích xuất điểm 4 tiêu chí TR/TA, CC, LR, GRA từ nhận xét của AI / Giáo viên
+      const trMatch = fb.match(/(?:Task\s*(?:Response|Achievement)|TR|TA)[^0-9\n]{0,25}([0-9](?:\.[05])?)/i);
+      const ccMatch = fb.match(/(?:Coherence\s*(?:&|and)?\s*Cohesion|CC)[^0-9\n]{0,25}([0-9](?:\.[05])?)/i);
+      const lrMatch = fb.match(/(?:Lexical\s*Resource|LR)[^0-9\n]{0,25}([0-9](?:\.[05])?)/i);
+      const graMatch = fb.match(/(?:Grammatical\s*Range|GRA)[^0-9\n]{0,25}([0-9](?:\.[05])?)/i);
+
+      report.writingCriteria = {
+        TR: trMatch ? trMatch[1] : overallNum.toFixed(1),
+        CC: ccMatch ? ccMatch[1] : overallNum.toFixed(1),
+        LR: lrMatch ? lrMatch[1] : overallNum.toFixed(1),
+        GRA: graMatch ? graMatch[1] : overallNum.toFixed(1)
+      };
+
+      // Trích xuất cặp từ sửa lỗi & làm sạch hoàn toàn dấu ngoặc kép thừa
+      const arrowRegex = /([^\n\->➔]{3,65})\s*(?:->|➔|=>)\s*([^\n]{3,75})/g;
+      let m;
+      while ((m = arrowRegex.exec(fb)) !== null && report.writingFixes.length < 4) {
+        const badClean = cleanQuoteTrash(m[1]);
+        const goodClean = cleanQuoteTrash(m[2]);
+        if (badClean && goodClean && badClean.length < 60) {
+          report.writingFixes.push({ bad: badClean, good: goodClean });
+        }
+      }
+
+      // Lọc các dòng nhận xét thực chất (bỏ các dòng chỉ ghi điểm số ngắn ngủn như "OVERALL BAND SCORE: 7.5", "LR: 7")
+      const cleanLines = fb
+        .split(/\r?\n/)
+        .map(s => cleanQuoteTrash(s))
+        .filter(s =>
+          s.length > 38 &&
+          !s.startsWith('[') &&
+          !s.includes('->') &&
+          !s.includes('➔') &&
+          !/^(?:OVERALL|Task\s*Response|Task\s*Achievement|Coherence|Lexical|Grammatical)/i.test(s)
+        );
+      report.missedTraps = cleanLines.slice(0, 4);
+      return report;
+    }
+
+    if (!exam || !exam.correctAnswers) return report;
+
+    const uMap = res.userAnswersCopy || {};
+    const catMap = {};
+    const partMap = {};
+
+    Object.keys(exam.correctAnswers).sort((a, b) => parseInt(a.replace('q','')) - parseInt(b.replace('q',''))).forEach(qKey => {
+      const qNum = qKey.replace('q', '');
+      const uAns = String(uMap[qKey] || '').trim();
+      const rawKey = String(exam.correctAnswers[qKey] || '').trim();
+      const isRight = uAns && (rawKey.toLowerCase().includes('|')
+        ? rawKey.toLowerCase().split('|').map(x => x.trim()).includes(uAns.toLowerCase())
+        : uAns.toLowerCase() === rawKey.toLowerCase());
+
+      const cat = detectQuestionCategoryFromExam(exam, qKey);
+      if (!catMap[cat]) catMap[cat] = { c: 0, t: 0 };
+      catMap[cat].t++;
+      if (isRight) catMap[cat].c++;
+
+      let pNum = 1;
+      if (Array.isArray(exam.passages)) {
+        for (const p of exam.passages) {
+          const pHtml = (p.passageHtml || '') + '\n' + (p.questionsHtml || '');
+          if (new RegExp(`(name|data-target)=["']${qKey}["']|data-multi-pair=["'][^"']*\\b${qKey}\\b`, 'i').test(pHtml)) {
+            pNum = p.partNum || 1;
+            break;
+          }
+        }
+      }
+      const pLabel = lExam ? `Part ${pNum}` : `Passage ${pNum}`;
+      if (!partMap[pLabel]) partMap[pLabel] = { c: 0, t: 0 };
+      partMap[pLabel].t++;
+      if (isRight) partMap[pLabel].c++;
+
+      if (!isRight && report.missedTraps.length < 4) {
+        const exp = (exam.explanations && exam.explanations[qKey]) ? exam.explanations[qKey] : '';
+        const evi = (exam.evidences && exam.evidences[qKey]) ? exam.evidences[qKey] : '';
+        const detail = exp ? exp : (evi ? `Dẫn chứng: "${evi}"` : 'Đối chiếu lại từ khóa & dẫn chứng trong bài');
+        report.missedTraps.push({
+          qNum,
+          userAns: uAns || 'Bỏ trống',
+          keyAns: rawKey,
+          detail: detail.length > 130 ? detail.substring(0, 127) + '...' : detail
+        });
+      }
+    });
+
+    report.sectionStats = Object.entries(partMap).map(([k, v]) => `${k}: ${v.c}/${v.t} (${Math.round(v.c/v.t*100)}%)`);
+    report.typeStats = Object.entries(catMap).map(([k, v]) => ({
+      name: k,
+      c: v.c,
+      t: v.t,
+      pct: Math.round((v.c / v.t) * 100)
+    }));
+
+    const vocabList = [];
+    (exam.passages || []).forEach(p => {
+      (p.vocab || []).forEach(v => {
+        if (v && v.word && v.mean) vocabList.push(v);
+      });
+    });
+    report.mustLearnVocab = vocabList.slice(0, 6);
+    return report;
+  }
+
+  window.downloadShareableResultSlip = function(resId) {
+    let res = null;
+    if (resId) {
+      res = (db.results || []).find(r => r.id === resId);
+    } else if (db.results && db.results.length) {
+      res = db.results[db.results.length - 1];
+    }
+    if (!res) return alert('Không tìm thấy dữ liệu phiếu điểm!');
+
+    const diag = buildDetailedDiagnosticData(res);
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 820;
+    const ctx = canvas.getContext('2d');
+
+    // 1. NỀN SÁNG ĐỒNG BỘ 100% VỚI GIAO DIỆN WEB (#f8fafc & Emerald Soft)
+    ctx.fillStyle = '#f1f5f9';
+    ctx.fillRect(0, 0, 1080, 820);
+
+    // Thẻ chính trắng tinh khôi với viền Emerald nhạt
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(28, 24, 1024, 772, 20);
+    ctx.fill();
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Thanh điểm nhấn Emerald Green trên đỉnh thẻ (giống hệt Login Card & Header của Web)
+    const topBarGrad = ctx.createLinearGradient(28, 24, 1052, 24);
+    topBarGrad.addColorStop(0, '#064e3b');
+    topBarGrad.addColorStop(0.6, '#059669');
+    topBarGrad.addColorStop(1, '#10b981');
+    ctx.fillStyle = topBarGrad;
+    ctx.beginPath();
+    ctx.roundRect(28, 24, 1024, 12, [20, 20, 0, 0]);
+    ctx.fill();
+
+    // 2. HEADER THƯƠNG HIỆU IELTS WITH AMURO
+    ctx.fillStyle = '#059669';
+    ctx.font = '800 12.5px "Plus Jakarta Sans", Arial, sans-serif';
+    ctx.fillText(`OFFICIAL DIAGNOSTIC REPORT  •  ${diag.skillLabel}`, 64, 72);
+
+    ctx.fillStyle = '#064e3b';
+    ctx.font = '800 30px "Plus Jakarta Sans", Arial, sans-serif';
+    ctx.fillText('IELTS WITH AMURO', 64, 108);
+
+    ctx.fillStyle = '#475569';
+    ctx.font = 'bold 14px Arial, sans-serif';
+    const shortTitle = String(res.examTitle || '').length > 52 ? String(res.examTitle).substring(0, 50) + '...' : res.examTitle;
+    ctx.fillText(`Học viên: ${res.userName}    •    Đề bài: ${shortTitle}`, 64, 136);
+
+    // Huy hiệu Band Score đồng bộ tone Emerald Soft (#ecfdf5)
+    ctx.fillStyle = '#ecfdf5';
+    ctx.beginPath();
+    ctx.roundRect(805, 52, 215, 92, 14);
+    ctx.fill();
+    ctx.strokeStyle = '#a7f3d0';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#064e3b';
+    ctx.font = '800 31px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    const bandLabel = String(res.band).startsWith('Band') ? res.band : `Band ${res.band}`;
+    ctx.fillText(bandLabel, 912, 96);
+    ctx.fillStyle = '#059669';
+    ctx.font = 'bold 13px Arial, sans-serif';
+    ctx.fillText(`Kết quả: ${res.score}`, 912, 124);
+    ctx.textAlign = 'left';
+
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(64, 158);
+    ctx.lineTo(1018, 158);
+    ctx.stroke();
+
+    if (!diag.isWriting) {
+      // ================= BÁO CÁO READING & LISTENING =================
+      // KHỐI 1: THỐNG KÊ ĐIỂM RƠI TỪNG PHẦN & DẠNG CÂU HỎI
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.roundRect(64, 174, 954, 122, 12);
+      ctx.fill();
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.stroke();
+
+      ctx.fillStyle = '#064e3b';
+      ctx.font = 'bold 14.5px Arial, sans-serif';
+      ctx.fillText('1. THỐNG KÊ ĐIỂM RƠI THEO PHẦN & ĐỘ CHÍNH XÁC TỪNG DẠNG CÂU HỎI', 84, 200);
+
+      ctx.fillStyle = '#059669';
+      ctx.font = 'bold 13.5px Arial, sans-serif';
+      const secText = diag.sectionStats.length ? ('• Điểm từng phần:  ' + diag.sectionStats.join('     |     ')) : '• Đã ghi nhận kết quả toàn bài';
+      ctx.fillText(secText, 84, 226);
+
+      diag.typeStats.slice(0, 4).forEach((st, idx) => {
+        const colX = idx % 2 === 0 ? 84 : 550;
+        const rowY = idx < 2 ? 254 : 278;
+        const badgeColor = st.pct >= 70 ? '#059669' : (st.pct >= 50 ? '#b45309' : '#be123c');
+        ctx.fillStyle = '#334155';
+        ctx.font = 'bold 13px Arial, sans-serif';
+        ctx.fillText(`▪ ${st.name}:`, colX, rowY);
+        ctx.fillStyle = badgeColor;
+        ctx.fillText(`${st.c}/${st.t} câu (${st.pct}%)`, colX + 265, rowY);
+      });
+
+      // KHỐI 2: BÓC TÁCH CÂU SAI & CẶP TỪ PARAPHRASE / DẪN CHỨNG THỰC TẾ
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.roundRect(64, 312, 954, 240, 12);
+      ctx.fill();
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.stroke();
+
+      ctx.fillStyle = '#064e3b';
+      ctx.font = 'bold 14.5px Arial, sans-serif';
+      ctx.fillText('2. BÓC TÁCH CÂU SAI & DẪN CHỨNG PARAPHRASE TRONG BÀI', 84, 338);
+
+      if (!diag.missedTraps.length) {
+        ctx.fillStyle = '#059669';
+        ctx.font = 'bold 14px Arial, sans-serif';
+        ctx.fillText('✓ Xuất sắc! Không có lỗi sai nào cần bóc tách trong bài làm này.', 84, 372);
+      } else {
+        let curY = 366;
+        diag.missedTraps.forEach(item => {
+          ctx.fillStyle = '#0f172a';
+          ctx.font = 'bold 13.5px Arial, sans-serif';
+          ctx.fillText(`• Câu ${item.qNum}:`, 84, curY);
+
+          ctx.fillStyle = '#64748b';
+          ctx.font = 'bold 13px Arial, sans-serif';
+          ctx.fillText(`Đã chọn "${item.userAns}"`, 160, curY);
+
+          ctx.fillStyle = '#059669';
+          ctx.font = 'bold 13.5px Arial, sans-serif';
+          ctx.fillText(`➔  Đáp án đúng: "${item.keyAns}"`, 335, curY);
+
+          ctx.fillStyle = '#334155';
+          ctx.font = '13px Arial, sans-serif';
+          const lines = wrapCanvasLines(ctx, `   ↳ Giải thích / Paraphrase: ${item.detail}`, 900).slice(0, 2);
+          lines.forEach(line => {
+            curY += 19;
+            ctx.fillText(line, 84, curY);
+          });
+          curY += 23;
+        });
+      }
+
+      // KHỐI 3: TỪ VỰNG HỌC THUẬT TRỌNG TÂM CẦN NẠP
+      ctx.fillStyle = '#ecfdf5';
+      ctx.beginPath();
+      ctx.roundRect(64, 568, 954, 168, 12);
+      ctx.fill();
+      ctx.strokeStyle = '#a7f3d0';
+      ctx.stroke();
+
+      ctx.fillStyle = '#064e3b';
+      ctx.font = 'bold 14.5px Arial, sans-serif';
+      ctx.fillText('3. TỪ VỰNG HỌC THUẬT & SYNONYMS CẦN NẠP TỪ ĐỀ THI NÀY', 84, 594);
+
+      if (!diag.mustLearnVocab.length) {
+        ctx.fillStyle = '#047857';
+        ctx.font = '13.5px Arial, sans-serif';
+        ctx.fillText('• Mở mục Vocabulary hoặc Vocabulary Vault trên hệ thống để ôn tập bộ từ vựng của bài.', 84, 626);
+      } else {
+        diag.mustLearnVocab.forEach((v, i) => {
+          const colX = i % 2 === 0 ? 84 : 548;
+          const rowY = 624 + Math.floor(i / 2) * 35;
+          ctx.fillStyle = '#065f46';
+          ctx.font = 'bold 13.5px Arial, sans-serif';
+          const wordTag = `▪ ${v.word} (${v.type || 'vocab'}): `;
+          ctx.fillText(wordTag, colX, rowY);
+
+          ctx.fillStyle = '#0f172a';
+          ctx.font = '13px Arial, sans-serif';
+          const meanStr = `${v.mean}${v.syn ? ` (Syn: ${v.syn})` : ''}`;
+          ctx.fillText(meanStr.substring(0, 46), colX + ctx.measureText(wordTag).width, rowY);
+        });
+      }
+    } else {
+      // ================= BÁO CÁO WRITING (4 TIÊU CHÍ + NÂNG CẤP TỪ VỰNG + NHẬN XÉT) =================
+      // KHỐI 1: BẢNG ĐIỂM 4 TIÊU CHÍ CHẤM WRITING (TR, CC, LR, GRA)
+      const critList = [
+        { code: 'Task Response (TR)', val: diag.writingCriteria.TR },
+        { code: 'Coherence & Cohesion (CC)', val: diag.writingCriteria.CC },
+        { code: 'Lexical Resource (LR)', val: diag.writingCriteria.LR },
+        { code: 'Grammatical Range (GRA)', val: diag.writingCriteria.GRA }
+      ];
+      critList.forEach((c, idx) => {
+        const boxX = 64 + idx * 242;
+        ctx.fillStyle = '#f0fdf4';
+        ctx.beginPath();
+        ctx.roundRect(boxX, 174, 228, 86, 12);
+        ctx.fill();
+        ctx.strokeStyle = '#a7f3d0';
+        ctx.stroke();
+
+        ctx.fillStyle = '#065f46';
+        ctx.font = 'bold 12.5px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(c.code, boxX + 114, 200);
+
+        ctx.fillStyle = '#059669';
+        ctx.font = '800 26px Arial, sans-serif';
+        ctx.fillText(String(c.val), boxX + 114, 240);
+      });
+      ctx.textAlign = 'left';
+
+      // KHỐI 2: CÁC CẶP SỬA LỖI & NÂNG CẤP TỪ VỰNG TRỰC TIẾP TRONG BÀI
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.roundRect(64, 276, 954, 220, 12);
+      ctx.fill();
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.stroke();
+
+      ctx.fillStyle = '#064e3b';
+      ctx.font = 'bold 14.5px Arial, sans-serif';
+      ctx.fillText('1. CÁC CẶP SỬA LỖI & NÂNG CẤP DIỄN ĐẠT TRỰC TIẾP TỪ BÀI VIẾT', 84, 304);
+
+      if (!diag.writingFixes.length) {
+        ctx.fillStyle = '#475569';
+        ctx.font = '13.5px Arial, sans-serif';
+        ctx.fillText('• Mở mục "View Feedback" trên hệ thống để xem chi tiết nhận xét và bài mẫu Band 8.0+.', 84, 340);
+      } else {
+        let wy = 338;
+        diag.writingFixes.forEach(fx => {
+          ctx.fillStyle = '#64748b';
+          ctx.font = 'bold 13.5px Arial, sans-serif';
+          const leftTxt = `• Bản gốc: "${fx.bad}"`;
+          ctx.fillText(leftTxt, 84, wy);
+
+          ctx.fillStyle = '#059669';
+          ctx.font = 'bold 13.5px Arial, sans-serif';
+          ctx.fillText(`   ➔  Nâng cấp: "${fx.good}"`, 84 + ctx.measureText(leftTxt).width + 6, wy);
+          wy += 38;
+        });
+      }
+
+      // KHỐI 3: NHẬN XÉT CHI TIẾT TỪ GIÁM KHẢO / AI EXAMINER
+      ctx.fillStyle = '#ecfdf5';
+      ctx.beginPath();
+      ctx.roundRect(64, 512, 954, 224, 12);
+      ctx.fill();
+      ctx.strokeStyle = '#a7f3d0';
+      ctx.stroke();
+
+      ctx.fillStyle = '#064e3b';
+      ctx.font = 'bold 14.5px Arial, sans-serif';
+      ctx.fillText('2. ĐÁNH GIÁ CHUYÊN MÔN & HƯỚNG CẢI THIỆN TRỌNG TÂM', 84, 540);
+
+      let fy = 570;
+      const linesToDraw = diag.missedTraps.length
+        ? diag.missedTraps
+        : ['Bài viết đã được chấm theo 4 tiêu chí chuẩn CD-IELTS. Hãy đối chiếu với Dàn ý và Bài mẫu Band 8.0+ trên web.'];
+      linesToDraw.forEach(line => {
+        ctx.fillStyle = '#1e293b';
+        ctx.font = '13.5px Arial, sans-serif';
+        const wrapped = wrapCanvasLines(ctx, `• ${line}`, 910).slice(0, 2);
+        wrapped.forEach(wLine => {
+          ctx.fillText(wLine, 84, fy);
+          fy += 21;
+        });
+        fy += 10;
+      });
+    }
+
+    // CHÂN TRANG ĐỒNG BỘ THƯƠNG HIỆU
+    ctx.fillStyle = '#64748b';
+    ctx.font = 'italic 13px Arial, sans-serif';
+    ctx.fillText(`"Let justice be done though the heavens fall"  —  Verified by IELTS WITH AMURO (${res.timestamp})`, 64, 768);
+
+    const link = document.createElement('a');
+    link.download = `IELTS_Amuro_Report_${String(res.userName || 'Student').replace(/\s+/g, '_')}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+
+  function injectShareSlipBtnInSummaryModal() {
+    const footer = document.querySelector('#scoreSummaryModal .modal-footer');
+    if (footer && !document.getElementById('btnDownloadSlipModal')) {
+      const btn = document.createElement('button');
+      btn.id = 'btnDownloadSlipModal';
+      btn.className = 'btn btn-secondary';
+      btn.innerHTML = '📸 Tải Phiếu Chẩn Đoán';
+      btn.onclick = () => downloadShareableResultSlip(null);
+      footer.insertBefore(btn, footer.firstChild);
+    }
+  }
+
+  /* ==========================================================================
+     4. MỤC TIÊU HỌC TẬP HÀNG NGÀY (KHÓA CỐ ĐỊNH TRONG NGÀY + CHỐNG NỘP KHỐNG >=60%)
+        - Lưu siêu nhẹ vào suite_meta/daily_goals (không bao giờ tràn 1MB)
+        - Giáo viên xem được mục tiêu & tiến độ của từng học sinh trong lớp
+     ========================================================================== */
+  function getTodayDateStringKey() {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  // Kiểm tra 1 bài nộp có đủ điều kiện tính vào mục tiêu ngày không (Reading/Listening >= 60%, Writing >= 120 từ)
+  function isSubmissionQualifiedForDailyGoal(res) {
+    if (!res) return false;
+    const skill = detectResultSkillType(res);
+    if (skill === 'writing') {
+      const w1 = res.writingSubmission?.task1 ? res.writingSubmission.task1.trim().split(/\s+/).length : 0;
+      const w2 = res.writingSubmission?.task2 ? res.writingSubmission.task2.trim().split(/\s+/).length : 0;
+      if (w1 + w2 >= 120) return true;
+      const m = String(res.score || '').match(/(\d+)w/g);
+      if (m) {
+        const totalW = m.reduce((acc, item) => acc + (parseInt(item) || 0), 0);
+        return totalW >= 120;
+      }
+      return false;
+    }
+    if (skill === 'reading' || skill === 'listening') {
+      const parts = String(res.score || '').split('/');
+      if (parts.length === 2) {
+        const c = parseFloat(parts[0]) || 0;
+        const t = parseFloat(parts[1]) || 1;
+        return t > 0 && (c / t) >= 0.60; // Đạt từ 60% trở lên mới tính là làm thật
+      }
+    }
+    return false;
+  }
+
+  // Đếm số đề hợp lệ học sinh đã hoàn thành trong ngày hôm nay
+  function getStudentTodayQualifiedCounts(userName, dateStr = getTodayDateStringKey()) {
+    const counts = { rDone: 0, lDone: 0, wDone: 0, invalidCount: 0 };
+    if (!userName) return counts;
+    (db.results || []).forEach(r => {
+      if (String(r.userName || '').toLowerCase() !== String(userName).toLowerCase()) return;
+      if (!matchesDateFilter(r, dateStr)) return;
+      const sk = detectResultSkillType(r);
+      if (sk === 'quiz') return;
+      if (isSubmissionQualifiedForDailyGoal(r)) {
+        if (sk === 'reading') counts.rDone++;
+        else if (sk === 'listening') counts.lDone++;
+        else if (sk === 'writing') counts.wDone++;
+      } else {
+        counts.invalidCount++;
+      }
+    });
+    return counts;
+  }
+
+  function getStudentDailyGoalRecord(username, dateStr = getTodayDateStringKey()) {
+    if (!username) return null;
+    const key = `${username}_${dateStr}`;
+    if (cloudDailyGoalsMap[key]) return cloudDailyGoalsMap[key];
+    try {
+      const localRaw = localStorage.getItem(`AMURO_GOAL_${key}`);
+      if (localRaw) return JSON.parse(localRaw);
+    } catch (e) {}
+    return null;
+  }
+
+  window.openDailyGoalConfigModal = function() {
+    if (!activeUser) return;
+    const todayKey = getTodayDateStringKey();
+    const existing = getStudentDailyGoalRecord(activeUser.username, todayKey);
+    if (existing && existing.locked) {
+      return alert('🔒 Mục tiêu hôm nay của bạn đã được khóa cố định! Bạn chỉ có thể thay đổi mục tiêu mới sau 00:00 ngày mai.');
+    }
+    document.getElementById('goalInputReading').value = existing ? existing.r : 1;
+    document.getElementById('goalInputListening').value = existing ? existing.l : 1;
+    document.getElementById('goalInputWriting').value = existing ? existing.w : 1;
+    openModal('dailyGoalConfigModal');
+  };
+
+  window.saveAndLockDailyGoal = async function() {
+    if (!activeUser) return;
+    const r = Math.max(0, Math.min(10, parseInt(document.getElementById('goalInputReading').value) || 0));
+    const l = Math.max(0, Math.min(10, parseInt(document.getElementById('goalInputListening').value) || 0));
+    const w = Math.max(0, Math.min(10, parseInt(document.getElementById('goalInputWriting').value) || 0));
+    if (r + l + w === 0) {
+      return alert('Bạn hãy đặt ít nhất 1 đề mục tiêu trong ngày hôm nay nhé!');
+    }
+    if (!confirm(`Xác nhận khóa mục tiêu hôm nay:\n• Reading: ${r} đề\n• Listening: ${l} đề\n• Writing: ${w} bài\n\n(Sau khi khóa sẽ không thể chỉnh sửa cho đến ngày mai)`)) {
+      return;
+    }
+
+    const todayStr = getTodayDateStringKey();
+    const key = `${activeUser.username}_${todayStr}`;
+    const record = { r, l, w, locked: true, date: todayStr, name: activeUser.name };
+
+    cloudDailyGoalsMap[key] = record;
+    try { localStorage.setItem(`AMURO_GOAL_${key}`, JSON.stringify(record)); } catch (e) {}
+
+    closeModal('dailyGoalConfigModal');
+    renderHomeTab();
+
+    const fs = typeof getActiveFirestore === 'function' ? getActiveFirestore() : CLOUD_DB;
+    if (fs) {
+      try {
+        await fs.collection('suite_meta').doc('daily_goals').set({ [key]: record }, { merge: true });
+      } catch (e) {}
+    }
+  };
+
+  /* ==========================================================================
+     5. THU GỌN LIVE STUDY FEED (GIỮ 5 DÒNG, BỎ NGÀY GIỜ)
+     ========================================================================== */
+  function compactLiveStudyFeedOnDOM() {
+    const homeTab = document.getElementById('tab-home');
+    if (!homeTab) return;
+    // Tìm tất cả các phần tử thời gian bên phải trong khung Live Study Feed để ẩn đi cho gọn
+    const allDivs = homeTab.querySelectorAll('div, span');
+    allDivs.forEach(el => {
+      const txt = (el.textContent || '').trim();
+      if (txt.includes('Nhật Ký Học Tập Trực Tiếp') || txt.includes('Live Study Feed')) {
+        const feedCard = el.closest('.card') || el.parentElement?.parentElement;
+        if (feedCard) {
+          feedCard.style.padding = '14px 18px';
+          feedCard.style.marginBottom = '18px';
+          // Ẩn các nhãn thời gian có icon đồng hồ hoặc định dạng ngày tháng trong Live Feed
+          feedCard.querySelectorAll('span, div').forEach(sub => {
+            const sTxt = (sub.textContent || '').trim();
+            if ((/^\d{1,2}\/\d{1,2}\/\d{4}/.test(sTxt) || /^\d{2}:\d{2}:\d{2}/.test(sTxt) || sub.querySelector('.fa-clock')) && sub.children.length <= 1) {
+              sub.style.display = 'none';
+            }
+          });
+        }
+      }
+    });
+  }
+
+  /* ==========================================================================
+     6. GIAO BÀI TẬP CỐ ĐỊNH CHO LỚP (CLASS HOMEWORK) & THEO DÕI AI ĐÃ LÀM / CHƯA LÀM
+     ========================================================================== */
+  function injectHomeworkFieldsIntoAssignModal() {
+    const cohortSel = document.getElementById('assignCohortSelect');
+    if (!cohortSel || document.getElementById('assignAsHomeworkChk')) return;
+    const extraDiv = document.createElement('div');
+    extraDiv.style.marginTop = '14px';
+    extraDiv.style.padding = '12px 14px';
+    extraDiv.style.background = '#f0fdf4';
+    extraDiv.style.border = '1px solid #a7f3d0';
+    extraDiv.style.borderRadius = '10px';
+    extraDiv.innerHTML = `
+      <label style="display:flex; align-items:center; gap:8px; font-weight:800; color:#065f46; cursor:pointer; font-size:13px; margin-bottom:8px;">
+        <input type="checkbox" id="assignAsHomeworkChk" checked style="width:16px; height:16px; accent-color:#059669;">
+        📌 Giao làm Bài Tập Bắt Buộc cho Lớp (Hiện thông báo & Theo dõi ai chưa làm)
+      </label>
+      <div class="form-group" style="margin-bottom:0;">
+        <label style="font-size:11.5px;">📅 Hạn nộp (Deadline - Tùy chọn)</label>
+        <input type="date" id="assignHomeworkDeadline" class="form-input" value="${getTodayDateStringKey()}">
+      </div>
+    `;
+    cohortSel.parentElement.parentElement.appendChild(extraDiv);
+  }
+
+  const _u23OrigOpenAssignModal = openAssignModal;
+  openAssignModal = function(examId, type = 'reading') {
+    _u23OrigOpenAssignModal(examId, type);
+    injectHomeworkFieldsIntoAssignModal();
+  };
+
+  const _u23OrigExecuteAssign = executeAssign;
+  executeAssign = async function() {
+    injectHomeworkFieldsIntoAssignModal();
+    const examId = document.getElementById('assignExamId').value;
+    const type = document.getElementById('assignExamType').value;
+    const cohort = document.getElementById('assignCohortSelect').value;
+    const isHw = document.getElementById('assignAsHomeworkChk')?.checked;
+    const deadline = document.getElementById('assignHomeworkDeadline')?.value || '';
+
+    await _u23OrigExecuteAssign();
+
+    if (isHw && cohort && cohort !== 'ALL') {
+      const list = type === 'writing' ? db.writingExams : (type === 'listening' ? db.listeningExams : db.readingExams);
+      const target = (list || []).find(e => e.id === examId);
+      if (target) {
+        const hwObj = {
+          id: `hw_${cohort}_${examId}`,
+          classId: cohort,
+          examId: examId,
+          examTitle: target.title,
+          skill: type,
+          deadline: deadline,
+          assignedAt: new Date().toLocaleDateString()
+        };
+        cloudClassHomeworks = cloudClassHomeworks.filter(h => h.id !== hwObj.id);
+        cloudClassHomeworks.unshift(hwObj);
+        try { localStorage.setItem('AMURO_CLASS_HOMEWORKS', JSON.stringify(cloudClassHomeworks)); } catch (e) {}
+
+        const fs = typeof getActiveFirestore === 'function' ? getActiveFirestore() : CLOUD_DB;
+        if (fs) {
+          try {
+            await fs.collection('suite_meta').doc('class_homeworks').set({ list: cloudClassHomeworks.slice(0, 60) }, { merge: true });
+          } catch (e) {}
+        }
+      }
+    }
+    renderHomeTab();
+  };
+
+  window.removeClassHomework = async function(hwId, classId) {
+    if (!confirm('Xóa bài tập giao này khỏi danh sách theo dõi của lớp?')) return;
+    cloudClassHomeworks = cloudClassHomeworks.filter(h => h.id !== hwId);
+    try { localStorage.setItem('AMURO_CLASS_HOMEWORKS', JSON.stringify(cloudClassHomeworks)); } catch (e) {}
+    const fs = typeof getActiveFirestore === 'function' ? getActiveFirestore() : CLOUD_DB;
+    if (fs) {
+      try { await fs.collection('suite_meta').doc('class_homeworks').set({ list: cloudClassHomeworks }, { merge: true }); } catch (e) {}
+    }
+    if (classId) openClassProgressModal(classId);
+    renderHomeTab();
+  };
+
+  /* ==========================================================================
+     7. NÂNG CẤP MODAL QUẢN LÝ LỚP HỌC CHO GIÁO VIÊN:
+        - Xem Mục tiêu ngày của từng học sinh (Ai đạt / Ai chưa đặt)
+        - Xem Tiến độ Bài tập cố định đã giao (🟢 Ai đã nộp + Điểm | 🔴 Ai chưa làm)
+     ========================================================================== */
+  renderClassTable = function() {
+    const tbody = document.getElementById('classTbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    (db.classes || []).forEach(c => {
+      const count = (db.users || []).filter(u => u.role === 'student' && u.classId === c.id).length;
+      const hwCount = cloudClassHomeworks.filter(h => h.classId === c.id).length;
+      const quizReq = (c.requireVocabQuiz !== false);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <b>${c.name}</b>
+          <div style="margin-top:4px;">
+            <span style="background:${quizReq ? '#fef3c7' : '#e0f2fe'}; color:${quizReq ? '#b45309' : '#0369a1'}; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700;">
+              ${quizReq ? '🎯 Bắt buộc Vocab Quiz (sau 5 đề Reading)' : '⚡ Miễn Vocab Quiz (Lớp Cấp tốc / Tự do)'}
+            </span>
+            ${hwCount ? `<span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:800; margin-left:6px;">📌 ${hwCount} bài tập đã giao</span>` : ''}
+          </div>
+        </td>
+        <td><span style="background:#ecfdf5; color:#059669; padding:4px 12px; border-radius:999px; font-weight:700; font-size:12.5px;">👥 ${count} học sinh</span></td>
+        <td style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-emerald" onclick="openClassProgressModal('${c.id}')">📊 Tiến độ, Mục tiêu & Bài tập Lớp</button>
+          <button class="btn btn-secondary" onclick="toggleClassVocabQuizRequirement('${c.id}')">
+            ${quizReq ? '🔓 Tắt bắt buộc Quiz' : '🔒 Bật bắt buộc Quiz'}
+          </button>
+          <button class="btn btn-danger" onclick="deleteClass('${c.id}')">Delete</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  };
+
+  window.openClassProgressModal = function(classId) {
+    const cls = (db.classes || []).find(c => c.id === classId);
+    if (!cls) return;
+    let modal = document.getElementById('classProgressDetailModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'classProgressDetailModal';
+      modal.className = 'modal-overlay';
+      modal.innerHTML = `
+        <div class="modal-window" style="width:1040px; max-height:90vh;">
+          <div class="modal-header">
+            <span id="classProgressModalTitle">👥 Danh sách & Tiến độ Lớp</span>
+            <button class="btn btn-secondary" onclick="closeModal('classProgressDetailModal')">✕ Đóng</button>
+          </div>
+          <div class="modal-body" id="classProgressModalBody" style="padding:20px; overflow-y:auto;"></div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    const students = (db.users || []).filter(u => u.role === 'student' && u.classId === classId);
+    const classHwList = cloudClassHomeworks.filter(h => h.classId === classId);
+    const todayStr = getTodayDateStringKey();
+
+    document.getElementById('classProgressModalTitle').innerHTML = `🏫 Quản lý Lớp: <span style="color:#059669;">${cls.name}</span> (${students.length} học sinh)`;
+    const body = document.getElementById('classProgressModalBody');
+
+    if (!students.length) {
+      body.innerHTML = `<div style="text-align:center; padding:40px; color:#94a3b8; font-weight:600;">Lớp này hiện chưa có học sinh nào. Anh có thể xếp lớp cho học sinh ở tab <b>👤 Students</b>!</div>`;
+      openModal('classProgressDetailModal');
+      return;
+    }
+
+    // PHẦN 1: THEO DÕI BÀI TẬP CỐ ĐỊNH ĐÃ GIAO CHO LỚP (AI ĐÃ NỘP / AI CHƯA LÀM / ĐIỂM SỐ)
+    const hwSectionHtml = `
+      <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:14px; padding:16px 18px; margin-bottom:20px;">
+        <div style="font-weight:800; font-size:15px; color:#065f46; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span>📌 Theo Dõi Bài Tập Cố Định Đã Giao Cho Lớp (${classHwList.length} bài)</span>
+          <span style="font-size:12px; color:#047857; font-weight:600;">Để giao bài mới: Bấm nút "Assign" ở đề Reading / Listening / Writing bất kỳ</span>
+        </div>
+        ${!classHwList.length ? `
+          <div style="font-size:13px; color:#64748b; font-style:italic;">Chưa có bài tập cố định nào được giao cho lớp này.</div>
+        ` : classHwList.map(hw => {
+          const doneStudents = [];
+          const pendingStudents = [];
+          students.forEach(st => {
+            const sub = (db.results || []).slice().reverse().find(r =>
+              String(r.userName || '').toLowerCase() === String(st.name || '').toLowerCase() &&
+              (r.examId === hw.examId || r.examTitle === hw.examTitle)
+            );
+            if (sub) doneStudents.push({ st, sub });
+            else pendingStudents.push(st);
+          });
+
+          return `
+            <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:12px 14px; margin-bottom:10px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                <div>
+                  <span style="font-weight:800; color:#0f172a; font-size:14px;">${hw.skill === 'reading' ? '📖' : (hw.skill === 'listening' ? '🎧' : '✍️')} ${hw.examTitle}</span>
+                  ${hw.deadline ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; margin-left:8px;">📅 Hạn: ${hw.deadline}</span>` : ''}
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:12px; font-weight:800; color:#059669;">Đã nộp: ${doneStudents.length}/${students.length}</span>
+                  <button class="btn btn-danger" style="padding:3px 8px; font-size:11px;" onclick="removeClassHomework('${hw.id}', '${classId}')">Xóa</button>
+                </div>
+              </div>
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:12.5px;">
+                <div style="background:#f8fafc; padding:8px 10px; border-radius:8px; border:1px solid #e2e8f0;">
+                  <div style="font-weight:800; color:#15803d; margin-bottom:4px;">🟢 Đã hoàn thành (${doneStudents.length}):</div>
+                  ${!doneStudents.length ? '<div style="color:#94a3b8;">Chưa có học sinh nào nộp</div>' : doneStudents.map(item => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:3px 0; border-bottom:1px dashed #e2e8f0;">
+                      <span><b>${item.st.name}</b>: <b style="color:#059669;">${item.sub.score} (${item.sub.band})</b></span>
+                      <button class="btn btn-secondary" style="padding:2px 6px; font-size:10.5px;" onclick="closeModal('classProgressDetailModal'); ${hw.skill === 'writing' ? `openGradeWritingModal('${item.sub.id}')` : `reopenReviewFromHistory('${item.sub.id}')`}">Xem bài</button>
+                    </div>
+                  `).join('')}
+                </div>
+                <div style="background:#fef2f2; padding:8px 10px; border-radius:8px; border:1px solid #fecaca;">
+                  <div style="font-weight:800; color:#b91c1c; margin-bottom:4px;">🔴 Chưa làm (${pendingStudents.length}):</div>
+                  ${!pendingStudents.length ? '<div style="color:#15803d; font-weight:700;">🎉 100% học sinh trong lớp đã nộp bài!</div>' : pendingStudents.map(st => `
+                    <div style="padding:3px 0; color:#7f1d1d; font-weight:600;">• ${st.name} (<code>${st.username}</code>) — Chưa nộp</div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    // PHẦN 2: BẢNG MỤC TIÊU HÔM NAY & TIẾN ĐỘ TỔNG CỦA TỪNG HỌC SINH
+    body.innerHTML = hwSectionHtml + `
+      <div style="font-weight:800; font-size:14.5px; color:#0f172a; margin-bottom:10px;">
+        🎯 Theo Dõi Mục Tiêu Hôm Nay (${todayStr}) & Tiến Độ Học Sinh
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Học sinh</th>
+            <th>🎯 Mục tiêu tự đặt hôm nay</th>
+            <th>✅ Tiến độ hôm nay (Đạt ≥ 60%)</th>
+            <th>📖 Reading</th>
+            <th>🎧 Listening</th>
+            <th>✍️ Writing</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${students.map(st => {
+            const goal = getStudentDailyGoalRecord(st.username, todayStr);
+            const todayDone = getStudentTodayQualifiedCounts(st.name, todayStr);
+            const stuRes = (db.results || []).filter(r => String(r.userName || '').toLowerCase() === String(st.name || '').toLowerCase());
+            const rDoneTotal = new Set(stuRes.filter(r => detectResultSkillType(r) === 'reading').map(r => r.examId)).size;
+            const lDoneTotal = new Set(stuRes.filter(r => detectResultSkillType(r) === 'listening').map(r => r.examId)).size;
+            const wDoneTotal = new Set(stuRes.filter(r => detectResultSkillType(r) === 'writing').map(r => r.examId)).size;
+
+            const goalStr = goal
+              ? `<b>${goal.r}</b> Read • <b>${goal.l}</b> Lis • <b>${goal.w}</b> Wri 🔒`
+              : `<span style="color:#94a3b8; font-style:italic;">Chưa đặt mục tiêu</span>`;
+
+            const isAllGoalDone = goal && todayDone.rDone >= goal.r && todayDone.lDone >= goal.l && todayDone.wDone >= goal.w;
+            const progressStr = goal
+              ? `<span style="color:${isAllGoalDone ? '#15803d' : '#b45309'}; font-weight:800;">
+                  ${todayDone.rDone}/${goal.r} R • ${todayDone.lDone}/${goal.l} L • ${todayDone.wDone}/${goal.w} W
+                  ${isAllGoalDone ? ' (🎉 Đạt 100%)' : ''}
+                 </span>`
+              : `<span>Đã làm: ${todayDone.rDone}R • ${todayDone.lDone}L • ${todayDone.wDone}W</span>`;
+
+            return `
+              <tr>
+                <td><b>${st.name}</b> ${st.isPro ? '<span style="color:#d97706; font-size:11px; font-weight:800;">👑 PRO</span>' : ''}</td>
+                <td style="font-size:12.5px;">${goalStr}</td>
+                <td style="font-size:12.5px;">${progressStr}</td>
+                <td><b style="color:#059669;">${rDoneTotal} đề</b></td>
+                <td><b style="color:#2563eb;">${lDoneTotal} đề</b></td>
+                <td><b style="color:#d97706;">${wDoneTotal} bài</b></td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+    openModal('classProgressDetailModal');
+  };
+
+  /* ==========================================================================
+     8. CHẾ ĐỘ THI THẬT (EXAM MODE) VS. LUYỆN TẬP (PRACTICE MODE) CHO CẢ 3 KỸ NĂNG
      ========================================================================== */
   const _coreLaunchReading = launchExam;
   const _coreLaunchListening = launchListeningExam;
@@ -11059,17 +12005,12 @@ Câu dẫn chứng: "${eviVal}"`;
     const { skillType, examId } = pendingLaunchConfig;
     pendingLaunchConfig = null;
 
-    if (skillType === 'reading') {
-      _coreLaunchReading(examId);
-    } else if (skillType === 'listening') {
-      _coreLaunchListening(examId);
-    } else if (skillType === 'writing') {
-      _coreLaunchWriting(examId);
-    }
+    if (skillType === 'reading') _coreLaunchReading(examId);
+    else if (skillType === 'listening') _coreLaunchListening(examId);
+    else if (skillType === 'writing') _coreLaunchWriting(examId);
+
     setupExamOrPracticeTimerBar();
-    if (skillType === 'writing') {
-      injectWritingPracticeOutlineForPro();
-    }
+    if (skillType === 'writing') injectWritingPracticeOutlineForPro();
   };
 
   function setupExamOrPracticeTimerBar() {
@@ -11124,9 +12065,6 @@ Câu dẫn chứng: "${eviVal}"`;
     }
   };
 
-  /* ==========================================================================
-     4. WRITING PRO: HIỆN DÀN Ý (OUTLINE) TRONG PRACTICE MODE & MỞ SAMPLE SAU KHI NỘP
-     ========================================================================== */
   function injectWritingPracticeOutlineForPro() {
     if (activeExamType !== 'writing' || !activeExam) return;
     const leftPane = document.getElementById('insperaLeftPane');
@@ -11134,7 +12072,6 @@ Câu dẫn chứng: "${eviVal}"`;
 
     const oldDrawer = document.getElementById('livePracticeOutlineDrawer');
     if (oldDrawer) oldDrawer.remove();
-
     if (currentExecutionMode !== 'practice') return;
 
     const isTask1 = (activePartNum === 1);
@@ -11178,7 +12115,7 @@ Câu dẫn chứng: "${eviVal}"`;
   };
 
   /* ==========================================================================
-     5. DAILY VOCAB DRILL (10 TỪ CẦN ÔN HÔM NAY - FLASHCARD & MINI QUIZ 2 PHÚT)
+     9. DAILY VOCAB DRILL (10 TỪ CẦN ÔN HÔM NAY - FLASHCARD & MINI QUIZ 2 PHÚT)
      ========================================================================== */
   let dailyDrillWords = [];
   let dailyDrillStep = 0;
@@ -11187,14 +12124,12 @@ Câu dẫn chứng: "${eviVal}"`;
   let dailyDrillScore = 0;
 
   function getTodayDrillCompletedKey() {
-    const today = new Date().toISOString().split('T')[0];
-    return `AMURO_DAILY_DRILL_DONE_${activeUser ? activeUser.username : 'guest'}_${today}`;
+    return `AMURO_DAILY_DRILL_DONE_${activeUser ? activeUser.username : 'guest'}_${getTodayDateStringKey()}`;
   }
 
   function collectDailyDrillPool() {
     const userVault = (activeUser && db.savedVocab && db.savedVocab[activeUser.username]) ? db.savedVocab[activeUser.username] : [];
     const pool = [...userVault];
-
     if (pool.length < 10) {
       (db.readingExams || []).forEach(ex => {
         (ex.passages || []).forEach(p => {
@@ -11313,391 +12248,186 @@ Câu dẫn chứng: "${eviVal}"`;
     } else {
       alert(`💡 Gợi ý nhớ từ:\n"${currentItem.word}" có nghĩa là:\n➔ ${currentItem.mean}`);
     }
-    if (dailyDrillStep < dailyDrillWords.length - 1) {
-      dailyDrillStep++;
-    } else {
-      dailyDrillMode = 'done';
-    }
+    if (dailyDrillStep < dailyDrillWords.length - 1) dailyDrillStep++;
+    else dailyDrillMode = 'done';
     renderDailyVocabDrillStep();
   };
 
   /* ==========================================================================
-     6. PHIẾU ĐIỂM CHẨN ĐOÁN THỰC CHIẾN (DIAGNOSTIC REPORT SLIP PNG)
-        - Không dùng lời khuyên sáo rỗng!
-        - Bóc tách trực tiếp: Điểm rơi từng Part/Dạng bài + Cặp câu Bẫy/Paraphrase làm sai + Từ vựng cần nạp
+     10. TRANG HOME: BANNER BÀI TẬP LỚP + MỤC TIÊU NGÀY + KỆ ĐỀ HOT + SKILL ANALYTICS
      ========================================================================== */
-  function wrapCanvasLines(ctx, text, maxWidth) {
-    const words = String(text || '').split(/\s+/);
-    const lines = [];
-    let currentLine = '';
-    words.forEach(w => {
-      const testLine = currentLine ? (currentLine + ' ' + w) : w;
-      if (ctx.measureText(testLine).width > maxWidth && currentLine) {
-        lines.push(currentLine);
-        currentLine = w;
-      } else {
-        currentLine = testLine;
-      }
-    });
-    if (currentLine) lines.push(currentLine);
-    return lines;
+  function getLatestUserSubmissionForExam(examId, examTitle) {
+    if (!activeUser) return null;
+    const all = (db.results || []).slice().reverse();
+    return all.find(r =>
+      String(r.userName || '').toLowerCase() === String(activeUser.name || '').toLowerCase() &&
+      (r.examId === examId || (examTitle && r.examTitle === examTitle))
+    ) || null;
   }
 
-  function buildDetailedDiagnosticData(res) {
-    const rExam = (db.readingExams || []).find(e => e.id === res.examId);
-    const lExam = (db.listeningExams || []).find(e => e.id === res.examId);
-    const wExam = (db.writingExams || []).find(e => e.id === res.examId);
-    const exam = rExam || lExam || wExam;
-    const isWriting = Boolean(res.writingSubmission || wExam);
-
-    const report = {
-      isWriting,
-      skillLabel: isWriting ? 'ACADEMIC WRITING' : (lExam ? 'IELTS LISTENING' : 'ACADEMIC READING'),
-      sectionStats: [],
-      typeStats: [],
-      missedTraps: [],
-      mustLearnVocab: [],
-      writingFixes: []
-    };
-
-    if (isWriting) {
-      const fb = String(res.teacherFeedback || '');
-      // Trích xuất các cặp sửa lỗi "cụm sai" -> "cụm nâng cấp" từ bài chấm Writing
-      const arrowRegex = /["“]?([^"”\n\->➔]{3,55})["”]?\s*(?:->|➔|=>)\s*["“]?([^"”\n]{3,65})["”]?/g;
-      let m;
-      while ((m = arrowRegex.exec(fb)) !== null && report.writingFixes.length < 5) {
-        report.writingFixes.push({ bad: m[1].trim(), good: m[2].trim() });
-      }
-      // Lấy các dòng nhận xét chính trong bài Writing
-      const cleanLines = fb.split(/\r?\n/).map(s => s.trim()).filter(s => s.length > 20 && !s.startsWith('['));
-      report.missedTraps = cleanLines.slice(0, 4);
-      return report;
-    }
-
-    if (!exam || !exam.correctAnswers) return report;
-
-    const uMap = res.userAnswersCopy || {};
-    const catMap = {};
-    const partMap = {};
-
-    Object.keys(exam.correctAnswers).sort((a, b) => parseInt(a.replace('q','')) - parseInt(b.replace('q',''))).forEach(qKey => {
-      const qNum = qKey.replace('q', '');
-      const uAns = String(uMap[qKey] || '').trim();
-      const rawKey = String(exam.correctAnswers[qKey] || '').trim();
-      const isRight = uAns && (rawKey.toLowerCase().includes('|')
-        ? rawKey.toLowerCase().split('|').map(x => x.trim()).includes(uAns.toLowerCase())
-        : uAns.toLowerCase() === rawKey.toLowerCase());
-
-      // Thống kê theo dạng câu hỏi
-      const cat = detectQuestionCategoryFromExam(exam, qKey);
-      if (!catMap[cat]) catMap[cat] = { c: 0, t: 0 };
-      catMap[cat].t++;
-      if (isRight) catMap[cat].c++;
-
-      // Thống kê theo Passage / Part
-      let pNum = 1;
-      if (Array.isArray(exam.passages)) {
-        for (const p of exam.passages) {
-          const pHtml = (p.passageHtml || '') + '\n' + (p.questionsHtml || '');
-          if (new RegExp(`(name|data-target)=["']${qKey}["']|data-multi-pair=["'][^"']*\\b${qKey}\\b`, 'i').test(pHtml)) {
-            pNum = p.partNum || 1;
-            break;
-          }
-        }
-      }
-      const pLabel = lExam ? `Part ${pNum}` : `Passage ${pNum}`;
-      if (!partMap[pLabel]) partMap[pLabel] = { c: 0, t: 0 };
-      partMap[pLabel].t++;
-      if (isRight) partMap[pLabel].c++;
-
-      // Nếu câu này học sinh làm SAI: Bóc tách trực tiếp Cặp Paraphrase / Dẫn chứng & Lý do sai
-      if (!isRight && report.missedTraps.length < 4) {
-        const exp = (exam.explanations && exam.explanations[qKey]) ? exam.explanations[qKey] : '';
-        const evi = (exam.evidences && exam.evidences[qKey]) ? exam.evidences[qKey] : '';
-        const detail = exp ? exp : (evi ? `Dẫn chứng bài đọc: "${evi}"` : 'Cần đối chiếu lại từ khóa trong bài');
-        report.missedTraps.push({
-          qNum,
-          userAns: uAns || 'Bỏ trống',
-          keyAns: rawKey,
-          detail: detail.length > 135 ? detail.substring(0, 132) + '...' : detail
-        });
-      }
-    });
-
-    report.sectionStats = Object.entries(partMap).map(([k, v]) => `${k}: ${v.c}/${v.t} (${Math.round(v.c/v.t*100)}%)`);
-    report.typeStats = Object.entries(catMap).map(([k, v]) => ({
-      name: k,
-      c: v.c,
-      t: v.t,
-      pct: Math.round((v.c / v.t) * 100)
-    }));
-
-    // Trích xuất Top 6 từ vựng học thuật cần nạp từ các Passage của đề này
-    const vocabList = [];
-    (exam.passages || []).forEach(p => {
-      (p.vocab || []).forEach(v => {
-        if (v && v.word && v.mean) vocabList.push(v);
-      });
-    });
-    report.mustLearnVocab = vocabList.slice(0, 6);
-    return report;
+  function detectQuestionCategoryFromExam(exam, qKey) {
+    if (!exam) return 'Gap-Fill / Completion';
+    const keyVal = String((exam.correctAnswers && exam.correctAnswers[qKey]) || '').trim().toUpperCase();
+    if (['TRUE', 'FALSE', 'NOT GIVEN', 'YES', 'NO'].includes(keyVal)) return 'TRUE/FALSE/NOT GIVEN & YES/NO';
+    let fullHtml = '';
+    (exam.passages || []).forEach(p => { fullHtml += (p.passageHtml || '') + '\n' + (p.questionsHtml || ''); });
+    if (new RegExp(`data-target=["']${qKey}["']`, 'i').test(fullHtml)) return 'Matching / Drag & Drop';
+    if (new RegExp(`data-multi-pair=["'][^"']*\\b${qKey}\\b`, 'i').test(fullHtml)) return 'Multiple Choice (Choose TWO)';
+    if (new RegExp(`type=["']radio["'][^>]*name=["']${qKey}["']`, 'i').test(fullHtml)) return 'Multiple Choice (A, B, C, D)';
+    return 'Note / Summary / Gap-Fill';
   }
 
-  window.downloadShareableResultSlip = function(resId) {
-    let res = null;
-    if (resId) {
-      res = (db.results || []).find(r => r.id === resId);
-    } else if (db.results && db.results.length) {
-      res = db.results[db.results.length - 1];
-    }
-    if (!res) return alert('Không tìm thấy dữ liệu phiếu điểm!');
-
-    const diag = buildDetailedDiagnosticData(res);
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 1080;
-    canvas.height = 820;
-    const ctx = canvas.getContext('2d');
-
-    // 1. Nền Gradient tối sang trọng
-    const grad = ctx.createLinearGradient(0, 0, 1080, 820);
-    grad.addColorStop(0, '#064e3b');
-    grad.addColorStop(1, '#0f172a');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 1080, 820);
-
-    // 2. Khung báo cáo trắng bên trong
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.roundRect(28, 28, 1024, 764, 20);
-    ctx.fill();
-
-    // 3. Header Thương hiệu & Huy hiệu Band Score
-    ctx.fillStyle = '#059669';
-    ctx.font = '800 13px "Plus Jakarta Sans", Arial, sans-serif';
-    ctx.fillText(`OFFICIAL DIAGNOSTIC REPORT • ${diag.skillLabel}`, 60, 68);
-
-    ctx.fillStyle = '#0f172a';
-    ctx.font = '800 30px "Plus Jakarta Sans", Arial, sans-serif';
-    ctx.fillText('IELTS WITH AMURO', 60, 104);
-
-    ctx.fillStyle = '#475569';
-    ctx.font = 'bold 14.5px Arial, sans-serif';
-    ctx.fillText(`Học viên: ${res.userName}   |   Đề thi: ${String(res.examTitle || '').substring(0, 52)}   |   Ngày: ${res.timestamp}`, 60, 134);
-
-    // Huy hiệu Band góc phải trên
-    ctx.fillStyle = '#ecfdf5';
-    ctx.beginPath();
-    ctx.roundRect(810, 48, 210, 96, 14);
-    ctx.fill();
-    ctx.strokeStyle = '#10b981';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    ctx.fillStyle = '#059669';
-    ctx.font = '800 32px Arial, sans-serif';
-    ctx.textAlign = 'center';
-    const bandLabel = String(res.band).startsWith('Band') ? res.band : `Band ${res.band}`;
-    ctx.fillText(bandLabel, 915, 95);
-    ctx.fillStyle = '#065f46';
-    ctx.font = 'bold 13.5px Arial, sans-serif';
-    ctx.fillText(`Kết quả: ${res.score}`, 915, 124);
-    ctx.textAlign = 'left';
-
-    // Đường kẻ phân cách Header
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(60, 154);
-    ctx.lineTo(1020, 154);
-    ctx.stroke();
-
-    if (!diag.isWriting) {
-      // 4A. KHỐI 1: THỐNG KÊ ĐIỂM RƠI TỪNG PASSAGE & DẠNG CÂU HỎI
-      ctx.fillStyle = '#f8fafc';
-      ctx.beginPath();
-      ctx.roundRect(60, 170, 960, 125, 12);
-      ctx.fill();
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.stroke();
-
-      ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 15px Arial, sans-serif';
-      ctx.fillText('1. CHẨN ĐOÁN ĐIỂM RƠI & ĐỘ CHÍNH XÁC TỪNG DẠNG BÀI:', 80, 196);
-
-      ctx.fillStyle = '#047857';
-      ctx.font = 'bold 13.5px Arial, sans-serif';
-      const secText = diag.sectionStats.length ? ('• Điểm theo phần:  ' + diag.sectionStats.join('    |    ')) : '• Đã ghi nhận kết quả toàn bài';
-      ctx.fillText(secText, 80, 222);
-
-      // Vẽ các thanh tỷ lệ đúng theo dạng bài
-      diag.typeStats.slice(0, 4).forEach((st, idx) => {
-        const colX = idx % 2 === 0 ? 80 : 550;
-        const rowY = idx < 2 ? 250 : 276;
-        const color = st.pct >= 75 ? '#15803d' : (st.pct >= 50 ? '#b45309' : '#dc2626');
-        ctx.fillStyle = '#334155';
-        ctx.font = 'bold 13px Arial, sans-serif';
-        ctx.fillText(`▪ ${st.name}: `, colX, rowY);
-        ctx.fillStyle = color;
-        ctx.fillText(`${st.c}/${st.t} câu (${st.pct}%)`, colX + 265, rowY);
+  function computeStudentQuestionTypeAnalytics() {
+    if (!activeUser) return [];
+    const stats = {};
+    const myResults = (db.results || []).filter(r =>
+      activeUser.role === 'teacher' ? true : (String(r.userName || '').toLowerCase() === String(activeUser.name || '').toLowerCase())
+    );
+    myResults.forEach(res => {
+      if (!res.userAnswersCopy) return;
+      const exam = (db.readingExams || []).find(e => e.id === res.examId) || (db.listeningExams || []).find(e => e.id === res.examId);
+      if (!exam || !exam.correctAnswers) return;
+      Object.keys(exam.correctAnswers).forEach(qKey => {
+        const cat = detectQuestionCategoryFromExam(exam, qKey);
+        if (!stats[cat]) stats[cat] = { correct: 0, total: 0 };
+        stats[cat].total++;
+        const uAns = String(res.userAnswersCopy[qKey] || '').trim().toLowerCase();
+        const rawKey = String(exam.correctAnswers[qKey] || '').trim().toLowerCase();
+        const isRight = uAns && (rawKey.includes('|') ? rawKey.split('|').map(x => x.trim()).includes(uAns) : uAns === rawKey);
+        if (isRight) stats[cat].correct++;
       });
-
-      // 4B. KHỐI 2: BÓC TÁCH BẪY SAI & CẶP TỪ PARAPHRASE BỊ BỎ LỠ TRONG ĐỀ
-      ctx.fillStyle = '#fffbeb';
-      ctx.beginPath();
-      ctx.roundRect(60, 310, 960, 240, 12);
-      ctx.fill();
-      ctx.strokeStyle = '#fcd34d';
-      ctx.stroke();
-
-      ctx.fillStyle = '#92400e';
-      ctx.font = 'bold 15px Arial, sans-serif';
-      ctx.fillText('2. BÓC TÁCH CÂU SAI & CẶP TỪ PARAPHRASE / DẪN CHỨNG TRONG BÀI:', 80, 336);
-
-      if (!diag.missedTraps.length) {
-        ctx.fillStyle = '#15803d';
-        ctx.font = 'bold 14px Arial, sans-serif';
-        ctx.fillText('🎉 Xuất sắc! Bạn không mắc lỗi sai nào hoặc đề thi chưa có câu sai cần bóc tách.', 80, 370);
-      } else {
-        let curY = 364;
-        diag.missedTraps.forEach(item => {
-          ctx.fillStyle = '#dc2626';
-          ctx.font = 'bold 13.5px Arial, sans-serif';
-          const headStr = `• Câu ${item.qNum}: Chọn "${item.userAns}" ➔ Đáp án đúng: "${item.keyAns}"`;
-          ctx.fillText(headStr, 80, curY);
-
-          ctx.fillStyle = '#334155';
-          ctx.font = '13px Arial, sans-serif';
-          const lines = wrapCanvasLines(ctx, `   ↳ Lý do / Paraphrase: ${item.detail}`, 910).slice(0, 2);
-          lines.forEach(line => {
-            curY += 19;
-            ctx.fillText(line, 80, curY);
-          });
-          curY += 24;
-        });
-      }
-
-      // 4C. KHỐI 3: TỪ VỰNG TRỌNG TÂM CẦN NẠP TỪ BÀI ĐỌC NÀY
-      ctx.fillStyle = '#f0fdf4';
-      ctx.beginPath();
-      ctx.roundRect(60, 566, 960, 170, 12);
-      ctx.fill();
-      ctx.strokeStyle = '#86efac';
-      ctx.stroke();
-
-      ctx.fillStyle = '#065f46';
-      ctx.font = 'bold 15px Arial, sans-serif';
-      ctx.fillText('3. TỪ VỰNG HỌC THUẬT & ĐỒNG NGHĨA CẦN NẠP NGAY TỪ ĐỀ NÀY:', 80, 592);
-
-      if (!diag.mustLearnVocab.length) {
-        ctx.fillStyle = '#475569';
-        ctx.font = '13.5px Arial, sans-serif';
-        ctx.fillText('• Hãy mở mục Vocabulary hoặc Vocabulary Vault trên web để ôn lại các từ vựng đã lưu.', 80, 624);
-      } else {
-        diag.mustLearnVocab.forEach((v, i) => {
-          const colX = i % 2 === 0 ? 80 : 545;
-          const rowY = 622 + Math.floor(i / 2) * 36;
-          ctx.fillStyle = '#059669';
-          ctx.font = 'bold 13.5px Arial, sans-serif';
-          const wordTag = `★ ${v.word} (${v.type || 'vocab'}): `;
-          ctx.fillText(wordTag, colX, rowY);
-
-          ctx.fillStyle = '#0f172a';
-          ctx.font = '13px Arial, sans-serif';
-          const meanStr = `${v.mean}${v.syn ? ` [Syn: ${v.syn}]` : ''}`;
-          ctx.fillText(meanStr.substring(0, 48), colX + ctx.measureText(wordTag).width, rowY);
-        });
-      }
-    } else {
-      // PHIẾU BÁO CÁO DÀNH RIÊNG CHO WRITING (NÂNG CẤP TỪ VỰNG & LỖI NGỮ PHÁP THỰC TẾ)
-      ctx.fillStyle = '#f8fafc';
-      ctx.beginPath();
-      ctx.roundRect(60, 175, 960, 260, 12);
-      ctx.fill();
-      ctx.strokeStyle = '#cbd5e1';
-      ctx.stroke();
-
-      ctx.fillStyle = '#0f172a';
-      ctx.font = 'bold 15px Arial, sans-serif';
-      ctx.fillText('1. CÁC CẶP SỬA LỖI & NÂNG CẤP TỪ VỰNG TRỰC TIẾP TRONG BÀI VIẾT:', 80, 204);
-
-      if (!diag.writingFixes.length) {
-        ctx.fillStyle = '#475569';
-        ctx.font = '13.5px Arial, sans-serif';
-        ctx.fillText('• Mở mục "View Feedback" trên hệ thống để xem chi tiết bài chấm và bài mẫu Band 8.0+.', 80, 238);
-      } else {
-        let wy = 236;
-        diag.writingFixes.forEach(fx => {
-          ctx.fillStyle = '#dc2626';
-          ctx.font = 'bold 13.5px Arial, sans-serif';
-          ctx.fillText(`✗ "${fx.bad}"`, 80, wy);
-          ctx.fillStyle = '#15803d';
-          ctx.fillText(`   ➔  ✓ Nâng cấp: "${fx.good}"`, 80 + ctx.measureText(`✗ "${fx.bad}"`).width + 10, wy);
-          wy += 34;
-        });
-      }
-
-      ctx.fillStyle = '#eff6ff';
-      ctx.beginPath();
-      ctx.roundRect(60, 455, 960, 275, 12);
-      ctx.fill();
-      ctx.strokeStyle = '#93c5fd';
-      ctx.stroke();
-
-      ctx.fillStyle = '#1e3a8a';
-      ctx.font = 'bold 15px Arial, sans-serif';
-      ctx.fillText('2. ĐÁNH GIÁ TRỌNG TÂM TỪ GIÁM KHẢO / AI EXAMINER:', 80, 485);
-
-      let fy = 515;
-      (diag.missedTraps.length ? diag.missedTraps : ['Bài viết đã được lưu trên hệ thống IELTS WITH AMURO.']).forEach(line => {
-        ctx.fillStyle = '#1e293b';
-        ctx.font = '13.5px Arial, sans-serif';
-        const wrapped = wrapCanvasLines(ctx, `• ${line}`, 910).slice(0, 2);
-        wrapped.forEach(wLine => {
-          ctx.fillText(wLine, 80, fy);
-          fy += 22;
-        });
-        fy += 10;
-      });
-    }
-
-    // Chân trang thương hiệu
-    ctx.fillStyle = '#64748b';
-    ctx.font = 'italic 13px Arial, sans-serif';
-    ctx.fillText('"Let justice be done though the heavens fall" — Báo cáo phân tích trích xuất tự động từ hệ thống IELTS WITH AMURO', 60, 768);
-
-    const link = document.createElement('a');
-    link.download = `IELTS_Amuro_Diagnostic_${String(res.userName || 'Student').replace(/\s+/g, '_')}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  };
-
-  function injectShareSlipBtnInSummaryModal() {
-    const footer = document.querySelector('#scoreSummaryModal .modal-footer');
-    if (footer && !document.getElementById('btnDownloadSlipModal')) {
-      const btn = document.createElement('button');
-      btn.id = 'btnDownloadSlipModal';
-      btn.className = 'btn btn-secondary';
-      btn.innerHTML = '📸 Tải Phiếu Chẩn Đoán';
-      btn.onclick = () => downloadShareableResultSlip(null);
-      footer.insertBefore(btn, footer.firstChild);
-    }
+    });
+    return Object.entries(stats).map(([name, obj]) => ({
+      name, correct: obj.correct, total: obj.total, pct: obj.total > 0 ? Math.round((obj.correct / obj.total) * 100) : 0
+    })).sort((a, b) => a.pct - b.pct);
   }
 
-  /* ==========================================================================
-     7. HIỂN THỊ KỆ ĐỀ HOT/MỚI, SKILL ANALYTICS & DAILY DRILL LÊN TRANG HOME
-     ========================================================================== */
   function renderHomeHotExamsAndAnalytics() {
     if (!activeUser) return;
     const homeTab = document.getElementById('tab-home');
     if (!homeTab) return;
 
+    compactLiveStudyFeedOnDOM();
+
+    // 10.1. BANNER BÀI TẬP VỀ NHÀ TỪ THẦY & BẢNG MỤC TIÊU HÀNG NGÀY (DAILY GOALS)
+    let topGoalHwContainer = document.getElementById('homeDailyGoalAndHomeworkContainer');
+    if (!topGoalHwContainer) {
+      topGoalHwContainer = document.createElement('div');
+      topGoalHwContainer.id = 'homeDailyGoalAndHomeworkContainer';
+      const heroBanner = homeTab.querySelector('.home-hero-banner');
+      if (heroBanner) heroBanner.insertAdjacentElement('afterend', topGoalHwContainer);
+      else homeTab.insertBefore(topGoalHwContainer, homeTab.firstChild);
+    }
+
+    const todayStr = getTodayDateStringKey();
+    const myGoal = getStudentDailyGoalRecord(activeUser.username, todayStr);
+    const todayCounts = getStudentTodayQualifiedCounts(activeUser.name, todayStr);
+
+    // Kiểm tra bài tập cố định của lớp học sinh đang theo học
+    const myClassId = activeUser.classId;
+    const myClassHomeworks = activeUser.role === 'student'
+      ? cloudClassHomeworks.filter(h => !myClassId || h.classId === myClassId)
+      : cloudClassHomeworks.slice(0, 4);
+
+    let hwBannerHtml = '';
+    if (myClassHomeworks.length > 0) {
+      hwBannerHtml = `
+        <div class="homework-alert-banner">
+          <div style="font-weight:800; font-size:15px; color:#92400e; display:flex; justify-content:space-between; align-items:center;">
+            <span>📢 Bài Tập Trọng Tâm Đã Giao Cho Lớp (${myClassHomeworks.length} bài)</span>
+            <span style="font-size:12px; color:#b45309;">Hoàn thành đúng hạn để giáo viên chấm & theo dõi tiến độ</span>
+          </div>
+          ${myClassHomeworks.map(hw => {
+            const sub = getLatestUserSubmissionForExam(hw.examId, hw.examTitle);
+            return `
+              <div class="homework-item-row">
+                <div>
+                  <span style="font-weight:800; color:#0f172a; font-size:13.5px;">
+                    ${hw.skill === 'reading' ? '📖 Reading:' : (hw.skill === 'listening' ? '🎧 Listening:' : '✍️ Writing:')} ${hw.examTitle}
+                  </span>
+                  ${hw.deadline ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; margin-left:8px;">📅 Hạn nộp: ${hw.deadline}</span>` : ''}
+                  ${sub ? `<span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:800; margin-left:8px;">✓ Đã nộp (${sub.score} • ${sub.band})</span>` : `<span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:800; margin-left:8px;">⏳ Chưa hoàn thành</span>`}
+                </div>
+                <button class="btn btn-emerald" style="padding:6px 14px; font-size:12px;" onclick="openModeSelectBeforeLaunch('${hw.skill}', '${hw.examId}')">
+                  ${sub ? '🔄 Làm lại bài' : '⚡ Làm Bài Ngay'}
+                </button>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    // Giao diện Bảng Mục Tiêu Hôm Nay
+    let goalCardHtml = '';
+    if (!myGoal) {
+      goalCardHtml = `
+        <div class="daily-goal-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div style="font-weight:800; font-size:16px; color:#064e3b;">🎯 Mục Tiêu Học Tập Hôm Nay (${todayStr})</div>
+              <div style="font-size:13px; color:#475569; margin-top:4px;">
+                Bạn chưa đặt chỉ tiêu số đề Reading, Listening, Writing hôm nay. Hãy tự đặt mục tiêu và khóa cam kết kỷ luật! (Chỉ tính bài đạt ≥ 60% đúng)
+              </div>
+            </div>
+            <button class="btn btn-emerald" onclick="openDailyGoalConfigModal()">⚙️ Đặt & Khóa Mục Tiêu Hôm Nay</button>
+          </div>
+        </div>
+      `;
+    } else {
+      const rPct = myGoal.r > 0 ? Math.min(100, Math.round((todayCounts.rDone / myGoal.r) * 100)) : 100;
+      const lPct = myGoal.l > 0 ? Math.min(100, Math.round((todayCounts.lDone / myGoal.l) * 100)) : 100;
+      const wPct = myGoal.w > 0 ? Math.min(100, Math.round((todayCounts.wDone / myGoal.w) * 100)) : 100;
+      const allCompleted = (todayCounts.rDone >= myGoal.r) && (todayCounts.lDone >= myGoal.l) && (todayCounts.wDone >= myGoal.w);
+
+      goalCardHtml = `
+        <div class="daily-goal-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div>
+              <span style="font-weight:800; font-size:16px; color:#064e3b;">🎯 Mục Tiêu Hôm Nay (${todayStr})</span>
+              <span style="background:${allCompleted ? '#dcfce7' : '#f1f5f9'}; color:${allCompleted ? '#15803d' : '#475569'}; padding:3px 10px; border-radius:99px; font-size:11.5px; font-weight:800; margin-left:8px;">
+                ${allCompleted ? '🎉 Đã hoàn thành 100% chỉ tiêu ngày!' : '🔒 Đã khóa cố định đến hết 24:00 hôm nay'}
+              </span>
+            </div>
+            <span style="font-size:12px; color:#059669; font-weight:700;">
+              ✓ Chỉ tính bài đạt ≥ 60% đúng ${todayCounts.invalidCount > 0 ? `<b style="color:#dc2626;">(Có ${todayCounts.invalidCount} bài nộp <60% chưa được tính)</b>` : ''}
+            </span>
+          </div>
+          <div class="goal-progress-grid">
+            <div class="goal-skill-box">
+              <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:800; color:#0f172a;">
+                <span>📖 Reading Goal</span>
+                <span style="color:#059669;">${todayCounts.rDone} / ${myGoal.r} đề</span>
+              </div>
+              <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:${rPct}%; background:#059669;"></div></div>
+            </div>
+            <div class="goal-skill-box">
+              <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:800; color:#0f172a;">
+                <span>🎧 Listening Goal</span>
+                <span style="color:#2563eb;">${todayCounts.lDone} / ${myGoal.l} đề</span>
+              </div>
+              <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:${lPct}%; background:#2563eb;"></div></div>
+            </div>
+            <div class="goal-skill-box">
+              <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:800; color:#0f172a;">
+                <span>✍️ Writing Goal</span>
+                <span style="color:#d97706;">${todayCounts.wDone} / ${myGoal.w} bài</span>
+              </div>
+              <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:${wPct}%; background:#d97706;"></div></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    topGoalHwContainer.innerHTML = hwBannerHtml + goalCardHtml;
+
+    // 10.2. KỆ ĐỀ MỚI & ĐỀ HOT TUẦN NÀY
     let showcaseBox = document.getElementById('homeHotNewShowcaseBox');
     if (!showcaseBox) {
       showcaseBox = document.createElement('div');
       showcaseBox.id = 'homeHotNewShowcaseBox';
-      const heroBanner = homeTab.querySelector('.home-hero-banner');
-      if (heroBanner) heroBanner.insertAdjacentElement('afterend', showcaseBox);
+      topGoalHwContainer.insertAdjacentElement('afterend', showcaseBox);
     }
 
     const allExams = [
@@ -11705,7 +12435,6 @@ Câu dẫn chứng: "${eviVal}"`;
       ...getVisibleExams(db.listeningExams || []).map(e => ({ ...e, skill: 'listening', skillLabel: '🎧 Listening' })),
       ...getVisibleExams(db.writingExams || []).map(e => ({ ...e, skill: 'writing', skillLabel: '✍️ Writing' }))
     ];
-
     const newestExams = allExams.slice().sort((a, b) => getExamTimestamp(b) - getExamTimestamp(a)).slice(0, 2);
     const popularExams = allExams.slice().sort((a, b) => getExamSubmissionCount(b.id, b.title) - getExamSubmissionCount(a.id, a.title)).slice(0, 2);
     const featured = [];
@@ -11716,10 +12445,8 @@ Câu dẫn chứng: "${eviVal}"`;
     showcaseBox.innerHTML = `
       <div class="hot-new-showcase">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <div style="font-size:16px; font-weight:800; color:#064e3b;">
-            🔥 Đề Thi Mới Cập Nhật & Đề HOT Tuần Này
-          </div>
-          <span style="font-size:12px; color:#047857; font-weight:700;">Bấm "Làm ngay" để chọn Chế độ Thi Thật hoặc Luyện Tập</span>
+          <div style="font-size:15.5px; font-weight:800; color:#064e3b;">🔥 Đề Thi Mới Cập Nhật & Đề HOT Tuần Này</div>
+          <span style="font-size:12px; color:#047857; font-weight:700;">Chọn đề để bắt đầu ở Exam Mode hoặc Practice Mode</span>
         </div>
         <div class="hot-new-grid">
           ${featured.slice(0, 4).map((ex, i) => {
@@ -11730,15 +12457,13 @@ Câu dẫn chứng: "${eviVal}"`;
                 <div>
                   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                     <span style="font-size:11.5px; font-weight:800; color:#059669; background:#ecfdf5; padding:2px 8px; border-radius:6px;">${ex.skillLabel}</span>
-                    <span style="font-size:11px; font-weight:800; color:${i < 2 ? '#dc2626' : '#7c3aed'};">${i < 2 ? '🆕 ĐỀ MỚI' : `🔥 HOT (${subCount} lượt)`}</span>
+                    <span style="font-size:11px; font-weight:800; color:${i < 2 ? '#dc2626' : '#047857'};">${i < 2 ? '🆕 ĐỀ MỚI' : `🔥 HOT (${subCount} lượt)`}</span>
                   </div>
                   <div style="font-weight:800; font-size:14px; color:#0f172a; line-height:1.4; margin-bottom:4px;">${ex.title}</div>
                   <div style="font-size:12px; color:#64748b;">⏱️ ${ex.duration} mins ${ex.topic ? `• 🏷️ ${ex.topic}` : ''}</div>
                   ${lastSub ? `<div style="margin-top:6px; font-size:11.5px; font-weight:800; color:#059669;">✓ Điểm gần nhất: ${lastSub.score} (${lastSub.band})</div>` : ''}
                 </div>
-                <button class="btn btn-emerald" style="width:100%; padding:7px 12px; font-size:12.5px;" onclick="openModeSelectBeforeLaunch('${ex.skill}', '${ex.id}')">
-                  ⚡ Làm Ngay
-                </button>
+                <button class="btn btn-emerald" style="width:100%; padding:7px 12px; font-size:12.5px;" onclick="openModeSelectBeforeLaunch('${ex.skill}', '${ex.id}')">⚡ Làm Ngay</button>
               </div>
             `;
           }).join('')}
@@ -11746,12 +12471,13 @@ Câu dẫn chứng: "${eviVal}"`;
       </div>
     `;
 
+    // 10.3. KHỐI PHÂN TÍCH DẠNG BÀI & 10 TỪ CẦN ÔN HÔM NAY
     let analyticsRow = document.getElementById('homeSkillAnalyticsAndDrillRow');
     if (!analyticsRow) {
       analyticsRow = document.createElement('div');
       analyticsRow.id = 'homeSkillAnalyticsAndDrillRow';
       analyticsRow.className = 'analytics-drill-row';
-      const recentCard = homeTab.querySelector('.card');
+      const recentCard = document.getElementById('homeRecentActivityTbody')?.closest('.card');
       if (recentCard) recentCard.parentNode.insertBefore(analyticsRow, recentCard);
     }
 
@@ -11774,9 +12500,7 @@ Câu dẫn chứng: "${eviVal}"`;
           return `
             <div class="qtype-stat-row">
               <div style="width:42%; font-weight:700; color:#1e293b;">${st.name}</div>
-              <div class="qtype-bar-wrap">
-                <div class="qtype-bar-fill" style="width:${st.pct}%; background:${barColor};"></div>
-              </div>
+              <div class="qtype-bar-wrap"><div class="qtype-bar-fill" style="width:${st.pct}%; background:${barColor};"></div></div>
               <div style="width:115px; text-align:right; font-weight:800; color:${barColor};">
                 ${st.pct}% <span style="font-size:11px; color:#64748b; font-weight:600;">(${st.correct}/${st.total})</span>
               </div>
@@ -11785,10 +12509,10 @@ Câu dẫn chứng: "${eviVal}"`;
         }).join('')}
       </div>
 
-      <div class="card" style="margin-bottom:0; background:linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border-color:#bfdbfe; display:flex; flex-direction:column; justify-content:space-between;">
+      <div class="card" style="margin-bottom:0; background:linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); border-color:#a7f3d0; display:flex; flex-direction:column; justify-content:space-between;">
         <div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span style="font-size:15.5px; font-weight:800; color:#1e3a8a;">🎯 10 Từ Cần Ôn Hôm Nay</span>
+            <span style="font-size:15.5px; font-weight:800; color:#064e3b;">🎯 10 Từ Cần Ôn Hôm Nay</span>
             <span style="background:${drillDoneToday ? '#dcfce7' : '#fef3c7'}; color:${drillDoneToday ? '#15803d' : '#b45309'}; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:800;">
               ${drillDoneToday ? '✅ Đã hoàn thành hôm nay' : '⏳ Chưa ôn hôm nay'}
             </span>
@@ -11797,25 +12521,192 @@ Câu dẫn chứng: "${eviVal}"`;
             Hệ thống tự động trích xuất <b>${drillPoolCount} từ vựng</b> từ Vocabulary Vault & các từ bạn làm sai gần nhất để tạo bài <b>Flashcard + Phản xạ 2 phút</b>.
           </p>
         </div>
-        <button class="btn btn-emerald" style="width:100%; background:#2563eb; padding:11px;" onclick="openDailyVocabDrillModal()">
+        <button class="btn btn-emerald" style="width:100%; padding:11px;" onclick="openDailyVocabDrillModal()">
           ⚡ Bắt Đầu Drill 10 Từ Ngay (2 Phút)
         </button>
       </div>
     `;
+  }
 
-    const vocabTabCardTitle = document.querySelector('#tab-myvocab .card-title');
-    if (vocabTabCardTitle && !document.getElementById('btnVaultDailyDrill')) {
-      const btn = document.createElement('button');
-      btn.id = 'btnVaultDailyDrill';
-      btn.className = 'btn btn-emerald';
-      btn.innerHTML = '🎯 Ôn Nhanh 10 Từ Hôm Nay (Flashcard & Quiz)';
-      btn.onclick = openDailyVocabDrillModal;
-      vocabTabCardTitle.appendChild(btn);
+  /* ==========================================================================
+     11. PHÂN TRANG (8 DÒNG / TRANG) & BỘ LỌC NGÀY CHO RECENT SUBMISSIONS
+     ========================================================================== */
+  window.setHomeSubPage = function(pageNum) {
+    homeSubCurrentPage = pageNum;
+    renderPaginatedHomeSubmissions();
+  };
+
+  window.setHomeSubDateFilter = function(mode, customVal = '') {
+    homeSubDateRangeMode = mode;
+    if (mode === 'custom') homeSubCustomDate = customVal;
+    homeSubCurrentPage = 1;
+    renderPaginatedHomeSubmissions();
+  };
+
+  function isResultMatchingDateRange(res) {
+    if (homeSubDateRangeMode === 'all') return true;
+    const todayStr = getTodayDateStringKey();
+    if (homeSubDateRangeMode === 'today') {
+      return matchesDateFilter(res, todayStr);
+    }
+    if (homeSubDateRangeMode === 'custom' && homeSubCustomDate) {
+      return matchesDateFilter(res, homeSubCustomDate);
+    }
+    if (homeSubDateRangeMode === '7days') {
+      let itemTime = 0;
+      const idMatch = String(res.id || '').match(/(\d{13})/);
+      if (idMatch) itemTime = Number(idMatch[1]);
+      else {
+        const parsed = new Date(res.isoDate || res.timestamp);
+        if (!isNaN(parsed.getTime())) itemTime = parsed.getTime();
+      }
+      if (!itemTime) return true;
+      return (Date.now() - itemTime) <= 7 * 24 * 3600 * 1000;
+    }
+    return true;
+  }
+
+  function renderPaginatedHomeSubmissions() {
+    const tbody = document.getElementById('homeRecentActivityTbody');
+    if (!tbody || !activeUser) return;
+
+    let userRecents = (db.results || []).slice().reverse();
+    if (activeUser.role === 'student') {
+      userRecents = userRecents.filter(r => String(r.userName || '').toLowerCase() === String(activeUser.name || '').toLowerCase());
+    }
+
+    // Lọc theo Ngày (Tất cả / Hôm nay / 7 ngày qua / Chọn ngày)
+    const dateFiltered = userRecents.filter(r => isResultMatchingDateRange(r));
+
+    // Đếm số lượng theo từng kỹ năng
+    const counts = { all: dateFiltered.length, reading: 0, listening: 0, writing: 0, quiz: 0 };
+    dateFiltered.forEach(r => {
+      const k = detectResultSkillType(r);
+      if (counts[k] !== undefined) counts[k]++;
+    });
+
+    const tableEl = tbody.closest('table');
+    if (tableEl && tableEl.parentElement) {
+      let filterBar = document.getElementById('homeSubmissionFilterBar');
+      if (!filterBar) {
+        filterBar = document.createElement('div');
+        filterBar.id = 'homeSubmissionFilterBar';
+        tableEl.parentElement.insertBefore(filterBar, tableEl);
+      }
+      filterBar.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;';
+
+      const skillTabs = [
+        { key: 'all', label: `📋 Tất cả (${counts.all})` },
+        { key: 'reading', label: `📖 Reading (${counts.reading})` },
+        { key: 'listening', label: `🎧 Listening (${counts.listening})` },
+        { key: 'writing', label: `✍️ Writing (${counts.writing})` },
+        { key: 'quiz', label: `🎯 Vocab Quiz (${counts.quiz})` }
+      ];
+
+      filterBar.innerHTML = `
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          ${skillTabs.map(t => {
+            const active = (typeof currentHomeSkillFilter !== 'undefined' ? currentHomeSkillFilter : 'all') === t.key;
+            return `<button type="button" onclick="currentHomeSkillFilter='${t.key}'; homeSubCurrentPage=1; renderPaginatedHomeSubmissions();"
+              style="border:1px solid ${active ? '#059669' : '#cbd5e1'}; background:${active ? '#059669' : '#f8fafc'};
+              color:${active ? '#ffffff' : '#334155'}; padding:6px 13px; border-radius:999px; font-size:12px; font-weight:700; cursor:pointer;">
+              ${t.label}
+            </button>`;
+          }).join('')}
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <button type="button" class="page-num-btn ${homeSubDateRangeMode === 'all' ? 'active' : ''}" onclick="setHomeSubDateFilter('all')">Tất cả ngày</button>
+          <button type="button" class="page-num-btn ${homeSubDateRangeMode === 'today' ? 'active' : ''}" onclick="setHomeSubDateFilter('today')">Hôm nay</button>
+          <button type="button" class="page-num-btn ${homeSubDateRangeMode === '7days' ? 'active' : ''}" onclick="setHomeSubDateFilter('7days')">7 ngày qua</button>
+          <input type="date" class="form-input" style="width:auto; padding:5px 10px; font-size:12px; height:32px;"
+            value="${homeSubDateRangeMode === 'custom' ? homeSubCustomDate : ''}"
+            onchange="setHomeSubDateFilter('custom', this.value)" title="Lọc theo ngày làm bài">
+        </div>
+      `;
+    }
+
+    const activeSkill = typeof currentHomeSkillFilter !== 'undefined' ? currentHomeSkillFilter : 'all';
+    const fullFiltered = dateFiltered.filter(r => activeSkill === 'all' || detectResultSkillType(r) === activeSkill);
+
+    const totalPages = Math.max(1, Math.ceil(fullFiltered.length / HOME_SUB_PAGE_SIZE));
+    if (homeSubCurrentPage > totalPages) homeSubCurrentPage = totalPages;
+    const startIdx = (homeSubCurrentPage - 1) * HOME_SUB_PAGE_SIZE;
+    const pageItems = fullFiltered.slice(startIdx, startIdx + HOME_SUB_PAGE_SIZE);
+
+    tbody.innerHTML = '';
+    if (!pageItems.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:22px;">Không có bài nộp nào trong khoảng thời gian đã chọn.</td></tr>`;
+    } else {
+      pageItems.forEach(r => {
+        const skillType = detectResultSkillType(r);
+        const isWriting = (skillType === 'writing');
+        const isQuiz = (skillType === 'quiz');
+        let actionBtn = '';
+        if (isWriting) {
+          if (activeUser.role === 'teacher') {
+            actionBtn = `<button class="btn btn-emerald" onclick="openGradeWritingModal('${r.id}')">✏️ Evaluate</button>`;
+          } else {
+            const hasFb = r.teacherFeedback && r.teacherFeedback.trim() !== '';
+            actionBtn = `<button class="btn ${hasFb ? 'btn-emerald' : 'btn-secondary'}" onclick="openStudentViewWritingModal('${r.id}')">${hasFb ? '💬 View Feedback' : '👁️ View Essay'}</button>`;
+          }
+        } else if (isQuiz) {
+          actionBtn = `<span style="color:#64748b; font-size:12px; font-weight:700;">🎯 Milestone Quiz</span>`;
+        } else {
+          actionBtn = `<button class="btn btn-secondary" onclick="reopenReviewFromHistory('${r.id}')">🔍 Review Keys</button>`;
+        }
+
+        const slipBtn = !isQuiz ? `<button class="btn btn-secondary" style="margin-left:6px;" onclick="downloadShareableResultSlip('${r.id}')">📸 Phiếu điểm</button>` : '';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${r.userName}</b></td>
+          <td>${r.examTitle}</td>
+          <td>${r.score}</td>
+          <td><b style="color:var(--emerald-accent);">${String(r.band).startsWith('Band') || r.band === 'PASSED' || r.band === 'RETRY' ? r.band : 'Band ' + r.band}</b></td>
+          <td><span style="color:#64748b; font-size:12px;">${r.timestamp}</span></td>
+          <td>${actionBtn}${slipBtn}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Thanh nút chuyển trang ◀ 1, 2, 3... ▶
+    if (tableEl && tableEl.parentElement) {
+      let pager = document.getElementById('homeSubmissionsPaginationBar');
+      if (!pager) {
+        pager = document.createElement('div');
+        pager.id = 'homeSubmissionsPaginationBar';
+        pager.className = 'sub-pagination-bar';
+        tableEl.parentElement.appendChild(pager);
+      }
+
+      if (fullFiltered.length <= HOME_SUB_PAGE_SIZE) {
+        pager.innerHTML = `<span style="font-size:12px; color:#64748b; font-weight:600;">Hiển thị ${fullFiltered.length} / ${fullFiltered.length} kết quả</span><div></div>`;
+      } else {
+        const pageButtons = [];
+        for (let p = 1; p <= totalPages; p++) {
+          if (p === 1 || p === totalPages || Math.abs(p - homeSubCurrentPage) <= 2) {
+            pageButtons.push(`<button type="button" class="page-num-btn ${p === homeSubCurrentPage ? 'active' : ''}" onclick="setHomeSubPage(${p})">${p}</button>`);
+          } else if (pageButtons[pageButtons.length - 1] !== '...') {
+            pageButtons.push('...');
+          }
+        }
+        pager.innerHTML = `
+          <span style="font-size:12.5px; color:#64748b; font-weight:600;">
+            Hiển thị <b>${startIdx + 1}–${Math.min(startIdx + HOME_SUB_PAGE_SIZE, fullFiltered.length)}</b> trong tổng số <b>${fullFiltered.length}</b> bài nộp
+          </span>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <button type="button" class="page-num-btn" ${homeSubCurrentPage === 1 ? 'disabled' : ''} onclick="setHomeSubPage(${homeSubCurrentPage - 1})">◀</button>
+            ${pageButtons.map(b => b === '...' ? '<span style="color:#94a3b8; padding:0 4px;">...</span>' : b).join('')}
+            <button type="button" class="page-num-btn" ${homeSubCurrentPage === totalPages ? 'disabled' : ''} onclick="setHomeSubPage(${homeSubCurrentPage + 1})">▶</button>
+          </div>
+        `;
+      }
     }
   }
 
   /* ==========================================================================
-     8. GOM NHÓM ĐỀ THEO THƯ MỤC BỘ SÁCH / VOLUME (FOLDER ACCORDION) & ĐIỂM CŨ
+     12. GOM NHÓM ĐỀ THEO THƯ MỤC BỘ SÁCH / VOLUME (FOLDER ACCORDION) & ĐIỂM CŨ
      ========================================================================== */
   function extractExamFolderGroup(exam) {
     const title = String(exam.title || '').trim();
@@ -12104,39 +12995,715 @@ Câu dẫn chứng: "${eviVal}"`;
     }
   };
 
+  /* ==========================================================================
+     13. KHỞI TẠO ĐỒNG BỘ MỤC TIÊU NGÀY & BÀI TẬP LỚP TỪ FIREBASE
+     ========================================================================== */
+  function initGoalsAndHomeworkRealtime() {
+    try {
+      const cachedHw = localStorage.getItem('AMURO_CLASS_HOMEWORKS');
+      if (cachedHw) cloudClassHomeworks = JSON.parse(cachedHw) || [];
+    } catch (e) {}
+
+    const fs = typeof getActiveFirestore === 'function' ? getActiveFirestore() : CLOUD_DB;
+    if (!fs) return;
+
+    fs.collection('suite_meta').doc('daily_goals').onSnapshot(doc => {
+      if (doc.exists) {
+        cloudDailyGoalsMap = { ...cloudDailyGoalsMap, ...(doc.data() || {}) };
+        if (activeUser) renderHomeTab();
+      }
+    });
+
+    fs.collection('suite_meta').doc('class_homeworks').onSnapshot(doc => {
+      if (doc.exists && Array.isArray(doc.data()?.list)) {
+        cloudClassHomeworks = doc.data().list;
+        try { localStorage.setItem('AMURO_CLASS_HOMEWORKS', JSON.stringify(cloudClassHomeworks)); } catch (e) {}
+        if (activeUser) {
+          renderHomeTab();
+          if (activeUser.role === 'teacher') renderClassTable();
+        }
+      }
+    });
+  }
+
   const _u23OrigRenderHomeTab = renderHomeTab;
   renderHomeTab = function() {
     _u23OrigRenderHomeTab();
     renderHomeHotExamsAndAnalytics();
+    renderPaginatedHomeSubmissions();
     injectShareSlipBtnInSummaryModal();
-
-    const tbody = document.getElementById('homeRecentActivityTbody');
-    if (tbody) {
-      let userRecents = (db.results || []).slice().reverse();
-      if (activeUser && activeUser.role === 'student') {
-        userRecents = userRecents.filter(r => String(r.userName || '').toLowerCase() === String(activeUser.name || '').toLowerCase());
-      }
-      const filteredList = userRecents.filter(r => typeof currentHomeSkillFilter === 'undefined' || currentHomeSkillFilter === 'all' || detectResultSkillType(r) === currentHomeSkillFilter).slice(0, 15);
-      Array.from(tbody.querySelectorAll('tr')).forEach((tr, idx) => {
-        const rItem = filteredList[idx];
-        const lastTd = tr.lastElementChild;
-        if (rItem && lastTd && !lastTd.querySelector('.btn-slip-dl')) {
-          const dlBtn = document.createElement('button');
-          dlBtn.className = 'btn btn-secondary btn-slip-dl';
-          dlBtn.style.marginLeft = '6px';
-          dlBtn.title = 'Tải Phiếu Chẩn Đoán Chi Tiết';
-          dlBtn.innerHTML = '📸 Phiếu điểm';
-          dlBtn.onclick = () => downloadShareableResultSlip(rItem.id);
-          lastTd.appendChild(dlBtn);
-        }
-      });
-    }
+    setTimeout(compactLiveStudyFeedOnDOM, 60);
   };
 
   window.addEventListener('load', () => {
     injectShareSlipBtnInSummaryModal();
+    setTimeout(initGoalsAndHomeworkRealtime, 900);
     if (activeUser) renderDashboard();
   });
+</script>
+<!-- ============================================================================
+     PATCH BỔ SUNG:
+     1. Fix Locate Evidence cho câu bị cắt cụt đuôi ("...You can ev")
+     2. Phiếu điểm tông màu Matcha Trầm & Kem Ấm (#1f3d32 / #faf8f2)
+     3. Fix lỗi Writing Task 1 hiện nhầm "TR: 1" -> Chuẩn hóa TA / TR
+     4. Chẩn đoán hành vi làm bài & nguyên nhân lỗi sai cá nhân hóa (Không chép lại đề)
+     Dán nối tiếp đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<script>
+  /* ==========================================================================
+     1. NÂNG CẤP BỘ BẮT NEO DẪN CHỨNG LISTENING (XỬ LÝ CÂU BỊ CẮT CỤT ĐUÔI "You can ev")
+     ========================================================================== */
+  function buildClippedSafeAnchorRegex(quoteStr) {
+    let cleaned = String(quoteStr || '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;|&#160;/gi, ' ')
+      .replace(/[’‘`′]/g, "'")
+      .replace(/\b[A-Z][A-Z0-9\s]{1,16}:\s*/g, ' ')
+      .trim();
+
+    if (!cleaned) return [];
+
+    // Nếu câu dẫn chứng không kết thúc bằng dấu câu (. ? ! " ') và từ cuối cùng ngắn (<= 3 ký tự như "ev", "th", "ca"),
+    // tự động cắt bỏ từ bị gõ dở ở cuối để không làm trượt cả câu
+    if (!/[.?!'"”]$/.test(cleaned)) {
+      cleaned = cleaned.replace(/\s+[a-zA-Z]{1,3}$/, '').trim();
+    }
+
+    const patterns = [];
+
+    // Tách thành từng câu theo dấu chấm (. ? !)
+    const rawClauses = cleaned
+      .split(/[.?!;]+/)
+      .map(c => c.trim())
+      .filter(c => {
+        const low = c.toLowerCase().replace(/[^a-z0-9'\s]/g, '').trim();
+        return low.length >= 4 && !FILLER_CLAUSES_SET.has(low);
+      });
+
+    // Loại bỏ các vế bị cắt cụt quá ngắn ở cuối (ví dụ "You can" hoặc "You can ev" chỉ toàn đại từ/trợ động từ)
+    const validClauses = rawClauses.filter(c => {
+      const words = c.replace(/[^a-zA-Z0-9'\s]/g, ' ').trim().split(/\s+/).filter(Boolean);
+      const strongWords = words.filter(w => w.length >= 4 && !['that','this','there','they','have','will','would','could','should','with','from','what','when','where'].includes(w.toLowerCase()));
+      return words.length >= 3 && strongWords.length >= 1;
+    }).sort((a, b) => b.length - a.length);
+
+    validClauses.forEach(clause => {
+      const cTokens = clause
+        .replace(/[^a-zA-Z0-9'\s]/g, ' ')
+        .split(/\s+/)
+        .map(w => w.replace(/^'+|'+$/g, ''))
+        .filter(Boolean);
+
+      if (cTokens.length >= 2) {
+        const fullClauseRx = buildTokensRegexFromWords(cTokens);
+        if (fullClauseRx) patterns.push(fullClauseRx);
+
+        // Nếu mở đầu bằng "And", "So", "But", "Well", "In", tạo thêm mẫu bỏ 1-2 từ nối đầu câu
+        if (cTokens.length >= 4) {
+          const noLead1 = buildTokensRegexFromWords(cTokens.slice(1));
+          if (noLead1) patterns.push(noLead1);
+          const noLead2 = buildTokensRegexFromWords(cTokens.slice(2));
+          if (noLead2) patterns.push(noLead2);
+        }
+
+        // Bắt cụm 4 từ cuối của mệnh đề chính (ví dụ: "goes to a cave" hoặc "trip that goes to")
+        if (cTokens.length >= 4) {
+          const tail4 = buildTokensRegexFromWords(cTokens.slice(-4));
+          if (tail4) patterns.push(tail4);
+          const mid4 = buildTokensRegexFromWords(cTokens.slice(Math.floor(cTokens.length / 2) - 1, Math.floor(cTokens.length / 2) + 3));
+          if (mid4) patterns.push(mid4);
+        }
+      }
+    });
+
+    // Kế thừa thêm các mẫu từ hàm cũ để phủ kín mọi trường hợp
+    if (typeof buildSmartAnchorRegex === 'function') {
+      patterns.push(...buildSmartAnchorRegex(cleaned));
+    }
+    return patterns;
+  }
+
+  // Ghi đè locateEvidenceSnippet sử dụng bộ lọc chống cắt cụt chữ mới
+  window.locateEvidenceSnippet = function(encodedSnippet) {
+    const rawSnippet = decodeURIComponent(encodedSnippet || '').trim();
+    if (!rawSnippet) return;
+
+    const leftPane = document.getElementById('insperaLeftPane');
+    if (!leftPane) return;
+
+    if (leftPane.style.display === 'none') {
+      leftPane.style.display = 'block';
+      leftPane.style.width = '50%';
+      const rightPane = document.getElementById('insperaRightPane');
+      if (rightPane) rightPane.style.width = '50%';
+    }
+
+    leftPane.querySelectorAll('.evidence-highlight-active').forEach(el => {
+      el.outerHTML = el.innerHTML;
+    });
+
+    const parts = rawSnippet.split(/\s*(?:\|\||\/\/)\s*/).map(s => s.trim()).filter(Boolean);
+    parts.forEach((part, idx) => {
+      const regexCandidates = buildClippedSafeAnchorRegex(part);
+      for (const rx of regexCandidates) {
+        if (rx && rx.test(leftPane.innerHTML)) {
+          leftPane.innerHTML = leftPane.innerHTML.replace(rx, `<span class="evidence-highlight-active" id="activeLocateTarget_${idx}">$1</span>`);
+          break;
+        }
+      }
+    });
+
+    if (typeof setupDragDropEngine === 'function') setupDragDropEngine();
+    if (typeof restoreUserAnswersInDOM === 'function') restoreUserAnswersInDOM(document.getElementById('insperaSplitBox'));
+
+    const firstTarget = leftPane.querySelector('.evidence-highlight-active');
+    if (firstTarget) {
+      firstTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (activeExam && Array.isArray(activeExam.passages) && activeExam.passages.length > 1) {
+      for (const p of activeExam.passages) {
+        if (p.partNum === activePartNum) continue;
+        const pHtml = String(p.passageHtml || '');
+        const testCands = buildClippedSafeAnchorRegex(parts[0]);
+        if (testCands.some(rx => rx.test(pHtml))) {
+          switchExamPassage(p.partNum);
+          setTimeout(() => window.locateEvidenceSnippet(encodedSnippet), 80);
+          return;
+        }
+      }
+    }
+  };
+
+  /* ==========================================================================
+     2. BỘ PHÂN TÍCH HÀNH VI & CHẨN ĐOÁN NGUYÊN NHÂN LỖI SAI CÁ NHÂN HÓA
+        - Tự động phân biệt TA (Task 1) vs TR (Task 2) và bắt đúng điểm thập phân
+        - Chẩn đoán nguyên nhân gốc rễ (Bỏ trống, Sai đuôi -s/chính tả, Bẫy Distractor, False vs Not Given...)
+     ========================================================================== */
+  function extractCriterionScoreSafe(fbText, regexList, fallbackVal) {
+    for (const rx of regexList) {
+      const m = String(fbText || '').match(rx);
+      if (m && m[1]) {
+        const val = parseFloat(m[1]);
+        if (!isNaN(val) && val >= 2.0 && val <= 9.0) {
+          return val % 1 === 0 ? val.toFixed(1) : String(val);
+        }
+      }
+    }
+    return fallbackVal;
+  }
+
+  function analyzePersonalizedDiagnosticReport(res) {
+    const rExam = (db.readingExams || []).find(e => e.id === res.examId);
+    const lExam = (db.listeningExams || []).find(e => e.id === res.examId);
+    const wExam = (db.writingExams || []).find(e => e.id === res.examId);
+    const exam = rExam || lExam || wExam;
+    const isWriting = Boolean(res.writingSubmission || wExam || String(res.id || '').startsWith('res_w_'));
+
+    const out = {
+      isWriting,
+      skillType: isWriting ? 'writing' : (lExam ? 'listening' : 'reading'),
+      skillHeader: isWriting ? 'ACADEMIC WRITING REPORT' : (lExam ? 'IELTS LISTENING REPORT' : 'ACADEMIC READING REPORT'),
+      firstCritLabel: 'Task Achievement (TA)',
+      writingCriteria: { FIRST: '6.0', CC: '6.0', LR: '6.0', GRA: '6.0' },
+      writingFixes: [],
+      writingComments: [],
+      sectionSummary: [],
+      typeSummary: [],
+      behaviorDiagnoses: [],
+      targetReviewItems: []
+    };
+
+    if (isWriting) {
+      const fb = String(res.teacherFeedback || '');
+      const overallNum = parseFloat(String(res.band || '').replace(/[^0-9.]/g, '')) || 6.0;
+      const defaultScore = overallNum.toFixed(1);
+
+      // Xác định bài thi là Task 1, Task 2 hay Full Writing để đặt nhãn TA / TR chính xác
+      const t1Words = res.writingSubmission?.task1 ? res.writingSubmission.task1.trim().split(/\s+/).filter(Boolean).length : 0;
+      const t2Words = res.writingSubmission?.task2 ? res.writingSubmission.task2.trim().split(/\s+/).filter(Boolean).length : 0;
+      const scoreStr = String(res.score || '');
+      const isTask1Only = (t1Words > 0 && t2Words === 0) || (scoreStr.includes('T2: 0w') && !scoreStr.includes('T1: 0w'));
+      const isTask2Only = (t2Words > 0 && t1Words === 0) || (scoreStr.includes('T1: 0w') && !scoreStr.includes('T2: 0w'));
+
+      out.firstCritLabel = isTask1Only ? 'Task Achievement (TA)' : (isTask2Only ? 'Task Response (TR)' : 'Task Achievement / TR');
+
+      // Bắt chính xác điểm sau dấu hai chấm (TA: 6.0, Task Response (TR): 7.5...), tuyệt đối không bắt số 1 của chữ "Task 1"
+      out.writingCriteria = {
+        FIRST: extractCriterionScoreSafe(fb, [
+          /\b(?:TA|TR)\s*[:=-]\s*([2-9](?:\.[05])?)/i,
+          /Task\s+(?:Achievement|Response)\s*(?:\((?:TA|TR)\))?\s*[:=-]\s*([2-9](?:\.[05])?)/i
+        ], defaultScore),
+        CC: extractCriterionScoreSafe(fb, [
+          /\bCC\s*[:=-]\s*([2-9](?:\.[05])?)/i,
+          /Coherence\s*(?:&|and)?\s*Cohesion\s*(?:\(CC\))?\s*[:=-]\s*([2-9](?:\.[05])?)/i
+        ], defaultScore),
+        LR: extractCriterionScoreSafe(fb, [
+          /\bLR\s*[:=-]\s*([2-9](?:\.[05])?)/i,
+          /Lexical\s+Resource\s*(?:\(LR\))?\s*[:=-]\s*([2-9](?:\.[05])?)/i
+        ], defaultScore),
+        GRA: extractCriterionScoreSafe(fb, [
+          /\bGRA\s*[:=-]\s*([2-9](?:\.[05])?)/i,
+          /Grammatical\s+Range(?:\s*(?:&|and)\s*Accuracy)?\s*(?:\(GRA\))?\s*[:=-]\s*([2-9](?:\.[05])?)/i
+        ], defaultScore)
+      };
+
+      const arrowRegex = /([^\n\->➔]{3,65})\s*(?:->|➔|=>)\s*([^\n]{3,75})/g;
+      let m;
+      while ((m = arrowRegex.exec(fb)) !== null && out.writingFixes.length < 4) {
+        const b = cleanQuoteTrash(m[1]);
+        const g = cleanQuoteTrash(m[2]);
+        if (b && g && b.length < 58) out.writingFixes.push({ bad: b, good: g });
+      }
+
+      const lines = fb
+        .split(/\r?\n/)
+        .map(s => cleanQuoteTrash(s))
+        .filter(s =>
+          s.length > 35 &&
+          !s.startsWith('[') &&
+          !s.includes('->') &&
+          !s.includes('➔') &&
+          !/^Detailed\s*Breakdown/i.test(s) &&
+          !/^(?:OVERALL|Task\s*Response|Task\s*Achievement|Coherence|Lexical|Grammatical)/i.test(s)
+        );
+      out.writingComments = lines.slice(0, 4);
+      return out;
+    }
+
+    if (!exam || !exam.correctAnswers) return out;
+
+    const uMap = res.userAnswersCopy || {};
+    const catMap = {};
+    const partMap = {};
+
+    let blankCount = 0;
+    let spellingOrPluralErrors = [];
+    let tfngConfusions = [];
+    let distractorTraps = [];
+    let mapOrMatchingErrors = [];
+    let wrongAnswerKeywords = [];
+
+    const sortedKeys = Object.keys(exam.correctAnswers).sort((a, b) => parseInt(a.replace('q','')) - parseInt(b.replace('q','')));
+    const totalQ = sortedKeys.length;
+    let correctQ = 0;
+
+    sortedKeys.forEach(qKey => {
+      const qNum = qKey.replace('q', '');
+      const uAns = String(uMap[qKey] || '').trim();
+      const rawKey = String(exam.correctAnswers[qKey] || '').trim();
+      const firstValidKey = rawKey.split('|')[0].trim();
+
+      const isRight = uAns && (rawKey.toLowerCase().includes('|')
+        ? rawKey.toLowerCase().split('|').map(x => x.trim()).includes(uAns.toLowerCase())
+        : uAns.toLowerCase() === rawKey.toLowerCase());
+
+      if (isRight) correctQ++;
+
+      const cat = detectQuestionCategoryFromExam(exam, qKey);
+      if (!catMap[cat]) catMap[cat] = { c: 0, t: 0 };
+      catMap[cat].t++;
+      if (isRight) catMap[cat].c++;
+
+      let pNum = 1;
+      if (Array.isArray(exam.passages)) {
+        for (const p of exam.passages) {
+          const pHtml = (p.passageHtml || '') + '\n' + (p.questionsHtml || '');
+          if (new RegExp(`(name|data-target)=["']${qKey}["']|data-multi-pair=["'][^"']*\\b${qKey}\\b`, 'i').test(pHtml)) {
+            pNum = p.partNum || 1;
+            break;
+          }
+        }
+      }
+      const pLabel = lExam ? `Part ${pNum}` : `Passage ${pNum}`;
+      if (!partMap[pLabel]) partMap[pLabel] = { c: 0, t: 0 };
+      partMap[pLabel].t++;
+      if (isRight) partMap[pLabel].c++;
+
+      if (!isRight) {
+        if (!uAns) {
+          blankCount++;
+        } else {
+          const uLow = uAns.toLowerCase();
+          const kLow = firstValidKey.toLowerCase();
+          // Kiểm tra lỗi thiếu/thừa đuôi số nhiều -s/-es hoặc sai khác 1-2 ký tự chính tả
+          if (uLow + 's' === kLow || uLow + 'es' === kLow || kLow + 's' === uLow || (kLow.length >= 4 && (kLow.startsWith(uLow.slice(0, -1)) || uLow.startsWith(kLow.slice(0, -1))))) {
+            spellingOrPluralErrors.push(`Q${qNum} (gõ "${uAns}" thay vì "${firstValidKey}")`);
+          } else if (['TRUE','FALSE','NOT GIVEN','YES','NO'].includes(firstValidKey.toUpperCase())) {
+            tfngConfusions.push(`Q${qNum} (nhầm ${uAns.toUpperCase()} với ${firstValidKey.toUpperCase()})`);
+          } else if (cat.includes('Matching') || /^[A-I]$/i.test(firstValidKey)) {
+            mapOrMatchingErrors.push(`Q${qNum} (chọn ${uAns} thay vì ${firstValidKey})`);
+          } else {
+            distractorTraps.push(`Q${qNum} (chọn "${uAns}" ➔ đúng: "${firstValidKey}")`);
+          }
+        }
+
+        // Lưu từ khóa thực chất từ câu sai để học sinh ôn đúng chỗ hổng (không hiện câu nhắc sáo rỗng)
+        const expText = (exam.explanations && exam.explanations[qKey]) ? exam.explanations[qKey] : '';
+        if (firstValidKey.length >= 2 && !['TRUE','FALSE','NOT GIVEN','YES','NO'].includes(firstValidKey.toUpperCase())) {
+          wrongAnswerKeywords.push({
+            qNum,
+            key: firstValidKey,
+            user: uAns || 'Bỏ trống',
+            note: expText ? expText.replace(/\s+/g, ' ').trim() : `Từ khóa đáp án câu ${qNum}`
+          });
+        } else if (expText) {
+          wrongAnswerKeywords.push({
+            qNum,
+            key: firstValidKey,
+            user: uAns || 'Bỏ trống',
+            note: expText.replace(/\s+/g, ' ').trim()
+          });
+        }
+      }
+    });
+
+    out.sectionSummary = Object.entries(partMap).map(([k, v]) => `${k}: ${v.c}/${v.t} (${Math.round(v.c/v.t*100)}%)`);
+    out.typeSummary = Object.entries(catMap).map(([k, v]) => ({
+      name: k, c: v.c, t: v.t, pct: Math.round((v.c / v.t) * 100)
+    }));
+
+    // XÂY DỰNG NHẬN XÉT CHẨN ĐOÁN CÁ NHÂN HÓA DỰA TRÊN HÀNH VI LÀM BÀI THỰC TẾ
+    if (correctQ === totalQ && totalQ > 0) {
+      out.behaviorDiagnoses.push('• Phong độ xuất sắc: Đạt độ chính xác tuyệt đối 100%, kiểm soát hoàn hảo cả từ vựng paraphrase lẫn bẫy thông tin nhiễu.');
+    } else {
+      if (blankCount >= Math.ceil(totalQ * 0.5)) {
+        out.behaviorDiagnoses.push(`• Cảnh báo bỏ trống (${blankCount}/${totalQ} câu chưa điền): Bài nộp bỏ trống quá nhiều câu. Trong IELTS không trừ điểm câu sai, cần điền đủ 100% các ô dựa trên dự đoán loại từ trước khi nộp.`);
+      } else if (blankCount > 0) {
+        out.behaviorDiagnoses.push(`• Quản lý tốc độ & Bỏ trống (${blankCount} câu): Có ${blankCount} câu bị bỏ trắng chưa kịp điền đáp án. Cần tận dụng thời gian đọc trước câu hỏi để gạch chân từ khóa định vị.`);
+      }
+
+      if (spellingOrPluralErrors.length > 0) {
+        out.behaviorDiagnoses.push(`• Lỗi Hình thái từ & Chính tả (${spellingOrPluralErrors.slice(0, 3).join(', ')}): Bạn nghe/đọc bắt trúng vị trí nhưng mất điểm đáng tiếc do thiếu đuôi số nhiều (-s/-es) hoặc sai chính tả.`);
+      }
+
+      if (tfngConfusions.length > 0) {
+        out.behaviorDiagnoses.push(`• Độ lệch tư duy câu ${tfngConfusions.slice(0, 3).join(', ')}: Bị nhầm lẫn giữa thông tin trái ngược hoàn toàn (FALSE/NO) và thông tin không được nhắc tới hoặc tự suy diễn (NOT GIVEN).`);
+      }
+
+      if (mapOrMatchingErrors.length > 0) {
+        out.behaviorDiagnoses.push(`• Bẫy định vị & Thông tin gây nhiễu ở ${mapOrMatchingErrors.slice(0, 3).join(', ')}: Bị đánh lạc hướng bởi phương án nhắc tới đầu tiên (Distractor) trước khi bài đọc/người nói đổi ý bằng từ chuyển hướng (However, Actually, Instead).`);
+      }
+
+      if (distractorTraps.length > 0) {
+        out.behaviorDiagnoses.push(`• Lệch từ khóa mục tiêu tại ${distractorTraps.slice(0, 3).join(', ')}: Chưa nhận diện được cấu trúc đồng nghĩa (Paraphrase) giữa câu hỏi và bài gốc nên chọn nhầm từ gây nhiễu đứng cạnh.`);
+      }
+
+      // Kiểm tra độ sụt giảm phong độ giữa phần đầu và phần cuối
+      const pEntries = Object.entries(partMap);
+      if (pEntries.length >= 2) {
+        const firstPct = pEntries[0][1].c / (pEntries[0][1].t || 1);
+        const lastPct = pEntries[pEntries.length - 1][1].c / (pEntries[pEntries.length - 1][1].t || 1);
+        if (firstPct - lastPct >= 0.35) {
+          out.behaviorDiagnoses.push(`• Hụt hơi cuối giờ: Độ chính xác ở ${pEntries[0][0]} đạt ${Math.round(firstPct*100)}% nhưng tụt xuống ${Math.round(lastPct*100)}% ở ${pEntries[pEntries.length - 1][0]} do dồn quá nhiều thời gian cho các câu đầu.`);
+        }
+      }
+    }
+
+    // KHỐI 3: TỰ ĐỘNG KẾT HỢP TỪ VỰNG ĐỀ BÀI HOẶC TỪ KHÓA CỐT LÕI CỦA CÁC CÂU LÀM SAI
+    const vocabFromExam = [];
+    (exam.passages || []).forEach(p => {
+      (p.vocab || []).forEach(v => {
+        if (v && v.word && v.mean) vocabFromExam.push({ title: `${v.word} (${v.type || 'vocab'})`, desc: `${v.mean}${v.syn ? ` — Syn: ${v.syn}` : ''}` });
+      });
+    });
+
+    if (vocabFromExam.length > 0) {
+      out.targetReviewItems = vocabFromExam.slice(0, 4);
+    } else if (wrongAnswerKeywords.length > 0) {
+      out.targetReviewItems = wrongAnswerKeywords.slice(0, 4).map(item => ({
+        title: `Câu ${item.qNum} — Từ khóa chuẩn: "${item.key}" (Bạn điền: ${item.user})`,
+        desc: item.note.length > 105 ? item.note.substring(0, 102) + '...' : item.note
+      }));
+    } else {
+      out.targetReviewItems = [
+        { title: 'Hoàn thành 100% câu hỏi', desc: 'Bạn đã nắm vững toàn bộ các từ khóa mục tiêu và cấu trúc paraphrase trong đề thi này.' }
+      ];
+    }
+
+    return out;
+  }
+
+  /* ==========================================================================
+     3. VẼ PHIẾU ĐIỂM TÔNG MÀU MATCHA TRẦM (#1f3d32) & KEM ẤM (#faf8f2)
+     ========================================================================== */
+  window.downloadShareableResultSlip = function(resId) {
+    let res = null;
+    if (resId) {
+      res = (db.results || []).find(r => r.id === resId);
+    } else if (db.results && db.results.length) {
+      res = db.results[db.results.length - 1];
+    }
+    if (!res) return alert('Không tìm thấy dữ liệu phiếu điểm!');
+
+    const diag = analyzePersonalizedDiagnosticReport(res);
+    const canvas = document.createElement('canvas');
+    canvas.width = 1080;
+    canvas.height = 830;
+    const ctx = canvas.getContext('2d');
+
+    // BẢNG MÀU MATCHA TRẦM & KEM ẤM (ĐỒNG BỘ TÔNG MÀU MODAL CỦA WEB)
+    const COLOR_BG_OUTER     = '#e6e2d6'; // Nền viền be trầm bên ngoài
+    const COLOR_CARD_CREAM   = '#faf8f2'; // Nền giấy kem ấm chủ đạo
+    const COLOR_BOX_SURFACE  = '#f3efe4'; // Nền các hộp nội dung kem đậm hơn 1 tông
+    const COLOR_MATCHA_DARK  = '#1f3d32'; // Xanh Matcha trầm đậm (giống nút Save Changes)
+    const COLOR_MATCHA_MID   = '#2d5a47'; // Xanh Matcha vừa
+    const COLOR_MATCHA_SOFT  = '#e3ece6'; // Nền xanh Matcha sữa dịu mắt
+    const COLOR_BORDER_WARM  = '#d5cfc0'; // Viền kem xám
+    const COLOR_TEXT_MAIN    = '#1e2923'; // Chữ chính xanh đen trầm
+    const COLOR_TEXT_MUTED   = '#5c6b62'; // Chữ phụ xám rêu
+    const COLOR_ACCENT_WARN  = '#9a3412'; // Đỏ đất trầm (không bị chói)
+
+    // 1. Vẽ nền ngoài & Thẻ giấy Kem ấm chính
+    ctx.fillStyle = COLOR_BG_OUTER;
+    ctx.fillRect(0, 0, 1080, 830);
+
+    ctx.fillStyle = COLOR_CARD_CREAM;
+    ctx.beginPath();
+    ctx.roundRect(26, 22, 1028, 786, 18);
+    ctx.fill();
+    ctx.strokeStyle = COLOR_BORDER_WARM;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Thanh Header Matcha trầm trên đỉnh
+    ctx.fillStyle = COLOR_MATCHA_DARK;
+    ctx.beginPath();
+    ctx.roundRect(26, 22, 1028, 14, [18, 18, 0, 0]);
+    ctx.fill();
+
+    // 2. Tiêu đề Thương hiệu & Thông tin Học viên
+    ctx.fillStyle = COLOR_MATCHA_MID;
+    ctx.font = '800 12.5px "Plus Jakarta Sans", Arial, sans-serif';
+    ctx.fillText(`OFFICIAL DIAGNOSTIC REPORT   •   ${diag.skillHeader}`, 62, 68);
+
+    ctx.fillStyle = COLOR_MATCHA_DARK;
+    ctx.font = '800 30px "Plus Jakarta Sans", Arial, sans-serif';
+    ctx.fillText('IELTS WITH AMURO', 62, 104);
+
+    ctx.fillStyle = COLOR_TEXT_MUTED;
+    ctx.font = 'bold 14px Arial, sans-serif';
+    const cleanTitle = String(res.examTitle || '').length > 52 ? String(res.examTitle).substring(0, 50) + '...' : res.examTitle;
+    ctx.fillText(`Học viên: ${res.userName}     •     Đề bài: ${cleanTitle}`, 62, 134);
+
+    // Huy hiệu Band Score góc phải (tông Matcha trầm sang trọng)
+    ctx.fillStyle = COLOR_MATCHA_DARK;
+    ctx.beginPath();
+    ctx.roundRect(800, 48, 220, 94, 14);
+    ctx.fill();
+
+    ctx.fillStyle = '#faf8f2';
+    ctx.font = '800 31px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    const bandLabel = String(res.band).startsWith('Band') ? res.band : `Band ${res.band}`;
+    ctx.fillText(bandLabel, 910, 92);
+
+    ctx.fillStyle = '#a7f3d0';
+    ctx.font = 'bold 13px Arial, sans-serif';
+    ctx.fillText(`Kết quả: ${res.score}`, 910, 122);
+    ctx.textAlign = 'left';
+
+    ctx.strokeStyle = COLOR_BORDER_WARM;
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(62, 156);
+    ctx.lineTo(1020, 156);
+    ctx.stroke();
+
+    if (!diag.isWriting) {
+      // ================= BÁO CÁO READING & LISTENING =================
+      // KHỐI 1: THỐNG KÊ ĐIỂM RƠI TỪNG PHẦN & DẠNG CÂU HỎI
+      ctx.fillStyle = COLOR_BOX_SURFACE;
+      ctx.beginPath();
+      ctx.roundRect(62, 172, 958, 122, 12);
+      ctx.fill();
+      ctx.strokeStyle = COLOR_BORDER_WARM;
+      ctx.stroke();
+
+      ctx.fillStyle = COLOR_MATCHA_DARK;
+      ctx.font = 'bold 14.5px Arial, sans-serif';
+      ctx.fillText('1. PHÂN BỔ ĐIỂM RƠI THEO PHẦN & ĐỘ CHÍNH XÁC TỪNG DẠNG BÀI', 82, 198);
+
+      ctx.fillStyle = COLOR_MATCHA_MID;
+      ctx.font = 'bold 13.5px Arial, sans-serif';
+      const secLine = diag.sectionSummary.length ? ('• Điểm từng phần:   ' + diag.sectionSummary.join('     |     ')) : '• Đã ghi nhận kết quả toàn bài';
+      ctx.fillText(secLine, 82, 224);
+
+      diag.typeSummary.slice(0, 4).forEach((st, idx) => {
+        const colX = idx % 2 === 0 ? 82 : 550;
+        const rowY = idx < 2 ? 252 : 276;
+        const scoreColor = st.pct >= 70 ? COLOR_MATCHA_MID : (st.pct >= 50 ? '#92400e' : COLOR_ACCENT_WARN);
+        ctx.fillStyle = COLOR_TEXT_MAIN;
+        ctx.font = 'bold 13px Arial, sans-serif';
+        ctx.fillText(`▪ ${st.name}:`, colX, rowY);
+        ctx.fillStyle = scoreColor;
+        ctx.fillText(`${st.c}/${st.t} câu (${st.pct}%)`, colX + 265, rowY);
+      });
+
+      // KHỐI 2: CHẨN ĐOÁN HÀNH VI LÀM BÀI & BẢN CHẤT LỖI SAI CÁ NHÂN HÓA
+      ctx.fillStyle = COLOR_BOX_SURFACE;
+      ctx.beginPath();
+      ctx.roundRect(62, 310, 958, 238, 12);
+      ctx.fill();
+      ctx.strokeStyle = COLOR_BORDER_WARM;
+      ctx.stroke();
+
+      ctx.fillStyle = COLOR_MATCHA_DARK;
+      ctx.font = 'bold 14.5px Arial, sans-serif';
+      ctx.fillText('2. CHẨN ĐOÁN NGUYÊN NHÂN LỖI SAI & ĐIỂM MÙ KỸ NĂNG TRONG BÀI', 82, 336);
+
+      let diagY = 365;
+      diag.behaviorDiagnoses.slice(0, 4).forEach(dLine => {
+        ctx.fillStyle = COLOR_TEXT_MAIN;
+        ctx.font = '13.5px Arial, sans-serif';
+        const wrapped = wrapCanvasLines(ctx, dLine, 915).slice(0, 2);
+        wrapped.forEach((wLine, wIdx) => {
+          if (wIdx === 0) {
+            const colonPos = wLine.indexOf(':');
+            if (colonPos > 0 && colonPos < 55) {
+              const boldPart = wLine.substring(0, colonPos + 1);
+              const restPart = wLine.substring(colonPos + 1);
+              ctx.font = 'bold 13.5px Arial, sans-serif';
+              ctx.fillStyle = COLOR_MATCHA_DARK;
+              ctx.fillText(boldPart, 82, diagY);
+              const bWidth = ctx.measureText(boldPart).width;
+              ctx.font = '13.5px Arial, sans-serif';
+              ctx.fillStyle = COLOR_TEXT_MAIN;
+              ctx.fillText(restPart, 82 + bWidth, diagY);
+            } else {
+              ctx.fillText(wLine, 82, diagY);
+            }
+          } else {
+            ctx.fillText('   ' + wLine, 82, diagY);
+          }
+          diagY += 21;
+        });
+        diagY += 8;
+      });
+
+      // KHỐI 3: TRỌNG TÂM CẦN RÀ SOÁT TỪ CÁC CÂU LÀM SAI TRONG ĐỀ NÀY
+      ctx.fillStyle = COLOR_MATCHA_SOFT;
+      ctx.beginPath();
+      ctx.roundRect(62, 564, 958, 182, 12);
+      ctx.fill();
+      ctx.strokeStyle = '#bdd0c4';
+      ctx.stroke();
+
+      ctx.fillStyle = COLOR_MATCHA_DARK;
+      ctx.font = 'bold 14.5px Arial, sans-serif';
+      ctx.fillText('3. ĐIỂM MẤU CHỐT & TỪ KHÓA MỤC TIÊU CẦN GHI NHỚ TỪ CÁC CÂU SAI', 82, 590);
+
+      let revY = 618;
+      diag.targetReviewItems.slice(0, 4).forEach(item => {
+        ctx.fillStyle = COLOR_MATCHA_DARK;
+        ctx.font = 'bold 13px Arial, sans-serif';
+        ctx.fillText(`▪ ${item.title}: `, 82, revY);
+        const tWidth = ctx.measureText(`▪ ${item.title}: `).width;
+
+        ctx.fillStyle = COLOR_TEXT_MAIN;
+        ctx.font = '13px Arial, sans-serif';
+        const remainWidth = Math.max(200, 910 - tWidth);
+        const descShort = ctx.measureText(item.desc).width > remainWidth
+          ? item.desc.substring(0, Math.floor(remainWidth / 7)) + '...'
+          : item.desc;
+        ctx.fillText(descShort, 82 + tWidth, revY);
+        revY += 31;
+      });
+    } else {
+      // ================= BÁO CÁO WRITING (CHUẨN HÓA TA / TR + TÔNG MATCHA KEM) =================
+      const critList = [
+        { code: diag.firstCritLabel, val: diag.writingCriteria.FIRST },
+        { code: 'Coherence & Cohesion (CC)', val: diag.writingCriteria.CC },
+        { code: 'Lexical Resource (LR)', val: diag.writingCriteria.LR },
+        { code: 'Grammatical Range (GRA)', val: diag.writingCriteria.GRA }
+      ];
+      critList.forEach((c, idx) => {
+        const boxX = 62 + idx * 243;
+        ctx.fillStyle = COLOR_MATCHA_SOFT;
+        ctx.beginPath();
+        ctx.roundRect(boxX, 172, 229, 86, 12);
+        ctx.fill();
+        ctx.strokeStyle = '#bdd0c4';
+        ctx.stroke();
+
+        ctx.fillStyle = COLOR_MATCHA_DARK;
+        ctx.font = 'bold 12.5px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(c.code, boxX + 114, 198);
+
+        ctx.fillStyle = COLOR_MATCHA_MID;
+        ctx.font = '800 26px Arial, sans-serif';
+        ctx.fillText(String(c.val), boxX + 114, 238);
+      });
+      ctx.textAlign = 'left';
+
+      // KHỐI 2: CÁC CẶP SỬA LỖI & NÂNG CẤP TỪ VỰNG TRỰC TIẾP TỪ BÀI VIẾT
+      ctx.fillStyle = COLOR_BOX_SURFACE;
+      ctx.beginPath();
+      ctx.roundRect(62, 274, 958, 218, 12);
+      ctx.fill();
+      ctx.strokeStyle = COLOR_BORDER_WARM;
+      ctx.stroke();
+
+      ctx.fillStyle = COLOR_MATCHA_DARK;
+      ctx.font = 'bold 14.5px Arial, sans-serif';
+      ctx.fillText('1. CÁC CẶP SỬA LỖI & NÂNG CẤP DIỄN ĐẠT TRỰC TIẾP TỪ BÀI VIẾT', 82, 302);
+
+      if (!diag.writingFixes.length) {
+        ctx.fillStyle = COLOR_TEXT_MUTED;
+        ctx.font = '13.5px Arial, sans-serif';
+        ctx.fillText('• Mở mục "View Feedback" trên hệ thống để xem chi tiết nhận xét và bài mẫu Band 8.0+.', 82, 338);
+      } else {
+        let wy = 336;
+        diag.writingFixes.forEach(fx => {
+          ctx.fillStyle = COLOR_ACCENT_WARN;
+          ctx.font = 'bold 13.5px Arial, sans-serif';
+          const leftTxt = `• Bản gốc: "${fx.bad}"`;
+          ctx.fillText(leftTxt, 82, wy);
+
+          ctx.fillStyle = COLOR_MATCHA_MID;
+          ctx.font = 'bold 13.5px Arial, sans-serif';
+          ctx.fillText(`   ➔  Nâng cấp: "${fx.good}"`, 82 + ctx.measureText(leftTxt).width + 6, wy);
+          wy += 38;
+        });
+      }
+
+      // KHỐI 3: ĐÁNH GIÁ CHUYÊN MÔN TỪ GIÁM KHẢO / AI EXAMINER
+      ctx.fillStyle = COLOR_MATCHA_SOFT;
+      ctx.beginPath();
+      ctx.roundRect(62, 508, 958, 238, 12);
+      ctx.fill();
+      ctx.strokeStyle = '#bdd0c4';
+      ctx.stroke();
+
+      ctx.fillStyle = COLOR_MATCHA_DARK;
+      ctx.font = 'bold 14.5px Arial, sans-serif';
+      ctx.fillText('2. ĐÁNH GIÁ CHUYÊN MÔN & HƯỚNG CẢI THIỆN TRỌNG TÂM', 82, 536);
+
+      let fy = 566;
+      const linesToDraw = diag.writingComments.length
+        ? diag.writingComments
+        : ['Bài viết đã được đánh giá theo 4 tiêu chí chuẩn CD-IELTS. Hãy đối chiếu với Dàn ý và Bài mẫu trên hệ thống.'];
+      linesToDraw.forEach(line => {
+        ctx.fillStyle = COLOR_TEXT_MAIN;
+        ctx.font = '13.5px Arial, sans-serif';
+        const wrapped = wrapCanvasLines(ctx, `• ${line}`, 915).slice(0, 2);
+        wrapped.forEach(wLine => {
+          ctx.fillText(wLine, 82, fy);
+          fy += 21;
+        });
+        fy += 9;
+      });
+    }
+
+    // Chân trang đồng bộ tông rêu trầm
+    ctx.fillStyle = COLOR_TEXT_MUTED;
+    ctx.font = 'italic 13px Arial, sans-serif';
+    ctx.fillText(`"Let justice be done though the heavens fall"  —  Verified by IELTS WITH AMURO (${res.timestamp})`, 62, 778);
+
+    const link = document.createElement('a');
+    link.download = `IELTS_Amuro_Report_${String(res.userName || 'Student').replace(/\s+/g, '_')}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
 </script>
 </body>
 </html>
