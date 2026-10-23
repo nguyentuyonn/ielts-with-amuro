@@ -15325,5 +15325,859 @@ Câu dẫn chứng: "${eviVal}"`;
     }
   }, 600);
 </script>
+<!-- ============================================================================
+     MODULE UPDATE 23.10 - V5 (COMMUNITY STREAK, MISTAKE BANK & HIGHLIGHTER):
+     1. Thanh Phòng Tự Học Trực Tuyến (Hiện người đang Online & bài đang làm cho TẤT CẢ học sinh)
+     2. Hệ thống Chuỗi Ngày Học Liên Tục (🔥 Streak) + Bảng Xếp Hạng Top Kỷ Luật Lớp
+     3. Biểu đồ Xu Hướng Điểm Số (📈 Score Trend Chart) qua các lần làm đề
+     4. Sổ Tay Lỗi Sai Cá Nhân (📌 Mistake Bank) & Chế độ Ôn tập lại các câu từng sai
+     5. Bút Highlight 2 Màu (🟡 Vàng Keyword / 🟢 Xanh Evidence) khi bôi đen văn bản
+     Dán nối tiếp đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* 1. THANH PHÒNG TỰ HỌC TRỰC TUYẾN & STREAK BAR TRÊN ĐẦU TRANG */
+  .live-lounge-streak-bar {
+    background: linear-gradient(135deg, #faf8f2 0%, #f0fdf4 100%);
+    border: 1.5px solid #bdd0c4;
+    border-radius: 14px;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    box-shadow: 0 4px 12px rgba(6, 78, 59, 0.05);
+  }
+  .online-pill-list {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  .online-student-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 4px 11px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e293b;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+  .online-dot-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
+    display: inline-block;
+  }
+  .streak-action-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .my-streak-badge {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px solid #f59e0b;
+    color: #92400e;
+    padding: 5px 13px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* 2. BẢNG XẾP HẠNG STREAK & SỔ TAY LỖI SAI */
+  .streak-rank-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 8px;
+  }
+  .streak-rank-row.top-1 { background: #fffbeb; border-color: #fcd34d; }
+  .streak-rank-row.top-2 { background: #f0fdf4; border-color: #86efac; }
+  .streak-rank-row.top-3 { background: #eff6ff; border-color: #93c5fd; }
+
+  .mistake-card-item {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-left: 4px solid #dc2626;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+  }
+  .btn-save-mistake-inline {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #f59e0b;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: 0.15s;
+  }
+  .btn-save-mistake-inline:hover {
+    background: #f59e0b;
+    color: #ffffff;
+  }
+
+  /* 3. BÚT TÔ SÁNG 2 MÀU (DUAL-COLOR HIGHLIGHTER POPUP) */
+  #floatingDualHighlighter {
+    position: fixed;
+    z-index: 99999;
+    background: #1f3d32;
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 5px 10px;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.25);
+    border: 1px solid #2d5a47;
+  }
+  .hl-swatch-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .user-hl-yellow {
+    background-color: #fef08a;
+    color: #0f172a;
+    border-radius: 3px;
+    padding: 0 2px;
+  }
+  .user-hl-green {
+    background-color: #bbf7d0;
+    color: #064e3b;
+    border-radius: 3px;
+    padding: 0 2px;
+  }
+</style>
+
+<!-- POPUP NỔI KHI BÔI ĐEN VĂN BẢN TRONG BÀI THI (HIGHLIGHT 2 MÀU) -->
+<div id="floatingDualHighlighter">
+  <button type="button" class="hl-swatch-btn" style="background:#fde047; color:#1e293b;" onmousedown="applyUserTextHighlight('yellow', event)">
+    🟡 Keyword
+  </button>
+  <button type="button" class="hl-swatch-btn" style="background:#86efac; color:#064e3b;" onmousedown="applyUserTextHighlight('green', event)">
+    🟢 Evidence
+  </button>
+  <button type="button" class="hl-swatch-btn" style="background:#334155; color:#f8fafc;" onmousedown="clearSelectedHighlights(event)">
+    ✕ Xóa màu
+  </button>
+</div>
+
+<!-- MODAL 1: BẢNG XẾP HẠNG STREAK LỚP & BIỂU ĐỒ XU HƯỚNG ĐIỂM SỐ -->
+<div class="modal-overlay" id="streakAndTrendModal" style="z-index: 97000;">
+  <div class="modal-window" style="width: 780px; max-height: 90vh;">
+    <div class="modal-header" style="background:#1f3d32; color:#faf8f2;">
+      <span>🏆 Bảng Vinh Danh Chuỗi Kỷ Luật (Streak) & Xu Hướng Điểm Số</span>
+      <button class="btn btn-secondary" onclick="closeModal('streakAndTrendModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" id="streakAndTrendModalBody" style="padding: 22px; overflow-y: auto;"></div>
+  </div>
+</div>
+
+<!-- MODAL 2: SỔ TAY LỖI SAI CÁ NHÂN (MISTAKE BANK & MINI QUIZ ÔN LẠI CÂU SAI) -->
+<div class="modal-overlay" id="mistakeBankModal" style="z-index: 97500;">
+  <div class="modal-window" style="width: 820px; max-height: 90vh;">
+    <div class="modal-header" style="background:#1f3d32; color:#faf8f2;">
+      <span id="mistakeBankModalTitle">📕 Sổ Tay Lỗi Sai Cá Nhân (Personal Mistake Bank)</span>
+      <button class="btn btn-secondary" onclick="closeModal('mistakeBankModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" id="mistakeBankModalBody" style="padding: 22px; overflow-y: auto;"></div>
+    <div class="modal-footer" id="mistakeBankModalFooter" style="justify-content: space-between;"></div>
+  </div>
+</div>
+
+<script>
+  /* ==========================================================================
+     1. HỆ THỐNG HIỂN THỊ HỌC VIÊN ĐANG ONLINE CHO TẤT CẢ MỌI NGƯỜI CÙNG THẤY
+        - Tự động phát hiện bạn đó đang ở màn hình nào (Đang làm Reading, Listening, Writing...)
+     ========================================================================== */
+  function detectCurrentUserActivityLabel() {
+    const examOverlay = document.getElementById('insperaExamOverlay');
+    if (examOverlay && examOverlay.style.display !== 'none' && activeExam) {
+      const sk = activeExamType === 'listening' ? '🎧 Listening' : (activeExamType === 'writing' ? '✍️ Writing' : '📖 Reading');
+      return `${ isReviewMode ? 'Đang sửa bài' : 'Đang làm' } ${sk}`;
+    }
+    const drillModal = document.getElementById('dailyVocabDrillModal');
+    if (drillModal && drillModal.classList.contains('active')) {
+      return '🧠 Đang luyện Vocab Drill';
+    }
+    return '📖 Đang trực tuyến';
+  }
+
+  // Ghi đè hàm gửi tín hiệu Online để đính kèm trạng thái hoạt động hiện tại
+  const _v5OrigSendPresence = typeof sendOnlinePresenceHeartbeat === 'function' ? sendOnlinePresenceHeartbeat : null;
+  sendOnlinePresenceHeartbeat = async function() {
+    if (!activeUser) return;
+    const fs = typeof getActiveFirestore === 'function' ? getActiveFirestore() : CLOUD_DB;
+    if (!fs) return;
+    const key = activeUser.id || activeUser.username;
+    try {
+      await fs.collection('suite_meta').doc('presence').set({
+        [key]: {
+          name: activeUser.name,
+          username: activeUser.username,
+          role: activeUser.role || 'student',
+          activity: detectCurrentUserActivityLabel(),
+          lastSeen: Date.now()
+        }
+      }, { merge: true });
+    } catch (e) {}
+  };
+
+  /* ==========================================================================
+     2. TÍNH TOÁN CHUỖI NGÀY HỌC LIÊN TỤC (🔥 STREAK) & BẢNG XẾP HẠNG LỚP
+        - Tự động tính từ lịch sử bài nộp hợp lệ (Reading/Listening >= 60%, Writing >= 120w, Quiz)
+     ========================================================================== */
+  function parseResultToDateKey(res) {
+    if (!res) return null;
+    if (res.isoDate && /^\d{4}-\d{2}-\d{2}/.test(res.isoDate)) {
+      return res.isoDate.substring(0, 10);
+    }
+    const idMatch = String(res.id || '').match(/(\d{13})/);
+    if (idMatch) {
+      const d = new Date(Number(idMatch[1]));
+      if (!isNaN(d.getTime())) {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      }
+    }
+    const ts = String(res.timestamp || '');
+    const dmy = ts.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (dmy) {
+      let p1 = parseInt(dmy[1]), p2 = parseInt(dmy[2]), yyyy = dmy[3];
+      // Hỗ trợ cả định dạng MM/DD/YYYY và DD/MM/YYYY
+      const mm = p1 > 12 ? p2 : p1;
+      const dd = p1 > 12 ? p1 : p2;
+      return `${yyyy}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+    }
+    return null;
+  }
+
+  function shiftDateStringByDays(dateStr, deltaDays) {
+    const parts = dateStr.split('-').map(Number);
+    const dt = new Date(parts[0], parts[1] - 1, parts[2]);
+    dt.setDate(dt.getDate() + deltaDays);
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+  }
+
+  function calculateUserStreakStats(userName, usernameOptional) {
+    const activeDates = new Set();
+    const uLow = String(userName || '').trim().toLowerCase();
+
+    (db.results || []).forEach(r => {
+      if (String(r.userName || '').trim().toLowerCase() !== uLow) return;
+      const sk = detectResultSkillType(r);
+      const valid = sk === 'quiz' || isSubmissionQualifiedForDailyGoal(r);
+      if (valid) {
+        const dKey = parseResultToDateKey(r);
+        if (dKey) activeDates.add(dKey);
+      }
+    });
+
+    // Nếu hôm nay đã hoàn thành Vocab Drill thì cũng được tính giữ chuỗi hôm nay
+    const todayStr = getTodayDateStringKey();
+    if (usernameOptional && localStorage.getItem(`AMURO_DAILY_DRILL_DONE_${usernameOptional}_${todayStr}`) === 'true') {
+      activeDates.add(todayStr);
+    }
+
+    let streak = 0;
+    let cursor = todayStr;
+    const yesterdayStr = shiftDateStringByDays(todayStr, -1);
+
+    // Nếu hôm nay chưa kịp làm nhưng hôm qua đã làm thì chuỗi vẫn còn sống từ hôm qua
+    if (!activeDates.has(todayStr) && activeDates.has(yesterdayStr)) {
+      cursor = yesterdayStr;
+    }
+
+    while (activeDates.has(cursor)) {
+      streak++;
+      cursor = shiftDateStringByDays(cursor, -1);
+    }
+
+    return {
+      currentStreak: streak,
+      totalActiveDays: activeDates.size,
+      doneToday: activeDates.has(todayStr)
+    };
+  }
+
+  function computeAllStudentsStreakLeaderboard() {
+    const mapByStudent = new Map();
+
+    // Lấy danh sách học sinh từ db.users và db.results (loại trừ giáo viên Amuro)
+    (db.users || []).forEach(u => {
+      if (u.role === 'teacher' || String(u.name || '').toLowerCase().includes('amuro')) return;
+      mapByStudent.set(String(u.name).toLowerCase(), { name: u.name, username: u.username, classId: u.classId });
+    });
+
+    (db.results || []).forEach(r => {
+      if (isSubmissionFromTeacher(r)) return;
+      const key = String(r.userName || '').trim().toLowerCase();
+      if (key && !mapByStudent.has(key)) {
+        mapByStudent.set(key, { name: r.userName, username: '', classId: '' });
+      }
+    });
+
+    const board = [];
+    mapByStudent.forEach(st => {
+      const sObj = calculateUserStreakStats(st.name, st.username);
+      const validSubs = (db.results || []).filter(r =>
+        String(r.userName || '').trim().toLowerCase() === String(st.name).toLowerCase() &&
+        isSubmissionQualifiedForDailyGoal(r)
+      ).length;
+      board.push({
+        name: st.name,
+        streak: sObj.currentStreak,
+        totalDays: sObj.totalActiveDays,
+        doneToday: sObj.doneToday,
+        validSubs
+      });
+    });
+
+    return board.sort((a, b) => (b.streak - a.streak) || (b.totalDays - a.totalDays) || (b.validSubs - a.validSubs));
+  }
+
+  /* ==========================================================================
+     3. HIỂN THỊ THANH LIVE STUDY LOUNGE & STREAK CHO TẤT CẢ HỌC SINH CÙNG THẤY
+     ========================================================================== */
+  function renderUnifiedLoungeAndStreakBar() {
+    if (!activeUser) return;
+    const homeTab = document.getElementById('tab-home');
+    if (!homeTab) return;
+
+    // Ẩn thanh chỉ báo chỉ dành cho giáo viên cũ để thay bằng thanh chung cho toàn bộ học viên & giáo viên
+    const oldTeacherBar = document.getElementById('teacherOnlineIndicatorBar');
+    if (oldTeacherBar) oldTeacherBar.style.display = 'none';
+
+    let loungeBar = document.getElementById('universalStudyLoungeBar');
+    if (!loungeBar) {
+      loungeBar = document.createElement('div');
+      loungeBar.id = 'universalStudyLoungeBar';
+      loungeBar.className = 'live-lounge-streak-bar';
+      homeTab.insertBefore(loungeBar, homeTab.firstChild);
+    }
+
+    const now = Date.now();
+    // Lấy danh sách tất cả các học viên đang mở web trong 2 phút gần nhất
+    const onlineStudents = Object.values(onlinePresenceMap || {}).filter(p =>
+      p && (now - (p.lastSeen || 0) < 120000) && !String(p.name || '').toLowerCase().includes('amuro')
+    );
+
+    // Nếu bản thân người đang xem là học sinh và chưa kịp đồng bộ lên map thì tự thêm vào danh sách hiển thị
+    if (activeUser.role === 'student' && !onlineStudents.some(x => x.username === activeUser.username)) {
+      onlineStudents.unshift({
+        name: activeUser.name,
+        username: activeUser.username,
+        activity: detectCurrentUserActivityLabel()
+      });
+    }
+
+    const myStreakInfo = calculateUserStreakStats(activeUser.name, activeUser.username);
+    const mistakeCount = getSavedMistakeList().length;
+
+    loungeBar.innerHTML = `
+      <div class="online-pill-list">
+        <span style="font-size:12.5px; font-weight:800; color:#064e3b; display:inline-flex; align-items:center; gap:6px;">
+          <span class="online-dot-pulse"></span>
+          Phòng Tự Học Trực Tuyến (${onlineStudents.length} bạn đang học):
+        </span>
+        ${!onlineStudents.length ? `
+          <span style="font-size:12px; color:#64748b; font-style:italic;">Hãy là người đầu tiên bắt đầu ca học hôm nay!</span>
+        ` : onlineStudents.slice(0, 8).map(st => `
+          <span class="online-student-chip">
+            <b style="color:#065f46;">${st.name}</b>
+            <span style="color:#64748b; font-weight:600; font-size:11px;">• ${st.activity || 'Đang học'}</span>
+          </span>
+        `).join('')}
+      </div>
+
+      <div class="streak-action-group">
+        <div class="my-streak-badge" title="Hoàn thành ít nhất 1 đề đạt >=60% hoặc 1 lượt Vocab Drill mỗi ngày để giữ lửa!">
+          🔥 Chuỗi của bạn: <b>${myStreakInfo.currentStreak} ngày</b>
+          ${myStreakInfo.doneToday ? '<span style="color:#15803d;">(✓ Đã giữ lửa)</span>' : '<span style="color:#dc2626;">(Chưa học hôm nay)</span>'}
+        </div>
+        <button type="button" class="btn btn-emerald" style="padding:6px 12px; font-size:12px; background:#1f3d32;" onclick="openStreakAndTrendModal()">
+          🏆 Bảng Xếp Hạng Chuỗi & Tiến Độ
+        </button>
+        <button type="button" class="btn btn-secondary" style="padding:6px 12px; font-size:12px; border-color:#fca5a5; color:#991b1b; background:#fef2f2;" onclick="openMistakeBankModal()">
+          📕 Sổ Lỗi Sai (${mistakeCount})
+        </button>
+      </div>
+    `;
+  }
+
+  // Ghi đè renderOnlineStudentsBar để mỗi khi Firebase đẩy dữ liệu Presence mới về thì thanh chung tự động cập nhật ngay
+  renderOnlineStudentsBar = function() {
+    renderUnifiedLoungeAndStreakBar();
+  };
+
+  /* ==========================================================================
+     4. MODAL BẢNG XẾP HẠNG STREAK LỚP & BIỂU ĐỒ XU HƯỚNG ĐIỂM SỐ (SCORE TREND CHART)
+     ========================================================================== */
+  window.openStreakAndTrendModal = function() {
+    const body = document.getElementById('streakAndTrendModalBody');
+    if (!body || !activeUser) return;
+
+    const leaderboard = computeAllStudentsStreakLeaderboard().slice(0, 8);
+    const myResults = (db.results || [])
+      .filter(r =>
+        (activeUser.role === 'teacher' ? !isSubmissionFromTeacher(r) : String(r.userName || '').toLowerCase() === String(activeUser.name || '').toLowerCase()) &&
+        detectResultSkillType(r) !== 'quiz'
+      )
+      .slice(-10);
+
+    body.innerHTML = `
+      <div style="margin-bottom:22px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <span style="font-size:15.5px; font-weight:800; color:#1f3d32;">🔥 Top Chiến Thần Kỷ Luật (Chuỗi Ngày Học Liên Tiếp)</span>
+          <span style="font-size:12px; color:#64748b;">Chỉ tính ngày có bài đạt ≥ 60% hoặc hoàn thành Vocab Drill</span>
+        </div>
+        ${!leaderboard.length ? `
+          <div style="padding:20px; text-align:center; color:#94a3b8;">Chưa có dữ liệu xếp hạng chuỗi.</div>
+        ` : leaderboard.map((item, idx) => {
+          const rankIcon = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
+          const topClass = idx === 0 ? 'top-1' : (idx === 1 ? 'top-2' : (idx === 2 ? 'top-3' : ''));
+          return `
+            <div class="streak-rank-row ${topClass}">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:18px; font-weight:800; min-width:28px;">${rankIcon}</span>
+                <div>
+                  <div style="font-weight:800; font-size:14px; color:#0f172a;">
+                    ${item.name}
+                    ${item.doneToday ? '<span style="background:#dcfce7; color:#15803d; padding:2px 7px; border-radius:99px; font-size:10.5px; margin-left:6px;">✓ Hôm nay đã học</span>' : ''}
+                  </div>
+                  <div style="font-size:12px; color:#64748b;">Tổng số ngày tích lũy: <b>${item.totalDays} ngày</b> • Đề đạt chuẩn: <b>${item.validSubs} bài</b></div>
+                </div>
+              </div>
+              <div style="font-size:16px; font-weight:800; color:#b45309; background:#fef3c7; padding:5px 14px; border-radius:999px; border:1px solid #fde68a;">
+                🔥 ${item.streak} ngày liên tục
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div style="background:#faf8f2; border:1.5px solid #d5cfc0; border-radius:14px; padding:16px 18px;">
+        <div style="font-size:15px; font-weight:800; color:#1f3d32; margin-bottom:10px;">
+          📈 Biểu Đồ Xu Hướng Điểm Số (10 Bài Thi Gần Nhất)
+        </div>
+        <canvas id="studentScoreTrendCanvas" width="700" height="230" style="width:100%; height:230px; background:#ffffff; border-radius:10px; border:1px solid #e2e8f0;"></canvas>
+      </div>
+    `;
+
+    openModal('streakAndTrendModal');
+    setTimeout(() => drawStudentScoreTrendCanvas(myResults), 60);
+  };
+
+  function drawStudentScoreTrendCanvas(resultsList) {
+    const canvas = document.getElementById('studentScoreTrendCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (!resultsList || resultsList.length === 0) {
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 14px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Hãy hoàn thành ít nhất 1 đề thi để hệ thống vẽ đường cong tiến bộ Band điểm!', canvas.width / 2, canvas.height / 2);
+      return;
+    }
+
+    const padL = 50, padR = 30, padT = 28, padB = 42;
+    const w = canvas.width - padL - padR;
+    const h = canvas.height - padT - padB;
+
+    // Vẽ lưới ngang (Band 4.0 -> 9.0)
+    [4.0, 5.0, 6.0, 7.0, 8.0, 9.0].forEach(bVal => {
+      const y = padT + h - ((bVal - 4.0) / 5.0) * h;
+      ctx.strokeStyle = '#f1f5f9';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padL, y);
+      ctx.lineTo(padL + w, y);
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 11.5px Arial, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`Band ${bVal.toFixed(1)}`, padL - 8, y + 4);
+    });
+
+    const points = resultsList.map((r, idx) => {
+      const num = Math.max(4.0, Math.min(9.0, parseFloat(String(r.band || '').replace(/[^0-9.]/g, '')) || 5.0));
+      const x = resultsList.length === 1 ? (padL + w / 2) : (padL + (idx / (resultsList.length - 1)) * w);
+      const y = padT + h - ((num - 4.0) / 5.0) * h;
+      return { x, y, band: num, title: String(r.examTitle || '').substring(0, 14), sk: detectResultSkillType(r) };
+    });
+
+    // Vẽ đường nối Matcha Green
+    ctx.strokeStyle = '#059669';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    points.forEach((pt, i) => {
+      if (i === 0) ctx.moveTo(pt.x, pt.y);
+      else ctx.lineTo(pt.x, pt.y);
+    });
+    ctx.stroke();
+
+    // Vẽ từng điểm tròn & nhãn Band
+    points.forEach((pt, idx) => {
+      ctx.fillStyle = '#1f3d32';
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = '#064e3b';
+      ctx.font = 'bold 11.5px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(pt.band.toFixed(1), pt.x, pt.y - 10);
+
+      ctx.fillStyle = '#475569';
+      ctx.font = '10.5px Arial, sans-serif';
+      ctx.fillText(`#${idx + 1}`, pt.x, padT + h + 18);
+    });
+  }
+
+  /* ==========================================================================
+     5. SỔ TAY LỖI SAI CÁ NHÂN (📌 MISTAKE BANK) & TRẮC NGHIỆM ÔN LẠI CÂU SAI
+     ========================================================================== */
+  function getMistakeStorageKey() {
+    return `AMURO_MISTAKE_BANK_${activeUser ? activeUser.username : 'guest'}`;
+  }
+
+  function getSavedMistakeList() {
+    try {
+      const raw = localStorage.getItem(getMistakeStorageKey());
+      return raw ? (JSON.parse(raw) || []) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveMistakeListToStorage(list) {
+    try {
+      localStorage.setItem(getMistakeStorageKey(), JSON.stringify(list.slice(0, 150)));
+    } catch (e) {}
+  }
+
+  window.saveSingleQuestionToMistakeBank = function(qNumStr, btnEl) {
+    if (!activeExam || !activeUser) return;
+    const qKey = `q${qNumStr}`;
+    const correctAns = String((activeExam.correctAnswers && activeExam.correctAnswers[qKey]) || '').trim();
+    if (!correctAns) return;
+
+    const userAns = String(userAnswers[qKey] || '').trim() || 'Bỏ trống';
+    const exp = (activeExam.explanations && activeExam.explanations[qKey]) ? activeExam.explanations[qKey] : '';
+    const evi = (activeExam.evidences && activeExam.evidences[qKey]) ? activeExam.evidences[qKey] : '';
+
+    const list = getSavedMistakeList();
+    const itemId = `${activeExam.id}_${qKey}`;
+    if (!list.some(x => x.id === itemId)) {
+      list.unshift({
+        id: itemId,
+        examId: activeExam.id,
+        examTitle: activeExam.title,
+        skill: activeExamType || 'reading',
+        qNum: qNumStr,
+        userAns,
+        correctAns: correctAns.split('|')[0].trim(),
+        explanation: exp || evi || 'Cần chú ý từ khóa đồng nghĩa và bẫy thông tin nhiễu trong bài.',
+        savedAt: new Date().toLocaleDateString()
+      });
+      saveMistakeListToStorage(list);
+    }
+
+    if (btnEl) {
+      btnEl.textContent = '✓ Đã lưu vào Sổ Lỗi Sai';
+      btnEl.style.background = '#dcfce7';
+      btnEl.style.color = '#15803d';
+      btnEl.style.borderColor = '#86efac';
+    }
+    renderUnifiedLoungeAndStreakBar();
+  };
+
+  // Tự động chèn nút "📌 Lưu vào Sổ Lỗi Sai" vào tất cả các hộp câu trả lời sai trong chế độ Review
+  function injectSaveMistakeButtonsInReviewDOM() {
+    if (!isReviewMode || !activeExam) return;
+    const rightPane = document.getElementById('insperaRightPane');
+    if (!rightPane) return;
+
+    const currentSaved = getSavedMistakeList();
+    rightPane.querySelectorAll('div').forEach(box => {
+      const txt = box.textContent || '';
+      if (!txt.includes('Incorrect') || !txt.includes('Key:')) return;
+      if (box.querySelector('.btn-save-mistake-inline')) return;
+
+      const m = txt.match(/\bQ(\d+)\s*:/i);
+      if (!m) return;
+      const qNum = m[1];
+      const itemId = `${activeExam.id}_q${qNum}`;
+      const alreadySaved = currentSaved.some(x => x.id === itemId);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-save-mistake-inline';
+      if (alreadySaved) {
+        btn.textContent = '✓ Đã lưu trong Sổ Lỗi Sai';
+        btn.style.background = '#dcfce7';
+        btn.style.color = '#15803d';
+        btn.style.borderColor = '#86efac';
+      } else {
+        btn.textContent = '📌 Lưu vào Sổ Lỗi Sai';
+      }
+      btn.onclick = () => saveSingleQuestionToMistakeBank(qNum, btn);
+
+      const locateBtn = box.querySelector('button');
+      if (locateBtn) locateBtn.insertAdjacentElement('afterend', btn);
+      else box.appendChild(btn);
+    });
+  }
+
+  let mistakeQuizMode = false;
+  let mistakeQuizStep = 0;
+  let mistakeQuizScore = 0;
+
+  window.openMistakeBankModal = function(startQuiz = false) {
+    mistakeQuizMode = Boolean(startQuiz);
+    mistakeQuizStep = 0;
+    mistakeQuizScore = 0;
+    renderMistakeBankModalContent();
+    openModal('mistakeBankModal');
+  };
+
+  window.deleteMistakeItem = function(itemId) {
+    const list = getSavedMistakeList().filter(x => x.id !== itemId);
+    saveMistakeListToStorage(list);
+    renderMistakeBankModalContent();
+    renderUnifiedLoungeAndStreakBar();
+  };
+
+  function renderMistakeBankModalContent() {
+    const body = document.getElementById('mistakeBankModalBody');
+    const footer = document.getElementById('mistakeBankModalFooter');
+    const list = getSavedMistakeList();
+    if (!body || !footer) return;
+
+    if (!list.length) {
+      body.innerHTML = `
+        <div style="text-align:center; padding:36px 20px; color:#64748b;">
+          <div style="font-size:42px; margin-bottom:10px;">📕</div>
+          <div style="font-size:16px; font-weight:800; color:#0f172a; margin-bottom:6px;">Sổ Tay Lỗi Sai Của Bạn Đang Trống</div>
+          <p style="font-size:13.5px; max-width:520px; margin:0 auto; line-height:1.6;">
+            Khi xem lại bài làm (<b>Review Keys</b>), bạn hãy bấm nút <b>"📌 Lưu vào Sổ Lỗi Sai"</b> ở những câu bị bẫy hoặc nghe/đọc nhầm để gom về đây ôn tập lại nhé!
+          </p>
+        </div>
+      `;
+      footer.innerHTML = `<div></div><button class="btn btn-secondary" onclick="closeModal('mistakeBankModal')">Đóng</button>`;
+      return;
+    }
+
+    if (!mistakeQuizMode) {
+      body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+          <span style="font-size:14px; font-weight:800; color:#1f3d32;">Bạn đã lưu ${list.length} câu hỏi cần khắc phục điểm mù:</span>
+          <button class="btn btn-emerald" onclick="openMistakeBankModal(true)">⚡ Làm Quiz Kiểm Tra Lại Các Câu Từng Sai</button>
+        </div>
+        ${list.map(item => `
+          <div class="mistake-card-item">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-size:12px; font-weight:800; color:#059669; background:#ecfdf5; padding:2px 8px; border-radius:6px;">
+                ${item.skill === 'listening' ? '🎧 Listening' : '📖 Reading'} • ${item.examTitle} (Câu ${item.qNum})
+              </span>
+              <button class="btn btn-danger" style="padding:2px 8px; font-size:11px;" onclick="deleteMistakeItem('${item.id}')">Đã thuộc / Xóa</button>
+            </div>
+            <div style="font-size:14px; margin-bottom:6px;">
+              • Đã chọn nhầm: <b style="color:#dc2626; text-decoration:line-through;">${item.userAns}</b>
+              &nbsp; ➔ &nbsp; Đáp án đúng: <b style="color:#15803d; font-size:15px;">${item.correctAns}</b>
+            </div>
+            <div style="font-size:13px; color:#334155; background:#f8fafc; padding:8px 12px; border-radius:8px; border:1px solid #e2e8f0;">
+              💡 <b>Giải thích / Dẫn chứng:</b> ${item.explanation}
+            </div>
+          </div>
+        `).join('')}
+      `;
+      footer.innerHTML = `
+        <span style="font-size:12px; color:#64748b;">Ôn lại lỗi sai giúp bạn tránh lặp lại bẫy cũ trong phòng thi thật</span>
+        <button class="btn btn-secondary" onclick="closeModal('mistakeBankModal')">Đóng</button>
+      `;
+    } else {
+      const quizPool = list.slice(0, 10);
+      const cur = quizPool[mistakeQuizStep];
+      const otherKeys = list.filter((_, i) => i !== mistakeQuizStep).map(x => x.correctAns).filter(Boolean);
+      const distractors = [...new Set([cur.userAns !== 'Bỏ trống' ? cur.userAns : 'NOT GIVEN', ...otherKeys, 'FALSE', 'information'])].filter(x => x !== cur.correctAns).slice(0, 3);
+      const opts = [cur.correctAns, ...distractors].sort(() => Math.random() - 0.5);
+
+      body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:13px; font-weight:800; color:#059669;">
+          <span>⚡ Kiểm Tra Lại Điểm Mù Từng Sai (${cur.examTitle} - Câu ${cur.qNum})</span>
+          <span>Câu ${mistakeQuizStep + 1} / ${quizPool.length} (Đúng: ${mistakeQuizScore})</span>
+        </div>
+        <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:12px; padding:16px; margin-bottom:14px;">
+          <div style="font-size:12.5px; color:#92400e; margin-bottom:6px;">
+            <b>Ngữ cảnh & Dẫn chứng câu từng sai (Trước đó bạn từng điền: "${cur.userAns}"):</b>
+          </div>
+          <div style="font-size:14.5px; font-weight:700; color:#0f172a; line-height:1.55;">
+            ${cur.explanation}
+          </div>
+        </div>
+        <div style="font-size:13px; font-weight:700; color:#334155; margin-bottom:8px;">Chọn lại đáp án chuẩn xác cho câu hỏi này:</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          ${opts.map((o, idx) => `
+            <button type="button" class="btn drill-opt-btn" onclick="checkMistakeQuizOption(this, '${encodeURIComponent(o)}', '${encodeURIComponent(cur.correctAns)}', ${quizPool.length})">
+              <b>${String.fromCharCode(65 + idx)}.</b> &nbsp; ${o}
+            </button>
+          `).join('')}
+        </div>
+      `;
+      footer.innerHTML = `
+        <button class="btn btn-secondary" onclick="mistakeQuizMode=false; renderMistakeBankModalContent();">🔙 Quay lại danh sách</button>
+        <div></div>
+      `;
+    }
+  }
+
+  window.checkMistakeQuizOption = function(btnEl, chosenEnc, rightEnc, totalLen) {
+    const chosen = decodeURIComponent(chosenEnc);
+    const right = decodeURIComponent(rightEnc);
+    if (chosen === right) {
+      mistakeQuizScore++;
+      btnEl.classList.add('correct-choice');
+    } else {
+      btnEl.classList.add('wrong-choice');
+    }
+    setTimeout(() => {
+      if (mistakeQuizStep < totalLen - 1) {
+        mistakeQuizStep++;
+        renderMistakeBankModalContent();
+      } else {
+        mistakeQuizMode = false;
+        renderMistakeBankModalContent();
+      }
+    }, 650);
+  };
+
+  /* ==========================================================================
+     6. BÚT TÔ SÁNG 2 MÀU CHUẨN CD-IELTS (🟡 KEYWORD / 🟢 EVIDENCE HIGHLIGHTER)
+     ========================================================================== */
+  document.addEventListener('mouseup', function(ev) {
+    const popup = document.getElementById('floatingDualHighlighter');
+    if (!popup) return;
+    if (popup.contains(ev.target)) return;
+
+    const splitBox = document.getElementById('insperaSplitBox');
+    if (!splitBox || splitBox.offsetParent === null) {
+      popup.style.display = 'none';
+      return;
+    }
+
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.toString().trim()) {
+      popup.style.display = 'none';
+      return;
+    }
+
+    const anchorNode = sel.anchorNode;
+    if (!anchorNode || !splitBox.contains(anchorNode)) {
+      popup.style.display = 'none';
+      return;
+    }
+
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    if (rect.width < 5) {
+      popup.style.display = 'none';
+      return;
+    }
+
+    popup.style.display = 'flex';
+    popup.style.top = `${Math.max(10, rect.top - 44)}px`;
+    popup.style.left = `${Math.max(10, Math.min(window.innerWidth - 280, rect.left + rect.width / 2 - 125))}px`;
+  });
+
+  window.applyUserTextHighlight = function(colorType, ev) {
+    if (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+    }
+    const sel = window.getSelection();
+    const popup = document.getElementById('floatingDualHighlighter');
+    if (!sel || sel.isCollapsed) {
+      if (popup) popup.style.display = 'none';
+      return;
+    }
+
+    try {
+      const range = sel.getRangeAt(0);
+      const span = document.createElement('span');
+      span.className = colorType === 'green' ? 'user-hl-green' : 'user-hl-yellow';
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+      sel.removeAllRanges();
+    } catch (e) {}
+
+    if (popup) popup.style.display = 'none';
+  };
+
+  window.clearSelectedHighlights = function(ev) {
+    if (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+    }
+    const splitBox = document.getElementById('insperaSplitBox');
+    const sel = window.getSelection();
+    if (splitBox && sel && !sel.isCollapsed) {
+      const container = sel.getRangeAt(0).commonAncestorContainer;
+      const rootEl = container.nodeType === 1 ? container : container.parentElement;
+      if (rootEl) {
+        rootEl.querySelectorAll('.user-hl-yellow, .user-hl-green').forEach(el => {
+          const parent = el.parentNode;
+          while (el.firstChild) parent.insertBefore(el.firstChild, el);
+          parent.removeChild(el);
+        });
+      }
+      sel.removeAllRanges();
+    }
+    const popup = document.getElementById('floatingDualHighlighter');
+    if (popup) popup.style.display = 'none';
+  };
+
+  // Tự động đồng bộ thanh Phòng Tự Học, Streak và nút Lưu Lỗi Sai
+  setInterval(() => {
+    const homeTab = document.getElementById('tab-home');
+    if (homeTab && homeTab.style.display !== 'none' && activeUser) {
+      renderUnifiedLoungeAndStreakBar();
+    }
+    if (isReviewMode) {
+      injectSaveMistakeButtonsInReviewDOM();
+    }
+  }, 900);
+</script>
 </body>
 </html>
