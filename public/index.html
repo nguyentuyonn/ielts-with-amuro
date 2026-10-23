@@ -14150,5 +14150,1180 @@ Câu dẫn chứng: "${eviVal}"`;
     }
   });
 </script>
+<!-- ============================================================================
+     MODULE UPDATE 23.10 - V3 (UX OPTIMIZATION & FULL FIX):
+     1. Quy hoạch Trang Home tinh gọn: Đưa Vocab Drill lên đầu cạnh Mục Tiêu Ngày,
+        ẩn các thanh Progress/Stats thừa, gom Live Feed (bỏ ngày giờ) cạnh Analytics.
+     2. Sửa dứt điểm 100% Locate Evidence cho Listening (Event Delegation + Keyword Match).
+     3. Thay Dropdown tốc độ Audio bằng Thanh trượt mượt mà (0.5x -> 2.0x) + nút Reset 1.0x.
+     4. Vocab Drill: Bỏ hẳn alert() gây phiền, hiện giải thích inline & thêm nút "Làm lại bộ này".
+     5. Nâng cấp Phiếu điểm (Report PNG): Có Action Checklist thực chiến & Bảng bẫy sai.
+     Dán nối tiếp đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* 1. BỐ CỤC TẦNG 1 TRANG HOME: MỤC TIÊU NGÀY (TRÁI) + VOCAB DRILL (PHẢI) */
+  .home-top-action-grid {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 16px;
+    margin-bottom: 18px;
+    align-items: stretch;
+  }
+  @media (max-width: 960px) {
+    .home-top-action-grid { grid-template-columns: 1fr; }
+  }
+  .home-top-action-grid .daily-goal-card {
+    margin-bottom: 0 !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .vocab-drill-top-card {
+    background: linear-gradient(135deg, #1f3d32 0%, #064e3b 100%);
+    color: #faf8f2;
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 6px 18px rgba(6, 78, 59, 0.12);
+    border: 1.5px solid #2d5a47;
+  }
+
+  /* 2. BỐ CỤC TẦNG 3: PHÂN TÍCH DẠNG BÀI (TRÁI) + LIVE FEED GỌN (PHẢI) */
+  .home-analytics-feed-grid {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: stretch;
+  }
+  @media (max-width: 960px) {
+    .home-analytics-feed-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Thu gọn Hero Banner chào mừng để không chiếm nửa màn hình */
+  #tab-home .home-hero-banner {
+    padding: 14px 22px !important;
+    margin-bottom: 16px !important;
+    min-height: auto !important;
+  }
+  #tab-home .home-hero-banner h1,
+  #tab-home .home-hero-banner h2 {
+    font-size: 20px !important;
+    margin-bottom: 2px !important;
+  }
+  #tab-home .home-hero-banner p {
+    font-size: 12.5px !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* 3. THANH TRƯỢT TỐC ĐỘ AUDIO LISTENING (0.5x -> 2.0x) */
+  .audio-speed-slider-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .audio-speed-slider-wrap input[type="range"] {
+    width: 82px;
+    height: 5px;
+    accent-color: #059669;
+    cursor: pointer;
+  }
+  .audio-speed-reset-chip {
+    background: #e2e8f0;
+    border: none;
+    border-radius: 5px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #1e293b;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .audio-speed-reset-chip:hover {
+    background: #059669;
+    color: #ffffff;
+  }
+
+  /* 4. HIỆU ỨNG CHỌN ĐÁP ÁN INLINE TRONG VOCAB DRILL (KHÔNG DÙNG ALERT) */
+  .drill-opt-btn {
+    justify-content: flex-start !important;
+    padding: 12px 16px !important;
+    text-align: left !important;
+    font-size: 13.5px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    color: #1e293b !important;
+    transition: 0.15s !important;
+  }
+  .drill-opt-btn:hover:not(:disabled) {
+    border-color: #059669 !important;
+    background: #f0fdf4 !important;
+  }
+  .drill-opt-btn.correct-choice {
+    background: #dcfce7 !important;
+    border-color: #16a34a !important;
+    color: #14532d !important;
+    font-weight: 800 !important;
+  }
+  .drill-opt-btn.wrong-choice {
+    background: #fee2e2 !important;
+    border-color: #dc2626 !important;
+    color: #7f1d1d !important;
+  }
+</style>
+
+<script>
+  /* ==========================================================================
+     1. QUY HOẠCH LẠI TRANG HOME TINH GỌN (ĐƯA VOCAB DRILL LÊN ĐẦU CẠNH MỤC TIÊU)
+     ========================================================================== */
+  function reorganizeCleanHomeLayout() {
+    if (!activeUser) return;
+    const homeTab = document.getElementById('tab-home');
+    if (!homeTab) return;
+
+    // 1.1. Ẩn 3 thanh Reading/Listening/Writing Progress % bị trùng lặp với Mục tiêu ngày
+    homeTab.querySelectorAll('div').forEach(el => {
+      const txt = (el.textContent || '').trim();
+      if (
+        (txt.includes('Reading Progress') && txt.includes('Listening Progress') && txt.includes('Writing Progress')) &&
+        el.children.length === 3 &&
+        !el.classList.contains('goal-progress-grid')
+      ) {
+        el.style.display = 'none';
+      }
+      // Ẩn hàng 5 ô tổng số đề (65 Reading, 22 Listening...) đối với Học sinh cho thoáng màn hình
+      if (
+        activeUser.role === 'student' &&
+        txt.includes('READING TESTS') &&
+        txt.includes('LISTENING TESTS') &&
+        txt.includes('WRITING TESTS') &&
+        el.children.length >= 4 &&
+        el.children.length <= 6
+      ) {
+        el.style.display = 'none';
+      }
+    });
+
+    // 1.2. Đưa Vocab Drill lên đứng cạnh Bảng Mục Tiêu Hôm Nay ở ngay Tầng 1
+    const topContainer = document.getElementById('homeDailyGoalAndHomeworkContainer');
+    const analyticsRow = document.getElementById('homeSkillAnalyticsAndDrillRow');
+    if (!topContainer) return;
+
+    const todayStr = getTodayDateStringKey();
+    const myGoal = getStudentDailyGoalRecord(activeUser.username, todayStr);
+    const todayCounts = getStudentTodayQualifiedCounts(activeUser.name, todayStr);
+    const drillDoneToday = localStorage.getItem(getTodayDrillCompletedKey()) === 'true';
+    const drillPoolCount = collectDailyDrillPool().length;
+
+    // Giữ nguyên banner Bài tập về nhà (nếu có)
+    const hwBannerEl = topContainer.querySelector('.homework-alert-banner');
+    const hwBannerOuter = hwBannerEl ? hwBannerEl.outerHTML : '';
+
+    // Khối Mục tiêu hôm nay (Cột trái)
+    let goalCardHtml = '';
+    if (!myGoal) {
+      goalCardHtml = `
+        <div class="daily-goal-card">
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
+              <span style="font-weight:800; font-size:15.5px; color:#064e3b;">🎯 Mục Tiêu Học Tập Hôm Nay (${todayStr})</span>
+              <span style="background:#fef3c7; color:#92400e; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:800;">Chưa khóa mục tiêu</span>
+            </div>
+            <p style="font-size:13px; color:#475569; line-height:1.55; margin-bottom:14px;">
+              Tự đặt số đề Reading, Listening, Writing bạn cam kết hoàn thành hôm nay. Chỉ tính các bài làm thật đạt <b>≥ 60% số câu đúng</b>.
+            </p>
+          </div>
+          <button class="btn btn-emerald" style="width:100%; padding:10px;" onclick="openDailyGoalConfigModal()">
+            ⚙️ Đặt & Khóa Mục Tiêu Hôm Nay
+          </button>
+        </div>
+      `;
+    } else {
+      const rPct = myGoal.r > 0 ? Math.min(100, Math.round((todayCounts.rDone / myGoal.r) * 100)) : 100;
+      const lPct = myGoal.l > 0 ? Math.min(100, Math.round((todayCounts.lDone / myGoal.l) * 100)) : 100;
+      const wPct = myGoal.w > 0 ? Math.min(100, Math.round((todayCounts.wDone / myGoal.w) * 100)) : 100;
+      const allCompleted = (todayCounts.rDone >= myGoal.r) && (todayCounts.lDone >= myGoal.l) && (todayCounts.wDone >= myGoal.w);
+
+      goalCardHtml = `
+        <div class="daily-goal-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div>
+              <span style="font-weight:800; font-size:15.5px; color:#064e3b;">🎯 Mục Tiêu Hôm Nay (${todayStr})</span>
+              <span style="background:${allCompleted ? '#dcfce7' : '#f1f5f9'}; color:${allCompleted ? '#15803d' : '#475569'}; padding:3px 9px; border-radius:99px; font-size:11px; font-weight:800; margin-left:6px;">
+                ${allCompleted ? '🎉 Hoàn thành 100%' : '🔒 Đã khóa đến 24:00'}
+              </span>
+            </div>
+            <span style="font-size:11.5px; color:#059669; font-weight:700;">
+              ✓ Chỉ tính bài ≥ 60% đúng ${todayCounts.invalidCount > 0 ? `<b style="color:#dc2626;">(${todayCounts.invalidCount} bài <60%)</b>` : ''}
+            </span>
+          </div>
+          <div class="goal-progress-grid" style="grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:12px;">
+            <div class="goal-skill-box" style="padding:10px 12px;">
+              <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:800; color:#0f172a;">
+                <span>📖 Reading</span>
+                <span style="color:#059669;">${todayCounts.rDone}/${myGoal.r}</span>
+              </div>
+              <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:${rPct}%; background:#059669;"></div></div>
+            </div>
+            <div class="goal-skill-box" style="padding:10px 12px;">
+              <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:800; color:#0f172a;">
+                <span>🎧 Listening</span>
+                <span style="color:#2563eb;">${todayCounts.lDone}/${myGoal.l}</span>
+              </div>
+              <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:${lPct}%; background:#2563eb;"></div></div>
+            </div>
+            <div class="goal-skill-box" style="padding:10px 12px;">
+              <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:800; color:#0f172a;">
+                <span>✍️ Writing</span>
+                <span style="color:#d97706;">${todayCounts.wDone}/${myGoal.w}</span>
+              </div>
+              <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:${wPct}%; background:#d97706;"></div></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Khối 10 Từ Cần Ôn Hôm Nay (Đặt ngay Cột phải Tầng 1)
+    const vocabDrillTopHtml = `
+      <div class="vocab-drill-top-card">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
+            <span style="font-size:15px; font-weight:800; color:#ecfdf5;">🧠 10 Từ Cần Ôn Hôm Nay</span>
+            <span style="background:${drillDoneToday ? '#059669' : '#f59e0b'}; color:#ffffff; padding:3px 9px; border-radius:99px; font-size:11px; font-weight:800;">
+              ${drillDoneToday ? '✅ Đã ôn hôm nay' : '🔥 Khởi động 2p'}
+            </span>
+          </div>
+          <p style="font-size:12.5px; color:#d1fae5; line-height:1.5; margin-bottom:12px;">
+            Trích xuất <b>${drillPoolCount} từ vựng trọng tâm</b> từ các đề thi & lỗi sai gần nhất. Lật Flashcard & phản xạ trắc nghiệm trước khi làm đề!
+          </p>
+        </div>
+        <button class="btn" style="width:100%; background:#faf8f2; color:#064e3b; font-weight:800; padding:9px 14px; border:none;" onclick="openDailyVocabDrillModal(false)">
+          ⚡ Bắt Đầu Drill 10 Từ Ngay
+        </button>
+      </div>
+    `;
+
+    topContainer.innerHTML = `
+      ${hwBannerOuter}
+      <div class="home-top-action-grid">
+        ${goalCardHtml}
+        ${vocabDrillTopHtml}
+      </div>
+    `;
+
+    // 1.3. Gom bảng "Phân tích dạng câu hỏi" và "Live Study Feed (5 dòng, xóa sạch ngày giờ)" vào chung 1 hàng gọn gàng
+    if (analyticsRow) {
+      let feedCard = null;
+      homeTab.querySelectorAll('.card').forEach(c => {
+        if ((c.textContent || '').includes('Nhật Ký Học Tập Trực Tiếp') || (c.textContent || '').includes('Live Study Feed')) {
+          feedCard = c;
+        }
+      });
+
+      const qTypeStats = computeStudentQuestionTypeAnalytics();
+      const analyticsCardHtml = `
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-title" style="margin-bottom:12px;">
+            <span>📊 Tỷ Lệ Đúng / Sai Theo Dạng Câu Hỏi</span>
+            <span style="font-size:11.5px; color:#64748b; font-weight:600;">Ưu tiên ôn dạng % thấp</span>
+          </div>
+          ${!qTypeStats.length ? `
+            <div style="padding:20px; text-align:center; color:#94a3b8; font-size:13px;">
+              Hoàn thành ít nhất 1 đề Reading hoặc Listening để hệ thống thống kê độ chính xác từng dạng câu hỏi.
+            </div>
+          ` : qTypeStats.map(st => {
+            const barColor = st.pct >= 75 ? '#10b981' : (st.pct >= 50 ? '#f59e0b' : '#ef4444');
+            return `
+              <div class="qtype-stat-row">
+                <div style="width:44%; font-weight:700; color:#1e293b; font-size:12.5px;">${st.name}</div>
+                <div class="qtype-bar-wrap"><div class="qtype-bar-fill" style="width:${st.pct}%; background:${barColor};"></div></div>
+                <div style="width:105px; text-align:right; font-weight:800; font-size:12.5px; color:${barColor};">
+                  ${st.pct}% <span style="font-size:11px; color:#64748b; font-weight:600;">(${st.correct}/${st.total})</span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+
+      // Tạo khối Live Study Feed gọn 5 dòng và KHÔNG CÓ NGÀY GIỜ
+      const recentFive = (db.results || []).slice(-5).reverse();
+      const cleanFeedHtml = `
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-title" style="margin-bottom:10px;">
+            <span>⚡ Nhật Ký Học Tập Trực Tiếp</span>
+            <span style="font-size:11px; color:#64748b; font-weight:600;">5 hoạt động mới nhất</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:7px;">
+            ${!recentFive.length ? `<div style="color:#94a3b8; font-size:12.5px; padding:12px;">Chưa có hoạt động nào.</div>` : recentFive.map(r => {
+              const sk = detectResultSkillType(r);
+              const badge = sk === 'listening'
+                ? `<span style="background:#e0f2fe; color:#0369a1; padding:2px 7px; border-radius:6px; font-size:11px; font-weight:700;">🎧 Listening</span>`
+                : (sk === 'writing'
+                  ? `<span style="background:#fef3c7; color:#b45309; padding:2px 7px; border-radius:6px; font-size:11px; font-weight:700;">✍️ Writing</span>`
+                  : `<span style="background:#dcfce7; color:#15803d; padding:2px 7px; border-radius:6px; font-size:11px; font-weight:700;">📖 Reading</span>`);
+              return `
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:9px; padding:8px 12px; font-size:12.5px; display:flex; align-items:center; gap:6px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+                  <span style="color:#10b981; font-size:10px;">●</span>
+                  <b>${r.userName}</b>
+                  <span style="color:#64748b;">hoàn thành</span>
+                  ${badge}
+                  <b style="color:#064e3b; overflow:hidden; text-overflow:ellipsis;">${r.examTitle}</b>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      if (feedCard && feedCard !== analyticsRow) {
+        feedCard.style.display = 'none';
+      }
+      analyticsRow.className = 'home-analytics-feed-grid';
+      analyticsRow.innerHTML = analyticsCardHtml + cleanFeedHtml;
+    }
+  }
+
+  /* ==========================================================================
+     2. NÂNG CẤP DAILY VOCAB DRILL:
+        - BỎ HOÀN TOÀN ALERT() KHI CHỌN ĐÁP ÁN -> HIỆN PHẢN HỒI TRỰC QUAN NGAY TRÊN NÚT
+        - THÊM NÚT "🔁 LÀM LẠI 10 TỪ NÀY (REPEAT THIS SET)" ĐỂ HỌC ĐẾN KHI THUỘC
+     ========================================================================== */
+  let drillAnsweredCurrentStep = false;
+
+  window.openDailyVocabDrillModal = function(keepCurrentSet = false) {
+    if (!keepCurrentSet || !Array.isArray(dailyDrillWords) || !dailyDrillWords.length) {
+      dailyDrillWords = collectDailyDrillPool();
+    }
+    if (!dailyDrillWords.length) return;
+    dailyDrillStep = 0;
+    dailyDrillMode = 'flashcard';
+    dailyDrillFlipped = false;
+    dailyDrillScore = 0;
+    drillAnsweredCurrentStep = false;
+    renderDailyVocabDrillStep();
+    openModal('dailyVocabDrillModal');
+  };
+
+  window.repeatCurrentVocabDrillQuizOnly = function() {
+    if (!Array.isArray(dailyDrillWords) || !dailyDrillWords.length) {
+      dailyDrillWords = collectDailyDrillPool();
+    }
+    // Xáo trộn lại thứ tự của đúng 10 từ vừa học để học sinh làm lại cho nhớ kỹ
+    dailyDrillWords = dailyDrillWords.slice().sort(() => Math.random() - 0.5);
+    dailyDrillStep = 0;
+    dailyDrillMode = 'quiz';
+    dailyDrillScore = 0;
+    drillAnsweredCurrentStep = false;
+    renderDailyVocabDrillStep();
+  };
+
+  renderDailyVocabDrillStep = function() {
+    const body = document.getElementById('dailyDrillModalBody');
+    const footer = document.getElementById('dailyDrillModalFooter');
+    if (!body || !footer) return;
+
+    if (dailyDrillMode === 'flashcard') {
+      const item = dailyDrillWords[dailyDrillStep];
+      body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:12.5px; font-weight:700; color:#64748b;">
+          <span>Bước 1/2: Lật thẻ Flashcard ghi nhớ nhanh</span>
+          <span>Thẻ ${dailyDrillStep + 1} / ${dailyDrillWords.length}</span>
+        </div>
+        <div class="flashcard-box" onclick="dailyDrillFlipped = !dailyDrillFlipped; renderDailyVocabDrillStep();">
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#a7f3d0; margin-bottom:8px;">
+            ${dailyDrillFlipped ? '📖 Nghĩa & Từ đồng nghĩa (Bấm để lật lại)' : '🔤 Từ vựng mục tiêu (Bấm vào thẻ để lật xem nghĩa)'}
+          </div>
+          <div style="font-size:26px; font-weight:800; margin-bottom:10px;">
+            ${dailyDrillFlipped ? item.mean : item.word}
+          </div>
+          <div style="font-size:13.5px; color:#e2e8f0;">
+            ${dailyDrillFlipped ? `Synonyms: <b>${item.syn || 'N/A'}</b> • Nguồn: ${item.passageTitle || 'IELTS Reading'}` : '👆 Nhấp vào thẻ này để xem nghĩa tiếng Việt & Synonyms'}
+          </div>
+        </div>
+      `;
+      footer.innerHTML = `
+        <button class="btn btn-secondary" ${dailyDrillStep === 0 ? 'disabled' : ''} onclick="dailyDrillStep--; dailyDrillFlipped=false; renderDailyVocabDrillStep();">⬅️ Từ trước</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary" onclick="dailyDrillMode='quiz'; dailyDrillStep=0; dailyDrillScore=0; drillAnsweredCurrentStep=false; renderDailyVocabDrillStep();">⚡ Chuyển sang Trắc nghiệm</button>
+          ${dailyDrillStep < dailyDrillWords.length - 1 ? `
+            <button class="btn btn-emerald" onclick="dailyDrillStep++; dailyDrillFlipped=false; renderDailyVocabDrillStep();">Từ tiếp theo ➡️</button>
+          ` : `
+            <button class="btn btn-emerald" onclick="dailyDrillMode='quiz'; dailyDrillStep=0; dailyDrillScore=0; drillAnsweredCurrentStep=false; renderDailyVocabDrillStep();">🎯 Làm Mini Quiz Kiểm Tra ➡️</button>
+          `}
+        </div>
+      `;
+    } else if (dailyDrillMode === 'quiz') {
+      const item = dailyDrillWords[dailyDrillStep];
+      const distractors = dailyDrillWords
+        .filter((_, idx) => idx !== dailyDrillStep)
+        .map(x => x.mean)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3);
+      while (distractors.length < 3) distractors.push('Nghĩa nhiễu khác ngữ cảnh');
+      const options = [item.mean, ...distractors].sort(() => Math.random() - 0.5);
+      drillAnsweredCurrentStep = false;
+
+      body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:12.5px; font-weight:700; color:#059669;">
+          <span>⚡ Bước 2/2: Phản xạ chọn nghĩa nhanh (Không dùng popup)</span>
+          <span>Câu ${dailyDrillStep + 1} / ${dailyDrillWords.length} (Đúng: ${dailyDrillScore})</span>
+        </div>
+        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; padding:16px 18px; margin-bottom:14px;">
+          <div style="font-size:12.5px; color:#64748b; margin-bottom:4px;">Chọn nghĩa chính xác nhất của từ:</div>
+          <div style="font-size:22px; font-weight:800; color:#0f172a;">${item.word}</div>
+        </div>
+        <div id="drillOptionsContainer" style="display:flex; flex-direction:column; gap:9px;">
+          ${options.map((opt, idx) => `
+            <button type="button" class="btn drill-opt-btn" data-opt-val="${encodeURIComponent(opt)}"
+              onclick="handleInlineDrillAnswer(this)">
+              <b>${String.fromCharCode(65 + idx)}.</b> &nbsp; ${opt}
+            </button>
+          `).join('')}
+        </div>
+        <div id="drillInlineFeedbackBox" style="display:none; margin-top:12px; padding:11px 14px; border-radius:10px; font-size:13px; font-weight:700;"></div>
+      `;
+      footer.innerHTML = `
+        <button class="btn btn-secondary" onclick="dailyDrillMode='flashcard'; dailyDrillStep=0; renderDailyVocabDrillStep();">🔙 Xem lại Flashcard</button>
+        <button id="btnDrillNextInline" class="btn btn-emerald" style="display:none;" onclick="advanceDailyDrillStep()">Câu tiếp theo ➡️</button>
+      `;
+    } else {
+      localStorage.setItem(getTodayDrillCompletedKey(), 'true');
+      body.innerHTML = `
+        <div style="text-align:center; padding:22px 12px;">
+          <div style="font-size:44px; margin-bottom:8px;">🎉</div>
+          <div style="font-size:20px; font-weight:800; color:#065f46; margin-bottom:6px;">Hoàn Thành Lượt Ôn Từ Vựng!</div>
+          <div style="font-size:16px; font-weight:800; color:#0f172a; margin-bottom:10px;">
+            Kết quả phản xạ: <span style="color:#059669;">${dailyDrillScore} / ${dailyDrillWords.length}</span> từ chính xác
+          </div>
+          <p style="font-size:13px; color:#475569; max-width:460px; margin:0 auto;">
+            Nếu chưa đạt 10/10 hoặc muốn ghi nhớ sâu hơn, bạn hãy bấm <b>"🔁 Làm lại 10 từ này"</b> để ôn lại ngay bộ từ vừa học nhé!
+          </p>
+        </div>
+      `;
+      footer.innerHTML = `
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-emerald" style="background:#047857;" onclick="repeatCurrentVocabDrillQuizOnly()">🔁 Làm lại 10 từ này (Cho nhớ kỹ)</button>
+          <button class="btn btn-secondary" onclick="openDailyVocabDrillModal(false)">🔀 Đổi 10 từ khác</button>
+        </div>
+        <button class="btn btn-emerald" onclick="closeModal('dailyVocabDrillModal'); renderDashboard();">✅ Hoàn tất</button>
+      `;
+    }
+  };
+
+  window.handleInlineDrillAnswer = function(btnEl) {
+    if (drillAnsweredCurrentStep) return;
+    drillAnsweredCurrentStep = true;
+
+    const chosenMean = decodeURIComponent(btnEl.getAttribute('data-opt-val') || '');
+    const currentItem = dailyDrillWords[dailyDrillStep];
+    const rightMean = String(currentItem.mean || '').trim();
+    const isCorrect = String(chosenMean).trim() === rightMean;
+
+    const allBtns = document.querySelectorAll('#drillOptionsContainer .drill-opt-btn');
+    allBtns.forEach(b => {
+      b.disabled = true;
+      const val = decodeURIComponent(b.getAttribute('data-opt-val') || '').trim();
+      if (val === rightMean) b.classList.add('correct-choice');
+    });
+
+    const fbBox = document.getElementById('drillInlineFeedbackBox');
+    const nextBtn = document.getElementById('btnDrillNextInline');
+
+    if (isCorrect) {
+      dailyDrillScore++;
+      if (fbBox) {
+        fbBox.style.display = 'block';
+        fbBox.style.background = '#dcfce7';
+        fbBox.style.color = '#14532d';
+        fbBox.style.border = '1px solid #86efac';
+        fbBox.innerHTML = `✅ Chính xác! <b>${currentItem.word}</b> = ${rightMean}`;
+      }
+      setTimeout(() => advanceDailyDrillStep(), 650);
+    } else {
+      btnEl.classList.add('wrong-choice');
+      if (fbBox) {
+        fbBox.style.display = 'block';
+        fbBox.style.background = '#fffbeb';
+        fbBox.style.color = '#92400e';
+        fbBox.style.border = '1px solid #fde68a';
+        fbBox.innerHTML = `💡 Ghi nhớ ngay: <b>${currentItem.word}</b> có nghĩa là: <b style="color:#065f46;">${rightMean}</b>`;
+      }
+      if (nextBtn) nextBtn.style.display = 'inline-flex';
+    }
+  };
+
+  window.advanceDailyDrillStep = function() {
+    if (dailyDrillStep < dailyDrillWords.length - 1) {
+      dailyDrillStep++;
+    } else {
+      dailyDrillMode = 'done';
+    }
+    renderDailyVocabDrillStep();
+  };
+
+  /* ==========================================================================
+     3. THANH TRƯỢT TỐC ĐỘ AUDIO LISTENING (SLIDER 0.5x -> 2.0x + NÚT 1.0x)
+     ========================================================================== */
+  window.applyCustomListeningSpeed = function(val) {
+    const num = parseFloat(val) || 1.0;
+    const audioEl = document.getElementById('insperaAudioPlayer');
+    if (audioEl) audioEl.playbackRate = num;
+    const lbl = document.getElementById('listeningSpeedValueLabel');
+    if (lbl) lbl.textContent = `${num.toFixed(2).replace(/\.00$/, '.0').replace(/(\.\d)0$/, '$1')}x`;
+    const slider = document.getElementById('listeningSpeedRangeInput');
+    if (slider && parseFloat(slider.value) !== num) slider.value = num;
+  };
+
+  function upgradeAudioSpeedDropdownToSlider() {
+    const oldSelect = document.getElementById('insperaAudioSpeed');
+    if (!oldSelect || document.getElementById('listeningSpeedRangeInput')) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'audio-speed-slider-wrap';
+    wrap.title = 'Kéo thanh trượt để chỉnh tốc độ nghe từ 0.5x đến 2.0x';
+    wrap.innerHTML = `
+      <span>⚡ Tốc độ:</span>
+      <input type="range" id="listeningSpeedRangeInput" min="0.5" max="2.0" step="0.05" value="1.0"
+        oninput="applyCustomListeningSpeed(this.value)">
+      <span id="listeningSpeedValueLabel" style="min-width:36px; text-align:center; color:#059669; font-weight:800;">1.0x</span>
+      <button type="button" class="audio-speed-reset-chip" onclick="applyCustomListeningSpeed(1.0)" title="Đặt lại tốc độ chuẩn 1.0x">1.0x</button>
+    `;
+    oldSelect.style.display = 'none';
+    oldSelect.insertAdjacentElement('afterend', wrap);
+  }
+
+  /* ==========================================================================
+     4. SỬA DỨT ĐIỂM 100% LOCATE EVIDENCE CHO LISTENING & READING
+        - Bắt trực tiếp sự kiện click của mọi nút "Locate Evidence"
+        - Kết hợp cả Evidence Quote + Đáp án (Key) của câu hỏi đó (ví dụ Q6: "cave", Q7: "back")
+     ========================================================================== */
+  function highlightElementRangeOrScroll(leftPane, quoteStr, answerKeyHint) {
+    if (!leftPane) return false;
+
+    // 1. Dọn sạch các highlight cũ
+    leftPane.querySelectorAll('.evidence-highlight-active').forEach(span => {
+      const parent = span.parentNode;
+      if (!parent) return;
+      while (span.firstChild) parent.insertBefore(span.firstChild, span);
+      parent.removeChild(span);
+      parent.normalize();
+    });
+
+    // 2. Thu thập bản đồ toàn bộ chữ trong khung bên trái (Transcript / Passage)
+    const textNodes = [];
+    let fullText = '';
+    const walker = document.createTreeWalker(leftPane, NodeFilter.SHOW_TEXT, null);
+    let n;
+    while ((n = walker.nextNode())) {
+      const pTag = n.parentElement?.tagName?.toUpperCase() || '';
+      if (['SCRIPT', 'STYLE', 'BUTTON'].includes(pTag)) continue;
+      const val = n.nodeValue || '';
+      if (!val) continue;
+      const st = fullText.length;
+      fullText += val;
+      textNodes.push({ node: n, start: st, end: fullText.length });
+      fullText += ' ';
+    }
+
+    if (!fullText.trim()) return false;
+
+    // Chuẩn hóa chuỗi để tìm kiếm không phân biệt dấu nháy, dấu câu, chữ hoa/thường
+    function extractPureWordTokens(str) {
+      const res = [];
+      const rx = /[a-zA-Z0-9]+/g;
+      let m;
+      while ((m = rx.exec(str)) !== null) {
+        res.push({
+          word: m[0].toLowerCase(),
+          start: m.index,
+          end: m.index + m[0].length
+        });
+      }
+      return res;
+    }
+
+    const docWords = extractPureWordTokens(fullText);
+    if (!docWords.length) return false;
+
+    // Cắt bỏ từ bị gõ dở ở cuối câu dẫn chứng (như "...You can ev")
+    let cleanedQuote = String(quoteStr || '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;|&#160;/gi, ' ')
+      .trim();
+    if (!/[.?!'"”]$/.test(cleanedQuote)) {
+      cleanedQuote = cleanedQuote.replace(/\s+[a-zA-Z]{1,3}$/, '').trim();
+    }
+
+    const quoteWords = extractPureWordTokens(cleanedQuote).map(x => x.word);
+    const keyWords = extractPureWordTokens(String(answerKeyHint || '')).map(x => x.word);
+
+    // Tìm đoạn văn trong docWords khớp nhiều từ liên tiếp nhất với quoteWords
+    let bestStartChar = -1;
+    let bestEndChar = -1;
+    let bestMatchCount = 0;
+
+    if (quoteWords.length >= 2) {
+      for (let di = 0; di < docWords.length; di++) {
+        for (let qi = 0; qi < quoteWords.length; qi++) {
+          if (docWords[di].word === quoteWords[qi]) {
+            let k = 1;
+            while (
+              di + k < docWords.length &&
+              qi + k < quoteWords.length &&
+              docWords[di + k].word === quoteWords[qi + k]
+            ) {
+              k++;
+            }
+            if (k > bestMatchCount) {
+              bestMatchCount = k;
+              bestStartChar = docWords[di].start;
+              bestEndChar = docWords[di + k - 1].end;
+            }
+          }
+        }
+      }
+    }
+
+    // Nếu câu dẫn chứng có khác biệt nhỏ ở giữa, dùng Cửa sổ trượt (Sliding Window) tìm câu có mật độ từ trùng cao nhất
+    if (bestMatchCount < 3 && quoteWords.length >= 3) {
+      const significantQuoteSet = new Set(quoteWords.filter(w => w.length >= 3));
+      const winSize = Math.max(8, quoteWords.length + 4);
+      let maxHits = 0;
+
+      for (let i = 0; i < docWords.length; i++) {
+        if (!significantQuoteSet.has(docWords[i].word)) continue;
+        let hits = 0;
+        let lastHitIdx = i;
+        for (let j = i; j < Math.min(docWords.length, i + winSize); j++) {
+          if (significantQuoteSet.has(docWords[j].word)) {
+            hits++;
+            lastHitIdx = j;
+          }
+        }
+        // Ưu tiên cửa sổ có chứa luôn cả từ khóa đáp án (ví dụ: "cave", "back", "waterfall")
+        if (keyWords.length && keyWords.some(kw => docWords.slice(i, lastHitIdx + 1).some(dw => dw.word === kw))) {
+          hits += 3;
+        }
+        if (hits > maxHits) {
+          maxHits = hits;
+          bestStartChar = docWords[i].start;
+          bestEndChar = docWords[lastHitIdx].end;
+          bestMatchCount = hits;
+        }
+      }
+    }
+
+    // Dự phòng cuối: Nếu chỉ có từ khóa đáp án (Answer Key) trong bài
+    if (bestMatchCount < 2 && keyWords.length) {
+      const targetKw = keyWords[0];
+      const foundKw = docWords.find(dw => dw.word === targetKw);
+      if (foundKw) {
+        bestStartChar = Math.max(0, foundKw.start - 35);
+        bestEndChar = Math.min(fullText.length, foundKw.end + 35);
+        bestMatchCount = 2;
+      }
+    }
+
+    if (bestStartChar === -1 || bestEndChar <= bestStartChar) return false;
+
+    // Bọc thẻ <span class="evidence-highlight-active"> lên vùng chữ tìm được
+    let firstSpan = null;
+    const targetNodes = textNodes.filter(t => t.end > bestStartChar && t.start < bestEndChar);
+    for (let i = targetNodes.length - 1; i >= 0; i--) {
+      const item = targetNodes[i];
+      const tNode = item.node;
+      if (!tNode || !tNode.parentNode) continue;
+      const lStart = Math.max(0, bestStartChar - item.start);
+      const lEnd = Math.min(tNode.nodeValue.length, bestEndChar - item.start);
+      if (lEnd <= lStart) continue;
+
+      let midNode = tNode;
+      if (lEnd < tNode.nodeValue.length) midNode.splitText(lEnd);
+      if (lStart > 0) midNode = midNode.splitText(lStart);
+
+      const span = document.createElement('span');
+      span.className = 'evidence-highlight-active';
+      midNode.parentNode.insertBefore(span, midNode);
+      span.appendChild(midNode);
+      firstSpan = span;
+    }
+
+    if (firstSpan) {
+      firstSpan.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return true;
+    }
+    return false;
+  }
+
+  // Ghi đè hàm locateEvidenceSnippet và gắn thêm bộ bắt sự kiện trực tiếp trên nút "Locate Evidence"
+  window.locateEvidenceSnippet = function(encodedSnippet, qKeyOptional) {
+    let rawSnippet = '';
+    try { rawSnippet = decodeURIComponent(encodedSnippet || '').trim(); } catch (e) { rawSnippet = String(encodedSnippet || '').trim(); }
+
+    const leftPane = document.getElementById('insperaLeftPane');
+    if (!leftPane) return;
+
+    if (leftPane.style.display === 'none') {
+      leftPane.style.display = 'block';
+      leftPane.style.width = '50%';
+      const rightPane = document.getElementById('insperaRightPane');
+      if (rightPane) rightPane.style.width = '50%';
+    }
+
+    const keyHint = (qKeyOptional && activeExam?.correctAnswers?.[qKeyOptional]) ? activeExam.correctAnswers[qKeyOptional] : '';
+    const parts = rawSnippet.split(/\s*(?:\|\||\/\/)\s*/).map(s => s.trim()).filter(Boolean);
+    const mainQuote = parts[0] || rawSnippet;
+
+    if (highlightElementRangeOrScroll(leftPane, mainQuote, keyHint)) {
+      return;
+    }
+
+    // Nếu câu dẫn chứng nằm ở Part khác, tự động chuyển sang Part đó rồi tô sáng
+    if (activeExam && Array.isArray(activeExam.passages) && activeExam.passages.length > 1) {
+      for (const p of activeExam.passages) {
+        if (p.partNum === activePartNum) continue;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = String(p.passageHtml || '');
+        if (highlightElementRangeOrScroll(tempDiv, mainQuote, keyHint)) {
+          switchExamPassage(p.partNum);
+          setTimeout(() => {
+            const lp = document.getElementById('insperaLeftPane');
+            highlightElementRangeOrScroll(lp, mainQuote, keyHint);
+          }, 90);
+          return;
+        }
+      }
+    }
+  };
+
+  // Bắt sự kiện click cho mọi nút có chữ "Locate Evidence" (kể cả khi chuỗi quote chứa dấu nháy đơn làm lỗi onclick)
+  document.addEventListener('click', function(ev) {
+    const btn = ev.target.closest('button');
+    if (!btn) return;
+    const label = (btn.textContent || '').trim();
+    if (!label.includes('Locate Evidence')) return;
+
+    // Tìm xem nút này thuộc câu hỏi số mấy (Q1, Q2, Q6...)
+    const explainBox = btn.closest('div');
+    if (!explainBox || !activeExam) return;
+    const boxText = explainBox.textContent || '';
+    const qMatch = boxText.match(/\bQ(\d+)\s*:/i);
+    if (qMatch) {
+      const qKey = `q${qMatch[1]}`;
+      const quoteFromDb = (activeExam.evidences && activeExam.evidences[qKey]) ? activeExam.evidences[qKey] : '';
+      if (quoteFromDb) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        window.locateEvidenceSnippet(encodeURIComponent(quoteFromDb), qKey);
+      }
+    }
+  }, true);
+
+  /* ==========================================================================
+     5. NÂNG CẤP PHIẾU ĐIỂM CHẨN ĐOÁN (REPORT PNG):
+        - Có Bảng Đối Chiếu Bẫy Sai Cụ Thể + Checklist Hành Động Cho Đề Tiếp Theo
+     ========================================================================== */
+  const _v3OrigDownloadSlip = window.downloadShareableResultSlip;
+  window.downloadShareableResultSlip = function(resId) {
+    let res = null;
+    if (resId) res = (db.results || []).find(r => r.id === resId);
+    else if (db.results && db.results.length) res = db.results[db.results.length - 1];
+    if (!res) return;
+
+    const diag = analyzePersonalizedDiagnosticReport(res);
+
+    // Bổ sung Action Plan thực tế vào Khối 3 để tờ phiếu điểm thực sự có giá trị sử dụng
+    if (!diag.isWriting) {
+      const rExam = (db.readingExams || []).find(e => e.id === res.examId);
+      const lExam = (db.listeningExams || []).find(e => e.id === res.examId);
+      const exam = rExam || lExam;
+
+      const actionItems = [];
+      if (exam && exam.correctAnswers) {
+        const uMap = res.userAnswersCopy || {};
+        Object.keys(exam.correctAnswers)
+          .sort((a, b) => parseInt(a.replace('q','')) - parseInt(b.replace('q','')))
+          .forEach(qKey => {
+            const qNum = qKey.replace('q', '');
+            const uAns = String(uMap[qKey] || '').trim();
+            const rawKey = String(exam.correctAnswers[qKey] || '').trim();
+            const firstKey = rawKey.split('|')[0].trim();
+            const isRight = uAns && (rawKey.toLowerCase().includes('|')
+              ? rawKey.toLowerCase().split('|').map(x => x.trim()).includes(uAns.toLowerCase())
+              : uAns.toLowerCase() === rawKey.toLowerCase());
+
+            if (!isRight && actionItems.length < 4) {
+              const evi = (exam.evidences && exam.evidences[qKey]) ? exam.evidences[qKey].replace(/<[^>]+>/g, '').trim() : '';
+              const exp = (exam.explanations && exam.explanations[qKey]) ? exam.explanations[qKey].trim() : '';
+              actionItems.push({
+                title: `Câu ${qNum} (Điền: "${uAns || 'Trống'}" ➔ Đúng: "${firstKey}")`,
+                desc: evi ? `Dẫn chứng gốc: "${evi}"` : (exp || 'Mở chế độ Review Keys để nghe/đọc lại vị trí câu này')
+              });
+            }
+          });
+      }
+      if (actionItems.length > 0) {
+        diag.targetReviewItems = actionItems;
+      }
+    }
+
+    // Gọi hàm vẽ Canvas Matcha-Cream với dữ liệu đã được làm giàu
+    _v3OrigDownloadSlip(resId);
+  };
+
+  /* ==========================================================================
+     6. KÍCH HOẠT TỰ ĐỘNG CÁC NÂNG CẤP TRÊN MỌI MÀN HÌNH
+     ========================================================================== */
+  const _v3OrigRenderHomeTab = renderHomeTab;
+  renderHomeTab = function() {
+    _v3OrigRenderHomeTab();
+    reorganizeCleanHomeLayout();
+  };
+
+  const _v3OrigLaunchListening = launchListeningExam;
+  launchListeningExam = function(examId) {
+    _v3OrigLaunchListening(examId);
+    setTimeout(upgradeAudioSpeedDropdownToSlider, 60);
+  };
+
+  const _v3OrigReopenReview = reopenReviewFromHistory;
+  reopenReviewFromHistory = function(resId) {
+    _v3OrigReopenReview(resId);
+    setTimeout(upgradeAudioSpeedDropdownToSlider, 60);
+  };
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      upgradeAudioSpeedDropdownToSlider();
+      if (activeUser) reorganizeCleanHomeLayout();
+    }, 500);
+  });
+</script>
+<!-- ============================================================================
+     MODULE UPDATE 23.10 - V4 (FINAL POLISH):
+     1. Xóa hẳn khung Live Study Feed cũ bị lặp ở trên & lọc bỏ tên Giáo viên (Amuro)
+     2. Thay thế trực tiếp Dropdown 1.0x (Normal) bằng Thanh kéo Slider (0.5x - 2.0x)
+     3. Tích hợp Phát âm chuẩn bản xứ (🔊 Web Speech API) tự động cho Vocab Drill
+     Dán nối tiếp đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  .vocab-speak-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.16);
+    color: #ecfdf5;
+    border: 1px solid rgba(167, 243, 208, 0.45);
+    border-radius: 999px;
+    padding: 5px 13px;
+    font-size: 12.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .vocab-speak-btn:hover {
+    background: #059669;
+    color: #ffffff;
+    transform: scale(1.04);
+  }
+  .vocab-speak-btn-light {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    border-radius: 999px;
+    padding: 4px 11px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .vocab-speak-btn-light:hover {
+    background: #059669;
+    color: #ffffff;
+  }
+</style>
+
+<script>
+  /* ==========================================================================
+     1. BỘ PHÁT ÂM TỪ VỰNG BẢN XỨ (🔊 WEB SPEECH API) CHO VOCAB DRILL
+     ========================================================================== */
+  window.speakVocabWord = function(rawWordText, ev) {
+    if (ev) {
+      ev.stopPropagation();
+      ev.preventDefault();
+    }
+    if (!('speechSynthesis' in window)) return;
+
+    // Lọc bỏ phần từ loại trong ngoặc như "(verb / noun)", "(adj)" để máy chỉ đọc đúng từ tiếng Anh
+    const cleanWord = String(rawWordText || '')
+      .replace(/\([^)]*\)/g, ' ')
+      .replace(/[^a-zA-Z\s\-']/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!cleanWord) return;
+
+    try {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(cleanWord);
+      utter.lang = 'en-GB';
+      utter.rate = 0.92;
+      const voices = window.speechSynthesis.getVoices() || [];
+      const preferredVoice = voices.find(v => /en[-_](GB|US)/i.test(v.lang) && /Google|Natural|Microsoft|Siri/i.test(v.name))
+        || voices.find(v => /^en/i.test(v.lang));
+      if (preferredVoice) utter.voice = preferredVoice;
+      window.speechSynthesis.speak(utter);
+    } catch (e) {}
+  };
+
+  // Ghi đè hàm vẽ bước Vocab Drill để thêm nút 🔊 Phát âm và tự động đọc từ khi chuyển thẻ
+  const _v4OrigRenderDailyVocabDrillStep = renderDailyVocabDrillStep;
+  renderDailyVocabDrillStep = function() {
+    const body = document.getElementById('dailyDrillModalBody');
+    const footer = document.getElementById('dailyDrillModalFooter');
+    if (!body || !footer) return;
+
+    if (dailyDrillMode === 'flashcard') {
+      const item = dailyDrillWords[dailyDrillStep];
+      const safeWordAttr = String(item.word || '').replace(/'/g, "\\'");
+      body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:12.5px; font-weight:700; color:#64748b;">
+          <span>Bước 1/2: Lật thẻ Flashcard & Nghe phát âm</span>
+          <span>Thẻ ${dailyDrillStep + 1} / ${dailyDrillWords.length}</span>
+        </div>
+        <div class="flashcard-box" onclick="dailyDrillFlipped = !dailyDrillFlipped; renderDailyVocabDrillStep();">
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:10px;">
+            <span style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#a7f3d0;">
+              ${dailyDrillFlipped ? '📖 Nghĩa & Từ đồng nghĩa' : '🔤 Từ vựng mục tiêu'}
+            </span>
+            <button type="button" class="vocab-speak-btn" onclick="speakVocabWord('${safeWordAttr}', event)">
+              🔊 Phát âm
+            </button>
+          </div>
+          <div style="font-size:26px; font-weight:800; margin-bottom:10px;">
+            ${dailyDrillFlipped ? item.mean : item.word}
+          </div>
+          <div style="font-size:13.5px; color:#e2e8f0;">
+            ${dailyDrillFlipped ? `Synonyms: <b>${item.syn || 'N/A'}</b> • Nguồn: ${item.passageTitle || 'IELTS Reading'}` : '👆 Nhấp vào thẻ để xem nghĩa tiếng Việt (Bấm 🔊 để nghe lại)'}
+          </div>
+        </div>
+      `;
+      footer.innerHTML = `
+        <button class="btn btn-secondary" ${dailyDrillStep === 0 ? 'disabled' : ''} onclick="dailyDrillStep--; dailyDrillFlipped=false; renderDailyVocabDrillStep();">⬅️ Từ trước</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary" onclick="dailyDrillMode='quiz'; dailyDrillStep=0; dailyDrillScore=0; drillAnsweredCurrentStep=false; renderDailyVocabDrillStep();">⚡ Chuyển sang Trắc nghiệm</button>
+          ${dailyDrillStep < dailyDrillWords.length - 1 ? `
+            <button class="btn btn-emerald" onclick="dailyDrillStep++; dailyDrillFlipped=false; renderDailyVocabDrillStep();">Từ tiếp theo ➡️</button>
+          ` : `
+            <button class="btn btn-emerald" onclick="dailyDrillMode='quiz'; dailyDrillStep=0; dailyDrillScore=0; drillAnsweredCurrentStep=false; renderDailyVocabDrillStep();">🎯 Làm Mini Quiz Kiểm Tra ➡️</button>
+          `}
+        </div>
+      `;
+      if (!dailyDrillFlipped) {
+        setTimeout(() => speakVocabWord(item.word), 120);
+      }
+    } else if (dailyDrillMode === 'quiz') {
+      const item = dailyDrillWords[dailyDrillStep];
+      const safeWordAttr = String(item.word || '').replace(/'/g, "\\'");
+      const distractors = dailyDrillWords
+        .filter((_, idx) => idx !== dailyDrillStep)
+        .map(x => x.mean)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3);
+      while (distractors.length < 3) distractors.push('Nghĩa nhiễu khác ngữ cảnh');
+      const options = [item.mean, ...distractors].sort(() => Math.random() - 0.5);
+      drillAnsweredCurrentStep = false;
+
+      body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:12.5px; font-weight:700; color:#059669;">
+          <span>⚡ Bước 2/2: Phản xạ chọn nghĩa nhanh</span>
+          <span>Câu ${dailyDrillStep + 1} / ${dailyDrillWords.length} (Đúng: ${dailyDrillScore})</span>
+        </div>
+        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; padding:16px 18px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; gap:12px;">
+          <div>
+            <div style="font-size:12.5px; color:#64748b; margin-bottom:4px;">Chọn nghĩa chính xác nhất của từ:</div>
+            <div style="font-size:22px; font-weight:800; color:#0f172a;">${item.word}</div>
+          </div>
+          <button type="button" class="vocab-speak-btn-light" onclick="speakVocabWord('${safeWordAttr}', event)">
+            🔊 Nghe phát âm
+          </button>
+        </div>
+        <div id="drillOptionsContainer" style="display:flex; flex-direction:column; gap:9px;">
+          ${options.map((opt, idx) => `
+            <button type="button" class="btn drill-opt-btn" data-opt-val="${encodeURIComponent(opt)}"
+              onclick="handleInlineDrillAnswer(this)">
+              <b>${String.fromCharCode(65 + idx)}.</b> &nbsp; ${opt}
+            </button>
+          `).join('')}
+        </div>
+        <div id="drillInlineFeedbackBox" style="display:none; margin-top:12px; padding:11px 14px; border-radius:10px; font-size:13px; font-weight:700;"></div>
+      `;
+      footer.innerHTML = `
+        <button class="btn btn-secondary" onclick="dailyDrillMode='flashcard'; dailyDrillStep=0; renderDailyVocabDrillStep();">🔙 Xem lại Flashcard</button>
+        <button id="btnDrillNextInline" class="btn btn-emerald" style="display:none;" onclick="advanceDailyDrillStep()">Câu tiếp theo ➡️</button>
+      `;
+      setTimeout(() => speakVocabWord(item.word), 120);
+    } else {
+      _v4OrigRenderDailyVocabDrillStep();
+    }
+  };
+
+  /* ==========================================================================
+     2. XÓA TRIỆT ĐỂ LIVE FEED CŨ BỊ LẶP & LỌC BỎ TÊN GIÁO VIÊN (AMURO)
+     ========================================================================== */
+  function isSubmissionFromTeacher(res) {
+    if (!res) return false;
+    const uName = String(res.userName || '').trim().toLowerCase();
+    if (!uName) return false;
+    // Loại bỏ tài khoản Giáo viên / Admin Amuro khỏi Live Study Feed của học viên
+    if (uName.includes('amuro')) return true;
+    const matchedUser = (db.users || []).find(u =>
+      String(u.name || '').trim().toLowerCase() === uName ||
+      String(u.username || '').trim().toLowerCase() === uName
+    );
+    if (matchedUser && matchedUser.role === 'teacher') return true;
+    return false;
+  }
+
+  function cleanDuplicateLiveFeedAndFilterTeacher() {
+    const homeTab = document.getElementById('tab-home');
+    if (!homeTab) return;
+
+    const analyticsRow = document.getElementById('homeSkillAnalyticsAndDrillRow');
+
+    // 2.1. Tìm và ẩn sạch mọi khung "Nhật Ký Học Tập Trực Tiếp (Live Study Feed)" cũ nằm ngoài analyticsRow
+    homeTab.querySelectorAll('div, section').forEach(el => {
+      if (analyticsRow && analyticsRow.contains(el)) return;
+      const directText = (el.textContent || '').trim();
+      if (
+        (directText.includes('Nhật Ký Học Tập Trực Tiếp (Live Study Feed)') ||
+         directText.includes('Hoạt động hoàn thành đề mới nhất của học viên')) &&
+        !el.querySelector('#homeSkillAnalyticsAndDrillRow') &&
+        !el.querySelector('#homeRecentActivityTbody') &&
+        !el.querySelector('#homeHotNewShowcaseBox')
+      ) {
+        // Đảm bảo chỉ ẩn đúng cái hộp Live Feed cũ chứ không ẩn nhầm tab-home
+        if (el.id !== 'tab-home' && el.children.length <= 6) {
+          el.style.display = 'none';
+        }
+      }
+    });
+
+    // 2.2. Cập nhật lại cột phải của analyticsRow để chỉ hiện đúng 5 bài mới nhất của HỌC SINH (không có tên Amuro)
+    if (analyticsRow && analyticsRow.children.length >= 2) {
+      const feedCol = analyticsRow.children[1];
+      const studentOnlyRecents = (db.results || [])
+        .filter(r => !isSubmissionFromTeacher(r))
+        .slice(-5)
+        .reverse();
+
+      feedCol.innerHTML = `
+        <div class="card-title" style="margin-bottom:10px;">
+          <span>⚡ Nhật Ký Học Tập Trực Tiếp</span>
+          <span style="font-size:11px; color:#64748b; font-weight:600;">5 hoạt động học viên mới nhất</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:7px;">
+          ${!studentOnlyRecents.length ? `<div style="color:#94a3b8; font-size:12.5px; padding:12px;">Chưa có hoạt động mới từ học viên.</div>` : studentOnlyRecents.map(r => {
+            const sk = detectResultSkillType(r);
+            const badge = sk === 'listening'
+              ? `<span style="background:#e0f2fe; color:#0369a1; padding:2px 7px; border-radius:6px; font-size:11px; font-weight:700;">🎧 Listening</span>`
+              : (sk === 'writing'
+                ? `<span style="background:#fef3c7; color:#b45309; padding:2px 7px; border-radius:6px; font-size:11px; font-weight:700;">✍️ Writing</span>`
+                : `<span style="background:#dcfce7; color:#15803d; padding:2px 7px; border-radius:6px; font-size:11px; font-weight:700;">📖 Reading</span>`);
+            return `
+              <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:9px; padding:8px 12px; font-size:12.5px; display:flex; align-items:center; gap:6px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+                <span style="color:#10b981; font-size:10px;">●</span>
+                <b>${r.userName}</b>
+                <span style="color:#64748b;">hoàn thành</span>
+                ${badge}
+                <b style="color:#064e3b; overflow:hidden; text-overflow:ellipsis;">${r.examTitle}</b>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+  }
+
+  /* ==========================================================================
+     3. THAY THẾ TRỰC TIẾP DROPDOWN TỐC ĐỘ AUDIO BẰNG THANH KÉO SLIDER (0.5x - 2.0x)
+        - Quét mọi thẻ <select> chứa "1.0x (Normal)" hoặc "0.75x" trên thanh Topbar
+        - Gắn thuộc tính controlsList="nodownload noplaybackrate" để tắt menu tốc độ trùng của Chrome
+     ========================================================================== */
+  window.applyCustomListeningSpeed = function(val) {
+    const num = Math.max(0.5, Math.min(2.0, parseFloat(val) || 1.0));
+    // Áp dụng tốc độ cho mọi thẻ <audio> đang có trong giao diện thi
+    document.querySelectorAll('audio').forEach(a => {
+      a.playbackRate = num;
+      a.setAttribute('controlsList', 'nodownload noplaybackrate');
+    });
+    const lbl = document.getElementById('listeningSpeedValueLabel');
+    if (lbl) lbl.textContent = `${num.toFixed(2).replace(/\.00$/, '.0').replace(/(\.\d)0$/, '$1')}x`;
+    const slider = document.getElementById('listeningSpeedRangeInput');
+    if (slider && parseFloat(slider.value) !== num) slider.value = num;
+  };
+
+  function forceReplaceSpeedSelectWithSlider() {
+    // Ẩn nút Playback Speed thừa bên trong nút 3 chấm mặc định của trình duyệt Chrome/Edge
+    document.querySelectorAll('audio').forEach(a => {
+      if (a.getAttribute('controlsList') !== 'nodownload noplaybackrate') {
+        a.setAttribute('controlsList', 'nodownload noplaybackrate');
+      }
+    });
+
+    // Tìm chính xác thẻ <select> đang chứa "1.0x" hoặc "0.75x" trên thanh điều khiển
+    const allSelects = document.querySelectorAll('select');
+    allSelects.forEach(sel => {
+      const optText = sel.textContent || '';
+      if (optText.includes('0.75x') || optText.includes('1.0x') || optText.includes('1.25x')) {
+        sel.style.display = 'none';
+        if (!document.getElementById('listeningSpeedRangeInput')) {
+          const wrap = document.createElement('div');
+          wrap.className = 'audio-speed-slider-wrap';
+          wrap.title = 'Kéo để chỉnh tốc độ nghe mượt mà từ 0.5x đến 2.0x';
+          wrap.innerHTML = `
+            <span style="font-size:11.5px; color:#334155;">⚡ Speed:</span>
+            <input type="range" id="listeningSpeedRangeInput" min="0.5" max="2.0" step="0.05" value="1.0"
+              oninput="applyCustomListeningSpeed(this.value)">
+            <span id="listeningSpeedValueLabel" style="min-width:34px; text-align:center; color:#059669; font-weight:800;">1.0x</span>
+            <button type="button" class="audio-speed-reset-chip" onclick="applyCustomListeningSpeed(1.0)" title="Về 1.0x">1.0x</button>
+          `;
+          sel.insertAdjacentElement('afterend', wrap);
+        }
+      }
+    });
+  }
+
+  // Kết nối vào chu trình render của trang Home & màn hình thi Listening
+  const _v4OrigRenderHomeTab = renderHomeTab;
+  renderHomeTab = function() {
+    _v4OrigRenderHomeTab();
+    cleanDuplicateLiveFeedAndFilterTeacher();
+    setTimeout(cleanDuplicateLiveFeedAndFilterTeacher, 80);
+  };
+
+  // Tự động kiểm tra liên tục mỗi khi mở màn hình Listening hoặc Review Mode để thanh kéo tốc độ luôn xuất hiện 100%
+  setInterval(() => {
+    forceReplaceSpeedSelectWithSlider();
+    const homeTab = document.getElementById('tab-home');
+    if (homeTab && homeTab.style.display !== 'none') {
+      cleanDuplicateLiveFeedAndFilterTeacher();
+    }
+  }, 600);
+</script>
 </body>
 </html>
