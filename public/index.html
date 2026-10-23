@@ -13705,5 +13705,450 @@ Câu dẫn chứng: "${eviVal}"`;
     link.click();
   };
 </script>
+<!-- ============================================================================
+     HOTFIX TRIỆT ĐỂ:
+     1. Phân trang THẬT 100% cho Reading, Listening, Writing (Cắt đúng 10 đề/trang)
+     2. Fix dẫn chứng Listening câu dài 2 vế ("...trouble with your back. Riding can really aggravate that.")
+     Dán đoạn này ngay trước thẻ đóng </body> ở cuối cùng của file index.html
+     ============================================================================ -->
+<script>
+  /* ==========================================================================
+     1. SỬA TRIỆT ĐỂ LỖI PHÂN TRANG (READING, LISTENING, WRITING)
+     ========================================================================== */
+  let examPageTrackers = { reading: 1, listening: 1, writing: 1 };
+  const EXAM_PAGE_SIZE = 10;
+
+  window.setExamCatalogPage = function(skillKey, pageNum) {
+    examPageTrackers[skillKey] = pageNum;
+    if (skillKey === 'reading') renderReadingTable();
+    else if (skillKey === 'listening') renderListeningTable();
+    else renderWritingTable();
+  };
+
+  // Hàm vẽ thanh phân trang thật và cắt mảng chuẩn xác 10 đề / trang
+  function applyTrueCatalogPagination(skillKey, fullList, tbodyEl, renderRowCallback) {
+    if (!tbodyEl) return;
+    const totalItems = fullList.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / EXAM_PAGE_SIZE));
+
+    if (examPageTrackers[skillKey] > totalPages) examPageTrackers[skillKey] = totalPages;
+    if (examPageTrackers[skillKey] < 1) examPageTrackers[skillKey] = 1;
+    const currentPage = examPageTrackers[skillKey];
+
+    // CẮT ĐÚNG 10 ĐỀ CỦA TRANG HIỆN TẠI
+    const startIdx = (currentPage - 1) * EXAM_PAGE_SIZE;
+    const pageItems = fullList.slice(startIdx, startIdx + EXAM_PAGE_SIZE);
+
+    // Vẽ danh sách 10 đề của trang đó
+    tbodyEl.innerHTML = pageItems.map((item, idx) => renderRowCallback(item, startIdx + idx)).join('');
+
+    // Vẽ hoặc cập nhật thanh phân trang ngay bên dưới bảng
+    const tableEl = tbodyEl.closest('table');
+    if (!tableEl || !tableEl.parentElement) return;
+
+    let pagerEl = document.getElementById(`catalogPaginationBar_${skillKey}`);
+    if (!pagerEl) {
+      pagerEl = document.createElement('div');
+      pagerEl.id = `catalogPaginationBar_${skillKey}`;
+      pagerEl.className = 'sub-pagination-bar';
+      tableEl.parentElement.appendChild(pagerEl);
+    }
+
+    if (totalItems <= EXAM_PAGE_SIZE) {
+      pagerEl.innerHTML = `<span style="font-size:12.5px; color:#64748b; font-weight:600;">Đang xem 1–${totalItems} trên tổng số ${totalItems} đề</span><div></div>`;
+      return;
+    }
+
+    const pageButtons = [];
+    for (let p = 1; p <= totalPages; p++) {
+      if (p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2) {
+        pageButtons.push(`<button type="button" class="page-num-btn ${p === currentPage ? 'active' : ''}" onclick="setExamCatalogPage('${skillKey}', ${p})">${p}</button>`);
+      } else if (pageButtons[pageButtons.length - 1] !== '...') {
+        pageButtons.push('...');
+      }
+    }
+
+    pagerEl.innerHTML = `
+      <span style="font-size:12.5px; color:#64748b; font-weight:600;">
+        Đang xem <b>${startIdx + 1}–${Math.min(startIdx + EXAM_PAGE_SIZE, totalItems)}</b> trên tổng số <b>${totalItems}</b> đề (Trang ${currentPage}/${totalPages})
+      </span>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button type="button" class="page-num-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="setExamCatalogPage('${skillKey}', ${currentPage - 1})">◀ Trước</button>
+        ${pageButtons.map(b => b === '...' ? '<span style="color:#94a3b8; padding:0 4px;">...</span>' : b).join('')}
+        <button type="button" class="page-num-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="setExamCatalogPage('${skillKey}', ${currentPage + 1})">Tiếp ▶</button>
+      </div>
+    `;
+  }
+
+  // 1.1. GHI ĐÈ BẢNG READING
+  renderReadingTable = function() {
+    injectFolderToggleBtn('reading', document.querySelector('#tab-reading .card-title'));
+    const tbody = document.getElementById('readingTbody');
+    if (!tbody) return;
+
+    const searchKw = (document.getElementById('filterReadingSearch')?.value || '').toLowerCase().trim();
+    const partFilter = document.getElementById('filterReadingPart')?.value || 'ALL';
+    const topicKw = (document.getElementById('filterReadingTopic')?.value || '').toLowerCase().trim();
+    const sortMode = document.getElementById('sortReadingSelect')?.value || 'newest';
+
+    let list = getVisibleExams(db.readingExams || []).filter(e => {
+      const hay = `${e.title || ''} ${e.topic || ''} ${e.category || ''}`.toLowerCase();
+      return (!searchKw || hay.includes(searchKw)) && (!topicKw || hay.includes(topicKw)) && (!partFilter || partFilter === 'ALL' || (e.category || 'Full Test') === partFilter);
+    });
+    list = sortExamList(list, sortMode);
+
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:22px;">Không tìm thấy bài Reading nào phù hợp.</td></tr>`;
+      const p = document.getElementById('catalogPaginationBar_reading');
+      if (p) p.innerHTML = '';
+      return;
+    }
+
+    const completedIds = getStudentCompletedExamIds('reading');
+    const st = getMilestoneQuizStatus();
+
+    function buildReadingRow(e, idx) {
+      const clsNames = (!e.assignedClasses || !e.assignedClasses.length) ? 'All Classes' : e.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
+      const catBadge = e.category ? `<span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; margin-right:6px;">${e.category}</span>` : '';
+      const topBadge = e.topic ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700;">🏷️ ${e.topic}</span>` : '';
+      const smartBadges = renderSmartBadges(e, sortMode === 'newest' && idx === 0);
+      const isDone = completedIds.includes(e.id);
+      const lastSub = getLatestUserSubmissionForExam(e.id, e.title);
+      const doneBadge = lastSub
+        ? `<span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:6px; font-size:11.5px; font-weight:800; margin-left:6px;">✓ Done (${lastSub.score} • Band ${String(lastSub.band).replace('Band','').trim()})</span>`
+        : (isDone ? '<span style="color:#059669; font-size:12px; font-weight:800;">✓ Done</span>' : '');
+      const isLockedForStudent = st.locked && !isDone;
+
+      return `
+        <tr>
+          <td>
+            <div style="margin-bottom:4px;"><b>${e.title}</b> ${doneBadge}</div>
+            <div>${smartBadges}${catBadge}${topBadge}</div>
+          </td>
+          <td>${e.duration} mins</td>
+          <td>${e.passages ? e.passages.length : 1} Passage(s)</td>
+          <td><span style="color:#64748b; font-weight:600;">${clsNames}</span></td>
+          <td style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn ${isLockedForStudent ? 'btn-locked' : 'btn-emerald'}" onclick="openModeSelectBeforeLaunch('reading', '${e.id}')">
+              ${isLockedForStudent ? '🔒 Locked (Làm Vocab Quiz)' : (isDone ? '🔄 Làm lại' : 'Start Test')}
+            </button>
+            ${lastSub ? `<button class="btn btn-secondary" onclick="reopenReviewFromHistory('${lastSub.id}')">🔍 Xem bài cũ</button>` : ''}
+            <button class="btn btn-secondary" onclick="openStudyVocabModal('${e.id}')">Vocabulary</button>
+            ${activeUser && activeUser.role === 'teacher' ? `
+              <button class="btn btn-secondary" onclick="openEditExamModal('${e.id}')">Edit</button>
+              <button class="btn btn-secondary" onclick="openAssignModal('${e.id}', 'reading')">Assign</button>
+              <button class="btn btn-danger" onclick="deleteExam('${e.id}', 'reading')">Delete</button>
+            ` : ''}
+          </td>
+        </tr>
+      `;
+    }
+
+    if (!folderViewEnabled.reading) {
+      applyTrueCatalogPagination('reading', list, tbody, buildReadingRow);
+    } else {
+      const p = document.getElementById('catalogPaginationBar_reading');
+      if (p) p.innerHTML = '';
+      const groups = {};
+      list.forEach((e, idx) => {
+        const gName = extractExamFolderGroup(e);
+        if (!groups[gName]) groups[gName] = [];
+        groups[gName].push({ e, idx });
+      });
+      tbody.innerHTML = `<tr><td colspan="5" style="padding:0; border:none;">
+        ${Object.entries(groups).map(([gName, items], gIdx) => `
+          <div class="folder-accordion-box ${gIdx === 0 ? 'open' : ''}">
+            <div class="folder-accordion-header" onclick="this.parentElement.classList.toggle('open')">
+              <span>📂 ${gName}</span>
+              <span style="font-size:12px; background:#ffffff; padding:3px 10px; border-radius:99px; border:1px solid #cbd5e1;">${items.length} đề thi ▾</span>
+            </div>
+            <div class="folder-accordion-body">
+              <table><tbody>${items.map(it => buildReadingRow(it.e, it.idx)).join('')}</tbody></table>
+            </div>
+          </div>
+        `).join('')}
+      </td></tr>`;
+    }
+  };
+
+  // 1.2. GHI ĐÈ BẢNG LISTENING
+  renderListeningTable = function() {
+    injectFolderToggleBtn('listening', document.querySelector('#tab-listening .card-title'));
+    const tbody = document.getElementById('listeningTbody');
+    if (!tbody) return;
+
+    const searchKw = (document.getElementById('filterListeningSearch')?.value || '').toLowerCase().trim();
+    const partFilter = document.getElementById('filterListeningPart')?.value || 'ALL';
+    const topicKw = (document.getElementById('filterListeningTopic')?.value || '').toLowerCase().trim();
+    const sortMode = document.getElementById('sortListeningSelect')?.value || 'newest';
+
+    let list = getVisibleExams(db.listeningExams || []).filter(e => {
+      const hay = `${e.title || ''} ${e.topic || ''} ${e.category || ''}`.toLowerCase();
+      return (!searchKw || hay.includes(searchKw)) && (!topicKw || hay.includes(topicKw)) && (!partFilter || partFilter === 'ALL' || (e.category || 'Listening Full') === partFilter);
+    });
+    list = sortExamList(list, sortMode);
+
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:22px;">Không tìm thấy bài Listening nào.</td></tr>`;
+      const p = document.getElementById('catalogPaginationBar_listening');
+      if (p) p.innerHTML = '';
+      return;
+    }
+
+    const completedIds = getStudentCompletedExamIds('listening');
+
+    function buildListeningRow(e, idx) {
+      const clsNames = (!e.assignedClasses || !e.assignedClasses.length) ? 'All Classes' : e.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
+      const catBadge = `<span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; margin-right:6px;">${e.category || 'Listening'}</span>`;
+      const topBadge = e.topic ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; margin-right:6px;">🏷️ ${e.topic}</span>` : '';
+      const smartBadges = renderSmartBadges(e, sortMode === 'newest' && idx === 0);
+      const isDone = completedIds.includes(e.id);
+      const lastSub = getLatestUserSubmissionForExam(e.id, e.title);
+      const doneBadge = lastSub
+        ? `<span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:6px; font-size:11.5px; font-weight:800; margin-left:6px;">✓ Done (${lastSub.score} • Band ${String(lastSub.band).replace('Band','').trim()})</span>`
+        : (isDone ? '<span style="color:#059669; font-size:12px; font-weight:800;">✓ Done</span>' : '');
+
+      return `
+        <tr>
+          <td>
+            <b>${e.title}</b> ${doneBadge}
+            <div style="margin-top:4px;">${smartBadges}${catBadge}${topBadge}</div>
+          </td>
+          <td>${e.duration} mins</td>
+          <td>${e.passages ? e.passages.length : 1} Part(s)</td>
+          <td><span style="color:#64748b; font-weight:600;">${clsNames}</span></td>
+          <td style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-emerald" onclick="openModeSelectBeforeLaunch('listening', '${e.id}')">${isDone ? '🔄 Làm lại' : 'Start Listening'}</button>
+            ${lastSub ? `<button class="btn btn-secondary" onclick="reopenReviewFromHistory('${lastSub.id}')">🔍 Xem bài cũ</button>` : ''}
+            ${activeUser && activeUser.role === 'teacher' ? `
+              <button class="btn btn-secondary" onclick="openEditListeningModal('${e.id}')">Edit</button>
+              <button class="btn btn-secondary" onclick="openAssignModal('${e.id}', 'listening')">Assign</button>
+              <button class="btn btn-danger" onclick="deleteExam('${e.id}', 'listening')">Delete</button>
+            ` : ''}
+          </td>
+        </tr>
+      `;
+    }
+
+    if (!folderViewEnabled.listening) {
+      applyTrueCatalogPagination('listening', list, tbody, buildListeningRow);
+    } else {
+      const p = document.getElementById('catalogPaginationBar_listening');
+      if (p) p.innerHTML = '';
+      const groups = {};
+      list.forEach((e, idx) => {
+        const gName = extractExamFolderGroup(e);
+        if (!groups[gName]) groups[gName] = [];
+        groups[gName].push({ e, idx });
+      });
+      tbody.innerHTML = `<tr><td colspan="5" style="padding:0; border:none;">
+        ${Object.entries(groups).map(([gName, items], gIdx) => `
+          <div class="folder-accordion-box ${gIdx === 0 ? 'open' : ''}">
+            <div class="folder-accordion-header" onclick="this.parentElement.classList.toggle('open')">
+              <span>📂 ${gName}</span>
+              <span style="font-size:12px; background:#ffffff; padding:3px 10px; border-radius:99px; border:1px solid #cbd5e1;">${items.length} đề nghe ▾</span>
+            </div>
+            <div class="folder-accordion-body">
+              <table><tbody>${items.map(it => buildListeningRow(it.e, it.idx)).join('')}</tbody></table>
+            </div>
+          </div>
+        `).join('')}
+      </td></tr>`;
+    }
+  };
+
+  // 1.3. GHI ĐÈ BẢNG WRITING
+  renderWritingTable = function() {
+    injectFolderToggleBtn('writing', document.querySelector('#tab-writing .card-title'));
+    const tbody = document.getElementById('writingTbody');
+    if (!tbody) return;
+
+    const searchKw = (document.getElementById('filterWritingSearch')?.value || '').toLowerCase().trim();
+    const partFilter = document.getElementById('filterWritingPart')?.value || 'ALL';
+    const topicKw = (document.getElementById('filterWritingTopic')?.value || '').toLowerCase().trim();
+    const sortMode = document.getElementById('sortWritingSelect')?.value || 'newest';
+
+    let list = getVisibleExams(db.writingExams || []).filter(w => {
+      const hasT1 = Boolean(w.task1 && w.task1.prompt);
+      const hasT2 = Boolean(w.task2 && w.task2.prompt);
+      const wType = (hasT1 && hasT2) ? 'Full Writing' : (hasT1 ? 'Task 1 Only' : 'Task 2 Only');
+      const hay = `${w.title || ''} ${w.topic || ''} ${w.task1?.prompt || ''} ${w.task2?.prompt || ''}`.toLowerCase();
+      return (!searchKw || hay.includes(searchKw)) && (!topicKw || hay.includes(topicKw)) && (!partFilter || partFilter === 'ALL' || wType === partFilter);
+    });
+    list = sortExamList(list, sortMode);
+
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:22px;">Không tìm thấy bài Writing nào.</td></tr>`;
+      const p = document.getElementById('catalogPaginationBar_writing');
+      if (p) p.innerHTML = '';
+      return;
+    }
+
+    const completedIds = getStudentCompletedExamIds('writing');
+
+    function buildWritingRow(w, idx) {
+      const hasT1 = Boolean(w.task1 && w.task1.prompt);
+      const hasT2 = Boolean(w.task2 && w.task2.prompt);
+      const taskLabel = (hasT1 && hasT2) ? 'Task 1 & Task 2' : (hasT1 ? 'Task 1 Only' : 'Task 2 Only');
+      const topBadge = w.topic ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:700; margin-right:6px;">🏷️ ${w.topic}</span>` : '';
+      const smartBadges = renderSmartBadges(w, sortMode === 'newest' && idx === 0);
+      const clsNames = (!w.assignedClasses || !w.assignedClasses.length) ? 'All Classes' : w.assignedClasses.map(cid => (db.classes.find(c => c.id === cid) || {}).name).filter(Boolean).join(', ');
+      const isDone = completedIds.includes(w.id);
+      const lastSub = getLatestUserSubmissionForExam(w.id, w.title);
+      const doneBadge = lastSub
+        ? `<span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:6px; font-size:11.5px; font-weight:800; margin-left:6px;">✓ Done (${lastSub.band})</span>`
+        : (isDone ? '<span style="color:#059669; font-size:12px; font-weight:800;">✓ Done</span>' : '');
+
+      return `
+        <tr>
+          <td>
+            <b>${w.title}</b> ${doneBadge}
+            <div style="margin-top:4px;">${smartBadges}${topBadge}</div>
+          </td>
+          <td>${w.duration} mins</td>
+          <td><span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:6px; font-size:11.5px; font-weight:700;">${taskLabel}</span></td>
+          <td><span style="color:#64748b; font-weight:600;">${clsNames}</span></td>
+          <td style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-emerald" onclick="openModeSelectBeforeLaunch('writing', '${w.id}')">${isDone ? '🔄 Viết lại' : 'Start Writing'}</button>
+            ${lastSub ? `<button class="btn btn-secondary" onclick="openStudentViewWritingModal('${lastSub.id}')">💬 Xem bài cũ</button>` : ''}
+            ${activeUser && activeUser.role === 'teacher' ? `
+              <button class="btn btn-secondary" onclick="openEditWritingModal('${w.id}')">Edit</button>
+              <button class="btn btn-secondary" onclick="openAssignModal('${w.id}', 'writing')">Assign</button>
+              <button class="btn btn-danger" onclick="deleteExam('${w.id}', 'writing')">Delete</button>
+            ` : ''}
+          </td>
+        </tr>
+      `;
+    }
+
+    if (!folderViewEnabled.writing) {
+      applyTrueCatalogPagination('writing', list, tbody, buildWritingRow);
+    } else {
+      const p = document.getElementById('catalogPaginationBar_writing');
+      if (p) p.innerHTML = '';
+      const groups = {};
+      list.forEach((w, idx) => {
+        const gName = extractExamFolderGroup(w);
+        if (!groups[gName]) groups[gName] = [];
+        groups[gName].push({ w, idx });
+      });
+      tbody.innerHTML = `<tr><td colspan="5" style="padding:0; border:none;">
+        ${Object.entries(groups).map(([gName, items], gIdx) => `
+          <div class="folder-accordion-box ${gIdx === 0 ? 'open' : ''}">
+            <div class="folder-accordion-header" onclick="this.parentElement.classList.toggle('open')">
+              <span>📂 ${gName}</span>
+              <span style="font-size:12px; background:#ffffff; padding:3px 10px; border-radius:99px; border:1px solid #cbd5e1;">${items.length} đề viết ▾</span>
+            </div>
+            <div class="folder-accordion-body">
+              <table><tbody>${items.map(it => buildWritingRow(it.w, it.idx)).join('')}</tbody></table>
+            </div>
+          </div>
+        `).join('')}
+      </td></tr>`;
+    }
+  };
+
+  /* ==========================================================================
+     2. BỘ TÁCH CÂU CHUYÊN SÂU: FIX DẪN CHỨNG DÀI ("...trouble with your back. Riding can really aggravate that.")
+     ========================================================================== */
+  function buildDeepSentenceChunkRegexes(quoteStr) {
+    const rawClean = String(quoteStr || '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;|&#160;/gi, ' ')
+      .replace(/[’‘`′]/g, "'")
+      .trim();
+
+    if (!rawClean) return [];
+    const patterns = [];
+
+    // Tách thành từng câu độc lập theo dấu chấm câu (. ? ! ;)
+    const sentences = rawClean.split(/[.?!;]+/).map(s => s.trim()).filter(s => s.length >= 4);
+
+    sentences.forEach(sent => {
+      // 1. Thử khớp nguyên câu này
+      const sentTokens = sent.replace(/[^a-zA-Z0-9'\s]/g, ' ').split(/\s+/).map(w => w.replace(/^'+|'+$/g, '')).filter(Boolean);
+      if (sentTokens.length >= 2) {
+        const fullRx = buildTokensRegexFromWords(sentTokens.slice(0, 16));
+        if (fullRx) patterns.push(fullRx);
+      }
+
+      // 2. Bỏ các từ nối & từ cảm thán đầu câu ("It was okay, actually, but what...", "And", "So")
+      const trimmedLeadTokens = sentTokens.filter((w, idx) => {
+        if (idx <= 3 && ['it','was','okay','actually','but','and','so','what','well','oh'].includes(w.toLowerCase())) return false;
+        return true;
+      });
+      if (trimmedLeadTokens.length >= 3) {
+        const leadTrimRx = buildTokensRegexFromWords(trimmedLeadTokens.slice(0, 12));
+        if (leadTrimRx) patterns.push(leadTrimRx);
+      }
+
+      // 3. BẮT ĐÚNG MỆNH ĐỀ CỐT LÕI (Ví dụ: "trouble with your back" hoặc "Riding can really aggravate that")
+      // Lọc lấy các cụm 3-4 từ liên tiếp chứa danh từ/động từ dài
+      for (let i = 0; i <= sentTokens.length - 4; i++) {
+        const subChunk = sentTokens.slice(i, i + 4);
+        if (subChunk.some(w => w.length >= 4 && !['have','with','your','that','this','from','what'].includes(w.toLowerCase()))) {
+          const chunkRx = buildTokensRegexFromWords(subChunk);
+          if (chunkRx) patterns.push(chunkRx);
+        }
+      }
+    });
+
+    return patterns;
+  }
+
+  // Nối tầng thêm hàm bắt câu sâu vào locateEvidenceSnippet
+  const _priorLocateEvidenceSnippet = window.locateEvidenceSnippet;
+  window.locateEvidenceSnippet = function(encodedSnippet) {
+    const rawSnippet = decodeURIComponent(encodedSnippet || '').trim();
+    if (!rawSnippet) return;
+
+    const leftPane = document.getElementById('insperaLeftPane');
+    if (!leftPane) return;
+
+    if (leftPane.style.display === 'none') {
+      leftPane.style.display = 'block';
+      leftPane.style.width = '50%';
+      const rightPane = document.getElementById('insperaRightPane');
+      if (rightPane) rightPane.style.width = '50%';
+    }
+
+    leftPane.querySelectorAll('.evidence-highlight-active').forEach(el => {
+      el.outerHTML = el.innerHTML;
+    });
+
+    // Thử bằng bộ tách câu sâu chuyên biệt trước
+    let matched = false;
+    const deepRegexes = buildDeepSentenceChunkRegexes(rawSnippet);
+    for (const rx of deepRegexes) {
+      if (rx && rx.test(leftPane.innerHTML)) {
+        leftPane.innerHTML = leftPane.innerHTML.replace(rx, `<span class="evidence-highlight-active" id="activeLocateTarget_deep">$1</span>`);
+        matched = true;
+        break;
+      }
+    }
+
+    if (matched) {
+      if (typeof setupDragDropEngine === 'function') setupDragDropEngine();
+      if (typeof restoreUserAnswersInDOM === 'function') restoreUserAnswersInDOM(document.getElementById('insperaSplitBox'));
+      const target = leftPane.querySelector('.evidence-highlight-active');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    // Nếu chưa khớp, gọi tiếp hàm xử lý dự phòng phía trước
+    if (typeof _priorLocateEvidenceSnippet === 'function') {
+      _priorLocateEvidenceSnippet(encodedSnippet);
+    }
+  };
+
+  // Khởi chạy đồng bộ lại giao diện ngay khi trang tải xong
+  window.addEventListener('load', () => {
+    if (activeUser) {
+      renderReadingTable();
+      renderListeningTable();
+      renderWritingTable();
+    }
+  });
+</script>
 </body>
 </html>
