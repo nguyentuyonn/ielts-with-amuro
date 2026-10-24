@@ -16179,5 +16179,1244 @@ Câu dẫn chứng: "${eviVal}"`;
     }
   }, 900);
 </script>
+<!-- ============================================================================
+     MODULE UPDATE 24.10 - V6 (WRITING DOC EXPORT, REWRITE V2, CONTEXT FLASHCARD & EXCEL REPORT):
+     1. Bỏ nút ảnh Phiếu điểm Read/Lis -> Chuyển Writing sang xuất file Word/Google Docs (.doc)
+     2. Sổ Tay Lỗi Sai: Chuyển sang Thẻ Bóc Tách Bẫy Ngữ Cảnh (Hiện câu hỏi gốc có chỗ trống [___])
+     3. Chế độ "Viết lại bản sửa" (Writing Rewrite V2) chia đôi màn hình cho học sinh sửa bài
+     4. Bộ lọc đề Reading & Listening theo Dạng Câu Hỏi (T/F/NG, Matching, Gap-fill, MCQ...)
+     5. Xuất Báo Cáo Tuần / Tiến độ Lớp học ra file Excel (.csv) cho Giáo viên
+     Dán nối tiếp đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* 1. THẺ FLASHCARD BÓC TÁCH BẪY NGỮ CẢNH TRONG SỔ LỖI SAI */
+  .trap-flashcard-front {
+    background: #faf8f2;
+    border: 2px solid #bdd0c4;
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 18px rgba(6, 78, 59, 0.06);
+  }
+  .trap-context-box {
+    background: #ffffff;
+    border-left: 4px solid #1f3d32;
+    border-radius: 10px;
+    padding: 16px 18px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #0f172a;
+    margin: 12px 0;
+    border-top: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .trap-blank-pill {
+    display: inline-block;
+    background: #fef3c7;
+    color: #92400e;
+    border: 1.5px dashed #f59e0b;
+    border-radius: 6px;
+    padding: 1px 12px;
+    font-weight: 800;
+    margin: 0 4px;
+  }
+  .trap-flashcard-back {
+    background: #f0fdf4;
+    border: 2px solid #86efac;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-top: 12px;
+  }
+
+  /* 2. MODAL CHẾ ĐỘ VIẾT LẠI BẢN SỬA WRITING (REWRITE WORKSPACE) */
+  .rewrite-split-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 18px;
+    max-height: 72vh;
+  }
+  @media (max-width: 960px) {
+    .rewrite-split-grid { grid-template-columns: 1fr; max-height: none; }
+  }
+  .rewrite-left-panel {
+    background: #faf8f2;
+    border: 1px solid #d5cfc0;
+    border-radius: 12px;
+    padding: 16px;
+    overflow-y: auto;
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+  .rewrite-right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .rewrite-textarea {
+    width: 100%;
+    min-height: 210px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    line-height: 1.65;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .rewrite-textarea:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+  }
+</style>
+
+<!-- MODAL VIẾT LẠI BẢN SỬA WRITING (WRITING REWRITE V2 WORKSPACE) -->
+<div class="modal-overlay" id="writingRewriteModal" style="z-index: 98000;">
+  <div class="modal-window" style="width: 1060px; max-height: 92vh;">
+    <div class="modal-header" style="background:#1f3d32; color:#faf8f2;">
+      <span id="writingRewriteModalTitle">✏️ Viết Lại Bản Sửa Hoàn Thiện (Writing Revision V2)</span>
+      <button class="btn btn-secondary" onclick="closeModal('writingRewriteModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" id="writingRewriteModalBody" style="padding: 20px; overflow-y: auto;"></div>
+    <div class="modal-footer" style="justify-content: space-between;">
+      <span style="font-size:12.5px; color:#64748b;">💡 Hãy đối chiếu nhận xét bên trái để sửa trực tiếp lỗi từ vựng, ngữ pháp và cấu trúc câu ở bên phải.</span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-secondary" id="btnExportDocFromRewrite">📄 Xuất File Word / Google Docs</button>
+        <button class="btn btn-emerald" onclick="saveWritingRewriteSubmission()">💾 Lưu Bản Sửa (Version 2)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ==========================================================================
+     1. XUẤT BÀI CHẤM WRITING RA FILE WORD / GOOGLE DOCS (.DOC)
+        & LOẠI BỎ HOÀN TOÀN NÚT PHIẾU ĐIỂM ẢNH CỦA READING / LISTENING
+     ========================================================================== */
+  window.exportWritingFeedbackToDoc = function(resId) {
+    let res = null;
+    if (resId) {
+      res = (db.results || []).find(r => r.id === resId);
+    } else if (db.results && db.results.length) {
+      res = db.results[db.results.length - 1];
+    }
+    if (!res) return alert('Không tìm thấy dữ liệu bài viết!');
+
+    const wExam = (db.writingExams || []).find(e => e.id === res.examId);
+    const diag = typeof analyzePersonalizedDiagnosticReport === 'function'
+      ? analyzePersonalizedDiagnosticReport(res)
+      : { firstCritLabel: 'Task Achievement / TR', writingCriteria: { FIRST: res.band, CC: res.band, LR: res.band, GRA: res.band }, writingFixes: [] };
+
+    const t1Prompt = wExam?.task1?.prompt || 'Writing Task 1';
+    const t2Prompt = wExam?.task2?.prompt || 'Writing Task 2';
+    const t1Sample = wExam?.task1?.sample || '';
+    const t2Sample = wExam?.task2?.sample || '';
+
+    const stuT1 = res.writingSubmission?.task1 || '';
+    const stuT2 = res.writingSubmission?.task2 || '';
+    const rewriteT1 = res.rewriteSubmission?.task1 || '';
+    const rewriteT2 = res.rewriteSubmission?.task2 || '';
+    const rawFeedback = String(res.teacherFeedback || 'Chưa có nhận xét chi tiết.');
+
+    const fixesRowsHtml = (diag.writingFixes || []).map(fx => `
+      <tr>
+        <td style="border:1px solid #cbd5e1; padding:8px 12px; color:#991b1b; background:#fef2f2;">"${fx.bad}"</td>
+        <td style="border:1px solid #cbd5e1; padding:8px 12px; color:#065f46; background:#f0fdf4; font-weight:bold;">"${fx.good}"</td>
+      </tr>
+    `).join('');
+
+    const docHtml = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset="utf-8">
+        <title>IELTS Writing Report - ${res.userName}</title>
+        <style>
+          body { font-family: "Times New Roman", Arial, serif; font-size: 12pt; color: #1e293b; line-height: 1.5; }
+          h1 { color: #1f3d32; font-size: 20pt; margin-bottom: 4pt; }
+          h2 { color: #1f3d32; font-size: 14pt; border-bottom: 1.5pt solid #1f3d32; padding-bottom: 4pt; margin-top: 16pt; }
+          .meta-box { background: #faf8f2; border: 1pt solid #cbd5e1; padding: 10pt; margin-bottom: 14pt; }
+          .essay-box { background: #f8fafc; border: 1pt solid #cbd5e1; padding: 12pt; white-space: pre-wrap; margin-bottom: 12pt; }
+          table { width: 100%; border-collapse: collapse; margin-top: 8pt; margin-bottom: 14pt; }
+          th { background: #1f3d32; color: #ffffff; padding: 8pt; border: 1pt solid #1f3d32; text-align: center; }
+          td { padding: 8pt; border: 1pt solid #cbd5e1; }
+        </style>
+      </head>
+      <body>
+        <h1>IELTS WITH AMURO — OFFICIAL WRITING ASSESSMENT & REVISION</h1>
+        <div class="meta-box">
+          <p><b>Học viên:</b> ${res.userName} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Đề bài:</b> ${res.examTitle}</p>
+          <p><b>Ngày nộp:</b> ${res.timestamp} &nbsp;&nbsp;|&nbsp;&nbsp; <b>Kết quả:</b> <span style="color:#059669; font-weight:bold; font-size:14pt;">${String(res.band).startsWith('Band') ? res.band : 'Band ' + res.band}</span> (${res.score})</p>
+        </div>
+
+        <h2>1. BẢNG ĐIỂM CHI TIẾT 4 TIÊU CHÍ (BAND DESCRIPTORS)</h2>
+        <table>
+          <tr>
+            <th>${diag.firstCritLabel}</th>
+            <th>Coherence & Cohesion (CC)</th>
+            <th>Lexical Resource (LR)</th>
+            <th>Grammatical Range (GRA)</th>
+          </tr>
+          <tr>
+            <td style="text-align:center; font-size:15pt; font-weight:bold; color:#065f46;">${diag.writingCriteria.FIRST}</td>
+            <td style="text-align:center; font-size:15pt; font-weight:bold; color:#065f46;">${diag.writingCriteria.CC}</td>
+            <td style="text-align:center; font-size:15pt; font-weight:bold; color:#065f46;">${diag.writingCriteria.LR}</td>
+            <td style="text-align:center; font-size:15pt; font-weight:bold; color:#065f46;">${diag.writingCriteria.GRA}</td>
+          </tr>
+        </table>
+
+        ${stuT1 ? `
+          <h2>2. BÀI LÀM TASK 1 CỦA HỌC VIÊN</h2>
+          <p><b>Đề bài Task 1:</b> ${t1Prompt}</p>
+          <div class="essay-box">${stuT1.replace(/\n/g, '<br>')}</div>
+        ` : ''}
+
+        ${stuT2 ? `
+          <h2>${stuT1 ? '3.' : '2.'} BÀI LÀM TASK 2 CỦA HỌC VIÊN</h2>
+          <p><b>Đề bài Task 2:</b> ${t2Prompt}</p>
+          <div class="essay-box">${stuT2.replace(/\n/g, '<br>')}</div>
+        ` : ''}
+
+        ${(rewriteT1 || rewriteT2) ? `
+          <h2>BẢN SỬA HOÀN THIỆN CỦA HỌC VIÊN (VERSION 2 - REWRITE)</h2>
+          ${rewriteT1 ? `<p><b>Task 1 (Bản sửa V2):</b></p><div class="essay-box" style="background:#f0fdf4;">${rewriteT1.replace(/\n/g, '<br>')}</div>` : ''}
+          ${rewriteT2 ? `<p><b>Task 2 (Bản sửa V2):</b></p><div class="essay-box" style="background:#f0fdf4;">${rewriteT2.replace(/\n/g, '<br>')}</div>` : ''}
+        ` : `
+          <h2>KHUNG DÀNH CHO HỌC VIÊN TỰ VIẾT LẠI BẢN SỬA (REWRITE AREA)</h2>
+          <div class="essay-box" style="color:#64748b; font-style:italic;">[Học viên hãy gõ bản viết lại đã sửa lỗi trực tiếp vào khung này trên Word / Google Docs...]</div>
+        `}
+
+        ${fixesRowsHtml ? `
+          <h2>BẢNG ĐỐI CHIẾU SỬA LỖI & NÂNG CẤP TỪ VỰNG TRỰC TIẾP</h2>
+          <table>
+            <tr>
+              <th style="width:48%;">Diễn đạt gốc trong bài (Cần tránh / Sửa)</th>
+              <th style="width:52%;">Diễn đạt nâng cấp chuẩn Academic (Band 7.5+)</th>
+            </tr>
+            ${fixesRowsHtml}
+          </table>
+        ` : ''}
+
+        <h2>NHẬN XÉT CHI TIẾT TỪ GIÁM KHẢO / AI EXAMINER</h2>
+        <div class="essay-box">${rawFeedback.replace(/\n/g, '<br>')}</div>
+
+        ${(t1Sample || t2Sample) ? `
+          <h2>BÀI MẪU THAM KHẢO (SAMPLE ESSAY BAND 8.0+)</h2>
+          ${t1Sample ? `<p><b>Sample Task 1:</b></p><div class="essay-box">${t1Sample.replace(/\n/g, '<br>')}</div>` : ''}
+          ${t2Sample ? `<p><b>Sample Task 2:</b></p><div class="essay-box">${t2Sample.replace(/\n/g, '<br>')}</div>` : ''}
+        ` : ''}
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob(['\ufeff', docHtml], { type: 'application/msword;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `IELTS_Writing_${String(res.userName || 'Student').replace(/\s+/g, '_')}_${String(res.examTitle || 'Task').substring(0, 22).replace(/[^a-zA-Z0-9]/g, '_')}.doc`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  };
+
+  // Ẩn nút tải phiếu điểm ở modal kết quả Reading/Listening
+  const hideSlipModalBtn = document.getElementById('btnDownloadSlipModal');
+  if (hideSlipModalBtn) hideSlipModalBtn.style.display = 'none';
+
+  /* ==========================================================================
+     2. CHẾ ĐỘ "VIẾT LẠI BẢN SỬA" CHO WRITING (WRITING REWRITE V2 WORKSPACE)
+     ========================================================================== */
+  let activeRewriteResId = null;
+
+  window.openWritingRewriteModal = function(resId) {
+    const res = (db.results || []).find(r => r.id === resId);
+    if (!res) return alert('Không tìm thấy bài nộp Writing!');
+    activeRewriteResId = resId;
+
+    const wExam = (db.writingExams || []).find(e => e.id === res.examId);
+    const hasT1 = Boolean(res.writingSubmission?.task1 || wExam?.task1?.prompt);
+    const hasT2 = Boolean(res.writingSubmission?.task2 || wExam?.task2?.prompt);
+
+    const origT1 = res.writingSubmission?.task1 || '';
+    const origT2 = res.writingSubmission?.task2 || '';
+    const savedV2T1 = res.rewriteSubmission?.task1 || origT1;
+    const savedV2T2 = res.rewriteSubmission?.task2 || origT2;
+
+    const fbText = String(res.teacherFeedback || 'Chưa có nhận xét. Bạn vẫn có thể tự rà soát và viết lại bản cải thiện (Version 2).');
+
+    document.getElementById('writingRewriteModalTitle').innerHTML = `✏️ Viết Lại Bản Sửa (Rewrite V2) — <span style="color:#a7f3d0;">${res.examTitle}</span>`;
+    const expBtn = document.getElementById('btnExportDocFromRewrite');
+    if (expBtn) expBtn.onclick = () => exportWritingFeedbackToDoc(res.id);
+
+    const body = document.getElementById('writingRewriteModalBody');
+    body.innerHTML = `
+      <div class="rewrite-split-grid">
+        <div class="rewrite-left-panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="font-weight:800; color:#1f3d32; font-size:14.5px;">📋 Nhận Xét & Lỗi Cần Sửa</span>
+            <span style="background:#1f3d32; color:#ffffff; padding:3px 10px; border-radius:99px; font-size:12px; font-weight:800;">
+              ${String(res.band).startsWith('Band') ? res.band : 'Band ' + res.band}
+            </span>
+          </div>
+          ${wExam?.task1?.prompt && hasT1 ? `<div style="margin-bottom:10px; padding:10px; background:#ffffff; border-radius:8px; border:1px solid #e2e8f0;"><b>Đề Task 1:</b> ${wExam.task1.prompt}</div>` : ''}
+          ${wExam?.task2?.prompt && hasT2 ? `<div style="margin-bottom:10px; padding:10px; background:#ffffff; border-radius:8px; border:1px solid #e2e8f0;"><b>Đề Task 2:</b> ${wExam.task2.prompt}</div>` : ''}
+          <div style="white-space:pre-wrap; background:#ffffff; padding:12px; border-radius:8px; border:1px solid #cbd5e1; color:#1e293b;">${fbText}</div>
+        </div>
+
+        <div class="rewrite-right-panel">
+          ${hasT1 ? `
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <label style="font-weight:800; font-size:13px; color:#064e3b;">✍️ Bản sửa Task 1 (Version 2):</label>
+                <span id="rewriteT1WordCount" style="font-size:12px; font-weight:700; color:#059669;">0 words</span>
+              </div>
+              <textarea id="rewriteInputTask1" class="rewrite-textarea" placeholder="Sửa lại bài viết Task 1 của bạn tại đây..."
+                oninput="updateRewriteWordCounts()">${savedV2T1}</textarea>
+            </div>
+          ` : ''}
+
+          ${hasT2 ? `
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <label style="font-weight:800; font-size:13px; color:#064e3b;">✍️ Bản sửa Task 2 (Version 2):</label>
+                <span id="rewriteT2WordCount" style="font-size:12px; font-weight:700; color:#059669;">0 words</span>
+              </div>
+              <textarea id="rewriteInputTask2" class="rewrite-textarea" style="min-height:250px;" placeholder="Sửa lại bài viết Task 2 của bạn tại đây..."
+                oninput="updateRewriteWordCounts()">${savedV2T2}</textarea>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+
+    openModal('writingRewriteModal');
+    setTimeout(updateRewriteWordCounts, 50);
+  };
+
+  window.updateRewriteWordCounts = function() {
+    const t1El = document.getElementById('rewriteInputTask1');
+    const t2El = document.getElementById('rewriteInputTask2');
+    if (t1El) {
+      const c1 = t1El.value.trim() ? t1El.value.trim().split(/\s+/).length : 0;
+      const lbl1 = document.getElementById('rewriteT1WordCount');
+      if (lbl1) lbl1.textContent = `${c1} words`;
+    }
+    if (t2El) {
+      const c2 = t2El.value.trim() ? t2El.value.trim().split(/\s+/).length : 0;
+      const lbl2 = document.getElementById('rewriteT2WordCount');
+      if (lbl2) lbl2.textContent = `${c2} words`;
+    }
+  };
+
+  window.saveWritingRewriteSubmission = async function() {
+    if (!activeRewriteResId) return;
+    const res = (db.results || []).find(r => r.id === activeRewriteResId);
+    if (!res) return;
+
+    const t1Val = document.getElementById('rewriteInputTask1')?.value?.trim() || '';
+    const t2Val = document.getElementById('rewriteInputTask2')?.value?.trim() || '';
+
+    res.rewriteSubmission = {
+      task1: t1Val,
+      task2: t2Val,
+      updatedAt: new Date().toLocaleString()
+    };
+
+    await persist();
+    closeModal('writingRewriteModal');
+    renderPaginatedHomeSubmissions();
+    alert('✅ Đã lưu Bản sửa hoàn thiện (Version 2) thành công! Bạn cũng có thể bấm nút "📄 Xuất Word/Docs" để tải toàn bộ bài chấm & bản sửa về máy.');
+  };
+
+  // Chèn thêm nút "📄 Xuất Word / Google Docs" và "✏️ Viết bản sửa V2" vào cả modal xem bài Writing của Học sinh & Giáo viên
+  const _v6OrigOpenStudentViewWriting = openStudentViewWritingModal;
+  openStudentViewWritingModal = function(resId) {
+    _v6OrigOpenStudentViewWriting(resId);
+    injectDocAndRewriteBtnsIntoWritingModal('studentViewWritingModal', resId);
+  };
+
+  const _v6OrigOpenGradeWriting = openGradeWritingModal;
+  openGradeWritingModal = function(resId) {
+    _v6OrigOpenGradeWriting(resId);
+    injectDocAndRewriteBtnsIntoWritingModal('gradeWritingModal', resId);
+  };
+
+  function injectDocAndRewriteBtnsIntoWritingModal(modalId, resId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    const footer = modal.querySelector('.modal-footer');
+    if (!footer) return;
+
+    let docBtn = footer.querySelector('.btn-export-writing-doc');
+    if (!docBtn) {
+      docBtn = document.createElement('button');
+      docBtn.type = 'button';
+      docBtn.className = 'btn btn-secondary btn-export-writing-doc';
+      docBtn.innerHTML = '📄 Xuất File Word / Google Docs';
+      footer.insertBefore(docBtn, footer.firstChild);
+    }
+    docBtn.onclick = () => exportWritingFeedbackToDoc(resId);
+
+    let rwBtn = footer.querySelector('.btn-open-rewrite-v2');
+    if (!rwBtn) {
+      rwBtn = document.createElement('button');
+      rwBtn.type = 'button';
+      rwBtn.className = 'btn btn-emerald btn-open-rewrite-v2';
+      rwBtn.style.background = '#047857';
+      rwBtn.innerHTML = '✏️ Viết bản sửa (Rewrite V2)';
+      footer.insertBefore(rwBtn, docBtn.nextSibling);
+    }
+    rwBtn.onclick = () => {
+      closeModal(modalId);
+      openWritingRewriteModal(resId);
+    };
+  }
+
+  // Ghi đè bảng Recent Submissions để:
+  // - BỎ HẲN nút "📸 Phiếu điểm" ở Reading & Listening
+  // - Chỉ hiện nút "📄 Word/Docs" và "✏️ Sửa bài V2" cho bài Writing
+  const _v6OrigRenderPaginatedSubs = renderPaginatedHomeSubmissions;
+  renderPaginatedHomeSubmissions = function() {
+    _v6OrigRenderPaginatedSubs();
+    const tbody = document.getElementById('homeRecentActivityTbody');
+    if (!tbody) return;
+
+    tbody.querySelectorAll('tr').forEach(tr => {
+      const slipBtn = Array.from(tr.querySelectorAll('button')).find(b => (b.textContent || '').includes('Phiếu điểm'));
+      if (!slipBtn) return;
+
+      const onclickAttr = slipBtn.getAttribute('onclick') || '';
+      const idMatch = onclickAttr.match(/'([^']+)'/);
+      const resId = idMatch ? idMatch[1] : '';
+      const res = (db.results || []).find(r => r.id === resId);
+      if (!res) {
+        slipBtn.remove();
+        return;
+      }
+
+      const sk = detectResultSkillType(res);
+      if (sk === 'writing') {
+        slipBtn.innerHTML = '📄 Word/Docs';
+        slipBtn.title = 'Tải phiếu chấm & bài viết ra file Microsoft Word / Google Docs (.doc)';
+        slipBtn.onclick = () => exportWritingFeedbackToDoc(res.id);
+
+        const rwBtn = document.createElement('button');
+        rwBtn.type = 'button';
+        rwBtn.className = 'btn btn-secondary';
+        rwBtn.style.marginLeft = '6px';
+        const hasV2 = Boolean(res.rewriteSubmission && (res.rewriteSubmission.task1 || res.rewriteSubmission.task2));
+        rwBtn.innerHTML = hasV2 ? '✓ Đã sửa V2' : '✏️ Viết lại V2';
+        if (hasV2) {
+          rwBtn.style.background = '#dcfce7';
+          rwBtn.style.color = '#15803d';
+          rwBtn.style.borderColor = '#86efac';
+        }
+        rwBtn.onclick = () => openWritingRewriteModal(res.id);
+        slipBtn.insertAdjacentElement('afterend', rwBtn);
+      } else {
+        // Bỏ hoàn toàn nút Phiếu điểm cho Reading & Listening theo đúng yêu cầu
+        slipBtn.remove();
+      }
+    });
+  };
+
+  /* ==========================================================================
+     3. SỔ TAY LỖI SAI CÁ NHÂN (MISTAKE BANK):
+        - Chuyển sang "Thẻ Bóc Tách Bẫy Ngữ Cảnh" (Trap & Context Flashcard)
+        - Tự động lấy câu hỏi gốc có chỗ trống [ ___ (Q29) ___ ] từ đề thi
+     ========================================================================== */
+  function extractOriginalQuestionContextText(exam, qNumStr) {
+    if (!exam || !Array.isArray(exam.passages)) return '';
+    const qKey = `q${qNumStr}`;
+
+    for (const p of exam.passages) {
+      const qHtml = String(p.questionsHtml || '');
+      if (!qHtml) continue;
+
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = qHtml;
+
+      // Tìm ô input, select, radio hoặc vùng kéo thả của câu hỏi qKey
+      const targetEl = tempDiv.querySelector(`[name="${qKey}"], [data-target="${qKey}"], [data-multi-pair*="${qKey}"]`);
+      if (targetEl) {
+        let block = targetEl.closest('li, tr, p, .question-row, .q-item, div');
+        if (!block || (block.textContent || '').trim().length < 18) {
+          block = targetEl.parentElement?.parentElement || targetEl.parentElement;
+        }
+        if (block) {
+          const cloneBlock = block.cloneNode(true);
+          // Bỏ các hộp giải thích đỏ bên trong nếu có
+          cloneBlock.querySelectorAll('button, .btn-save-mistake-inline').forEach(b => b.remove());
+          const targetInClone = cloneBlock.querySelector(`[name="${qKey}"], [data-target="${qKey}"]`);
+          if (targetInClone) {
+            const placeholderSpan = document.createElement('span');
+            placeholderSpan.textContent = ` [ ___ (Q${qNumStr}) ___ ] `;
+            targetInClone.replaceWith(placeholderSpan);
+          }
+          const cleanStr = (cloneBlock.textContent || '').replace(/\s+/g, ' ').trim();
+          if (cleanStr.length >= 8) {
+            return cleanStr.length > 280 ? cleanStr.substring(0, 277) + '...' : cleanStr;
+          }
+        }
+      }
+    }
+    return `Câu hỏi số ${qNumStr} trong đề "${exam.title}": Hãy điền/chọn đáp án đúng vào vị trí [ ___ (Q${qNumStr}) ___ ].`;
+  }
+
+  // Ghi đè hàm lưu câu sai để lưu kèm cả Câu hỏi gốc có chỗ trống + Dẫn chứng nguyên bản + Giải thích
+  window.saveSingleQuestionToMistakeBank = function(qNumStr, btnEl) {
+    if (!activeExam || !activeUser) return;
+    const qKey = `q${qNumStr}`;
+    const correctAns = String((activeExam.correctAnswers && activeExam.correctAnswers[qKey]) || '').trim();
+    if (!correctAns) return;
+
+    const userAns = String(userAnswers[qKey] || '').trim() || 'Bỏ trống';
+    const exp = (activeExam.explanations && activeExam.explanations[qKey]) ? activeExam.explanations[qKey] : '';
+    const evi = (activeExam.evidences && activeExam.evidences[qKey]) ? activeExam.evidences[qKey] : '';
+    const questionContext = extractOriginalQuestionContextText(activeExam, qNumStr);
+    const qCategory = typeof detectQuestionCategoryFromExam === 'function' ? detectQuestionCategoryFromExam(activeExam, qKey) : 'IELTS Question';
+
+    const list = getSavedMistakeList();
+    const itemId = `${activeExam.id}_${qKey}`;
+    const newRecord = {
+      id: itemId,
+      examId: activeExam.id,
+      examTitle: activeExam.title,
+      skill: activeExamType || 'reading',
+      qNum: qNumStr,
+      qCategory,
+      questionContext,
+      userAns,
+      correctAns: correctAns.split('|')[0].trim(),
+      evidenceQuote: evi ? evi.replace(/<[^>]+>/g, '').trim() : '',
+      explanation: exp || 'Đối chiếu kỹ từ đồng nghĩa (Paraphrase) giữa câu hỏi và dẫn chứng trong bài.',
+      savedAt: new Date().toLocaleDateString()
+    };
+
+    const existingIdx = list.findIndex(x => x.id === itemId);
+    if (existingIdx !== -1) list[existingIdx] = newRecord;
+    else list.unshift(newRecord);
+    saveMistakeListToStorage(list);
+
+    if (btnEl) {
+      btnEl.textContent = '✓ Đã lưu vào Sổ Lỗi Sai';
+      btnEl.style.background = '#dcfce7';
+      btnEl.style.color = '#15803d';
+      btnEl.style.borderColor = '#86efac';
+    }
+    renderUnifiedLoungeAndStreakBar();
+  };
+
+  let trapCardRevealed = false;
+  let trapUserTypedGuess = '';
+
+  window.flipTrapFlashcard = function() {
+    const inp = document.getElementById('trapGuessInputBox');
+    if (inp) trapUserTypedGuess = inp.value.trim();
+    trapCardRevealed = true;
+    renderMistakeBankModalContent();
+  };
+
+  window.nextTrapFlashcard = function(removeCurrentId) {
+    if (removeCurrentId) {
+      const list = getSavedMistakeList().filter(x => x.id !== removeCurrentId);
+      saveMistakeListToStorage(list);
+      renderUnifiedLoungeAndStreakBar();
+    } else {
+      mistakeQuizStep++;
+    }
+    trapCardRevealed = false;
+    trapUserTypedGuess = '';
+    renderMistakeBankModalContent();
+  };
+
+  // Ghi đè giao diện Sổ Tay Lỗi Sai sang Thẻ Bóc Tách Bẫy Ngữ Cảnh (Context Flashcard)
+  renderMistakeBankModalContent = function() {
+    const body = document.getElementById('mistakeBankModalBody');
+    const footer = document.getElementById('mistakeBankModalFooter');
+    const list = getSavedMistakeList();
+    if (!body || !footer) return;
+
+    if (!list.length) {
+      body.innerHTML = `
+        <div style="text-align:center; padding:36px 20px; color:#64748b;">
+          <div style="font-size:42px; margin-bottom:10px;">📕</div>
+          <div style="font-size:16px; font-weight:800; color:#0f172a; margin-bottom:6px;">Sổ Tay Lỗi Sai Của Bạn Đang Trống</div>
+          <p style="font-size:13.5px; max-width:520px; margin:0 auto; line-height:1.6;">
+            Khi xem lại bài làm (<b>Review Keys</b>), bạn hãy bấm nút <b>"📌 Lưu vào Sổ Lỗi Sai"</b> ở những câu bị bẫy để lưu nguyên ngữ cảnh câu hỏi về đây ôn tập nhé!
+          </p>
+        </div>
+      `;
+      footer.innerHTML = `<div></div><button class="btn btn-secondary" onclick="closeModal('mistakeBankModal')">Đóng</button>`;
+      return;
+    }
+
+    // Tự động bổ sung ngữ cảnh câu hỏi gốc cho các mục lưu từ phiên bản trước (nếu chưa có questionContext)
+    list.forEach(item => {
+      if (!item.questionContext) {
+        const ex = (db.readingExams || []).find(e => e.id === item.examId) || (db.listeningExams || []).find(e => e.id === item.examId);
+        item.questionContext = ex ? extractOriginalQuestionContextText(ex, item.qNum) : `Câu số ${item.qNum} trong đề "${item.examTitle}" — vị trí cần điền: [ ___ (Q${item.qNum}) ___ ]`;
+        if (ex && !item.evidenceQuote && ex.evidences && ex.evidences[`q${item.qNum}`]) {
+          item.evidenceQuote = ex.evidences[`q${item.qNum}`].replace(/<[^>]+>/g, '').trim();
+        }
+      }
+    });
+
+    if (!mistakeQuizMode) {
+      body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+          <span style="font-size:14px; font-weight:800; color:#1f3d32;">📕 Danh sách ${list.length} câu hỏi & bẫy ngữ cảnh cần khắc phục:</span>
+          <button class="btn btn-emerald" onclick="trapCardRevealed=false; trapUserTypedGuess=''; openMistakeBankModal(true);">
+            🃏 Lật Thẻ Ôn Tập Ngữ Cảnh & Bẫy (${list.length} thẻ)
+          </button>
+        </div>
+        ${list.map(item => `
+          <div class="mistake-card-item">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-size:12px; font-weight:800; color:#059669; background:#ecfdf5; padding:3px 9px; border-radius:6px;">
+                ${item.skill === 'listening' ? '🎧 Listening' : '📖 Reading'} • ${item.examTitle} — Câu ${item.qNum} (${item.qCategory || 'Question'})
+              </span>
+              <button class="btn btn-danger" style="padding:2px 8px; font-size:11px;" onclick="deleteMistakeItem('${item.id}')">✓ Đã hiểu bẫy / Gỡ</button>
+            </div>
+            <div style="font-size:13.5px; color:#0f172a; background:#faf8f2; padding:8px 12px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:6px;">
+              <b>Ngữ cảnh câu hỏi gốc:</b> ${String(item.questionContext).replace(/\[\s*___\s*\(Q\d+\)\s*___\s*\]/g, `<span class="trap-blank-pill">[ ___ (Q${item.qNum}) ___ ]</span>`)}
+            </div>
+            <div style="font-size:13.5px; margin-bottom:6px;">
+              • Lần trước điền: <b style="color:#dc2626;">${item.userAns}</b>
+              &nbsp; ➔ &nbsp; Đáp án chuẩn: <b style="color:#15803d; font-size:14.5px;">${item.correctAns}</b>
+            </div>
+            ${item.evidenceQuote ? `
+              <div style="font-size:12.5px; color:#065f46; background:#f0fdf4; padding:7px 11px; border-radius:7px; border:1px solid #bbf7d0; margin-bottom:5px;">
+                🔎 <b>Dẫn chứng nguyên bản trong bài:</b> "${item.evidenceQuote}"
+              </div>
+            ` : ''}
+            <div style="font-size:12.5px; color:#334155; background:#f8fafc; padding:7px 11px; border-radius:7px; border:1px solid #e2e8f0;">
+              💡 <b>Phân tích Paraphrase & Bẫy:</b> ${item.explanation}
+            </div>
+          </div>
+        `).join('')}
+      `;
+      footer.innerHTML = `
+        <span style="font-size:12px; color:#64748b;">Bấm "🃏 Lật Thẻ Ôn Tập Ngữ Cảnh & Bẫy" để tự nhẩm lại đáp án trên câu hỏi gốc mà không bị lộ đáp án</span>
+        <button class="btn btn-secondary" onclick="closeModal('mistakeBankModal')">Đóng</button>
+      `;
+    } else {
+      if (mistakeQuizStep >= list.length) mistakeQuizStep = 0;
+      const cur = list[mistakeQuizStep];
+      const formattedQuestion = String(cur.questionContext || '').replace(
+        /\[\s*___\s*\(Q\d+\)\s*___\s*\]/g,
+        `<span class="trap-blank-pill">[ ______ (Câu ${cur.qNum}) ______ ]</span>`
+      );
+
+      body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:13px; font-weight:800; color:#1f3d32;">
+          <span>🃏 Thẻ Bóc Tách Bẫy Ngữ Cảnh • ${cur.skill === 'listening' ? '🎧 Listening' : '📖 Reading'}: ${cur.examTitle}</span>
+          <span>Thẻ ${mistakeQuizStep + 1} / ${list.length}</span>
+        </div>
+
+        <!-- MẶT TRƯỚC: CÂU HỎI GỐC CÓ CHỖ TRỐNG (KHÔNG HỀ LỘ ĐÁP ÁN) -->
+        <div class="trap-flashcard-front">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:12px; font-weight:800; color:#059669; text-transform:uppercase;">
+              Mặt Trước: Ngữ Cảnh Câu Hỏi Gốc Trong Đề (Câu ${cur.qNum} • ${cur.qCategory || 'IELTS'})
+            </span>
+            <span style="font-size:12px; color:#92400e; background:#fef3c7; padding:2px 9px; border-radius:99px; font-weight:700;">
+              Lần thi trước bạn đã điền: "${cur.userAns}"
+            </span>
+          </div>
+
+          <div class="trap-context-box">
+            ${formattedQuestion}
+          </div>
+
+          <div style="display:flex; gap:10px; align-items:center; margin-top:12px; flex-wrap:wrap;">
+            <input type="text" id="trapGuessInputBox" class="form-input" style="flex:1; min-width:220px;"
+              placeholder="Gõ thử từ/đáp án bạn nhớ vào đây trước khi lật thẻ..."
+              value="${trapUserTypedGuess.replace(/"/g, '&quot;')}"
+              onkeydown="if(event.key==='Enter') flipTrapFlashcard();">
+            ${!trapCardRevealed ? `
+              <button type="button" class="btn btn-emerald" style="padding:10px 18px;" onclick="flipTrapFlashcard()">
+                👁️ Lật Thẻ Xem Đáp Án & Cặp Từ Paraphrase
+              </button>
+            ` : ''}
+          </div>
+        </div>
+
+        <!-- MẶT SAU: CHỈ HIỆN RA KHI HỌC SINH BẤM LẬT THẺ -->
+        ${trapCardRevealed ? `
+          <div class="trap-flashcard-back">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px; border-bottom:1px solid #bbf7d0; padding-bottom:10px;">
+              <div style="font-size:17px; font-weight:800; color:#065f46;">
+                🎯 ĐÁP ÁN CHUẨN: <span style="background:#ffffff; padding:3px 12px; border-radius:8px; border:1.5px solid #059669; color:#047857;">${cur.correctAns}</span>
+              </div>
+              ${trapUserTypedGuess ? `
+                <div style="font-size:13px; font-weight:800; color:${trapUserTypedGuess.toLowerCase() === cur.correctAns.toLowerCase() ? '#15803d' : '#b91c1c'};">
+                  ${trapUserTypedGuess.toLowerCase() === cur.correctAns.toLowerCase() ? '✅ Bạn vừa gõ chính xác 100%!' : `❌ Bạn vừa gõ: "${trapUserTypedGuess}"`}
+                </div>
+              ` : ''}
+            </div>
+
+            ${cur.evidenceQuote ? `
+              <div style="margin-bottom:10px; background:#ffffff; padding:11px 14px; border-radius:10px; border:1px solid #86efac;">
+                <div style="font-size:12px; font-weight:800; color:#065f46; margin-bottom:3px;">1. DẪN CHỨNG NGUYÊN BẢN TRONG BÀI ĐỌC / TRANSCRIPT:</div>
+                <div style="font-size:14px; color:#0f172a; font-style:italic;">"${cur.evidenceQuote}"</div>
+              </div>
+            ` : ''}
+
+            <div style="background:#ffffff; padding:11px 14px; border-radius:10px; border:1px solid #cbd5e1;">
+              <div style="font-size:12px; font-weight:800; color:#1f3d32; margin-bottom:3px;">
+                ${cur.evidenceQuote ? '2.' : '1.'} PHÂN TÍCH CẶP TỪ PARAPHRASE & BẢN CHẤT BẪY CẦN NHỚ:
+              </div>
+              <div style="font-size:13.5px; color:#1e293b; line-height:1.6;">${cur.explanation}</div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; gap:10px; flex-wrap:wrap;">
+              <button type="button" class="btn btn-secondary" onclick="nextTrapFlashcard(null)">
+                🔁 Giữ lại trong sổ để mai ôn tiếp ➡️
+              </button>
+              <button type="button" class="btn btn-emerald" onclick="nextTrapFlashcard('${cur.id}')">
+                ✅ Đã hiểu rõ bẫy này (Gỡ khỏi sổ & Qua thẻ kế)
+              </button>
+            </div>
+          </div>
+        ` : ''}
+      `;
+
+      footer.innerHTML = `
+        <button class="btn btn-secondary" onclick="mistakeQuizMode=false; renderMistakeBankModalContent();">🔙 Xem dạng danh sách</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary" onclick="if(mistakeQuizStep>0){mistakeQuizStep--; trapCardRevealed=false; renderMistakeBankModalContent();}">⬅️ Thẻ trước</button>
+          <button class="btn btn-secondary" onclick="mistakeQuizStep=(mistakeQuizStep+1)%${list.length}; trapCardRevealed=false; renderMistakeBankModalContent();">Thẻ kế tiếp ➡️</button>
+        </div>
+      `;
+    }
+  };
+
+  /* ==========================================================================
+     4. BỘ LỌC ĐỀ THI THEO "DẠNG CÂU HỎI YẾU" (QUESTION TYPE FILTER) CHO READING & LISTENING
+     ========================================================================== */
+  function getExamQuestionTypesSet(exam) {
+    const types = new Set();
+    if (!exam || !exam.correctAnswers) return types;
+    Object.keys(exam.correctAnswers).forEach(qKey => {
+      types.add(detectQuestionCategoryFromExam(exam, qKey));
+    });
+    return types;
+  }
+
+  function injectQuestionTypeFilterSelect(skillKey) {
+    const partSelectId = skillKey === 'reading' ? 'filterReadingPart' : 'filterListeningPart';
+    const partSel = document.getElementById(partSelectId);
+    if (!partSel) return;
+
+    const qTypeSelectId = `filterQType_${skillKey}`;
+    if (document.getElementById(qTypeSelectId)) return;
+
+    const sel = document.createElement('select');
+    sel.id = qTypeSelectId;
+    sel.className = 'form-select';
+    sel.style.cssText = 'width:auto; min-width:195px;';
+    sel.innerHTML = `
+      <option value="ALL">🎯 Tất cả dạng câu hỏi</option>
+      <option value="TRUE/FALSE/NOT GIVEN & YES/NO">🎯 T/F/NG & YES/NO</option>
+      <option value="Matching / Drag & Drop">🎯 Matching / Headings / Map</option>
+      <option value="Note / Summary / Gap-Fill">🎯 Note / Summary / Gap-Fill</option>
+      <option value="Multiple Choice (A, B, C, D)">🎯 Multiple Choice (A, B, C, D)</option>
+      <option value="Multiple Choice (Choose TWO)">🎯 Multiple Choice (Choose TWO)</option>
+    `;
+    sel.onchange = () => {
+      examPageTrackers[skillKey] = 1;
+      if (skillKey === 'reading') renderReadingTable();
+      else renderListeningTable();
+    };
+    partSel.insertAdjacentElement('afterend', sel);
+  }
+
+  // Nâng cấp renderReadingTable & renderListeningTable để hỗ trợ lọc theo Dạng câu hỏi
+  const _v6OrigRenderReadingTable = renderReadingTable;
+  renderReadingTable = function() {
+    injectQuestionTypeFilterSelect('reading');
+    const qTypeVal = document.getElementById('filterQType_reading')?.value || 'ALL';
+    if (qTypeVal === 'ALL') {
+      return _v6OrigRenderReadingTable();
+    }
+    const origReadingExams = db.readingExams;
+    try {
+      db.readingExams = (origReadingExams || []).filter(ex => getExamQuestionTypesSet(ex).has(qTypeVal));
+      _v6OrigRenderReadingTable();
+    } finally {
+      db.readingExams = origReadingExams;
+    }
+  };
+
+  const _v6OrigRenderListeningTable = renderListeningTable;
+  renderListeningTable = function() {
+    injectQuestionTypeFilterSelect('listening');
+    const qTypeVal = document.getElementById('filterQType_listening')?.value || 'ALL';
+    if (qTypeVal === 'ALL') {
+      return _v6OrigRenderListeningTable();
+    }
+    const origListeningExams = db.listeningExams;
+    try {
+      db.listeningExams = (origListeningExams || []).filter(ex => getExamQuestionTypesSet(ex).has(qTypeVal));
+      _v6OrigRenderListeningTable();
+    } finally {
+      db.listeningExams = origListeningExams;
+    }
+  };
+
+  /* ==========================================================================
+     5. XUẤT BÁO CÁO TIẾN ĐỘ LỚP HỌC RA FILE EXCEL (.CSV) CHO GIÁO VIÊN
+     ========================================================================== */
+  window.exportClassReportToExcel = function(classId) {
+    const cls = (db.classes || []).find(c => c.id === classId);
+    if (!cls) return;
+    const students = (db.users || []).filter(u => u.role === 'student' && u.classId === classId);
+    if (!students.length) return alert('Lớp này hiện chưa có học sinh nào để xuất báo cáo!');
+
+    const todayStr = getTodayDateStringKey();
+    const rows = [
+      ['STT', 'Họ và Tên', 'Tài khoản (Username)', 'Loại TK', 'Chuỗi Streak (Ngày)', 'Mục tiêu hôm nay', 'Số đề Reading đã làm', 'Band Reading TB', 'Số đề Listening đã làm', 'Band Listening TB', 'Số bài Writing đã nộp', 'Band Writing TB', 'Số bài làm trong 7 ngày qua']
+    ];
+
+    students.forEach((st, idx) => {
+      const stuRes = (db.results || []).filter(r => String(r.userName || '').trim().toLowerCase() === String(st.name || '').trim().toLowerCase());
+      const rSubs = stuRes.filter(r => detectResultSkillType(r) === 'reading');
+      const lSubs = stuRes.filter(r => detectResultSkillType(r) === 'listening');
+      const wSubs = stuRes.filter(r => detectResultSkillType(r) === 'writing');
+
+      function calcAvgBand(arr) {
+        if (!arr.length) return '—';
+        const nums = arr.map(x => parseFloat(String(x.band || '').replace(/[^0-9.]/g, ''))).filter(n => !isNaN(n) && n > 0);
+        if (!nums.length) return '—';
+        return (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(1);
+      }
+
+      const last7DaysCount = stuRes.filter(r => {
+        const idMatch = String(r.id || '').match(/(\d{13})/);
+        const t = idMatch ? Number(idMatch[1]) : new Date(r.isoDate || r.timestamp).getTime();
+        return t && (Date.now() - t <= 7 * 24 * 3600 * 1000);
+      }).length;
+
+      const streakObj = calculateUserStreakStats(st.name, st.username);
+      const goal = getStudentDailyGoalRecord(st.username, todayStr);
+      const goalTxt = goal ? `${goal.r}R - ${goal.l}L - ${goal.w}W` : 'Chưa đặt';
+
+      rows.push([
+        idx + 1,
+        st.name,
+        st.username,
+        st.isPro ? 'PRO' : 'Standard',
+        streakObj.currentStreak,
+        goalTxt,
+        rSubs.length,
+        calcAvgBand(rSubs),
+        lSubs.length,
+        calcAvgBand(lSubs),
+        wSubs.length,
+        calcAvgBand(wSubs),
+        last7DaysCount
+      ]);
+    });
+
+    const csvContent = rows
+      .map(r => r.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+      .join('\r\n');
+
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Bao_Cao_Lop_${String(cls.name).replace(/\s+/g, '_')}_${todayStr}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  };
+
+  // Thêm nút "📊 Xuất Báo Cáo Tuần (Excel)" vào bảng Classes và modal Tiến độ lớp
+  const _v6OrigRenderClassTable = renderClassTable;
+  renderClassTable = function() {
+    _v6OrigRenderClassTable();
+    const tbody = document.getElementById('classTbody');
+    if (!tbody) return;
+    tbody.querySelectorAll('tr').forEach(tr => {
+      const progBtn = tr.querySelector('button[onclick^="openClassProgressModal"]');
+      if (!progBtn || tr.querySelector('.btn-export-class-excel')) return;
+      const m = (progBtn.getAttribute('onclick') || '').match(/'([^']+)'/);
+      if (!m) return;
+      const classId = m[1];
+      const excelBtn = document.createElement('button');
+      excelBtn.type = 'button';
+      excelBtn.className = 'btn btn-secondary btn-export-class-excel';
+      excelBtn.innerHTML = '📊 Xuất Báo Cáo (Excel)';
+      excelBtn.onclick = () => exportClassReportToExcel(classId);
+      progBtn.insertAdjacentElement('afterend', excelBtn);
+    });
+  };
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      injectQuestionTypeFilterSelect('reading');
+      injectQuestionTypeFilterSelect('listening');
+      if (activeUser) {
+        renderPaginatedHomeSubmissions();
+        if (activeUser.role === 'teacher') renderClassTable();
+      }
+    }, 650);
+  });
+</script>
+<!-- ============================================================================
+     MODULE UPDATE 24.10 - V7 (WRITING REWRITE V2 FULL-HEIGHT, CHART IMAGE & FOCUSED FIXES):
+     1. Mở rộng cửa sổ Rewrite V2 (1260px, tỷ lệ 40% - 60%) và kéo cao khung viết (490px+)
+     2. Tự động hiển thị Ảnh / Biểu đồ Task 1 ngay trong cột trái (Bấm vào ảnh để phóng to)
+     3. Lọc gọn cột Nhận xét: Chỉ hiển thị "Các cặp từ/câu cần sửa" & "Điểm cần cải thiện"
+     Dán nối tiếp đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* Mở rộng tối đa cửa sổ Modal Viết Lại Bản Sửa */
+  #writingRewriteModal .modal-window {
+    width: 96vw !important;
+    max-width: 1280px !important;
+    height: 92vh !important;
+    max-height: 92vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #writingRewriteModal .modal-body {
+    flex: 1 !important;
+    padding: 16px 20px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Tỷ lệ mới: Cột trái 40% (Đề + Biểu đồ + Lỗi cần sửa) | Cột phải 60% (Khung viết rộng thoáng) */
+  .rewrite-v7-grid {
+    display: grid;
+    grid-template-columns: 4fr 6fr;
+    gap: 18px;
+    height: 100%;
+    flex: 1;
+    min-height: 0;
+  }
+  @media (max-width: 980px) {
+    .rewrite-v7-grid {
+      grid-template-columns: 1fr;
+      overflow-y: auto;
+    }
+  }
+
+  .rewrite-v7-left {
+    background: #faf8f2;
+    border: 1.5px solid #d5cfc0;
+    border-radius: 14px;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .rewrite-v7-right {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .rewrite-task-editor-card {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 460px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  }
+
+  .rewrite-v7-textarea {
+    width: 100%;
+    flex: 1;
+    min-height: 430px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 16px 18px;
+    font-size: 15.5px;
+    line-height: 1.75;
+    color: #0f172a;
+    background: #fcfbf7;
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
+    resize: vertical;
+  }
+  .rewrite-v7-textarea:focus {
+    outline: none;
+    background: #ffffff;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.14);
+  }
+
+  .rewrite-fix-pair-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #f59e0b;
+    border-radius: 9px;
+    padding: 9px 12px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .rewrite-chart-img-box {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    margin-top: 8px;
+  }
+  .rewrite-chart-img-box img {
+    max-width: 100%;
+    max-height: 260px;
+    object-fit: contain;
+    border-radius: 6px;
+    cursor: zoom-in;
+    transition: transform 0.15s;
+  }
+  .rewrite-chart-img-box img:hover {
+    opacity: 0.95;
+  }
+</style>
+
+<!-- LIGHTBOX PHÓNG TO BIỂU ĐỒ TASK 1 KHI HỌC SINH BẤM VÀO ẢNH -->
+<div id="rewriteChartZoomOverlay" onclick="this.style.display='none'"
+  style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.86); z-index:99999; align-items:center; justify-content:center; padding:24px; cursor:zoom-out;">
+  <img id="rewriteChartZoomImg" src="" alt="Task 1 Chart" style="max-width:94vw; max-height:90vh; background:#ffffff; padding:12px; border-radius:12px; box-shadow:0 15px 40px rgba(0,0,0,0.4);">
+</div>
+
+<script>
+  // 1. Hàm trích xuất hình ảnh Biểu đồ / Bản đồ của Task 1 từ dữ liệu đề thi
+  function extractTask1ChartImageSrc(wExam) {
+    if (!wExam) return '';
+    const t1 = wExam.task1 || {};
+    const directUrl = t1.image || t1.imageUrl || t1.img || t1.chartUrl || t1.mediaUrl || wExam.image || wExam.imageUrl || '';
+    if (directUrl && String(directUrl).trim()) return String(directUrl).trim();
+
+    // Nếu ảnh được nhúng dạng thẻ <img src="..."> bên trong chuỗi prompt của Task 1
+    const promptStr = String(t1.prompt || '');
+    const imgMatch = promptStr.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (imgMatch && imgMatch[1]) return imgMatch[1];
+
+    return '';
+  }
+
+  window.openRewriteChartZoom = function(imgSrc) {
+    if (!imgSrc) return;
+    const overlay = document.getElementById('rewriteChartZoomOverlay');
+    const imgEl = document.getElementById('rewriteChartZoomImg');
+    if (overlay && imgEl) {
+      imgEl.src = imgSrc;
+      overlay.style.display = 'flex';
+    }
+  };
+
+  // 2. Hàm bóc tách RIÊNG các lỗi cần sửa & điểm cần cải thiện (Lọc bỏ phần khen và lý thuyết dài dòng)
+  function extractActionableFeedbackForRewrite(rawFb) {
+    const text = String(rawFb || '').trim();
+    if (!text) {
+      return { fixes: [], improvements: ['Hãy đọc kỹ lại bài viết, rà soát lỗi chính tả, ngữ pháp và nâng cấp các từ vựng lặp lại.'] };
+    }
+
+    const fixes = [];
+    const arrowRegex = /([^\n\->➔]{3,75})\s*(?:->|➔|=>)\s*([^\n]{3,85})/g;
+    let m;
+    while ((m = arrowRegex.exec(text)) !== null && fixes.length < 10) {
+      const bad = m[1].replace(/^[\s•\-\*1-9.]+/, '').replace(/["“”]/g, '').trim();
+      const good = m[2].replace(/["“”]/g, '').trim();
+      if (bad && good && bad.length < 70) {
+        fixes.push({ bad, good });
+      }
+    }
+
+    // Lọc lấy các dòng chỉ ra lỗi sai / điểm cần cải thiện (Areas for Improvement, Hạn chế, Cần cải thiện, Tuy nhiên, Lỗi...)
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const improvements = [];
+
+    lines.forEach(line => {
+      const clean = line.replace(/^[\s•\-\*]+/, '').trim();
+      if (clean.length < 25) return;
+      if (clean.includes('->') || clean.includes('➔')) return;
+
+      // Bỏ qua các dòng khen ngợi thuần túy (Strengths / Điểm mạnh / Hoàn thành xuất sắc)
+      if (/^(?:Strengths|Điểm mạnh|Ưu điểm)\s*:/i.test(clean)) return;
+      if (/hoàn thành xuất sắc yêu cầu đề bài/i.test(clean) && !/tuy nhiên|cần|nhưng|hạn chế/i.test(clean)) return;
+
+      const isActionable = /(?:Areas?\s*for\s*Improvement|Weakness|To\s*improve|Suggestion|Fix|Error|Mistake|Instead\s*of|Avoid|Should|Could\s*be\s*improved|Hạn\s*chế|Cần\s*cải\s*thiện|Cần\s*khắc\s*phục|Cần\s*lưu\s*ý|Cần\s*sửa|Lỗi|Tuy\s*nhiên|Chú\s*ý|Nên\s*dùng|Nâng\s*cấp)/i.test(clean);
+
+      if (isActionable) {
+        // Làm gọn nhãn đầu dòng cho dễ đọc
+        const stripped = clean.replace(/^(?:Areas?\s*for\s*Improvement|Điểm\s*cần\s*cải\s*thiện|Hạn\s*chế)\s*:\s*/i, '');
+        improvements.push(stripped);
+      }
+    });
+
+    // Nếu bài nhận xét viết tự do không có từ khóa đặc trưng, lấy 3-4 dòng ngắn gọn nhất không phải tiêu đề
+    if (!improvements.length) {
+      lines.forEach(line => {
+        const clean = line.replace(/^[\s•\-\*]+/, '').trim();
+        if (
+          clean.length > 35 &&
+          !clean.startsWith('[') &&
+          !clean.includes('->') &&
+          !clean.includes('➔') &&
+          !/^(?:OVERALL|DETAILED\s*EVALUATION|Strengths)/i.test(clean) &&
+          improvements.length < 4
+        ) {
+          improvements.push(clean);
+        }
+      });
+    }
+
+    return { fixes, improvements: improvements.slice(0, 6) };
+  }
+
+  // 3. Ghi đè hàm mở cửa sổ Rewrite V2 với bố cục rộng thoáng + Hiện biểu đồ Task 1 + Nhận xét lọc gọn
+  window.openWritingRewriteModal = function(resId) {
+    const res = (db.results || []).find(r => r.id === resId);
+    if (!res) return alert('Không tìm thấy bài nộp Writing!');
+    activeRewriteResId = resId;
+
+    const wExam = (db.writingExams || []).find(e => e.id === res.examId);
+    const stuT1 = String(res.writingSubmission?.task1 || '').trim();
+    const stuT2 = String(res.writingSubmission?.task2 || '').trim();
+    const scoreStr = String(res.score || '');
+
+    // Xác định học sinh đã làm Task nào trong lần nộp này
+    const didT1 = stuT1.length > 0 || (!stuT2.length && Boolean(wExam?.task1?.prompt) && !scoreStr.includes('T1: 0w'));
+    const didT2 = stuT2.length > 0 || (!stuT1.length && Boolean(wExam?.task2?.prompt) && !scoreStr.includes('T2: 0w'));
+
+    const savedV2T1 = res.rewriteSubmission?.task1 || stuT1;
+    const savedV2T2 = res.rewriteSubmission?.task2 || stuT2;
+
+    const chartImgSrc = extractTask1ChartImageSrc(wExam);
+    const rawFb = String(res.teacherFeedback || '');
+    const parsedFb = extractActionableFeedbackForRewrite(rawFb);
+
+    document.getElementById('writingRewriteModalTitle').innerHTML = `✏️ Viết Lại Bản Sửa (Rewrite V2) — <span style="color:#a7f3d0;">${res.examTitle}</span>`;
+    const expBtn = document.getElementById('btnExportDocFromRewrite');
+    if (expBtn) expBtn.onclick = () => exportWritingFeedbackToDoc(res.id);
+
+    const body = document.getElementById('writingRewriteModalBody');
+    body.innerHTML = `
+      <div class="rewrite-v7-grid">
+        <!-- CỘT TRÁI (40%): ĐỀ BÀI + ẢNH BIỂU ĐỒ TASK 1 + LỖI CẦN SỬA TRỌNG TÂM -->
+        <div class="rewrite-v7-left">
+          <!-- Khối Đề bài & Biểu đồ Task 1 -->
+          <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; padding:13px 15px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-weight:800; color:#1f3d32; font-size:13.5px;">📌 Đề Bài & Biểu Đồ Đối Chiếu</span>
+              <span style="background:#1f3d32; color:#ffffff; padding:3px 10px; border-radius:99px; font-size:12px; font-weight:800;">
+                ${String(res.band).startsWith('Band') ? res.band : 'Band ' + res.band}
+              </span>
+            </div>
+
+            ${didT1 && wExam?.task1?.prompt ? `
+              <div style="font-size:13px; color:#1e293b; line-height:1.55; margin-bottom:6px;">
+                <b style="color:#065f46;">Task 1:</b> ${wExam.task1.prompt}
+              </div>
+            ` : ''}
+
+            ${didT1 && chartImgSrc ? `
+              <div class="rewrite-chart-img-box">
+                <img src="${chartImgSrc}" alt="Task 1 Chart" onclick="openRewriteChartZoom('${chartImgSrc.replace(/'/g, "\\'")}')" title="Bấm vào biểu đồ để phóng to toàn màn hình">
+                <div style="font-size:11px; color:#64748b; margin-top:4px; font-weight:700;">🔍 Bấm vào biểu đồ để phóng to xem rõ số liệu</div>
+              </div>
+            ` : ''}
+
+            ${didT2 && wExam?.task2?.prompt ? `
+              <div style="font-size:13px; color:#1e293b; line-height:1.55; margin-top:${didT1 ? '10px' : '0'};">
+                <b style="color:#065f46;">Task 2:</b> ${wExam.task2.prompt}
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Khối 1: Các cặp từ / diễn đạt cần thay thế ngay -->
+          <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; padding:13px 15px;">
+            <div style="font-weight:800; color:#92400e; font-size:13.5px; margin-bottom:8px;">
+              🛠️ 1. Các Cụm Từ & Câu Cần Sửa / Nâng Cấp Trực Tiếp
+            </div>
+            ${!parsedFb.fixes.length ? `
+              <div style="font-size:12.5px; color:#64748b; font-style:italic;">
+                Hãy đối chiếu các điểm cần cải thiện bên dưới để nâng cấp từ vựng và cấu trúc câu.
+              </div>
+            ` : parsedFb.fixes.map(fx => `
+              <div class="rewrite-fix-pair-item">
+                <span style="color:#dc2626; text-decoration:line-through; font-weight:700;">"${fx.bad}"</span>
+                &nbsp; ➔ &nbsp;
+                <span style="color:#065f46; font-weight:800; background:#dcfce7; padding:1px 6px; border-radius:5px;">"${fx.good}"</span>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Khối 2: Chỉ hiện các điểm cần cải thiện (Areas for Improvement) -->
+          <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:12px; padding:13px 15px;">
+            <div style="font-weight:800; color:#065f46; font-size:13.5px; margin-bottom:8px;">
+              🎯 2. Điểm Cần Cải Thiện Trọng Tâm Khi Viết Lại
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              ${parsedFb.improvements.map(imp => `
+                <div style="font-size:13px; color:#1e293b; line-height:1.55; background:#ffffff; padding:8px 11px; border-radius:8px; border:1px solid #bbf7d0;">
+                  • ${imp}
+                </div>
+              `).join('')}
+            </div>
+
+            ${rawFb ? `
+              <details style="margin-top:10px; font-size:12px; color:#475569;">
+                <summary style="cursor:pointer; font-weight:700; color:#065f46;">👁️ Xem toàn bộ nhận xét gốc đầy đủ</summary>
+                <div style="white-space:pre-wrap; background:#ffffff; padding:10px; border-radius:8px; border:1px solid #cbd5e1; margin-top:6px; max-height:220px; overflow-y:auto;">${rawFb}</div>
+              </details>
+            ` : ''}
+          </div>
+        </div>
+
+        <!-- CỘT PHẢI (60%): KHUNG SOẠN THẢO BẢN SỬA CAO THOÁNG RỘNG RÃI -->
+        <div class="rewrite-v7-right">
+          ${didT1 ? `
+            <div class="rewrite-task-editor-card" style="${didT1 && didT2 ? 'min-height:280px;' : 'min-height:100%;'}">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <label style="font-weight:800; font-size:14.5px; color:#1f3d32;">✍️ Không Gian Viết Lại Bản Sửa Task 1 (Version 2):</label>
+                <span id="rewriteT1WordCount" style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; padding:3px 12px; border-radius:99px; font-size:12.5px; font-weight:800;">0 words</span>
+              </div>
+              <textarea id="rewriteInputTask1" class="rewrite-v7-textarea" style="${didT1 && didT2 ? 'min-height:220px;' : 'min-height:450px;'}"
+                placeholder="Sửa lại bài viết Task 1 của bạn tại đây..."
+                oninput="updateRewriteWordCounts()">${savedV2T1}</textarea>
+            </div>
+          ` : ''}
+
+          ${didT2 ? `
+            <div class="rewrite-task-editor-card" style="${didT1 && didT2 ? 'min-height:320px;' : 'min-height:100%;'}">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <label style="font-weight:800; font-size:14.5px; color:#1f3d32;">✍️ Không Gian Viết Lại Bản Sửa Task 2 (Version 2):</label>
+                <span id="rewriteT2WordCount" style="background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; padding:3px 12px; border-radius:99px; font-size:12.5px; font-weight:800;">0 words</span>
+              </div>
+              <textarea id="rewriteInputTask2" class="rewrite-v7-textarea" style="${didT1 && didT2 ? 'min-height:260px;' : 'min-height:450px;'}"
+                placeholder="Sửa lại bài viết Task 2 của bạn tại đây..."
+                oninput="updateRewriteWordCounts()">${savedV2T2}</textarea>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+
+    openModal('writingRewriteModal');
+    setTimeout(updateRewriteWordCounts, 50);
+  };
+</script>
 </body>
 </html>
