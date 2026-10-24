@@ -17418,5 +17418,525 @@ Câu dẫn chứng: "${eviVal}"`;
     setTimeout(updateRewriteWordCounts, 50);
   };
 </script>
+<!-- ============================================================================
+     MODULE UPDATE 24.10 - V8 (PERSISTENT HIGHLIGHT ACROSS PARTS & COMPACT TOPBAR):
+     1. Giữ nguyên 100% vết Highlight (Vàng / Xanh) khi chuyển qua lại giữa Part 1, 2, 3, 4
+     2. Thu gọn thanh Topbar phòng thi: Gom cỡ chữ & màu nền vào nút "⚙️ Hiển thị",
+        tinh giản cụm Speed Slider và mở rộng thanh tua Audio.
+     Dán nối tiếp đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* 1. TỐI ƯU KHÔNG GIAN THANH TOPBAR PHÒNG THI CHO THOÁNG MẮT */
+  #insperaExamOverlay .inspera-topbar {
+    padding: 6px 14px !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important;
+  }
+  /* Mở rộng thanh Audio Player ở trung tâm */
+  #insperaAudioPlayer {
+    min-width: 250px !important;
+    max-width: 380px !important;
+    height: 34px !important;
+  }
+  /* Tinh giản thanh kéo tốc độ nghe: Chỉ giữ [Thanh kéo] + số tốc độ (Click vào số để về 1.0x) */
+  .audio-speed-slider-wrap {
+    padding: 3px 8px !important;
+    gap: 5px !important;
+    border-radius: 999px !important;
+    background: #f1f5f9 !important;
+  }
+  .audio-speed-slider-wrap input[type="range"] {
+    width: 68px !important;
+  }
+  #listeningSpeedValueLabel {
+    cursor: pointer;
+    padding: 1px 5px;
+    border-radius: 5px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    font-size: 11.5px !important;
+  }
+  #listeningSpeedValueLabel:hover {
+    background: #059669;
+    color: #ffffff !important;
+    border-color: #059669;
+  }
+
+  /* Nút ⚙️ Hiển thị gom nhóm Standard Text & Black on White */
+  .topbar-display-gear-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .topbar-gear-btn {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e293b;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: 0.15s;
+    white-space: nowrap;
+  }
+  .topbar-gear-btn:hover {
+    background: #e2e8f0;
+  }
+  .topbar-gear-popover {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+    z-index: 99999;
+    min-width: 210px;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .topbar-gear-popover.open {
+    display: flex;
+  }
+  .topbar-gear-popover label {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #475569;
+    margin-bottom: 3px;
+    display: block;
+  }
+  .topbar-gear-popover select {
+    width: 100% !important;
+    display: block !important;
+  }
+</style>
+
+<script>
+  /* ==========================================================================
+     1. BỘ NHỚ LƯU VẾT HIGHLIGHT THEO TỪNG PART (KHÔNG BỊ MẤT KHI CHUYỂN PART)
+     ========================================================================== */
+  let partHighlightCache = {
+    examId: null,
+    isReview: null,
+    leftByPart: {},
+    rightByPart: {}
+  };
+
+  function resetPartHighlightCacheIfNeeded() {
+    const curExamId = activeExam ? activeExam.id : null;
+    const curRev = Boolean(isReviewMode);
+    if (partHighlightCache.examId !== curExamId || partHighlightCache.isReview !== curRev) {
+      partHighlightCache = {
+        examId: curExamId,
+        isReview: curRev,
+        leftByPart: {},
+        rightByPart: {}
+      };
+    }
+  }
+
+  // Lưu lại HTML đã tô màu của Part hiện tại (Xóa tạm vệt nháy Locate Evidence để chỉ lưu vết Highlight của học sinh)
+  function saveCurrentPartHighlightsToCache(partNum) {
+    if (!activeExam || !partNum) return;
+    resetPartHighlightCacheIfNeeded();
+
+    const leftPane = document.getElementById('insperaLeftPane');
+    const rightPane = document.getElementById('insperaRightPane');
+
+    if (leftPane && (leftPane.querySelector('.user-hl-yellow') || leftPane.querySelector('.user-hl-green') || partHighlightCache.leftByPart[partNum])) {
+      const cloneL = leftPane.cloneNode(true);
+      cloneL.querySelectorAll('.evidence-highlight-active').forEach(el => {
+        const p = el.parentNode;
+        while (el.firstChild) p.insertBefore(el.firstChild, el);
+        p.removeChild(el);
+      });
+      partHighlightCache.leftByPart[partNum] = cloneL.innerHTML;
+    }
+
+    if (rightPane && (rightPane.querySelector('.user-hl-yellow') || rightPane.querySelector('.user-hl-green') || partHighlightCache.rightByPart[partNum])) {
+      partHighlightCache.rightByPart[partNum] = rightPane.innerHTML;
+    }
+  }
+
+  // Khôi phục lại vết Highlight của Part vừa mở
+  function restorePartHighlightsFromCache(partNum) {
+    if (!activeExam || !partNum) return;
+    resetPartHighlightCacheIfNeeded();
+
+    const leftPane = document.getElementById('insperaLeftPane');
+    const rightPane = document.getElementById('insperaRightPane');
+
+    if (leftPane && partHighlightCache.leftByPart[partNum]) {
+      leftPane.innerHTML = partHighlightCache.leftByPart[partNum];
+    }
+
+    if (rightPane && partHighlightCache.rightByPart[partNum]) {
+      rightPane.innerHTML = partHighlightCache.rightByPart[partNum];
+      if (typeof setupDragDropEngine === 'function') setupDragDropEngine();
+      if (typeof restoreUserAnswersInDOM === 'function') {
+        restoreUserAnswersInDOM(document.getElementById('insperaSplitBox'));
+      }
+      if (isReviewMode && typeof injectSaveMistakeButtonsInReviewDOM === 'function') {
+        injectSaveMistakeButtonsInReviewDOM();
+      }
+    }
+  }
+
+  // Bọc hàm switchExamPassage để tự động Lưu Part cũ -> Chuyển Part -> Khôi phục Part mới
+  const _v8OrigSwitchExamPassage = switchExamPassage;
+  switchExamPassage = function(partNum) {
+    if (activeExam && activePartNum) {
+      saveCurrentPartHighlightsToCache(activePartNum);
+    }
+    _v8OrigSwitchExamPassage(partNum);
+    restorePartHighlightsFromCache(partNum);
+  };
+
+  // Tự động cập nhật ngay vào bộ nhớ mỗi khi học sinh bấm tô màu (Keyword / Evidence) hoặc Xóa màu
+  const _v8OrigApplyHighlight = window.applyUserTextHighlight;
+  window.applyUserTextHighlight = function(colorType, ev) {
+    if (typeof _v8OrigApplyHighlight === 'function') {
+      _v8OrigApplyHighlight(colorType, ev);
+    }
+    if (activeExam && activePartNum) {
+      saveCurrentPartHighlightsToCache(activePartNum);
+    }
+  };
+
+  const _v8OrigClearHighlight = window.clearSelectedHighlights;
+  window.clearSelectedHighlights = function(ev) {
+    if (typeof _v8OrigClearHighlight === 'function') {
+      _v8OrigClearHighlight(ev);
+    }
+    if (activeExam && activePartNum) {
+      // Cập nhật lại bản đã xóa màu vào cache của Part hiện tại
+      const leftPane = document.getElementById('insperaLeftPane');
+      const rightPane = document.getElementById('insperaRightPane');
+      if (leftPane) partHighlightCache.leftByPart[activePartNum] = leftPane.innerHTML;
+      if (rightPane) partHighlightCache.rightByPart[activePartNum] = rightPane.innerHTML;
+    }
+  };
+
+  // Reset bộ nhớ highlight khi bắt đầu mở một đề mới
+  const _v8OrigLaunchReading = launchReadingExam;
+  launchReadingExam = function(examId) {
+    partHighlightCache = { examId, isReview: false, leftByPart: {}, rightByPart: {} };
+    _v8OrigLaunchReading(examId);
+  };
+
+  const _v8OrigLaunchListening = launchListeningExam;
+  launchListeningExam = function(examId) {
+    partHighlightCache = { examId, isReview: false, leftByPart: {}, rightByPart: {} };
+    _v8OrigLaunchListening(examId);
+  };
+
+  const _v8OrigReopenReview = reopenReviewFromHistory;
+  reopenReviewFromHistory = function(resId) {
+    partHighlightCache = { examId: null, isReview: true, leftByPart: {}, rightByPart: {} };
+    _v8OrigReopenReview(resId);
+  };
+
+  /* ==========================================================================
+     2. THU GỌN THANH TOPBAR TRÊN CÙNG CHO THOÁNG MẮT
+        - Gom 2 menu "Standard Text" và "Black on White" vào nút "⚙️ Hiển thị"
+        - Tinh giản thanh trượt Speed (Bỏ nhãn thừa & nút 1.0x trùng lặp)
+        - Rút gọn chữ "Candidate:" trên thanh tiêu đề
+     ========================================================================== */
+  function compactExamTopbarLayout() {
+    const overlay = document.getElementById('insperaExamOverlay');
+    if (!overlay || overlay.style.display === 'none') return;
+
+    // 2.1. Tinh giản thanh kéo tốc độ Audio (chỉ giữ [Slider] + nhãn 1.0x có thể bấm để reset)
+    const speedWrap = overlay.querySelector('.audio-speed-slider-wrap');
+    if (speedWrap && !speedWrap.getAttribute('data-compacted')) {
+      speedWrap.setAttribute('data-compacted', '1');
+      const curVal = document.getElementById('listeningSpeedRangeInput')?.value || '1.0';
+      speedWrap.innerHTML = `
+        <span style="font-size:11px;" title="Kéo để chỉnh tốc độ nghe (0.5x - 2.0x)">⚡</span>
+        <input type="range" id="listeningSpeedRangeInput" min="0.5" max="2.0" step="0.05" value="${curVal}"
+          oninput="applyCustomListeningSpeed(this.value)">
+        <span id="listeningSpeedValueLabel" onclick="applyCustomListeningSpeed(1.0)" title="Bấm vào đây để đặt lại tốc độ chuẩn 1.0x">
+          ${parseFloat(curVal).toFixed(1)}x
+        </span>
+      `;
+    }
+
+    // 2.2. Rút gọn chữ "Candidate: ..." để đỡ chiếm diện tích ngang
+    overlay.querySelectorAll('span, div').forEach(el => {
+      if (el.children.length === 0 && (el.textContent || '').includes('Candidate:')) {
+        el.textContent = el.textContent.replace('Candidate:', '👤').trim();
+        el.style.whiteSpace = 'nowrap';
+      }
+    });
+
+    // 2.3. Gom 2 thẻ <select> "Standard Text" và "Black on White" vào nút "⚙️ Hiển thị"
+    if (!document.getElementById('topbarDisplayGearWrap')) {
+      let fontSelect = null;
+      let contrastSelect = null;
+
+      overlay.querySelectorAll('select').forEach(sel => {
+        const txt = sel.textContent || '';
+        if (txt.includes('Standard Text') || txt.includes('Large Text')) fontSelect = sel;
+        if (txt.includes('Black on White') || txt.includes('White on Black') || txt.includes('Yellow on Black')) contrastSelect = sel;
+      });
+
+      if (fontSelect && contrastSelect && fontSelect.parentNode) {
+        const gearWrap = document.createElement('div');
+        gearWrap.id = 'topbarDisplayGearWrap';
+        gearWrap.className = 'topbar-display-gear-wrap';
+
+        gearWrap.innerHTML = `
+          <button type="button" class="topbar-gear-btn" onclick="document.getElementById('topbarGearPopover').classList.toggle('open')" title="Tùy chỉnh cỡ chữ & màu nền bài thi">
+            ⚙️ Hiển thị
+          </button>
+          <div id="topbarGearPopover" class="topbar-gear-popover">
+            <div id="gearFontSelectSlot">
+              <label>🔤 Cỡ chữ bài đọc (Text Size):</label>
+            </div>
+            <div id="gearContrastSelectSlot">
+              <label>🎨 Chế độ màu (Contrast):</label>
+            </div>
+          </div>
+        `;
+
+        fontSelect.parentNode.insertBefore(gearWrap, fontSelect);
+        gearWrap.querySelector('#gearFontSelectSlot').appendChild(fontSelect);
+        gearWrap.querySelector('#gearContrastSelectSlot').appendChild(contrastSelect);
+      }
+    }
+  }
+
+  // Đóng popover "⚙️ Hiển thị" khi bấm ra ngoài
+  document.addEventListener('click', function(ev) {
+    const gearWrap = document.getElementById('topbarDisplayGearWrap');
+    const pop = document.getElementById('topbarGearPopover');
+    if (gearWrap && pop && pop.classList.contains('open') && !gearWrap.contains(ev.target)) {
+      pop.classList.remove('open');
+    }
+  });
+
+  setInterval(compactExamTopbarLayout, 500);
+</script>
+<!-- ============================================================================
+     MODULE UPDATE 24.10 - V9 (FIX TOPBAR #examShell DỰA TRÊN CODE GỐC):
+     1. Gom #examFontSizeSelect & #examThemeSelect vào nút "⚙️ Hiển thị"
+     2. Tinh giản thanh trượt tốc độ Audio (Chỉ giữ [Slider] + Nút số 1.0x)
+     3. Mở rộng thanh tua #examAudioPlayer & rút gọn nhãn #insperaCandidateTag
+     Dán nối tiếp đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* 1. CĂN CHỈNH THANH TOPBAR (#examShell .inspera-top) THOÁNG & KHÔNG RỚT DÒNG */
+  #examShell .inspera-top {
+    height: 52px !important;
+    padding: 0 14px !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+  }
+  #examShell .inspera-top-left {
+    gap: 10px !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+    overflow: hidden !important;
+  }
+  #insperaExamTitle {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 220px !important;
+    font-size: 13.5px !important;
+  }
+  #insperaCandidateTag {
+    white-space: nowrap !important;
+    background: #f1f5f9 !important;
+    padding: 3px 9px !important;
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+    color: #334155 !important;
+    font-size: 11.5px !important;
+  }
+  #insperaTimer {
+    white-space: nowrap !important;
+    padding: 3px 8px !important;
+    font-size: 13px !important;
+  }
+
+  /* 2. KÉO RỘNG TRÌNH PHÁT AUDIO & THU GỌN THANH TRƯỢT SPEED */
+  #listeningAudioHeaderContainer {
+    padding: 2px 8px !important;
+    gap: 6px !important;
+    border-radius: 8px !important;
+    flex-wrap: nowrap !important;
+  }
+  #examAudioPlayer {
+    width: 300px !important;
+    height: 30px !important;
+  }
+  .audio-speed-slider-wrap {
+    padding: 2px 7px !important;
+    gap: 5px !important;
+    border-radius: 999px !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    white-space: nowrap !important;
+  }
+  .audio-speed-slider-wrap input[type="range"] {
+    width: 64px !important;
+    height: 4px !important;
+  }
+  /* Ẩn nút 1.0x thừa bên cạnh, tích hợp thẳng thao tác bấm reset vào nhãn số */
+  .audio-speed-reset-chip {
+    display: none !important;
+  }
+  #listeningSpeedValueLabel {
+    cursor: pointer !important;
+    padding: 1px 6px !important;
+    border-radius: 6px !important;
+    background: #ecfdf5 !important;
+    color: #059669 !important;
+    border: 1px solid #a7f3d0 !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    min-width: 34px !important;
+    text-align: center !important;
+  }
+  #listeningSpeedValueLabel:hover {
+    background: #059669 !important;
+    color: #ffffff !important;
+  }
+
+  /* 3. NÚT "⚙️ HIỂN THỊ" GOM NHÓM CỠ CHỮ & MÀU NỀN */
+  .exam-display-gear-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .exam-display-gear-btn {
+    padding: 6px 11px;
+    border-radius: 4px;
+    border: 1px solid #9ca3af;
+    background: #ffffff;
+    color: #111827;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  .exam-display-gear-btn:hover {
+    background: #f3f4f6;
+  }
+  .exam-display-gear-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+    z-index: 99999;
+    min-width: 215px;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .exam-display-gear-dropdown.show {
+    display: flex;
+  }
+  .exam-display-gear-dropdown .gear-field-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #475569;
+    margin-bottom: 4px;
+    display: block;
+    text-transform: uppercase;
+  }
+  .exam-display-gear-dropdown select {
+    width: 100% !important;
+    padding: 6px 8px !important;
+    border-radius: 6px !important;
+    border: 1px solid #cbd5e1 !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+  }
+</style>
+
+<script>
+  function optimizeRealExamShellTopbar() {
+    const shell = document.getElementById('examShell');
+    if (!shell || shell.style.display === 'none') return;
+
+    // 1. Gom 2 thẻ <select id="examFontSizeSelect"> và <select id="examThemeSelect"> vào nút "⚙️ Hiển thị"
+    const fontSel = document.getElementById('examFontSizeSelect');
+    const themeSel = document.getElementById('examThemeSelect');
+
+    if (fontSel && themeSel && !document.getElementById('examDisplayGearContainer')) {
+      const rightControlsBox = fontSel.parentNode;
+      const gearContainer = document.createElement('div');
+      gearContainer.id = 'examDisplayGearContainer';
+      gearContainer.className = 'exam-display-gear-container';
+
+      gearContainer.innerHTML = `
+        <button type="button" class="exam-display-gear-btn" onclick="event.stopPropagation(); document.getElementById('examDisplayGearDropdown').classList.toggle('show')" title="Chỉnh cỡ chữ & màu nền">
+          ⚙️ Hiển thị
+        </button>
+        <div id="examDisplayGearDropdown" class="exam-display-gear-dropdown" onclick="event.stopPropagation()">
+          <div id="gearSlotFont">
+            <span class="gear-field-label">🔤 Cỡ chữ (Text Size):</span>
+          </div>
+          <div id="gearSlotTheme">
+            <span class="gear-field-label">🎨 Giao diện (Contrast):</span>
+          </div>
+        </div>
+      `;
+
+      rightControlsBox.insertBefore(gearContainer, fontSel);
+      gearContainer.querySelector('#gearSlotFont').appendChild(fontSel);
+      gearContainer.querySelector('#gearSlotTheme').appendChild(themeSel);
+    }
+
+    // 2. Rút gọn nhãn "Candidate: Tên" thành "👤 Tên" để không chiếm chỗ
+    const candTag = document.getElementById('insperaCandidateTag');
+    if (candTag && (candTag.textContent || '').includes('Candidate:')) {
+      candTag.textContent = candTag.textContent.replace('Candidate:', '👤').trim();
+    }
+
+    // 3. Rút gọn thanh trượt tốc độ Audio (Bỏ chữ "Speed:" dài dòng, bấm vào số 1.0x để reset)
+    const speedWrap = shell.querySelector('.audio-speed-slider-wrap');
+    if (speedWrap) {
+      const firstSpan = speedWrap.querySelector('span');
+      if (firstSpan && (firstSpan.textContent || '').includes('Speed')) {
+        firstSpan.innerHTML = '⚡';
+        firstSpan.title = 'Kéo để chỉnh tốc độ nghe (0.5x - 2.0x)';
+      }
+      const valLabel = document.getElementById('listeningSpeedValueLabel');
+      if (valLabel && !valLabel.getAttribute('data-reset-bound')) {
+        valLabel.setAttribute('data-reset-bound', '1');
+        valLabel.title = 'Bấm vào đây để đặt lại tốc độ chuẩn 1.0x';
+        valLabel.onclick = () => applyCustomListeningSpeed(1.0);
+      }
+    }
+  }
+
+  // Đóng menu "⚙️ Hiển thị" khi bấm ra ngoài
+  document.addEventListener('click', function() {
+    const dd = document.getElementById('examDisplayGearDropdown');
+    if (dd && dd.classList.contains('show')) {
+      dd.classList.remove('show');
+    }
+  });
+
+  // Tự động kích hoạt ngay khi mở bài thi Reading, Listening, Writing hoặc Review Mode
+  setInterval(optimizeRealExamShellTopbar, 350);
+</script>
 </body>
 </html>
