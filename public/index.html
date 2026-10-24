@@ -17938,5 +17938,398 @@ Câu dẫn chứng: "${eviVal}"`;
   // Tự động kích hoạt ngay khi mở bài thi Reading, Listening, Writing hoặc Review Mode
   setInterval(optimizeRealExamShellTopbar, 350);
 </script>
+<!-- ============================================================================
+     MODULE UPDATE 24.10 - V10 (AUTHENTIC INSPERA BOOKMARK, FLAT UI & SPLIT MAP):
+     1. Tích hợp nút "Bookmark" chuẩn Inspera + Góc đánh dấu trên ô số dưới Footer
+     2. Tối giản & làm phẳng giao diện phòng thi (#examShell) chuẩn demo-ielts.inspera.com
+     3. Chia đôi 2 cột (Ảnh Map ghim cố định bên trái - Câu hỏi bên phải) cho dạng bài Map
+     Dán nối tiếp đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* 1. GIAO DIỆN PHẲNG TỐI GIẢN CHUẨN INSPERA (DEMO-IELTS.INSPERA.COM) */
+  #examShell .inspera-instruction-banner {
+    background: #f3f4f6 !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 0 !important;
+    margin: 6px 14px 0 14px !important;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+  }
+  #examShell .inspera-part-tabs {
+    padding: 6px 14px 0 !important;
+    background: #ffffff !important;
+  }
+  #examShell .part-pill {
+    border-radius: 0 !important;
+    padding: 6px 18px !important;
+    font-size: 12.5px !important;
+  }
+  #examShell .resizer-bar {
+    width: 6px !important;
+    background: #f3f4f6 !important;
+    border-left: 1px solid #d1d5db !important;
+    border-right: 1px solid #d1d5db !important;
+  }
+  #examShell .question {
+    border: 1px solid transparent !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 12px 14px !important;
+    margin-bottom: 10px !important;
+    border-radius: 0 !important;
+    transition: background 0.12s;
+  }
+  #examShell .question:focus-within {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    border-left: 3px solid #111827 !important;
+  }
+
+  /* 2. NÚT BOOKMARK CHUẨN INSPERA TRÊN TỪNG CÂU HỎI */
+  .inspera-bookmark-btn {
+  width: fit-content !important;
+  max-width: 28px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #374151;
+  border: 1px solid #cbd5e1;
+  border-radius: 2px;
+  padding: 4px 6px !important;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.12s ease;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+.inspera-bookmark-btn span {
+  display: none !important; /* Tự động ẩn luôn chữ Bookmark mà không cần tìm xóa ở dưới */
+}
+  .inspera-bookmark-btn:hover {
+    background: #f3f4f6;
+    border-color: #6b7280;
+    color: #111827;
+  }
+  .inspera-bookmark-btn.active {
+    background: #111827 !important;
+    color: #ffffff !important;
+    border-color: #111827 !important;
+  }
+  .inspera-bookmark-btn svg {
+    width: 11px;
+    height: 11px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  .inspera-bookmark-btn.active svg {
+    fill: #fbbf24;
+    stroke: #fbbf24;
+  }
+
+  /* Khi câu hỏi là khối .question, đẩy nút Bookmark sang gọn góc phải */
+  .question > .question-text {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .question > .question-text > .inspera-bookmark-btn {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* 3. Ô SỐ DƯỚI FOOTER CÓ GÓC ĐÁNH DẤU BOOKMARK CHUẨN INSPERA */
+  #examShell .progress-item {
+    position: relative !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    border-radius: 0 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    overflow: hidden;
+  }
+  /* Tam giác góc trên bên phải khi câu hỏi được Bookmark */
+  #examShell .progress-item.bookmarked-pill::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 10px 10px 0;
+    border-color: transparent #f59e0b transparent transparent;
+    z-index: 2;
+  }
+  #examShell .progress-item.bookmarked-pill {
+    border-color: #d97706 !important;
+  }
+
+  /* 4. BỐ CỤC CHIA ĐÔI 2 CỘT CHO DẠNG BÀI MAP / DIAGRAM LISTENING (ẢNH TRÁI - CÂU HỎI PHẢI) */
+  .inspera-map-split-layout {
+    display: grid;
+    grid-template-columns: 1.08fr 1fr;
+    gap: 22px;
+    align-items: start;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    padding: 16px;
+    margin-top: 10px;
+  }
+  @media (max-width: 900px) {
+    .inspera-map-split-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+  .inspera-map-left-sticky {
+    position: sticky;
+    top: 8px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    padding: 10px;
+    text-align: center;
+  }
+  .inspera-map-left-sticky img {
+    max-width: 100%;
+    max-height: 62vh;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+    cursor: zoom-in;
+  }
+  .inspera-map-right-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    line-height: 2.2;
+  }
+</style>
+
+<script>
+  /* ==========================================================================
+     1. HỆ THỐNG BOOKMARK CHUẨN INSPERA (ĐỒNG BỘ NÚT CÂU HỎI & Ô SỐ FOOTER)
+     ========================================================================== */
+  let bookmarkedQuestionKeys = new Set();
+  let lastBookmarkExamId = null;
+
+  function ensureBookmarkSetForCurrentExam() {
+    const curId = activeExam ? activeExam.id : null;
+    if (curId !== lastBookmarkExamId) {
+      bookmarkedQuestionKeys = new Set();
+      lastBookmarkExamId = curId;
+    }
+  }
+
+  function createBookmarkButtonHtml(qKey) {
+    const isBookmarked = bookmarkedQuestionKeys.has(qKey);
+    const qNum = String(qKey).replace(/^q/i, '');
+    return `
+      <button type="button" class="inspera-bookmark-btn ${isBookmarked ? 'active' : ''}"
+        data-bm-key="${qKey}"
+        onclick="toggleInsperaBookmark('${qKey}', event)"
+        title="Bookmark Question ${qNum} for review">
+        <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+      </button>
+    `;
+  }
+
+  window.toggleInsperaBookmark = function(qKey, ev) {
+    if (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+    }
+    ensureBookmarkSetForCurrentExam();
+    if (bookmarkedQuestionKeys.has(qKey)) {
+      bookmarkedQuestionKeys.delete(qKey);
+    } else {
+      bookmarkedQuestionKeys.add(qKey);
+    }
+    syncBookmarkVisualState();
+  };
+
+  function syncBookmarkVisualState() {
+    ensureBookmarkSetForCurrentExam();
+    // Cập nhật trạng thái các nút Bookmark trên màn hình câu hỏi
+    document.querySelectorAll('.inspera-bookmark-btn[data-bm-key]').forEach(btn => {
+      const k = btn.getAttribute('data-bm-key');
+      btn.classList.toggle('active', bookmarkedQuestionKeys.has(k));
+    });
+    // Cập nhật dấu tam giác góc trên các ô số dưới thanh Footer
+    document.querySelectorAll('#insperaFooterList .progress-item').forEach(pill => {
+      const qKey = String(pill.id || '').replace('fpill_', '');
+      if (qKey) {
+        pill.classList.toggle('bookmarked-pill', bookmarkedQuestionKeys.has(qKey));
+      }
+    });
+  }
+
+  // Tự động gắn nút Bookmark vào mọi định dạng câu hỏi trong bài thi (Reading & Listening)
+  function injectInsperaBookmarkButtons() {
+    if (!activeExam || activeExamType === 'writing' || isReviewMode) return;
+    ensureBookmarkSetForCurrentExam();
+
+    const rightPane = document.getElementById('insperaRightPane');
+    if (!rightPane) return;
+
+    const allKeys = Object.keys(activeExam.correctAnswers || {}).sort(
+      (a, b) => parseInt(a.replace('q', '')) - parseInt(b.replace('q', ''))
+    );
+
+    allKeys.forEach(qKey => {
+      // Nếu câu hỏi này đã có nút Bookmark rồi thì bỏ qua
+      if (rightPane.querySelector(`.inspera-bookmark-btn[data-bm-key="${qKey}"]`)) return;
+
+      const qNum = qKey.replace(/^q/i, '');
+
+      // Trường hợp 1: Câu hỏi dạng khối chuẩn (.question[data-question="27"]) hoặc bảng Matrix (tr.question)
+      const qBlock = rightPane.querySelector(`.question[data-question="${qNum}"]`);
+      if (qBlock) {
+        const qTextEl = qBlock.querySelector('.question-text') || qBlock.querySelector('td.matrix-statement');
+        if (qTextEl) {
+          // Bọc nội dung chữ bên trái nếu chưa bọc để flex đẩy nút Bookmark sang phải
+          if (qTextEl.classList.contains('question-text') && !qTextEl.querySelector('.q-stem-wrap')) {
+            const wrapSpan = document.createElement('span');
+            wrapSpan.className = 'q-stem-wrap';
+            while (qTextEl.firstChild) wrapSpan.appendChild(qTextEl.firstChild);
+            qTextEl.appendChild(wrapSpan);
+          }
+          qTextEl.insertAdjacentHTML('beforeend', createBookmarkButtonHtml(qKey));
+          return;
+        }
+      }
+
+      // Trường hợp 2: Câu hỏi điền từ trực tiếp (input[name="q1"], select[name="q1"]) hoặc Kéo thả (.drop-zone[data-target="q36"])
+      const inlineTarget = rightPane.querySelector(`input[name="${qKey}"], select[name="${qKey}"], .drop-zone[data-target="${qKey}"]`);
+      if (inlineTarget) {
+        // Nếu là radio button nhưng không có .question bọc ngoài, gắn vào dòng chứa đầu tiên
+        if (inlineTarget.type === 'radio') {
+          const parentBox = inlineTarget.closest('div, li, p, tr');
+          if (parentBox && !parentBox.querySelector(`.inspera-bookmark-btn[data-bm-key="${qKey}"]`)) {
+            parentBox.insertAdjacentHTML('beforeend', createBookmarkButtonHtml(qKey));
+          }
+          return;
+        }
+        inlineTarget.insertAdjacentHTML('afterend', createBookmarkButtonHtml(qKey));
+      }
+    });
+
+    syncBookmarkVisualState();
+  }
+
+  /* ==========================================================================
+     2. TỰ ĐỘNG CHUYỂN DẠNG BÀI MAP / DIAGRAM SANG CHIA ĐÔI 2 CỘT (TRÁI: MAP - PHẢI: CÂU HỎI)
+        - Hoạt động cho cả các đề cũ đã nhập từ trước lẫn đề mới!
+     ========================================================================== */
+  function upgradeMapQuestionsToSplitLayout() {
+    if (!activeExam || activeExamType === 'writing') return;
+    const rightPane = document.getElementById('insperaRightPane');
+    if (!rightPane) return;
+
+    // Khi đang thi Listening (không có cột Transcript bên trái), cho phép khung câu hỏi mở rộng lên 1220px để Map và Câu hỏi đứng cạnh nhau rộng rãi
+    if (activeExamType === 'listening' && !isReviewMode) {
+      const innerWrapper = rightPane.firstElementChild;
+      if (innerWrapper && innerWrapper.style && innerWrapper.style.maxWidth === '960px') {
+        innerWrapper.style.maxWidth = '1220px';
+      }
+    }
+
+    rightPane.querySelectorAll('.question-group').forEach(group => {
+      if (group.querySelector('.inspera-map-split-layout')) return;
+
+      const imgEl = group.querySelector('img');
+      if (!imgEl) return;
+
+      // Tìm thẻ chứa ảnh (thường là div có text-align:center) và khối chứa các câu hỏi bên dưới
+      const imgContainer = imgEl.parentElement && imgEl.parentElement !== group ? imgEl.parentElement : imgEl;
+      const questionNodes = [];
+
+      Array.from(group.children).forEach(child => {
+        if (child === imgContainer || child.contains(imgEl)) return;
+        if (child.classList.contains('question-group-title')) return;
+        if (child.tagName === 'P' && !child.querySelector('input, select, .drop-zone, .question')) return;
+        questionNodes.push(child);
+      });
+
+      if (!questionNodes.length) return;
+
+      const splitWrapper = document.createElement('div');
+      splitWrapper.className = 'inspera-map-split-layout';
+
+      const leftMapCol = document.createElement('div');
+      leftMapCol.className = 'inspera-map-left-sticky';
+      imgEl.onclick = () => {
+        if (typeof openRewriteChartZoom === 'function') openRewriteChartZoom(imgEl.src);
+      };
+      imgEl.title = 'Bấm vào ảnh Bản đồ / Sơ đồ để phóng to';
+      leftMapCol.appendChild(imgEl);
+      const hintCap = document.createElement('div');
+      hintCap.style.cssText = 'font-size:11.5px; color:#6b7280; margin-top:6px; font-weight:600;';
+      hintCap.textContent = '🔍 Bấm vào hình để phóng to xem chi tiết';
+      leftMapCol.appendChild(hintCap);
+
+      const rightQCol = document.createElement('div');
+      rightQCol.className = 'inspera-map-right-questions';
+      questionNodes.forEach(node => rightQCol.appendChild(node));
+
+      splitWrapper.appendChild(leftMapCol);
+      splitWrapper.appendChild(rightQCol);
+
+      if (imgContainer !== imgEl && imgContainer.parentNode === group) {
+        imgContainer.replaceWith(splitWrapper);
+      } else {
+        group.appendChild(splitWrapper);
+      }
+    });
+  }
+
+  /* ==========================================================================
+     3. CẬP NHẬT NÚT TEMPLATE "+ Map / Plan Labelling Image" TRONG TRÌNH TẠO ĐỀ
+        SANG SẴN KHUNG CHIA 2 CỘT TRÁI - PHẢI
+     ========================================================================== */
+  const _v10OrigInsertQuestionTemplate = insertQuestionTemplate;
+  insertQuestionTemplate = function(type, mode = 're') {
+    if (type !== 'diagram') {
+      return _v10OrigInsertQuestionTemplate(type, mode);
+    }
+    const qBox = document.getElementById(mode === 'le' ? 'leQuestions' : 'rePQuestionsHtml');
+    if (!qBox) return;
+
+    const splitMapSnippet = `\n<div class="question-group">
+  <div class="question-group-title">Questions 15–18: Map / Plan Labelling</div>
+  <p>Label the map below. Write the correct letter, <strong>A–H</strong>, next to questions 15–18.</p>
+  <div class="inspera-map-split-layout">
+    <div class="inspera-map-left-sticky">
+      <img src="PASTE_YOUR_MAP_IMAGE_URL_HERE" alt="IELTS Map / Plan">
+      <div style="font-size:11.5px; color:#6b7280; margin-top:6px; font-weight:600;">🔍 Click image to zoom</div>
+    </div>
+    <div class="inspera-map-right-questions" style="background:#f8fafc; border:1px solid #cbd5e1; padding:16px;">
+      <div><span class="q-badge">15</span> Library Entrance: <input type="text" class="input-field inline-input" name="q15" placeholder="15" autocomplete="off"></div>
+      <div><span class="q-badge">16</span> Main Lecture Hall: <input type="text" class="input-field inline-input" name="q16" placeholder="16" autocomplete="off"></div>
+      <div><span class="q-badge">17</span> Student Cafeteria: <input type="text" class="input-field inline-input" name="q17" placeholder="17" autocomplete="off"></div>
+      <div><span class="q-badge">18</span> Sports Centre: <input type="text" class="input-field inline-input" name="q18" placeholder="18" autocomplete="off"></div>
+    </div>
+  </div>
+</div>\n`;
+    qBox.value += splitMapSnippet;
+  };
+
+  /* ==========================================================================
+     4. KẾT NỐI TỰ ĐỘNG VÀO CHU TRÌNH LOAD BÀI THI & CHUYỂN PART
+     ========================================================================== */
+  const _v10OrigLoadPassageView = loadPassageView;
+  loadPassageView = function(partNum) {
+    _v10OrigLoadPassageView(partNum);
+    upgradeMapQuestionsToSplitLayout();
+    injectInsperaBookmarkButtons();
+    syncBookmarkVisualState();
+  };
+
+  const _v10OrigUpdateFooterNav = updateFooterNav;
+  updateFooterNav = function() {
+    _v10OrigUpdateFooterNav();
+    syncBookmarkVisualState();
+  };
+</script>
 </body>
 </html>
