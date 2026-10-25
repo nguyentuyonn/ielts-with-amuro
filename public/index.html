@@ -15437,19 +15437,19 @@ Câu dẫn chứng: "${eviVal}"`;
   }
 
   /* 3. BÚT TÔ SÁNG 2 MÀU (DUAL-COLOR HIGHLIGHTER POPUP) */
-  #floatingDualHighlighter {
-    position: fixed;
-    z-index: 99999;
-    background: #1f3d32;
-    color: #ffffff;
-    border-radius: 999px;
-    padding: 5px 10px;
-    display: none;
-    align-items: center;
-    gap: 6px;
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.25);
-    border: 1px solid #2d5a47;
-  }
+#floatingDualHighlighter {
+  position: fixed;
+  z-index: 99999;
+  background: #1f3d32;
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 5px 10px;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.25);
+  border: 1px solid #2d5a47;
+}
   .hl-swatch-btn {
     border: none;
     border-radius: 999px;
@@ -15477,13 +15477,13 @@ Câu dẫn chứng: "${eviVal}"`;
 
 <!-- POPUP NỔI KHI BÔI ĐEN VĂN BẢN TRONG BÀI THI (HIGHLIGHT 2 MÀU) -->
 <div id="floatingDualHighlighter">
-  <button type="button" class="hl-swatch-btn" style="background:#fde047; color:#1e293b;" onmousedown="applyUserTextHighlight('yellow', event)">
+  <button type="button" class="hl-swatch-btn" style="background:#fef9c3; color:#854d0e; border:1px solid #fde047;" onmousedown="applyUserTextHighlight('yellow', event)">
     🟡 Keyword
   </button>
-  <button type="button" class="hl-swatch-btn" style="background:#86efac; color:#064e3b;" onmousedown="applyUserTextHighlight('green', event)">
+  <button type="button" class="hl-swatch-btn" style="background:#dcfce7; color:#166534; border:1px solid #86efac;" onmousedown="applyUserTextHighlight('green', event)">
     🟢 Evidence
   </button>
-  <button type="button" class="hl-swatch-btn" style="background:#334155; color:#f8fafc;" onmousedown="clearSelectedHighlights(event)">
+  <button type="button" class="hl-swatch-btn" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;" onmousedown="clearSelectedHighlights(event)">
     ✕ Xóa màu
   </button>
 </div>
@@ -18329,6 +18329,2209 @@ Câu dẫn chứng: "${eviVal}"`;
   updateFooterNav = function() {
     _v10OrigUpdateFooterNav();
     syncBookmarkVisualState();
+  };
+</script>
+<!-- ============================================================================
+     MODULE UPDATE 25.10 - V11 (IELTS MATE CLEAN UI, LIGHT HIGHLIGHT & 3-SKILL MOCK TEST):
+     1. Footer gom nhóm theo Part (Part 1 [1..10] | Part 2 0 of 10...) + Nút mũi tên ← →
+     2. Thanh kéo Splitter mảnh có nút ⮂ ở giữa & Nút Bookmark thu gọn thành icon nhỏ
+     3. Popup Highlight thẻ Trắng Minimalist (IELTS Mate style)
+     4. Phòng Thi Thử 3 Kỹ Năng (Listening -> Reading -> Writing) Ngẫu nhiên & Giao theo Lớp
+     Dán nối tiếp đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* 1. FIX TRIỆT ĐỂ NÚT BOOKMARK CHỈ CÒN ICON NHỎ GỌN (KHÔNG BỊ KÉO DÀI) */
+  .inspera-bookmark-btn {
+    width: 26px !important;
+    min-width: 26px !important;
+    max-width: 26px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 4px !important;
+    color: #64748b !important;
+    margin-left: 6px !important;
+    vertical-align: middle !important;
+    box-shadow: none !important;
+  }
+  .inspera-bookmark-btn:hover {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+  }
+  .inspera-bookmark-btn.active {
+    background: #fef3c7 !important;
+    border-color: #f59e0b !important;
+    color: #d97706 !important;
+  }
+  .inspera-bookmark-btn span {
+    display: none !important;
+  }
+  .inspera-bookmark-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* 2. THANH CHIA ĐÔI MÀN HÌNH (SPLITTER ⮂) CHUẨN IELTS MATE */
+  #examShell .resizer-bar {
+    width: 2px !important;
+    background: #e2e8f0 !important;
+    border: none !important;
+    position: relative !important;
+    z-index: 20 !important;
+  }
+  #examShell .resizer-bar::after {
+    content: "⮂" !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 26px;
+    height: 32px;
+    background: #ffffff;
+    border: 1px solid #94a3b8;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #334155;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+  }
+  #examShell .resizer-bar:hover {
+    background: #94a3b8 !important;
+  }
+
+  /* 3. POPUP HIGHLIGHT THẺ TRẮNG MINIMALIST (IELTS MATE LIGHT POPOVER) */
+  #selectionTooltip,
+  #customHighlightPopover {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    padding: 6px 8px !important;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.14) !important;
+    gap: 4px !important;
+    align-items: center !important;
+  }
+  #selectionTooltip button,
+  #customHighlightPopover button {
+    background: transparent !important;
+    color: #1e293b !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 5px 10px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    cursor: pointer !important;
+  }
+  #selectionTooltip button:hover,
+  #customHighlightPopover button:hover {
+    background: #f1f5f9 !important;
+  }
+
+  /* 4. FOOTER ĐIỀU HƯỚNG GOM CỤM THEO PART + NÚT MŨI TÊN ← → (IELTS MATE STYLE) */
+  #examShell .progress-container {
+    height: 54px !important;
+    background: #ffffff !important;
+    border-top: 1px solid #e2e8f0 !important;
+    padding: 0 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    position: relative !important;
+  }
+  #footerSectionLabel {
+    display: none !important;
+  }
+  #insperaFooterList {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    max-width: calc(100% - 68px) !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+  }
+  .mate-footer-part-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .mate-footer-part-group:hover {
+    background: #f8fafc;
+  }
+  .mate-footer-part-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .mate-footer-part-count {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #64748b;
+  }
+  .mate-footer-q-pills {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  #examShell .progress-item {
+    min-width: 24px !important;
+    width: 24px !important;
+    height: 26px !important;
+    border: 1px solid transparent !important;
+    border-top: 2px solid #cbd5e1 !important;
+    border-radius: 3px !important;
+    background: transparent !important;
+    color: #334155 !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    padding: 0 !important;
+  }
+  #examShell .progress-item:hover {
+    background: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+  }
+  #examShell .progress-item.answered {
+    border-top-color: #0f172a !important;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: 800 !important;
+  }
+  #examShell .progress-item.current {
+    border: 1.5px solid #2563eb !important;
+    color: #2563eb !important;
+    background: #eff6ff !important;
+    outline: none !important;
+    font-weight: 800 !important;
+  }
+
+  /* Nút Mũi tên ← → nổi góc dưới bên phải */
+  .mate-floating-prev-next {
+    position: fixed;
+    right: 22px;
+    bottom: 66px;
+    display: none;
+    gap: 6px;
+    z-index: 5500;
+  }
+  #examShell[style*="flex"] .mate-floating-prev-next {
+    display: flex;
+  }
+  .mate-nav-arrow-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    border: none;
+    background: #94a3b8;
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.14);
+    transition: 0.15s;
+  }
+  .mate-nav-arrow-btn.next-dark {
+    background: #111827;
+  }
+  .mate-nav-arrow-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+  /* Nút dấu tích ✓ ở góc phải thanh Footer */
+  #btnSubmitBottom {
+    min-width: 46px !important;
+    height: 40px !important;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    padding: 0 12px !important;
+  }
+  #btnSubmitBottom:hover {
+    background: #059669 !important;
+    color: #ffffff !important;
+    border-color: #059669 !important;
+  }
+</style>
+
+<!-- NÚT MŨI TÊN CHUYỂN CÂU NHANH ← → -->
+<div class="mate-floating-prev-next" id="matePrevNextBox">
+  <button type="button" class="mate-nav-arrow-btn" onclick="stepExamQuestionByDelta(-1)" title="Câu trước (Previous Question)">←</button>
+  <button type="button" class="mate-nav-arrow-btn next-dark" onclick="stepExamQuestionByDelta(1)" title="Câu kế tiếp (Next Question)">→</button>
+</div>
+
+<!-- MODAL TẠO BỘ ĐỀ THI THỬ 3 KỸ NĂNG GIAO CHO LỚP (DÀNH CHO GIÁO VIÊN) -->
+<div class="modal-overlay" id="createMockSetModal" style="z-index: 98500;">
+  <div class="modal-window" style="width: 680px;">
+    <div class="modal-header" style="background:#1f3d32; color:#fff;">
+      <span>🎓 Tạo Bộ Đề Thi Thử 3 Kỹ Năng (Full Mock Test) Giao Cho Lớp</span>
+      <button class="btn btn-secondary" onclick="closeModal('createMockSetModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Tên Đợt Thi Thử / Bộ Đề (Ví dụ: Mock Test Tháng 10 - Cam 19)</label>
+        <input type="text" id="mockSetTitleInput" class="form-input" placeholder="Nhập tên bộ đề thi thử...">
+      </div>
+      <div class="form-group">
+        <label>Giao Cho Lớp (Target Class)</label>
+        <select id="mockSetClassSelect" class="form-input"></select>
+      </div>
+      <div class="form-group">
+        <label>1. Chọn Đề Listening (Kỹ năng 1)</label>
+        <select id="mockSetListeningSelect" class="form-input"></select>
+      </div>
+      <div class="form-group">
+        <label>2. Chọn Đề Reading (Kỹ năng 2)</label>
+        <select id="mockSetReadingSelect" class="form-input"></select>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label>3A. Chọn Đề Writing Task 1 (Hoặc Full)</label>
+          <select id="mockSetWritingT1Select" class="form-input"></select>
+        </div>
+        <div class="form-group">
+          <label>3B. Ghép Thêm Writing Task 2 (Tùy chọn)</label>
+          <select id="mockSetWritingT2Select" class="form-input"></select>
+        </div>
+      </div>
+      <div style="font-size:12px; color:#065f46; background:#ecfdf5; padding:10px 12px; border-radius:8px; border:1px solid #a7f3d0;">
+        💡 <b>Siêu tiết kiệm dung lượng:</b> Bộ đề chỉ lưu mã liên kết ID (~0.5KB), không nhân bản dữ liệu nên tuyệt đối không tốn bộ nhớ Firebase.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('createMockSetModal')">Hủy</button>
+      <button class="btn btn-emerald" onclick="saveCustomMockSet()">💾 Lưu & Giao Cho Lớp</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MÀN HÌNH CHUYỂN TIẾP GIỮA 3 KỸ NĂNG & BẢNG ĐIỂM TRF CUỐI BUỔI THI -->
+<div class="modal-overlay" id="mockTransitionModal" style="z-index: 99500;">
+  <div class="modal-window" style="width: 580px; text-align:center;">
+    <div class="modal-header" style="justify-content:center; background:#1f3d32; color:#fff;" id="mockTransitionHeader">
+      🎓 Chuyển Tiếp Kỹ Năng Thi Thử (CD-IELTS Official Flow)
+    </div>
+    <div class="modal-body" id="mockTransitionBody" style="padding: 28px 24px;"></div>
+    <div class="modal-footer" id="mockTransitionFooter" style="justify-content:center; gap:10px;"></div>
+  </div>
+</div>
+
+<script>
+  /* ==========================================================================
+     1. TÁI CẤU TRÚC FOOTER THEO CỤM PART (IELTS MATE STYLE) & NÚT CHUYỂN CÂU ← →
+     ========================================================================== */
+  let currentFocusedQuestionKey = null;
+
+  function getSortedExamQuestionKeys() {
+    if (!activeExam || !activeExam.correctAnswers) return [];
+    return Object.keys(activeExam.correctAnswers).sort(
+      (a, b) => parseInt(a.replace(/\D/g, '')) - parseInt(b.replace(/\D/g, ''))
+    );
+  }
+
+  function getKeysGroupedByPart() {
+    const groups = {};
+    const passages = (activeExam && activeExam.passages) || [];
+    passages.forEach(p => { groups[p.partNum] = []; });
+
+    const allKeys = getSortedExamQuestionKeys();
+    allKeys.forEach(k => {
+      const pNum = findPartForQuestionKey(k) || (passages[0] ? passages[0].partNum : 1);
+      if (!groups[pNum]) groups[pNum] = [];
+      groups[pNum].push(k);
+    });
+    return groups;
+  }
+
+  // Ghi đè buildFooterNav & updateFooterNav để chỉ bung dãy số của Part đang làm, các Part khác hiện "Part X  0 of 10"
+  buildFooterNav = function() {
+    const container = document.getElementById('insperaFooterList');
+    if (!container) return;
+    if (activeExamType === 'writing') return;
+
+    const btnBottom = document.getElementById('btnSubmitBottom');
+    if (btnBottom) btnBottom.innerHTML = '✓';
+
+    const grouped = getKeysGroupedByPart();
+    const partNums = Object.keys(grouped).map(Number).sort((a, b) => a - b);
+
+    container.innerHTML = partNums.map(pNum => {
+      const keysInPart = grouped[pNum] || [];
+      const answeredCount = keysInPart.filter(k => Boolean(userAnswers[k] && String(userAnswers[k]).trim() !== '')).length;
+      const isCurrentPart = (Number(pNum) === Number(activePartNum));
+
+      if (!isCurrentPart) {
+        return `
+          <div class="mate-footer-part-group" onclick="switchExamPassage(${pNum})" title="Chuyển sang Part ${pNum}">
+            <span class="mate-footer-part-title">Part ${pNum}</span>
+            <span class="mate-footer-part-count">${answeredCount} of ${keysInPart.length}</span>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="mate-footer-part-group" style="background:#f8fafc; border:1px solid #e2e8f0;">
+          <span class="mate-footer-part-title" style="margin-right:4px;">Part ${pNum}</span>
+          <div class="mate-footer-q-pills">
+            ${keysInPart.map(k => {
+              const num = k.replace('q', '');
+              const hasVal = Boolean(userAnswers[k] && String(userAnswers[k]).trim() !== '');
+              const isCur = (currentFocusedQuestionKey === k);
+              const isBm = (typeof bookmarkedQuestionKeys !== 'undefined' && bookmarkedQuestionKeys.has(k));
+              let revCls = '';
+              if (isReviewMode) {
+                revCls = isAnswerCorrect(k) ? 'correct' : 'incorrect';
+              }
+              return `
+                <button type="button"
+                  class="progress-item ${hasVal ? 'answered' : ''} ${isCur ? 'current' : ''} ${isBm ? 'bookmarked-pill' : ''} ${revCls}"
+                  id="fpill_${k}"
+                  onclick="event.stopPropagation(); jumpToQuestionKey('${k}')">${num}</button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+  };
+
+  updateFooterNav = function() {
+    if (activeExamType === 'writing') return;
+    buildFooterNav();
+  };
+
+  window.jumpToQuestionKey = function(qKey) {
+    if (!activeExam) return;
+    currentFocusedQuestionKey = qKey;
+    const num = qKey.replace('q', '');
+    const targetPart = findPartForQuestionKey(qKey);
+    if (targetPart && Number(targetPart) !== Number(activePartNum)) {
+      switchExamPassage(targetPart);
+    } else {
+      buildFooterNav();
+    }
+    setTimeout(() => {
+      const targetEl = document.querySelector(`#insperaSplitBox [data-question="${num}"]`)
+        || document.querySelector(`#insperaSplitBox [name="${qKey}"]`)
+        || document.querySelector(`#insperaSplitBox .drop-zone[data-target="${qKey}"]`);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const inputInside = targetEl.matches('input, select') ? targetEl : targetEl.querySelector('input, select');
+        if (inputInside && inputInside.focus) inputInside.focus();
+      }
+    }, 45);
+  };
+
+  window.stepExamQuestionByDelta = function(delta) {
+    if (!activeExam) return;
+    if (activeExamType === 'writing') {
+      const nextTask = activePartNum === 1 ? 2 : 1;
+      if (typeof switchWritingTask === 'function') switchWritingTask(nextTask);
+      return;
+    }
+    const allKeys = getSortedExamQuestionKeys();
+    if (!allKeys.length) return;
+    let idx = allKeys.indexOf(currentFocusedQuestionKey);
+    if (idx === -1) {
+      const grouped = getKeysGroupedByPart();
+      const curPartKeys = grouped[activePartNum] || [];
+      idx = curPartKeys.length ? allKeys.indexOf(curPartKeys[0]) : 0;
+    } else {
+      idx = Math.max(0, Math.min(allKeys.length - 1, idx + delta));
+    }
+    jumpToQuestionKey(allKeys[idx]);
+  };
+
+  /* ==========================================================================
+     2. PHÒNG THI THỬ 3 KỸ NĂNG LIÊN HOÀN (FULL MOCK TEST ENGINE)
+        - Hỗ trợ cả Random bốc đề tự động & Bộ đề cố định giáo viên giao cho lớp
+     ========================================================================== */
+  let mockSession = {
+    active: false,
+    title: '',
+    stage: 0, // 1: Listening, 2: Reading, 3: Writing
+    listeningExam: null,
+    readingExam: null,
+    writingExam: null,
+    listeningResult: null,
+    readingResult: null,
+    writingResult: null,
+    breakTimer: null
+  };
+
+  function ensureMockSetsInitialized() {
+    if (!db.mockSets) db.mockSets = [];
+    // Đồng bộ danh sách bộ đề Mock Test từ collection nhẹ suite_mockSets
+    const fs = typeof getActiveFirestore === 'function' ? getActiveFirestore() : CLOUD_DB;
+    if (fs && !window._mockSetsListenerBound) {
+      window._mockSetsListenerBound = true;
+      fs.collection('suite_mockSets').onSnapshot(snap => {
+        if (!snap.empty) {
+          db.mockSets = snap.docs.map(d => d.data());
+          if (document.getElementById('tab-mocktest')?.style.display === 'block') {
+            renderMockTestTab();
+          }
+        }
+      });
+    }
+  }
+
+  function injectMockTestTabIntoDashboard() {
+    const tabsBar = document.querySelector('.dash-tabs');
+    const writingTabBtn = document.getElementById('tabbtn-writing');
+    if (tabsBar && writingTabBtn && !document.getElementById('tabbtn-mocktest')) {
+      const btn = document.createElement('button');
+      btn.className = 'dash-tab-btn';
+      btn.id = 'tabbtn-mocktest';
+      btn.innerHTML = '🎓 Full Mock Test (3 Kỹ Năng)';
+      btn.onclick = () => switchDashTab('mocktest');
+      writingTabBtn.insertAdjacentElement('afterend', btn);
+    }
+
+    const dashBody = document.querySelector('.dash-body');
+    if (dashBody && !document.getElementById('tab-mocktest')) {
+      const pane = document.createElement('div');
+      pane.id = 'tab-mocktest';
+      pane.className = 'dash-pane';
+      pane.style.display = 'none';
+      dashBody.appendChild(pane);
+    }
+  }
+
+  const _v11OrigSwitchDashTab = switchDashTab;
+  switchDashTab = function(tab) {
+    injectMockTestTabIntoDashboard();
+    _v11OrigSwitchDashTab(tab);
+    if (tab === 'mocktest') {
+      renderMockTestTab();
+    }
+  };
+
+  // Thuật toán chọn đề ngẫu nhiên thông minh (Ưu tiên đề Full & chưa làm, tự gộp Task 1 + Task 2 nếu thiếu Writing Full)
+  function buildRandomMockTestBundle() {
+    const doneR = new Set(getStudentCompletedExamIds('reading'));
+    const doneL = new Set(getStudentCompletedExamIds('listening'));
+
+    const allL = getVisibleExams(db.listeningExams || []);
+    const fullL = allL.filter(e => (e.passages && e.passages.length >= 4) || String(e.category || '').includes('Full'));
+    const poolL = fullL.length ? fullL : allL;
+    const freshL = poolL.filter(e => !doneL.has(e.id));
+    const chosenL = (freshL.length ? freshL : poolL)[Math.floor(Math.random() * (freshL.length ? freshL.length : poolL.length))];
+
+    const allR = getVisibleExams(db.readingExams || []);
+    const fullR = allR.filter(e => (e.passages && e.passages.length >= 3) || String(e.category || '').includes('Full'));
+    const poolR = fullR.length ? fullR : allR;
+    const freshR = poolR.filter(e => !doneR.has(e.id));
+    const chosenR = (freshR.length ? freshR : poolR)[Math.floor(Math.random() * (freshR.length ? freshR.length : poolR.length))];
+
+    const allW = getVisibleExams(db.writingExams || []);
+    const fullW = allW.filter(w => w.task1?.prompt && w.task2?.prompt);
+    let chosenW = null;
+
+    if (fullW.length) {
+      chosenW = fullW[Math.floor(Math.random() * fullW.length)];
+    } else {
+      const t1Pool = allW.filter(w => w.task1?.prompt);
+      const t2Pool = allW.filter(w => w.task2?.prompt);
+      const pickT1 = t1Pool.length ? t1Pool[Math.floor(Math.random() * t1Pool.length)] : null;
+      const pickT2 = t2Pool.length ? t2Pool[Math.floor(Math.random() * t2Pool.length)] : null;
+      if (pickT1 || pickT2) {
+        chosenW = {
+          id: (pickT1 ? pickT1.id : pickT2.id),
+          title: `Writing Mock (${pickT1 ? pickT1.title : 'Task 1'} + ${pickT2 ? pickT2.title : 'Task 2'})`,
+          duration: 60,
+          task1: pickT1 ? pickT1.task1 : { prompt: '', image: '' },
+          task2: pickT2 ? pickT2.task2 : { prompt: '' }
+        };
+      }
+    }
+
+    return { listening: chosenL, reading: chosenR, writing: chosenW };
+  }
+
+  window.startRandomFullMockTest = function() {
+    const bundle = buildRandomMockTestBundle();
+    if (!bundle.listening || !bundle.reading || !bundle.writing) {
+      return alert('Kho đề hiện cần có ít nhất 1 đề Listening, 1 đề Reading và 1 đề Writing để bắt đầu kỳ thi thử 3 kỹ năng!');
+    }
+    startMockTestFlow('Full CD-IELTS Mock Test (Random Official Simulation)', bundle.listening, bundle.reading, bundle.writing);
+  };
+
+  window.startAssignedMockSet = function(mockSetId) {
+    const ms = (db.mockSets || []).find(x => x.id === mockSetId);
+    if (!ms) return;
+    const lEx = (db.listeningExams || []).find(e => e.id === ms.listeningId) || (db.listeningExams || [])[0];
+    const rEx = (db.readingExams || []).find(e => e.id === ms.readingId) || (db.readingExams || [])[0];
+    const w1 = (db.writingExams || []).find(e => e.id === ms.writingT1Id) || (db.writingExams || [])[0];
+    const w2 = ms.writingT2Id ? (db.writingExams || []).find(e => e.id === ms.writingT2Id) : null;
+
+    if (!lEx || !rEx || !w1) return alert('Một trong các đề thành phần của gói thi thử này đã bị xóa!');
+
+    const combinedW = {
+      id: w1.id,
+      title: w2 && w2.id !== w1.id ? `${w1.title} + ${w2.title}` : w1.title,
+      duration: 60,
+      task1: w1.task1 || { prompt: '', image: '' },
+      task2: (w2 && w2.task2?.prompt) ? w2.task2 : (w1.task2 || { prompt: '' })
+    };
+
+    startMockTestFlow(ms.title, lEx, rEx, combinedW);
+  };
+
+  function startMockTestFlow(title, lExam, rExam, wExam) {
+    if (!confirm(`🎓 BẮT ĐẦU KỲ THI THỬ 3 KỸ NĂNG LIÊN HOÀN:\n"${title}"\n\n1. Listening: ${lExam.title} (${lExam.duration || 30} phút)\n2. Reading: ${rExam.title} (${rExam.duration || 60} phút)\n3. Writing: ${wExam.title} (60 phút)\n\nBạn đã sẵn sàng tai nghe và thời gian làm bài liên tục chưa?`)) {
+      return;
+    }
+    mockSession = {
+      active: true,
+      title,
+      stage: 1,
+      listeningExam: lExam,
+      readingExam: rExam,
+      writingExam: wExam,
+      listeningResult: null,
+      readingResult: null,
+      writingResult: null,
+      breakTimer: null
+    };
+    launchListeningExam(lExam.id);
+  }
+
+  // Can thiệp vào submitExam để nếu học sinh đang trong phiên Thi Thử 3 Kỹ Năng thì tự động chuyển sang kỹ năng kế tiếp!
+  const _v11OrigSubmitExam = submitExam;
+  submitExam = async function(forceSubmit = false) {
+    if (!mockSession.active) {
+      return _v11OrigSubmitExam(forceSubmit);
+    }
+
+    if (!forceSubmit && !confirm(`Nộp bài kỹ năng ${mockSession.stage === 1 ? 'LISTENING' : (mockSession.stage === 2 ? 'READING' : 'WRITING')} và chuyển sang phần tiếp theo?`)) {
+      return;
+    }
+
+    // Lưu kết quả kỹ năng hiện tại bằng hàm gốc (ép forceSubmit = true để không hỏi confirm 2 lần)
+    await _v11OrigSubmitExam(true);
+
+    // Đóng popup điểm lẻ nếu vừa nộp Listening/Reading
+    closeModal('scoreSummaryModal');
+    closeModal('gradeWritingModal');
+    closeModal('studentViewWritingModal');
+
+    const latestRes = (db.results && db.results.length) ? db.results[db.results.length - 1] : null;
+
+    if (mockSession.stage === 1) {
+      mockSession.listeningResult = latestRes;
+      mockSession.stage = 2;
+      showMockIntermissionScreen(
+        '✅ Đã hoàn thành Kỹ năng 1: LISTENING',
+        `Điểm Listening của bạn: <b style="color:#059669;">${latestRes ? latestRes.score : ''} (Band ${latestRes ? latestRes.band : ''})</b>.<br>Hệ thống sẽ tự động chuyển sang <b>Kỹ năng 2: READING (60 phút)</b> sau khi hết thời gian nghỉ chuyển tiếp.`,
+        '📖 Bắt Đầu Thi READING Ngay',
+        () => launchExam(mockSession.readingExam.id)
+      );
+      return;
+    }
+
+    if (mockSession.stage === 2) {
+      mockSession.readingResult = latestRes;
+      mockSession.stage = 3;
+      showMockIntermissionScreen(
+        '✅ Đã hoàn thành Kỹ năng 2: READING',
+        `Điểm Reading của bạn: <b style="color:#059669;">${latestRes ? latestRes.score : ''} (Band ${latestRes ? latestRes.band : ''})</b>.<br>Tiếp theo là phần thi cuối cùng: <b>Kỹ năng 3: WRITING (60 phút)</b>.`,
+        '✍️ Bắt Đầu Thi WRITING Ngay',
+        () => {
+          // Đảm bảo nếu đề Writing là đề ghép tạm thời Task 1 + Task 2 thì vẫn mở được trong launchWritingExam
+          const tempW = mockSession.writingExam;
+          const existsInDb = (db.writingExams || []).some(w => w.id === tempW.id && w.task1?.prompt && w.task2?.prompt);
+          if (!existsInDb) {
+            activeExam = tempW;
+            stopAllAudioPlayers();
+            activeExamType = 'writing';
+            isReviewMode = false;
+            activePartNum = tempW.task1?.prompt ? 1 : 2;
+            writingAnswers = { task1: '', task2: '' };
+            secondsRemaining = 60 * 60;
+            document.getElementById('dashboardApp').style.display = 'none';
+            document.getElementById('examShell').style.display = 'flex';
+            document.getElementById('insperaExamTitle').textContent = tempW.title;
+            document.getElementById('insperaCandidateTag').textContent = `👤 ${activeUser.name}`;
+            document.getElementById('btnSubmitExam').style.display = '';
+            document.getElementById('btnSubmitBottom').style.display = '';
+            const topTabs = document.getElementById('insperaPartTabs');
+            topTabs.innerHTML = `
+              ${tempW.task1?.prompt ? `<button class="part-pill active" id="wtab_1" onclick="switchWritingTask(1)">Part 1</button>` : ''}
+              ${tempW.task2?.prompt ? `<button class="part-pill" id="wtab_2" onclick="switchWritingTask(2)">Part 2</button>` : ''}
+            `;
+            loadWritingWorkspace(activePartNum);
+            setupResizer();
+            startTimer();
+          } else {
+            launchWritingExam(tempW.id);
+          }
+        }
+      );
+      return;
+    }
+
+    if (mockSession.stage === 3) {
+      mockSession.writingResult = latestRes;
+      mockSession.active = false;
+      showFinalMockTrfReport();
+    }
+  };
+
+  function showMockIntermissionScreen(headerTitle, messageHtml, nextBtnText, onProceed) {
+    clearInterval(mockSession.breakTimer);
+    let breakSecs = 60;
+    document.getElementById('mockTransitionHeader').textContent = headerTitle;
+    const body = document.getElementById('mockTransitionBody');
+    const footer = document.getElementById('mockTransitionFooter');
+
+    body.innerHTML = `
+      <div style="font-size:14.5px; color:#334155; line-height:1.65; margin-bottom:16px;">${messageHtml}</div>
+      <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:12px; padding:14px; display:inline-block; min-width:220px;">
+        <div style="font-size:11.5px; font-weight:800; color:#065f46; text-transform:uppercase;">Thời gian nghỉ chuyển tiếp</div>
+        <div id="mockBreakCountdownLabel" style="font-size:32px; font-weight:800; color:#059669; margin-top:4px;">01:00</div>
+      </div>
+    `;
+    footer.innerHTML = `
+      <button type="button" class="btn btn-emerald" id="btnProceedNextMockStage" style="padding:10px 22px; font-size:14px;">${nextBtnText}</button>
+    `;
+
+    const proceedHandler = () => {
+      clearInterval(mockSession.breakTimer);
+      closeModal('mockTransitionModal');
+      onProceed();
+    };
+    document.getElementById('btnProceedNextMockStage').onclick = proceedHandler;
+
+    mockSession.breakTimer = setInterval(() => {
+      breakSecs--;
+      const lbl = document.getElementById('mockBreakCountdownLabel');
+      if (lbl) lbl.textContent = `00:${String(Math.max(0, breakSecs)).padStart(2, '0')}`;
+      if (breakSecs <= 0) {
+        proceedHandler();
+      }
+    }, 1000);
+
+    openModal('mockTransitionModal');
+  }
+
+  function showFinalMockTrfReport() {
+    const lBand = parseFloat(String(mockSession.listeningResult?.band || '0').replace(/[^0-9.]/g, '')) || 0;
+    const rBand = parseFloat(String(mockSession.readingResult?.band || '0').replace(/[^0-9.]/g, '')) || 0;
+    const wBandRaw = String(mockSession.writingResult?.band || 'Submitted');
+    const wBandNum = parseFloat(wBandRaw.replace(/[^0-9.]/g, '')) || 0;
+
+    const validNums = [lBand, rBand, wBandNum].filter(n => n > 0);
+    const overall = validNums.length ? (Math.round((validNums.reduce((a, b) => a + b, 0) / validNums.length) * 2) / 2).toFixed(1) : '—';
+
+    document.getElementById('mockTransitionHeader').textContent = '🏆 KẾT QUẢ THI THỬ 3 KỸ NĂNG (MOCK TEST REPORT FORM)';
+    document.getElementById('mockTransitionBody').innerHTML = `
+      <div style="font-size:14px; font-weight:700; color:#1f3d32; margin-bottom:14px;">${mockSession.title}</div>
+      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin-bottom:18px;">
+        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:12px 8px;">
+          <div style="font-size:11px; font-weight:700; color:#64748b;">LISTENING</div>
+          <div style="font-size:22px; font-weight:800; color:#2563eb; margin:4px 0;">${lBand || '—'}</div>
+          <div style="font-size:11px; color:#475569;">${mockSession.listeningResult?.score || ''}</div>
+        </div>
+        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:12px 8px;">
+          <div style="font-size:11px; font-weight:700; color:#64748b;">READING</div>
+          <div style="font-size:22px; font-weight:800; color:#059669; margin:4px 0;">${rBand || '—'}</div>
+          <div style="font-size:11px; color:#475569;">${mockSession.readingResult?.score || ''}</div>
+        </div>
+        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:12px 8px;">
+          <div style="font-size:11px; font-weight:700; color:#64748b;">WRITING</div>
+          <div style="font-size:18px; font-weight:800; color:#d97706; margin:6px 0;">${wBandNum ? wBandNum : 'Chờ chấm'}</div>
+          <div style="font-size:11px; color:#475569;">${mockSession.writingResult?.score || ''}</div>
+        </div>
+        <div style="background:#ecfdf5; border:1.5px solid #059669; border-radius:10px; padding:12px 8px;">
+          <div style="font-size:11px; font-weight:800; color:#065f46;">OVERALL</div>
+          <div style="font-size:24px; font-weight:800; color:#047857; margin:4px 0;">${overall}</div>
+          <div style="font-size:10.5px; color:#065f46; font-weight:700;">CD-IELTS</div>
+        </div>
+      </div>
+      <div style="font-size:12.5px; color:#475569;">
+        Toàn bộ kết quả từng kỹ năng đã được lưu vào bảng lịch sử làm bài ở trang <b>Home</b> để bạn xem lại đáp án chi tiết.
+      </div>
+    `;
+    document.getElementById('mockTransitionFooter').innerHTML = `
+      <button type="button" class="btn btn-emerald" onclick="closeModal('mockTransitionModal'); switchDashTab('home');">🏠 Về Trang Chủ Xem Chi Tiết</button>
+    `;
+    openModal('mockTransitionModal');
+  }
+
+  /* ==========================================================================
+     3. GIAO DIỆN TAB "🎓 FULL MOCK TEST" & QUẢN LÝ GÓI ĐỀ GIAO LỚP CHO GIÁO VIÊN
+     ========================================================================== */
+  function renderMockTestTab() {
+    ensureMockSetsInitialized();
+    const pane = document.getElementById('tab-mocktest');
+    if (!pane || !activeUser) return;
+
+    const isTeacher = activeUser.role === 'teacher';
+    const visibleSets = (db.mockSets || []).filter(ms => {
+      if (isTeacher) return true;
+      if (!ms.classId || ms.classId === 'ALL') return true;
+      return ms.classId === activeUser.classId;
+    });
+
+    pane.innerHTML = `
+      <div class="card">
+        <div class="card-title">
+          <span>🎓 Phòng Thi Thử 3 Kỹ Năng Chuẩn Thi Thật (Listening ➔ Reading ➔ Writing)</span>
+          ${isTeacher ? `<button class="btn btn-emerald" onclick="openCreateMockSetModal()">+ Tạo Bộ Đề Mock Test Giao Lớp</button>` : ''}
+        </div>
+
+        <!-- Chế độ 1: Bốc đề ngẫu nhiên thông minh -->
+        <div style="background:linear-gradient(135deg,#ecfdf5 0%,#eff6ff 100%); border:1.5px solid #86efac; border-radius:16px; padding:22px 26px; margin-bottom:22px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+          <div style="max-width:720px;">
+            <div style="font-size:17px; font-weight:800; color:#064e3b; margin-bottom:6px;">
+              🎲 Chế Độ 1: Thi Thử Tổ Hợp Đề Ngẫu Nhiên (Smart Random Mock Test)
+            </div>
+            <div style="font-size:13.5px; color:#334155; line-height:1.6;">
+              Hệ thống tự động bốc ngẫu nhiên <b>1 đề Listening Full + 1 đề Reading Full + 1 đề Writing Full</b> (hoặc tự ghép 1 Task 1 + 1 Task 2) ưu tiên từ những đề bạn chưa làm. Trải nghiệm áp lực thời gian liên hoàn ~2 giờ 30 phút giống 100% kỳ thi thật trên máy tại IDP / BC.
+            </div>
+          </div>
+          <button class="btn btn-emerald" style="padding:12px 22px; font-size:14px;" onclick="startRandomFullMockTest()">
+            🚀 Bắt Đầu Thi Thử Ngẫu Nhiên Ngay
+          </button>
+        </div>
+
+        <!-- Chế độ 2: Danh sách bộ đề cố định Giáo viên giao cho lớp -->
+        <div style="font-size:15px; font-weight:800; color:#0f172a; margin-bottom:12px;">
+          📋 Chế Độ 2: Các Kỳ Thi Thử Cố Định Do Giáo Viên Giao Cho Lớp (${visibleSets.length})
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Tên Kỳ Thi Thử</th>
+              <th>🎧 Listening</th>
+              <th>📖 Reading</th>
+              <th>✍️ Writing</th>
+              <th>Lớp Nhận Bài</th>
+              <th>Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${!visibleSets.length ? `
+              <tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:22px;">Chưa có bộ đề thi thử cố định nào được giao. Bạn có thể bấm nút "Bắt Đầu Thi Thử Ngẫu Nhiên" ở trên nhé!</td></tr>
+            ` : visibleSets.map(ms => {
+              const cls = (db.classes || []).find(c => c.id === ms.classId);
+              return `
+                <tr>
+                  <td><b>${ms.title}</b></td>
+                  <td>${ms.listeningTitle || 'Listening Test'}</td>
+                  <td>${ms.readingTitle || 'Reading Test'}</td>
+                  <td>${ms.writingTitle || 'Writing Task 1 & 2'}</td>
+                  <td><span style="background:#f1f5f9; padding:3px 10px; border-radius:99px; font-size:12px; font-weight:700;">${cls ? cls.name : 'Tất cả các lớp'}</span></td>
+                  <td style="display:flex; gap:6px;">
+                    <button class="btn btn-emerald" onclick="startAssignedMockSet('${ms.id}')">▶️ Vào Phòng Thi</button>
+                    ${isTeacher ? `<button class="btn btn-danger" onclick="deleteMockSet('${ms.id}')">Xóa</button>` : ''}
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  window.openCreateMockSetModal = function() {
+    populateClassSelect('mockSetClassSelect', true);
+    const lSel = document.getElementById('mockSetListeningSelect');
+    const rSel = document.getElementById('mockSetReadingSelect');
+    const w1Sel = document.getElementById('mockSetWritingT1Select');
+    const w2Sel = document.getElementById('mockSetWritingT2Select');
+
+    lSel.innerHTML = (db.listeningExams || []).map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+    rSel.innerHTML = (db.readingExams || []).map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+    w1Sel.innerHTML = (db.writingExams || []).map(w => `<option value="${w.id}">${w.title}</option>`).join('');
+    w2Sel.innerHTML = `<option value="">-- Giữ nguyên theo đề trên (Nếu đã đủ 2 Task) --</option>` +
+      (db.writingExams || []).map(w => `<option value="${w.id}">${w.title}</option>`).join('');
+
+    document.getElementById('mockSetTitleInput').value = '';
+    openModal('createMockSetModal');
+  };
+
+  window.saveCustomMockSet = async function() {
+    ensureMockSetsInitialized();
+    const title = document.getElementById('mockSetTitleInput').value.trim();
+    const classId = document.getElementById('mockSetClassSelect').value;
+    const lId = document.getElementById('mockSetListeningSelect').value;
+    const rId = document.getElementById('mockSetReadingSelect').value;
+    const w1Id = document.getElementById('mockSetWritingT1Select').value;
+    const w2Id = document.getElementById('mockSetWritingT2Select').value;
+
+    if (!title || !lId || !rId || !w1Id) return alert('Vui lòng nhập tên kỳ thi và chọn đủ đề 3 kỹ năng!');
+
+    const lObj = (db.listeningExams || []).find(e => e.id === lId);
+    const rObj = (db.readingExams || []).find(e => e.id === rId);
+    const w1Obj = (db.writingExams || []).find(e => e.id === w1Id);
+    const w2Obj = w2Id ? (db.writingExams || []).find(e => e.id === w2Id) : null;
+
+    const newSet = {
+      id: 'mockset_' + Date.now(),
+      title,
+      classId,
+      listeningId: lId,
+      listeningTitle: lObj ? lObj.title : '',
+      readingId: rId,
+      readingTitle: rObj ? rObj.title : '',
+      writingT1Id: w1Id,
+      writingT2Id: w2Id || '',
+      writingTitle: w2Obj ? `${w1Obj?.title || ''} + ${w2Obj.title}` : (w1Obj?.title || ''),
+      createdAt: Date.now()
+    };
+
+    db.mockSets.unshift(newSet);
+    const fs = typeof getActiveFirestore === 'function' ? getActiveFirestore() : CLOUD_DB;
+    if (fs) {
+      try { await fs.collection('suite_mockSets').doc(newSet.id).set(newSet); } catch (e) {}
+    }
+    closeModal('createMockSetModal');
+    renderMockTestTab();
+    alert('✅ Đã tạo và giao bộ đề Thi Thử 3 Kỹ Năng thành công!');
+  };
+
+  window.deleteMockSet = async function(id) {
+    if (!confirm('Xóa bộ đề thi thử này?')) return;
+    db.mockSets = (db.mockSets || []).filter(x => x.id !== id);
+    const fs = typeof getActiveFirestore === 'function' ? getActiveFirestore() : CLOUD_DB;
+    if (fs) {
+      try { await fs.collection('suite_mockSets').doc(id).delete(); } catch (e) {}
+    }
+    renderMockTestTab();
+  };
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      injectMockTestTabIntoDashboard();
+      ensureMockSetsInitialized();
+    }, 500);
+  });
+</script>
+<!-- ============================================================================
+     MODULE UPDATE 25.10 - V12 (OFFICIAL CD-IELTS LOBBY, AUTOPLAY AUDIO & CLEAN UI):
+     1. Ẩn hoàn toàn thanh #insperaPartTabs thừa ở phía trên
+     2. Tự động ẩn Study Lounge Chat khi đang làm bài trong #examShell
+     3. Đổi triệt để Popup Highlight đen sang Thẻ Trắng Minimalist (IELTS Mate)
+     4. Cổng Thi Thử 4 Bước (Pre-test -> Listening -> Reading -> Writing) chuẩn Video
+     5. Tự động phát Audio (Autoplay) & khóa tua khi thi Listening trong Mock Test
+     Dán nối tiếp đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* 1. ẨN HOÀN TOÀN THANH PART 1, 2, 3 THỪA Ở PHÍA TRÊN (#insperaPartTabs) */
+  #examShell #insperaPartTabs,
+  #examShell .inspera-part-tabs {
+    display: none !important;
+  }
+
+  /* 2. TỰ ĐỘNG ẨN KHUNG CHAT STUDY LOUNGE KHI ĐANG TRONG PHÒNG THI */
+  body.in-active-exam-room [id*="chat" i],
+  body.in-active-exam-room [class*="chat" i],
+  body.in-active-exam-room [id*="lounge" i],
+  body.in-active-exam-room [class*="lounge" i] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* 3. ÉP TRIỆT ĐỂ MỌI POPUP HIGHLIGHT SANG THẺ TRẮNG MINIMALIST (LIGHT POPOVER) */
+  #selectionTooltip,
+  [id*="highlight" i][style*="position: absolute"],
+  [id*="highlight" i][style*="position: fixed"],
+  [class*="highlight-tooltip" i],
+  [class*="hl-tooltip" i] {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    padding: 5px 8px !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.15) !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+  #selectionTooltip button,
+  [id*="highlight" i] button {
+    background: #f8fafc !important;
+    color: #1e293b !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    padding: 5px 10px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    transition: all 0.12s ease !important;
+  }
+  #selectionTooltip button:hover,
+  [id*="highlight" i] button:hover {
+    background: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+    transform: translateY(-1px);
+  }
+  .user-highlight-green {
+    background-color: #bbf7d0 !important;
+    color: #064e3b !important;
+  }
+
+  /* 4. CHẾ ĐỘ AUDIO KHẢO THÍ TRONG MOCK TEST (KHÓA TUA & ẨN PAUSE) */
+  #examShell.mock-strict-audio #examAudioPlayer,
+  #examShell.mock-strict-audio .audio-speed-slider-wrap,
+  #examShell.mock-strict-audio #examAudioSpeedSelect,
+  #examShell.mock-strict-audio [onclick*="Pause" i] {
+    display: none !important;
+  }
+  #mockStrictAudioBar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  #examShell.mock-strict-audio #mockStrictAudioBar {
+    display: inline-flex !important;
+  }
+
+  /* 5. CỔNG THI THỬ 4 BƯỚC (OFFICIAL INSPERA ACCORDION LOBBY NHƯ VIDEO) */
+  #officialMockLobbyOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #f8fafc;
+    z-index: 99000;
+    flex-direction: column;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111827;
+  }
+  .lobby-top-bar {
+    height: 52px;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+  .lobby-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 20px 80px;
+  }
+  .lobby-accordion-stack {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .lobby-step-card {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+    overflow: hidden;
+  }
+  .lobby-step-header {
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .lobby-step-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #111827;
+  }
+  .lobby-step-sub {
+    font-size: 12.5px;
+    color: #6b7280;
+    margin-top: 3px;
+  }
+  .lobby-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid #d1d5db;
+    background: #f9fafb;
+    color: #6b7280;
+  }
+  .lobby-status-pill.completed {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #16a34a;
+  }
+  .lobby-step-body {
+    padding: 0 24px 24px;
+    border-top: 1px solid #f1f5f9;
+  }
+  .inspera-slide-box {
+    margin-top: 16px;
+    background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+    border: 1px solid #bfdbfe;
+    border-radius: 4px;
+    padding: 42px 28px;
+    text-align: center;
+    min-height: 230px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .inspera-slide-main-text {
+    font-size: 23px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.45;
+    max-width: 520px;
+  }
+  .inspera-slide-main-text b {
+    color: #dc2626;
+  }
+  .inspera-slide-controls {
+    background: #cbd5e1;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    border-radius: 0 0 4px 4px;
+    margin-bottom: 16px;
+  }
+  .lobby-black-btn {
+    background: #111827;
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    padding: 9px 24px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.15s;
+  }
+  .lobby-black-btn:hover {
+    background: #374151;
+  }
+  .lobby-bottom-bar {
+    height: 48px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    font-size: 12.5px;
+    color: #475569;
+  }
+</style>
+
+<!-- GIAO DIỆN CỔNG THI THỬ 4 BƯỚC (OFFICIAL CD-IELTS EXAM LOBBY OVERLAY) -->
+<div id="officialMockLobbyOverlay">
+  <div class="lobby-top-bar">
+    <div style="display:flex; align-items:center; gap:16px;">
+      <span style="font-size:18px; font-weight:900; color:#dc2626; letter-spacing:-0.5px;">IELTS</span>
+      <span id="lobbyCandidateLabel" style="font-size:13.5px; font-weight:700; color:#111827;">Candidate: Student</span>
+      <span id="lobbyMockTitleLabel" style="font-size:12.5px; color:#64748b;">Official Computer-Delivered Mock Test</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px; color:#475569; font-size:14px;">
+      <i class="fas fa-wifi" title="Connected"></i>
+      <i class="far fa-bell"></i>
+      <button class="inspera-flat-btn" onclick="abortOfficialMockLobby()">Exit Mock Test</button>
+    </div>
+  </div>
+
+  <div class="lobby-scroll-area">
+    <div class="lobby-accordion-stack" id="lobbyAccordionContainer"></div>
+  </div>
+
+  <div class="lobby-bottom-bar">
+    <span>CD-IELTS Official Simulation Environment</span>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span>🔊 Volume</span>
+      <input type="range" min="0" max="1" step="0.05" value="1" style="width:90px; accent-color:#111827;" oninput="setGlobalMockVolume(this.value)">
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ==========================================================================
+     1. ĐỒNG BỘ ẨN KHUNG CHAT KHI VÀO PHÒNG THI & LÀM SẠCH POPUP HIGHLIGHT TRẮNG
+     ========================================================================== */
+  function syncExamRoomBodyClass() {
+    const shell = document.getElementById('examShell');
+    const lobby = document.getElementById('officialMockLobbyOverlay');
+    const inExam = (shell && shell.style.display !== 'none') || (lobby && lobby.style.display !== 'none');
+    document.body.classList.toggle('in-active-exam-room', Boolean(inExam));
+
+    // Ẩn trực tiếp mọi phần tử nổi có chữ "Study Lounge Chat" khi đang thi
+    document.querySelectorAll('div, button, aside').forEach(el => {
+      if (el.id === 'examShell' || el.contains(shell)) return;
+      const txt = (el.textContent || '').trim();
+      if (txt.startsWith('Study Lounge Chat') && txt.length < 40) {
+        const floatingRoot = el.closest('[style*="fixed"]') || el;
+        floatingRoot.style.display = inExam ? 'none' : '';
+      }
+    });
+  }
+
+  function upgradeSelectionTooltipToLightCard() {
+    const tooltip = document.getElementById('selectionTooltip');
+    if (tooltip && !tooltip.getAttribute('data-light-upgraded')) {
+      tooltip.setAttribute('data-light-upgraded', '1');
+      tooltip.innerHTML = `
+        <button type="button" onclick="applyUserHighlightColor('yellow')" title="Tô vàng từ khóa">
+          <span style="width:10px; height:10px; border-radius:50%; background:#facc15; border:1px solid #ca8a04; display:inline-block;"></span>
+          <span>Keyword</span>
+        </button>
+        <button type="button" onclick="applyUserHighlightColor('green')" title="Tô xanh dẫn chứng">
+          <span style="width:10px; height:10px; border-radius:50%; background:#4ade80; border:1px solid #16a34a; display:inline-block;"></span>
+          <span>Evidence</span>
+        </button>
+        <button type="button" onclick="removeUserHighlight()" title="Xóa màu highlight">
+          <span style="color:#dc2626; font-weight:900;">✕</span>
+          <span>Xóa màu</span>
+        </button>
+      `;
+    }
+  }
+
+  window.applyUserHighlightColor = function(colorType) {
+    if (!currentSelectedRange) return;
+    const span = document.createElement('span');
+    span.className = colorType === 'green' ? 'user-highlight-green' : 'user-highlight-span';
+    try {
+      currentSelectedRange.surroundContents(span);
+    } catch (err) {
+      document.execCommand('hiliteColor', false, colorType === 'green' ? '#bbf7d0' : '#fde047');
+    }
+    const tooltip = document.getElementById('selectionTooltip');
+    if (tooltip) tooltip.style.display = 'none';
+    window.getSelection().removeAllRanges();
+    currentSelectedRange = null;
+  };
+
+  /* ==========================================================================
+     2. CHẾ ĐỘ AUDIO TỰ ĐỘNG PHÁT (AUTOPLAY) & KHÓA TUA CHO MOCK TEST
+     ========================================================================== */
+  function ensureMockStrictAudioBarInjected() {
+    const audioHeader = document.getElementById('listeningAudioHeaderContainer');
+    if (audioHeader && !document.getElementById('mockStrictAudioBar')) {
+      const strictBar = document.createElement('div');
+      strictBar.id = 'mockStrictAudioBar';
+      strictBar.innerHTML = `
+        <span style="color:#dc2626;">● LIVE AUDIO</span>
+        <span id="mockStrictAudioTimeLabel" style="font-family:monospace; color:#334155;">Playing...</span>
+        <span style="margin-left:6px;">🔊</span>
+        <input type="range" min="0" max="1" step="0.05" value="1" style="width:70px; accent-color:#0f172a; cursor:pointer;"
+          title="Chỉnh âm lượng tai nghe" oninput="setGlobalMockVolume(this.value)">
+      `;
+      audioHeader.appendChild(strictBar);
+
+      const audioEl = document.getElementById('examAudioPlayer');
+      if (audioEl) {
+        audioEl.addEventListener('timeupdate', () => {
+          const lbl = document.getElementById('mockStrictAudioTimeLabel');
+          if (lbl && audioEl.duration) {
+            const curM = String(Math.floor(audioEl.currentTime / 60)).padStart(2, '0');
+            const curS = String(Math.floor(audioEl.currentTime % 60)).padStart(2, '0');
+            const totM = String(Math.floor(audioEl.duration / 60)).padStart(2, '0');
+            const totS = String(Math.floor(audioEl.duration % 60)).padStart(2, '0');
+            lbl.textContent = `${curM}:${curS} / ${totM}:${totS}`;
+          }
+        });
+      }
+    }
+  }
+
+  window.setGlobalMockVolume = function(val) {
+    const v = parseFloat(val);
+    const audioEl = document.getElementById('examAudioPlayer');
+    if (audioEl) audioEl.volume = isNaN(v) ? 1 : v;
+    const preAudio = document.getElementById('lobbyTestSampleAudio');
+    if (preAudio) preAudio.volume = isNaN(v) ? 1 : v;
+  };
+
+  function activateStrictMockListeningAudio() {
+    const shell = document.getElementById('examShell');
+    if (!shell) return;
+    ensureMockStrictAudioBarInjected();
+
+    if (mockSession && mockSession.active && activeExamType === 'listening' && !isReviewMode) {
+      shell.classList.add('mock-strict-audio');
+      const audioEl = document.getElementById('examAudioPlayer');
+      if (audioEl) {
+        audioEl.playbackRate = 1.0;
+        setTimeout(() => {
+          audioEl.play().catch(() => {});
+        }, 300);
+      }
+    } else {
+      shell.classList.remove('mock-strict-audio');
+    }
+  }
+
+  /* ==========================================================================
+     3. CỔNG THI THỬ 4 BƯỚC (PRE-TEST -> LISTENING -> READING -> WRITING) NHƯ VIDEO
+     ========================================================================== */
+  let lobbyStepState = {
+    pretestDone: false,
+    listeningIntroConfirmed: false,
+    slideIndex: 0,
+    slideTimer: null
+  };
+
+  const LISTENING_INTRO_SLIDES = [
+    'IELTS Listening Test<br><span style="font-size:15px; font-weight:500; color:#64748b;">Test instructions</span>',
+    'Your listening test is<br><b>approximately 30 minutes.</b>',
+    'There are <b>40 questions.</b>',
+    'Each question carries <b>one mark.</b>',
+    'There are <b>four parts</b> to the test.',
+    'You will hear each part <b>once only.</b>',
+    'Listen and read the <b>instructions</b><br>carefully.',
+    'At the end, you will have <b>2 minutes</b><br>to check your answers.',
+    'The time <b>at the top of the screen</b><br>shows how much time you have left.',
+    'At the end of the test, the test<br>will <b>finish automatically.</b>'
+  ];
+
+  // Ghi đè hàm khởi động Mock Test để mở Cổng Lobby 4 Bước chuẩn thi thật
+  startMockTestFlow = function(title, lExam, rExam, wExam) {
+    mockSession = {
+      active: true,
+      title,
+      stage: 0, // 0: Pre-test, 1: Listening, 2: Reading, 3: Writing
+      listeningExam: lExam,
+      readingExam: rExam,
+      writingExam: wExam,
+      listeningResult: null,
+      readingResult: null,
+      writingResult: null,
+      breakTimer: null
+    };
+    lobbyStepState = {
+      pretestDone: false,
+      listeningIntroConfirmed: false,
+      slideIndex: 0,
+      slideTimer: null
+    };
+    openOfficialMockLobby();
+  };
+
+  function openOfficialMockLobby() {
+    document.getElementById('dashboardApp').style.display = 'none';
+    document.getElementById('examShell').style.display = 'none';
+    const lobby = document.getElementById('officialMockLobbyOverlay');
+    lobby.style.display = 'flex';
+    document.getElementById('lobbyCandidateLabel').textContent = `Candidate: ${activeUser ? activeUser.name : 'Student'}`;
+    document.getElementById('lobbyMockTitleLabel').textContent = mockSession.title || 'Official Mock Test';
+    syncExamRoomBodyClass();
+    renderOfficialMockLobbyCards();
+  }
+
+  window.abortOfficialMockLobby = function() {
+    if (!confirm('Bạn có chắc chắn muốn thoát khỏi kỳ thi thử 3 kỹ năng này?')) return;
+    clearInterval(lobbyStepState.slideTimer);
+    mockSession.active = false;
+    document.getElementById('officialMockLobbyOverlay').style.display = 'none';
+    document.getElementById('dashboardApp').style.display = 'flex';
+    syncExamRoomBodyClass();
+  };
+
+  function renderOfficialMockLobbyCards() {
+    clearInterval(lobbyStepState.slideTimer);
+    const box = document.getElementById('lobbyAccordionContainer');
+    if (!box) return;
+
+    const st = mockSession.stage; // 0: Pre-test, 1: Listening, 2: Reading, 3: Writing
+
+    // CARD 1: PRE-TEST (KIỂM TRA ÂM THANH & BÀN PHÍM)
+    const pretestCardHtml = `
+      <div class="lobby-step-card">
+        <div class="lobby-step-header">
+          <div>
+            <div class="lobby-step-title">Pre-test</div>
+            <div class="lobby-step-sub">2 Parts • Sound & Keyboard Check</div>
+          </div>
+          ${st > 0 ? `<span class="lobby-status-pill completed">✓</span>` : `<span class="lobby-status-pill">In Progress</span>`}
+        </div>
+        ${st === 0 ? `
+          <div class="lobby-step-body">
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:18px; margin-top:12px; border-radius:4px;">
+              <div style="font-weight:700; font-size:13.5px; margin-bottom:8px;">Part 1: Put on your headphones and test the sound</div>
+              <p style="font-size:12.5px; color:#475569; margin-bottom:12px;">Click the Play button below to check your headphone volume before starting the Listening test.</p>
+              <audio id="lobbyTestSampleAudio" controls src="${(mockSession.listeningExam && mockSession.listeningExam.audioUrl) || ''}" style="width:100%; height:34px; margin-bottom:16px;"></audio>
+              <div style="font-weight:700; font-size:13.5px; margin-bottom:8px;">Part 2: Keyboard & Input Check (Optional)</div>
+              <input type="text" class="form-input" placeholder="Type your name here to test keyboard input..." style="max-width:360px; margin-bottom:16px;">
+              <div>
+                <button type="button" class="lobby-black-btn" onclick="completeMockPretestStep()">
+                  Next <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    // CARD 2: LISTENING
+    const listeningCardHtml = `
+      <div class="lobby-step-card">
+        <div class="lobby-step-header">
+          <div>
+            <div class="lobby-step-title">Listening</div>
+            <div class="lobby-step-sub">4 Parts • ~30 minutes</div>
+          </div>
+          ${st > 1 ? `<span class="lobby-status-pill completed">✓</span>` : (st === 1 ? `<span class="lobby-status-pill" style="color:#111827; border-color:#111827;">Ready</span>` : `<span class="lobby-status-pill">Not started</span>`)}
+        </div>
+        ${st === 1 ? `
+          <div class="lobby-step-body">
+            ${!lobbyStepState.listeningIntroConfirmed ? `
+              <div class="inspera-slide-box">
+                <div style="position:absolute; top:14px; left:18px; font-weight:900; color:#2563eb; font-size:14px;">IELTS</div>
+                <div class="inspera-slide-main-text" id="listeningSlideText">${LISTENING_INTRO_SLIDES[0]}</div>
+              </div>
+              <div class="inspera-slide-controls">
+                <span style="font-size:12px; font-weight:700; color:#1e293b;" id="listeningSlideCounter">Slide 1 / ${LISTENING_INTRO_SLIDES.length}</span>
+                <span style="font-size:12px; color:#334155;">🔊 Official Test Instructions</span>
+              </div>
+              <button type="button" class="lobby-black-btn" onclick="confirmListeningIntroSlide()">
+                ✓ Confirm
+              </button>
+            ` : `
+              <div style="margin-top:14px;">
+                <button type="button" class="lobby-black-btn" onclick="enterMockListeningRoomNow()">
+                  Start test
+                </button>
+              </div>
+            `}
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    // CARD 3: READING
+    const readingCardHtml = `
+      <div class="lobby-step-card">
+        <div class="lobby-step-header">
+          <div>
+            <div class="lobby-step-title">Reading</div>
+            <div class="lobby-step-sub">3 Parts • 60 minutes</div>
+          </div>
+          ${st > 2 ? `<span class="lobby-status-pill completed">✓</span>` : (st === 2 ? `<span class="lobby-status-pill" style="color:#111827; border-color:#111827;">Ready</span>` : `<span class="lobby-status-pill">Not started</span>`)}
+        </div>
+        ${st === 2 ? `
+          <div class="lobby-step-body">
+            <div class="inspera-slide-box">
+              <div style="position:absolute; top:14px; left:18px; font-weight:900; color:#059669; font-size:14px;">IELTS</div>
+              <div class="inspera-slide-main-text">
+                IELTS Academic Reading<br>
+                <span style="font-size:16px; font-weight:500; color:#334155;">You will have <b>60 minutes</b> to complete <b>40 questions</b> across 3 passages.</span>
+              </div>
+            </div>
+            <div style="margin-top:16px;">
+              <button type="button" class="lobby-black-btn" onclick="enterMockReadingRoomNow()">
+                Start test
+              </button>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    // CARD 4: WRITING
+    const writingCardHtml = `
+      <div class="lobby-step-card">
+        <div class="lobby-step-header">
+          <div>
+            <div class="lobby-step-title">Writing</div>
+            <div class="lobby-step-sub">2 Parts • 60 minutes</div>
+          </div>
+          ${st > 3 ? `<span class="lobby-status-pill completed">✓</span>` : (st === 3 ? `<span class="lobby-status-pill" style="color:#111827; border-color:#111827;">Ready</span>` : `<span class="lobby-status-pill">Not started</span>`)}
+        </div>
+        ${st === 3 ? `
+          <div class="lobby-step-body">
+            <div class="inspera-slide-box">
+              <div style="position:absolute; top:14px; left:18px; font-weight:900; color:#d97706; font-size:14px;">IELTS</div>
+              <div class="inspera-slide-main-text">
+                IELTS Academic Writing<br>
+                <span style="font-size:16px; font-weight:500; color:#334155;">You will have <b>60 minutes</b> for <b>Task 1</b> (at least 150 words) and <b>Task 2</b> (at least 250 words).</span>
+              </div>
+            </div>
+            <div style="margin-top:16px;">
+              <button type="button" class="lobby-black-btn" onclick="enterMockWritingRoomNow()">
+                Start test
+              </button>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    box.innerHTML = pretestCardHtml + listeningCardHtml + readingCardHtml + writingCardHtml;
+
+    // Tự động chạy hiệu ứng chuyển Slide quy chế thi Listening giống trong video
+    if (st === 1 && !lobbyStepState.listeningIntroConfirmed) {
+      lobbyStepState.slideIndex = 0;
+      lobbyStepState.slideTimer = setInterval(() => {
+        lobbyStepState.slideIndex = (lobbyStepState.slideIndex + 1) % LISTENING_INTRO_SLIDES.length;
+        const txtEl = document.getElementById('listeningSlideText');
+        const cntEl = document.getElementById('listeningSlideCounter');
+        if (txtEl) txtEl.innerHTML = LISTENING_INTRO_SLIDES[lobbyStepState.slideIndex];
+        if (cntEl) cntEl.textContent = `Slide ${lobbyStepState.slideIndex + 1} / ${LISTENING_INTRO_SLIDES.length}`;
+      }, 2400);
+    }
+  }
+
+  window.completeMockPretestStep = function() {
+    const sampleAudio = document.getElementById('lobbyTestSampleAudio');
+    if (sampleAudio) sampleAudio.pause();
+    lobbyStepState.pretestDone = true;
+    mockSession.stage = 1;
+    renderOfficialMockLobbyCards();
+  };
+
+  window.confirmListeningIntroSlide = function() {
+    clearInterval(lobbyStepState.slideTimer);
+    lobbyStepState.listeningIntroConfirmed = true;
+    renderOfficialMockLobbyCards();
+  };
+
+  window.enterMockListeningRoomNow = function() {
+    document.getElementById('officialMockLobbyOverlay').style.display = 'none';
+    launchListeningExam(mockSession.listeningExam.id);
+    activateStrictMockListeningAudio();
+    syncExamRoomBodyClass();
+  };
+
+  window.enterMockReadingRoomNow = function() {
+    document.getElementById('officialMockLobbyOverlay').style.display = 'none';
+    launchExam(mockSession.readingExam.id);
+    activateStrictMockListeningAudio();
+    syncExamRoomBodyClass();
+  };
+
+  window.enterMockWritingRoomNow = function() {
+    document.getElementById('officialMockLobbyOverlay').style.display = 'none';
+    const tempW = mockSession.writingExam;
+    const existsInDb = (db.writingExams || []).some(w => w.id === tempW.id && w.task1?.prompt && w.task2?.prompt);
+    if (!existsInDb) {
+      activeExam = tempW;
+      stopAllAudioPlayers();
+      activeExamType = 'writing';
+      isReviewMode = false;
+      activePartNum = tempW.task1?.prompt ? 1 : 2;
+      writingAnswers = { task1: '', task2: '' };
+      secondsRemaining = 60 * 60;
+      document.getElementById('dashboardApp').style.display = 'none';
+      document.getElementById('examShell').style.display = 'flex';
+      document.getElementById('insperaExamTitle').textContent = tempW.title;
+      document.getElementById('insperaCandidateTag').textContent = `👤 ${activeUser.name}`;
+      document.getElementById('btnSubmitExam').style.display = '';
+      document.getElementById('btnSubmitBottom').style.display = '';
+      loadWritingWorkspace(activePartNum);
+      setupResizer();
+      startTimer();
+    } else {
+      launchWritingExam(tempW.id);
+    }
+    activateStrictMockListeningAudio();
+    syncExamRoomBodyClass();
+  };
+
+  // Khi nộp từng kỹ năng trong Mock Test -> Quay lại Cổng Lobby 4 Bước, đánh dấu ✓ xanh và mở phần tiếp theo!
+  submitExam = async function(forceSubmit = false) {
+    if (!mockSession.active) {
+      return _v11OrigSubmitExam(forceSubmit);
+    }
+    const skillName = mockSession.stage === 1 ? 'LISTENING' : (mockSession.stage === 2 ? 'READING' : 'WRITING');
+    if (!forceSubmit && !confirm(`Hoàn thành phần thi ${skillName} (Finish section) và chuyển sang bước tiếp theo?`)) {
+      return;
+    }
+
+    await _v11OrigSubmitExam(true);
+    closeModal('scoreSummaryModal');
+    closeModal('gradeWritingModal');
+    closeModal('studentViewWritingModal');
+
+    const latestRes = (db.results && db.results.length) ? db.results[db.results.length - 1] : null;
+
+    if (mockSession.stage === 1) {
+      mockSession.listeningResult = latestRes;
+      mockSession.stage = 2;
+      openOfficialMockLobby();
+      return;
+    }
+
+    if (mockSession.stage === 2) {
+      mockSession.readingResult = latestRes;
+      mockSession.stage = 3;
+      openOfficialMockLobby();
+      return;
+    }
+
+    if (mockSession.stage === 3) {
+      mockSession.writingResult = latestRes;
+      mockSession.active = false;
+      document.getElementById('officialMockLobbyOverlay').style.display = 'none';
+      document.getElementById('examShell').classList.remove('mock-strict-audio');
+      syncExamRoomBodyClass();
+      showFinalMockTrfReport();
+    }
+  };
+
+  // Đồng bộ liên tục trạng thái phòng thi & giao diện sạch
+  setInterval(() => {
+    syncExamRoomBodyClass();
+    upgradeSelectionTooltipToLightCard();
+  }, 400);
+</script>
+<!-- ============================================================================
+     BẢN CẬP NHẬT 25/10 (3 TRONG 1):
+     1. Ẩn triệt để #selectionTooltip bị trùng, chuẩn hóa #floatingDualHighlighter
+     2. Gộp kết quả Mock Test 3 kỹ năng thành 1 dòng + Bảng điều khiển Mock Test Hub
+     3. Nút In Kết Quả Mock Test (Chỉ hiện sau khi chấm Writing & chỉ in bảng điểm sạch)
+     Dán ngay phía trên thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* 1. ẨN VĨNH VIỄN THANH HIGHLIGHT CŨ (#selectionTooltip) ĐỂ KHÔNG BỊ ĐÈ 2 LỚP */
+  #selectionTooltip {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+  }
+
+  /* Ép chuẩn giao diện thẻ trắng viền xám mảnh phẳng cho #floatingDualHighlighter */
+  #floatingDualHighlighter {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 4px 6px !important;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12) !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+
+  /* 2. BẢNG ĐIỀU KHIỂN CHI TIẾT KỲ THI THỬ (MOCK TEST HUB MODAL) */
+  .mock-hub-skill-row {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .mock-hub-skill-row:hover {
+    border-color: #cbd5e1;
+    background: #ffffff;
+  }
+
+  /* 3. PHIẾU ĐIỂM MOCK TEST SẠCH SẼ (CHỈ IN ĐIỂM SỐ) */
+  #mockCleanScorePrintModal .modal-window {
+    width: 680px;
+    max-width: 95vw;
+    border-radius: 14px;
+    background: #ffffff;
+  }
+  #mockCleanPrintableSheet {
+    background: #ffffff;
+    border: 2px solid #0f172a;
+    border-radius: 10px;
+    padding: 28px 32px;
+    color: #0f172a;
+    font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  }
+  .mock-print-score-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 22px 0;
+  }
+  .mock-print-score-box {
+    border: 1.5px solid #0f172a;
+    border-radius: 8px;
+    padding: 14px 10px;
+    text-align: center;
+    background: #f8fafc;
+  }
+  .mock-print-score-box .sk-lbl {
+    font-size: 11.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #475569;
+    margin-bottom: 6px;
+  }
+  .mock-print-score-box .sk-val {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .mock-print-score-box .sk-sub {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  /* CHẾ ĐỘ IN ẤN: CHỈ IN ĐÚNG KHUNG ĐIỂM MOCK TEST, ẨN TOÀN BỘ THỨ LINH TINH */
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 15mm;
+    }
+    body * {
+      visibility: hidden !important;
+    }
+    #mockCleanPrintableSheet,
+    #mockCleanPrintableSheet * {
+      visibility: visible !important;
+    }
+    #mockCleanPrintableSheet {
+      position: fixed !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 24px !important;
+      border: 2px solid #000000 !important;
+      box-shadow: none !important;
+      background: #ffffff !important;
+    }
+  }
+</style>
+
+<!-- MODAL 1: BẢNG ĐIỀU KHIỂN MOCK TEST 3 KỸ NĂNG (MOCK TEST HUB MODAL) -->
+<div class="modal-overlay" id="mockTestHubModal" style="z-index: 9800;">
+  <div class="modal-window" style="width: 680px; max-width: 95vw;">
+    <div class="modal-header">
+      <span id="mockHubModalTitle">🎓 Bảng Điều Khiển Kết Quả Mock Test</span>
+      <button class="btn btn-secondary" onclick="closeModal('mockTestHubModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" id="mockHubModalBody" style="padding: 20px;"></div>
+    <div class="modal-footer" id="mockHubModalFooter" style="justify-content: space-between;"></div>
+  </div>
+</div>
+
+<!-- MODAL 2: XEM TRƯỚC & IN KẾT QUẢ ĐIỂM MOCK TEST -->
+<div class="modal-overlay" id="mockCleanScorePrintModal" style="z-index: 9999;">
+  <div class="modal-window">
+    <div class="modal-header">
+      <span>🖨️ Phiếu Kết Quả Điểm Mock Test</span>
+      <button class="btn btn-secondary" onclick="closeModal('mockCleanScorePrintModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" style="padding: 22px; background: #f1f5f9;">
+      <div id="mockCleanPrintableSheet">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #0f172a; padding-bottom:14px; margin-bottom:18px;">
+          <div>
+            <div style="font-size:22px; font-weight:800; color:#064e3b;">IELTS WITH AMURO</div>
+            <div style="font-size:11.5px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.6px;">Official Mock Test Score Report</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:13px; font-weight:800; color:#0f172a;" id="prtMockExamTitle">MOCK TEST</div>
+            <div style="font-size:12px; color:#64748b; margin-top:2px;" id="prtMockDate">Date: --/--/----</div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px 16px;">
+          <div>
+            <span style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; display:block;">Candidate Name</span>
+            <span style="font-size:17px; font-weight:800; color:#0f172a;" id="prtMockStudentName">Student Name</span>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; display:block;">Status</span>
+            <span style="font-size:13px; font-weight:800; color:#059669;">✓ Official Graded Result</span>
+          </div>
+        </div>
+
+        <div class="mock-print-score-grid">
+          <div class="mock-print-score-box">
+            <div class="sk-lbl">Listening</div>
+            <div class="sk-val" id="prtMockLBand">—</div>
+            <div class="sk-sub" id="prtMockLRaw"></div>
+          </div>
+          <div class="mock-print-score-box">
+            <div class="sk-lbl">Reading</div>
+            <div class="sk-val" id="prtMockRBand">—</div>
+            <div class="sk-sub" id="prtMockRRaw"></div>
+          </div>
+          <div class="mock-print-score-box">
+            <div class="sk-lbl">Writing</div>
+            <div class="sk-val" id="prtMockWBand">—</div>
+            <div class="sk-sub">Examiner Graded</div>
+          </div>
+          <div class="mock-print-score-box" style="background:#ecfdf5; border-color:#059669;">
+            <div class="sk-lbl" style="color:#047857;">Overall Band</div>
+            <div class="sk-val" style="color:#059669;" id="prtMockOverall">—</div>
+            <div class="sk-sub" style="color:#065f46;">IELTS Scale</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('mockCleanScorePrintModal')">Hủy</button>
+      <button class="btn btn-emerald" onclick="window.print()">🖨️ In Kết Quả Ngay</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ==========================================================================
+     1. VÔ HIỆU HÓA #selectionTooltip ĐỂ CHỈ HIỆN 1 THANH HIGHLIGHT DUY NHẤT
+     ========================================================================== */
+  setupInExamHighlightEngine = function() {
+    const oldTip = document.getElementById('selectionTooltip');
+    if (oldTip) oldTip.style.display = 'none';
+  };
+
+  /* ==========================================================================
+     2. CƠ CHẾ GỘP KẾT QUẢ MOCK TEST 3 KỸ NĂNG THÀNH 1 DÒNG DUY NHẤT
+     ========================================================================== */
+  function roundIeltsBand(num) {
+    const n = parseFloat(num);
+    if (isNaN(n) || n <= 0) return null;
+    return (Math.round(n * 2) / 2).toFixed(1);
+  }
+
+  function extractNumericBand(bandStr) {
+    if (!bandStr) return null;
+    const str = String(bandStr).replace(/Band/i, '').replace(/\(Overall\)/i, '').trim();
+    if (!str || str.toLowerCase() === 'submitted' || str.toLowerCase() === 'pending') return null;
+    const m = str.match(/(\d+(?:\.\d+)?)/);
+    return m ? parseFloat(m[1]) : null;
+  }
+
+  function isConsolidatedMockResult(res) {
+    if (!res) return false;
+    return Boolean(
+      res.isMockConsolidated ||
+      res.mockData ||
+      String(res.examTitle || '').includes('[Full Mock Test]') ||
+      (String(res.score || '').includes('🎧 L:') && String(res.score || '').includes('📖 R:'))
+    );
+  }
+
+  // Kiểm tra xem bài Mock Test đã được chấm điểm Writing hay chưa
+  function isMockWritingGraded(res) {
+    if (!res) return false;
+    if (res.mockData && res.mockData.writing) {
+      const wBand = extractNumericBand(res.mockData.writing.band);
+      if (wBand !== null) return true;
+    }
+    const scoreWMatch = String(res.score || '').match(/✍️\s*W:[^|]*\((?:Band\s*)?(\d+(?:\.\d+)?)\)/i);
+    if (scoreWMatch) return true;
+    // Nếu có teacherFeedback và band tổng không chứa chữ Pending/Submitted
+    if (res.teacherFeedback && String(res.teacherFeedback).trim() !== '' && extractNumericBand(res.band) !== null) {
+      return true;
+    }
+    return false;
+  }
+
+  // Lấy thông tin điểm 3 kỹ năng từ bản ghi Mock Test
+  function parseMockScoresFromRecord(res) {
+    const mData = res.mockData || {};
+    const scoreStr = String(res.score || '');
+
+    let lRaw = mData.listening?.score || '';
+    let lBand = extractNumericBand(mData.listening?.band);
+    if (!lRaw || lBand === null) {
+      const lm = scoreStr.match(/L:\s*([0-9/]+)\s*\((?:Band\s*)?([0-9.]+)\)/i);
+      if (lm) { lRaw = lRaw || lm[1]; if (lBand === null) lBand = parseFloat(lm[2]); }
+    }
+
+    let rRaw = mData.reading?.score || '';
+    let rBand = extractNumericBand(mData.reading?.band);
+    if (!rRaw || rBand === null) {
+      const rm = scoreStr.match(/R:\s*([0-9/]+)\s*\((?:Band\s*)?([0-9.]+)\)/i);
+      if (rm) { rRaw = rRaw || rm[1]; if (rBand === null) rBand = parseFloat(rm[2]); }
+    }
+
+    let wScoreText = mData.writing?.score || '';
+    let wBand = extractNumericBand(mData.writing?.band);
+    if (wBand === null) {
+      const wm = scoreStr.match(/W:[^|]*\((?:Band\s*)?([0-9.]+)\)/i);
+      if (wm) wBand = parseFloat(wm[1]);
+    }
+
+    const validBands = [lBand, rBand, wBand].filter(b => b !== null && !isNaN(b));
+    const overall = validBands.length
+      ? roundIeltsBand(validBands.reduce((a, b) => a + b, 0) / validBands.length)
+      : (extractNumericBand(res.band) ? roundIeltsBand(extractNumericBand(res.band)) : '—');
+
+    return {
+      lRaw: lRaw || '—',
+      lBand: lBand !== null ? lBand.toFixed(1) : '—',
+      rRaw: rRaw || '—',
+      rBand: rBand !== null ? rBand.toFixed(1) : '—',
+      wScoreText: wScoreText || 'Submitted',
+      wBand: wBand !== null ? wBand.toFixed(1) : null,
+      overall: overall
+    };
+  }
+
+  // Tự động gộp kết quả nếu học sinh đang trong phiên thi Mock Test (window.activeMockSession hoặc window.mockSession)
+  const _mockOrigSubmitExam = submitExam;
+  submitExam = async function(forceSubmit = false) {
+    const currentMock = window.mockSession || window.activeMockSession;
+    if (!currentMock || !currentMock.active) {
+      return _mockOrigSubmitExam(forceSubmit);
+    }
+
+    const prevLen = (db.results || []).length;
+    await _mockOrigSubmitExam(forceSubmit);
+
+    // Nếu hàm gốc vừa đẩy 1 kết quả lẻ vào db.results trong lúc đang thi Mock Test:
+    if ((db.results || []).length > prevLen) {
+      const newlyPushed = db.results.pop(); // Lấy kết quả lẻ ra để cất vào phiên Mock
+      const fs = (typeof getActiveFirestore === 'function') ? getActiveFirestore() : CLOUD_DB;
+      if (fs && newlyPushed && newlyPushed.id) {
+        try { await fs.collection('suite_results').doc(String(newlyPushed.id)).delete(); } catch (e) {}
+      }
+
+      if (!currentMock.collected) currentMock.collected = {};
+
+      if (activeExamType === 'listening') {
+        currentMock.collected.listening = {
+          examId: activeExam.id,
+          examTitle: activeExam.title,
+          score: newlyPushed.score,
+          band: newlyPushed.band,
+          userAnswersCopy: newlyPushed.userAnswersCopy || JSON.parse(JSON.stringify(userAnswers || {}))
+        };
+      } else if (activeExamType === 'reading') {
+        currentMock.collected.reading = {
+          examId: activeExam.id,
+          examTitle: activeExam.title,
+          score: newlyPushed.score,
+          band: newlyPushed.band,
+          userAnswersCopy: newlyPushed.userAnswersCopy || JSON.parse(JSON.stringify(userAnswers || {}))
+        };
+      } else if (activeExamType === 'writing') {
+        currentMock.collected.writing = {
+          examId: activeExam.id,
+          examTitle: activeExam.title,
+          score: newlyPushed.score,
+          band: newlyPushed.band,
+          writingSubmission: newlyPushed.writingSubmission,
+          teacherFeedback: newlyPushed.teacherFeedback || ''
+        };
+
+        // Đã hoàn thành kỹ năng cuối (Writing) -> Tạo 1 dòng kết quả Mock Test tổng hợp duy nhất
+        const lObj = currentMock.collected.listening || {};
+        const rObj = currentMock.collected.reading || {};
+        const wObj = currentMock.collected.writing || {};
+
+        const lBandNum = extractNumericBand(lObj.band);
+        const rBandNum = extractNumericBand(rObj.band);
+        const wBandNum = extractNumericBand(wObj.band);
+        const nums = [lBandNum, rBandNum, wBandNum].filter(x => x !== null);
+        const avgBand = nums.length ? roundIeltsBand(nums.reduce((a, b) => a + b, 0) / nums.length) : 'Pending';
+
+        const wWords = (wObj.score || '').replace(/T1:\s*(\d+)w\s*\|\s*T2:\s*(\d+)w/i, (_, a, b) => `${Number(a) + Number(b)}w`);
+        const wBandTag = wBandNum !== null ? ` (${wBandNum.toFixed(1)})` : '';
+
+        const consolidatedRecord = {
+          id: 'res_mock_' + Date.now(),
+          isMockConsolidated: true,
+          examId: currentMock.mockId || wObj.examId || 'mock_test',
+          userName: activeUser.name,
+          examTitle: `🎓 [Full Mock Test] ${currentMock.title || activeExam.title || 'IELTS Simulation'}`,
+          score: `🎧 L: ${lObj.score || '0/40'} (${lBandNum !== null ? lBandNum.toFixed(1) : '—'}) | 📖 R: ${rObj.score || '0/40'} (${rBandNum !== null ? rBandNum.toFixed(1) : '—'}) | ✍️ W: ${wWords}${wBandTag}`,
+          band: avgBand !== 'Pending' ? `Band ${avgBand} (Overall)` : 'Band Pending',
+          writingSubmission: wObj.writingSubmission || { task1: '', task2: '' },
+          teacherFeedback: wObj.teacherFeedback || '',
+          mockData: {
+            listening: lObj,
+            reading: rObj,
+            writing: wObj
+          },
+          isoDate: getTodayIsoString(),
+          timestamp: new Date().toLocaleString()
+        };
+
+        db.results.push(consolidatedRecord);
+        currentMock.active = false;
+
+        if (fs) {
+          try { await fs.collection('suite_results').doc(String(consolidatedRecord.id)).set(JSON.parse(JSON.stringify(consolidatedRecord))); } catch (e) {}
+        }
+        await persist();
+        renderDashboard();
+      }
+    }
+  };
+
+  /* ==========================================================================
+     3. BẢNG ĐIỀU KHIỂN MOCK TEST HUB MODAL & CHẤM WRITING TỰ CẬP NHẬT OVERALL
+     ========================================================================== */
+  window.openMockTestHubModal = function(resId) {
+    const res = (db.results || []).find(r => r.id === resId);
+    if (!res) return alert('Không tìm thấy dữ liệu bài thi Mock Test này.');
+
+    const parsed = parseMockScoresFromRecord(res);
+    const isTeacher = activeUser && activeUser.role === 'teacher';
+    const writingGraded = isMockWritingGraded(res);
+
+    document.getElementById('mockHubModalTitle').textContent = `${res.examTitle} — ${res.userName}`;
+
+    const body = document.getElementById('mockHubModalBody');
+    body.innerHTML = `
+      <div style="background:linear-gradient(135deg,#ecfdf5,#eff6ff); border:1px solid #a7f3d0; border-radius:12px; padding:16px 20px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+          <div style="font-size:12px; font-weight:800; color:#047857; text-transform:uppercase;">Thí sinh: ${res.userName}</div>
+          <div style="font-size:13px; color:#475569; margin-top:2px;">Ngày nộp: ${res.timestamp}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px; font-weight:800; color:#065f46; text-transform:uppercase;">Overall Band Score</div>
+          <div style="font-size:26px; font-weight:800; color:#059669;">Band ${parsed.overall}</div>
+        </div>
+      </div>
+
+      <!-- Kỹ năng 1: Listening -->
+      <div class="mock-hub-skill-row">
+        <div>
+          <div style="font-weight:800; font-size:14.5px; color:#0f172a;">🎧 Kỹ năng 1: Listening</div>
+          <div style="font-size:13px; color:#475569; margin-top:2px;">Kết quả: <b>${parsed.lRaw}</b> — <b style="color:#2563eb;">Band ${parsed.lBand}</b></div>
+        </div>
+        <button class="btn btn-secondary" onclick="reviewMockSkillPart('${res.id}', 'listening')">
+          🎧 Xem lại đáp án & Transcript Listening
+        </button>
+      </div>
+
+      <!-- Kỹ năng 2: Reading -->
+      <div class="mock-hub-skill-row">
+        <div>
+          <div style="font-weight:800; font-size:14.5px; color:#0f172a;">📖 Kỹ năng 2: Reading</div>
+          <div style="font-size:13px; color:#475569; margin-top:2px;">Kết quả: <b>${parsed.rRaw}</b> — <b style="color:#059669;">Band ${parsed.rBand}</b></div>
+        </div>
+        <button class="btn btn-secondary" onclick="reviewMockSkillPart('${res.id}', 'reading')">
+          📖 Xem lại đáp án & Evidence Reading
+        </button>
+      </div>
+
+      <!-- Kỹ năng 3: Writing -->
+      <div class="mock-hub-skill-row">
+        <div>
+          <div style="font-weight:800; font-size:14.5px; color:#0f172a;">✍️ Kỹ năng 3: Writing (Task 1 & Task 2)</div>
+          <div style="font-size:13px; color:#475569; margin-top:2px;">
+            Trạng thái: ${writingGraded ? `<b style="color:#d97706;">Đã chấm — Band ${parsed.wBand}</b>` : `<span style="color:#64748b; font-style:italic;">⏳ Đang chờ giáo viên chấm điểm</span>`}
+          </div>
+        </div>
+        <button class="btn btn-emerald" onclick="reviewMockSkillPart('${res.id}', 'writing')">
+          ✍️ ${isTeacher ? 'Chấm bài / Sửa nhận xét Writing' : 'Xem bài làm & Nhận xét Writing'}
+        </button>
+      </div>
+    `;
+
+    const footer = document.getElementById('mockHubModalFooter');
+    footer.innerHTML = `
+      <div>
+        ${writingGraded ? `
+          <button class="btn btn-emerald" style="background:#047857;" onclick="openCleanMockScorePrintModal('${res.id}')">
+            🖨️ In Kết Quả Mock Test
+          </button>
+        ` : `<span style="font-size:12px; color:#64748b;">💡 Nút in kết quả sẽ mở khóa sau khi giáo viên chấm điểm Writing.</span>`}
+      </div>
+      <button class="btn btn-secondary" onclick="closeModal('mockTestHubModal')">Đóng</button>
+    `;
+
+    openModal('mockTestHubModal');
+  };
+
+  window.reviewMockSkillPart = function(resId, skill) {
+    const res = (db.results || []).find(r => r.id === resId);
+    if (!res) return;
+    closeModal('mockTestHubModal');
+
+    const mData = res.mockData || {};
+    if (skill === 'listening') {
+      const lInfo = mData.listening || {};
+      const lExam = (db.listeningExams || []).find(e => e.id === lInfo.examId || e.id === res.listeningExamId) || (db.listeningExams || [])[0];
+      if (!lExam) return alert('Không tìm thấy đề Listening gốc của ca thi này.');
+      launchListeningExam(lExam.id);
+      userAnswers = lInfo.userAnswersCopy || res.listeningAnswers || {};
+      enterReviewModeFromSummary();
+    } else if (skill === 'reading') {
+      const rInfo = mData.reading || {};
+      const rExam = (db.readingExams || []).find(e => e.id === rInfo.examId || e.id === res.readingExamId) || (db.readingExams || [])[0];
+      if (!rExam) return alert('Không tìm thấy đề Reading gốc của ca thi này.');
+      launchExam(rExam.id);
+      userAnswers = rInfo.userAnswersCopy || res.readingAnswers || {};
+      enterReviewModeFromSummary();
+    } else if (skill === 'writing') {
+      if (activeUser && activeUser.role === 'teacher') {
+        openGradeWritingModal(res.id);
+      } else {
+        openStudentViewWritingModal(res.id);
+      }
+    }
+  };
+
+  // Khi Giáo viên chấm xong Writing của bài Mock Test và bấm Save Evaluation -> Tự động tính lại Band Overall 3 kỹ năng!
+  const _mockOrigSaveWritingEval = saveWritingEvaluation;
+  saveWritingEvaluation = async function() {
+    const resId = document.getElementById('gradeSubmissionId').value;
+    const res = (db.results || []).find(r => r.id === resId);
+    const bandInputVal = document.getElementById('gradeBandInput').value.trim();
+    const fbInputVal = document.getElementById('gradeFeedbackInput').value.trim();
+
+    if (res && isConsolidatedMockResult(res)) {
+      const wNumeric = extractNumericBand(bandInputVal);
+      if (wNumeric === null) return alert('Vui lòng nhập điểm Band Writing hợp lệ (VD: 6.5, 7.0)!');
+
+      if (!res.mockData) res.mockData = {};
+      if (!res.mockData.writing) res.mockData.writing = {};
+      res.mockData.writing.band = wNumeric.toFixed(1);
+      res.writingBand = wNumeric.toFixed(1);
+      res.teacherFeedback = fbInputVal;
+
+      const parsed = parseMockScoresFromRecord(res);
+      const lB = extractNumericBand(parsed.lBand);
+      const rB = extractNumericBand(parsed.rBand);
+      const validList = [lB, rB, wNumeric].filter(v => v !== null && !isNaN(v));
+      const newOverall = validList.length
+        ? roundIeltsBand(validList.reduce((a, b) => a + b, 0) / validList.length)
+        : wNumeric.toFixed(1);
+
+      res.band = `Band ${newOverall} (Overall)`;
+
+      // Cập nhật chuỗi hiển thị cột Score có kèm điểm Writing
+      const baseScore = String(res.score || '').replace(/\s*\|\s*✍️\s*W:.*$/i, '');
+      const w1 = res.writingSubmission?.task1?.trim() ? res.writingSubmission.task1.trim().split(/\s+/).length : 0;
+      const w2 = res.writingSubmission?.task2?.trim() ? res.writingSubmission.task2.trim().split(/\s+/).length : 0;
+      res.score = `${baseScore} | ✍️ W: ${w1 + w2}w (${wNumeric.toFixed(1)})`;
+
+      const fs = (typeof getActiveFirestore === 'function') ? getActiveFirestore() : CLOUD_DB;
+      if (fs && res.id) {
+        try { await fs.collection('suite_results').doc(String(res.id)).set(JSON.parse(JSON.stringify(res))); } catch (e) {}
+      }
+      await persist();
+      closeModal('gradeWritingModal');
+      renderAnalyticsTable();
+      renderHomeTab();
+      alert(`✅ Đã lưu điểm Writing (Band ${wNumeric.toFixed(1)}) và tự động cập nhật Điểm Tổng Mock Test: Band ${newOverall} (Overall)!\n\nHọc sinh hiện đã có thể bấm nút "🖨️ In Kết Quả" cho bài Mock Test này.`);
+      return;
+    }
+
+    _mockOrigSaveWritingEval();
+  };
+
+  /* ==========================================================================
+     4. HÀM MỞ PHIẾU IN KẾT QUẢ MOCK TEST (CHỈ IN ĐIỂM SỐ GỌN SẠCH)
+     ========================================================================== */
+  window.openCleanMockScorePrintModal = function(resId) {
+    const res = (db.results || []).find(r => r.id === resId);
+    if (!res) return alert('Không tìm thấy kết quả Mock Test.');
+    if (!isMockWritingGraded(res)) {
+      return alert('Bài Mock Test này cần được giáo viên chấm điểm Writing trước khi in phiếu kết quả!');
+    }
+
+    const parsed = parseMockScoresFromRecord(res);
+    document.getElementById('prtMockExamTitle').textContent = String(res.examTitle || 'IELTS MOCK TEST').replace('🎓', '').trim();
+    document.getElementById('prtMockDate').textContent = `Date: ${res.timestamp || res.isoDate || ''}`;
+    document.getElementById('prtMockStudentName').textContent = res.userName || '';
+
+    document.getElementById('prtMockLBand').textContent = parsed.lBand;
+    document.getElementById('prtMockLRaw').textContent = parsed.lRaw !== '—' ? `Correct: ${parsed.lRaw}` : '';
+
+    document.getElementById('prtMockRBand').textContent = parsed.rBand;
+    document.getElementById('prtMockRRaw').textContent = parsed.rRaw !== '—' ? `Correct: ${parsed.rRaw}` : '';
+
+    document.getElementById('prtMockWBand').textContent = parsed.wBand !== null ? parsed.wBand : '—';
+    document.getElementById('prtMockOverall').textContent = parsed.overall;
+
+    openModal('mockCleanScorePrintModal');
+  };
+
+  // Tự động gắn nút "🎛️ Chi tiết Mock" và nút "🖨️ In Kết Quả" (khi đã chấm Writing) vào bảng Home & Submissions
+  function upgradeMockTestRowsInTables() {
+    const allTbodies = [
+      document.getElementById('homeRecentActivityTbody'),
+      document.getElementById('analyticsTbody')
+    ].filter(Boolean);
+
+    allTbodies.forEach(tbody => {
+      tbody.querySelectorAll('tr').forEach(tr => {
+        const actionCell = tr.querySelector('td:last-child');
+        if (!actionCell) return;
+        const firstBtn = actionCell.querySelector('button[onclick]');
+        if (!firstBtn) return;
+
+        const onclickStr = firstBtn.getAttribute('onclick') || '';
+        const idMatch = onclickStr.match(/'([^']+)'/);
+        if (!idMatch) return;
+        const resId = idMatch[1];
+        const res = (db.results || []).find(r => r.id === resId);
+        if (!res || !isConsolidatedMockResult(res)) return;
+
+        // Tránh gắn trùng lặp
+        if (actionCell.dataset.mockUpgraded === '1') return;
+        actionCell.dataset.mockUpgraded = '1';
+
+        const graded = isMockWritingGraded(res);
+        actionCell.innerHTML = `
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-emerald" style="padding:5px 11px; font-size:12px;" onclick="openMockTestHubModal('${res.id}')">
+              🎓 Chi tiết 3 Kỹ năng
+            </button>
+            ${graded ? `
+              <button class="btn btn-secondary" style="padding:5px 11px; font-size:12px; color:#047857; border-color:#6ee7b7; background:#ecfdf5; font-weight:800;" onclick="openCleanMockScorePrintModal('${res.id}')">
+                🖨️ In Kết Quả
+              </button>
+            ` : ''}
+          </div>
+        `;
+      });
+    });
+  }
+
+  const _mockOrigRenderHome = renderHomeTab;
+  renderHomeTab = function() {
+    _mockOrigRenderHome();
+    upgradeMockTestRowsInTables();
+  };
+
+  const _mockOrigRenderAnalytics = renderAnalyticsTable;
+  renderAnalyticsTable = function() {
+    _mockOrigRenderAnalytics();
+    upgradeMockTestRowsInTables();
   };
 </script>
 </body>
