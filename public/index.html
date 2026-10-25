@@ -20534,5 +20534,704 @@ Câu dẫn chứng: "${eviVal}"`;
     upgradeMockTestRowsInTables();
   };
 </script>
+<!-- ============================================================================
+     HOTFIX RIÊNG CHO BÀI ĐỌC & NGHE:
+     1. Sửa lỗi đếm lệch số câu giữa các Passage dưới thanh Footer (16 câu / 11 câu)
+     2. Sửa lỗi mất đáp án đã chọn khi bấm chuyển qua lại giữa các Passage / Part
+     Dán đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<script>
+  /* 1. CHUẨN HÓA BỘ ĐẾM SỐ CÂU TỪNG PASSAGE (KHÔNG BỊ NHẢY CÂU CỦA PASSAGE 2 VỀ PASSAGE 1) */
+  let _cachedExamPartMap = { examId: null, map: {} };
+
+  function extractQuestionNumbersFromPassageDOM(p) {
+    const nums = new Set();
+    const qHtml = String(p.questionsHtml || '');
+    const pHtml = String(p.passageHtml || '');
+
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(`<div>${qHtml}</div>`, 'text/html');
+
+      doc.querySelectorAll('[name]').forEach(el => {
+        const m = String(el.getAttribute('name') || '').match(/^q?(\d+)$/i);
+        if (m) nums.add(parseInt(m[1], 10));
+      });
+      doc.querySelectorAll('[data-target]').forEach(el => {
+        const m = String(el.getAttribute('data-target') || '').match(/^q?(\d+)$/i);
+        if (m) nums.add(parseInt(m[1], 10));
+      });
+      doc.querySelectorAll('[data-question]').forEach(el => {
+        const raw = String(el.getAttribute('data-question') || '');
+        (raw.match(/\d+/g) || []).forEach(n => nums.add(parseInt(n, 10)));
+      });
+      doc.querySelectorAll('[data-multi-pair], [data-pair-group]').forEach(el => {
+        const raw = (el.getAttribute('data-multi-pair') || '') + ',' + (el.getAttribute('data-pair-group') || '');
+        (raw.match(/\d+/g) || []).forEach(n => nums.add(parseInt(n, 10)));
+      });
+      doc.querySelectorAll('.q-badge').forEach(el => {
+        const raw = String(el.textContent || '').trim();
+        const rangeMatch = raw.match(/^(\d+)\s*[-–—]\s*(\d+)$/);
+        if (rangeMatch) {
+          const s = parseInt(rangeMatch[1], 10), e = parseInt(rangeMatch[2], 10);
+          if (e >= s && (e - s) <= 6) {
+            for (let k = s; k <= e; k++) nums.add(k);
+          }
+        } else {
+          const singleMatch = raw.match(/^(\d+)$/);
+          if (singleMatch) nums.add(parseInt(singleMatch[1], 10));
+        }
+      });
+
+      // Quét riêng các ô kéo thả Matching Headings nằm bên trong bài đọc (passageHtml)
+      const pDoc = parser.parseFromString(`<div>${pHtml}</div>`, 'text/html');
+      pDoc.querySelectorAll('.drop-zone[data-target]').forEach(el => {
+        const m = String(el.getAttribute('data-target') || '').match(/^q?(\d+)$/i);
+        if (m) nums.add(parseInt(m[1], 10));
+      });
+    } catch (e) {}
+
+    return nums;
+  }
+
+  function buildAccuratePartMapForActiveExam() {
+    if (!activeExam) return {};
+    const curExamSignature = `${activeExam.id}_${Object.keys(activeExam.correctAnswers || {}).length}`;
+    if (_cachedExamPartMap.examId === curExamSignature) {
+      return _cachedExamPartMap.map;
+    }
+
+    const passages = activeExam.passages || [];
+    const partMap = {};
+    const passageNumSets = {};
+
+    passages.forEach(p => {
+      passageNumSets[p.partNum] = extractQuestionNumbersFromPassageDOM(p);
+    });
+
+    const allKeys = Object.keys(activeExam.correctAnswers || {}).sort(
+      (a, b) => parseInt(a.replace(/\D/g, ''), 10) - parseInt(b.replace(/\D/g, ''), 10)
+    );
+
+    // Gán trực tiếp câu hỏi tìm thấy trong DOM của từng Passage
+    allKeys.forEach(qKey => {
+      const qNum = parseInt(qKey.replace(/\D/g, ''), 10);
+      for (const p of passages) {
+        if (passageNumSets[p.partNum] && passageNumSets[p.partNum].has(qNum)) {
+          partMap[qKey] = p.partNum;
+          break;
+        }
+      }
+    });
+
+    // Với các câu hỏi đặc biệt chưa khớp trực tiếp, suy luận theo câu liền kề hoặc dải câu chuẩn IELTS
+    allKeys.forEach((qKey, idx) => {
+      if (partMap[qKey]) return;
+      const qNum = parseInt(qKey.replace(/\D/g, ''), 10);
+
+      for (let step = 1; step < allKeys.length; step++) {
+        const prevKey = idx - step >= 0 ? allKeys[idx - step] : null;
+        if (prevKey && partMap[prevKey]) {
+          partMap[qKey] = partMap[prevKey];
+          return;
+        }
+        const nextKey = idx + step < allKeys.length ? allKeys[idx + step] : null;
+        if (nextKey && partMap[nextKey]) {
+          partMap[qKey] = partMap[nextKey];
+          return;
+        }
+      }
+
+      if (passages.length === 3) {
+        partMap[qKey] = qNum <= 13 ? passages[0].partNum : (qNum <= 26 ? passages[1].partNum : passages[2].partNum);
+      } else if (passages.length === 4) {
+        partMap[qKey] = qNum <= 10 ? passages[0].partNum : (qNum <= 20 ? passages[1].partNum : (qNum <= 30 ? passages[2].partNum : passages[3].partNum));
+      } else {
+        partMap[qKey] = passages[0] ? passages[0].partNum : 1;
+      }
+    });
+
+    _cachedExamPartMap = { examId: curExamSignature, map: partMap };
+    return partMap;
+  }
+
+  findPartForQuestionKey = function(qKey) {
+    if (!activeExam) return 1;
+    const map = buildAccuratePartMapForActiveExam();
+    return map[qKey] || ((activeExam.passages && activeExam.passages[0]) ? activeExam.passages[0].partNum : 1);
+  };
+
+  /* 2. KHÓA & KHÔI PHỤC 100% ĐÁP ÁN KHI CHUYỂN QUA LẠI GIỮA CÁC PASSAGE */
+  function normalizeQKey(rawName) {
+    if (!rawName) return '';
+    const clean = String(rawName).trim();
+    if (/^q\d+$/i.test(clean)) return clean.toLowerCase();
+    if (/^\d+$/.test(clean)) return 'q' + clean;
+    return clean;
+  }
+
+  function harvestCurrentDOMAnswers() {
+    if (isReviewMode || !activeExam || activeExamType === 'writing') return;
+    const scope = document.getElementById('insperaSplitBox');
+    if (!scope) return;
+
+    // Lưu tất cả ô điền từ & select
+    scope.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]):not([type="button"]):not([type="submit"]), select, textarea').forEach(inp => {
+      const rawName = inp.getAttribute('name') || inp.getAttribute('data-target') || '';
+      const qKey = normalizeQKey(rawName);
+      if (!qKey) return;
+      const val = String(inp.value || '').trim();
+      if (val !== '') {
+        userAnswers[qKey] = val;
+      } else {
+        delete userAnswers[qKey];
+      }
+    });
+
+    // Lưu tất cả Radio Buttons (Trắc nghiệm đơn, TFNG, YNNG, Bảng Matrix)
+    scope.querySelectorAll('input[type="radio"]:checked').forEach(rad => {
+      const qKey = normalizeQKey(rad.getAttribute('name'));
+      if (qKey) userAnswers[qKey] = rad.value;
+    });
+
+    // Lưu tất cả Checkbox chọn nhiều đáp án (Choose TWO letters)
+    const pairGroups = new Set();
+    scope.querySelectorAll('input[type="checkbox"][data-pair-group]').forEach(chk => {
+      pairGroups.add(chk.getAttribute('data-pair-group'));
+    });
+    pairGroups.forEach(groupName => {
+      const allBoxes = Array.from(scope.querySelectorAll(`input[type="checkbox"][data-pair-group="${groupName}"]`));
+      const checkedVals = allBoxes.filter(b => b.checked).map(b => b.value).sort();
+      const qKeys = groupName.split(/[_,\s]+/).map(normalizeQKey).filter(Boolean);
+      qKeys.forEach((k, idx) => {
+        if (checkedVals[idx]) userAnswers[k] = checkedVals[idx];
+        else delete userAnswers[k];
+      });
+    });
+
+    scope.querySelectorAll('[data-multi-pair]').forEach(box => {
+      const rawPair = box.getAttribute('data-multi-pair') || '';
+      const qKeys = rawPair.split(/[_,\s]+/).map(normalizeQKey).filter(Boolean);
+      const checkedVals = Array.from(box.querySelectorAll('input[type="checkbox"]:checked')).map(b => b.value).sort();
+      if (qKeys.length) {
+        qKeys.forEach((k, idx) => {
+          if (checkedVals[idx]) userAnswers[k] = checkedVals[idx];
+          else delete userAnswers[k];
+        });
+      }
+    });
+  }
+
+  bindInputListeners = function(scope) {
+    if (!scope) return;
+    scope.querySelectorAll('input:not([type="checkbox"]):not([type="button"]), select, textarea').forEach(inp => {
+      const handler = () => {
+        if (isReviewMode) return;
+        const qKey = normalizeQKey(inp.getAttribute('name') || inp.getAttribute('data-target'));
+        if (!qKey) return;
+        if (inp.type === 'radio') {
+          if (inp.checked) userAnswers[qKey] = inp.value;
+        } else {
+          const val = String(inp.value || '').trim();
+          if (val !== '') userAnswers[qKey] = val;
+          else delete userAnswers[qKey];
+        }
+        updateFooterNav();
+      };
+      inp.addEventListener('input', handler);
+      inp.addEventListener('change', handler);
+    });
+
+    scope.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+      chk.addEventListener('change', () => {
+        if (isReviewMode) return;
+        const groupName = chk.getAttribute('data-pair-group')
+          || chk.closest('[data-multi-pair]')?.getAttribute('data-multi-pair')
+          || chk.getAttribute('name') || '';
+        const qNames = groupName.split(/[_,\s]+/).map(normalizeQKey).filter(Boolean);
+        let allBoxes = [];
+        if (chk.getAttribute('data-pair-group')) {
+          allBoxes = Array.from(scope.querySelectorAll(`input[type="checkbox"][data-pair-group="${chk.getAttribute('data-pair-group')}"]`));
+        } else if (chk.closest('[data-multi-pair]')) {
+          allBoxes = Array.from(chk.closest('[data-multi-pair]').querySelectorAll('input[type="checkbox"]'));
+        } else if (chk.name) {
+          allBoxes = Array.from(scope.querySelectorAll(`input[type="checkbox"][name="${chk.name}"]`));
+        }
+        const checkedBoxes = allBoxes.filter(b => b.checked);
+        if (qNames.length > 1 && checkedBoxes.length > qNames.length) {
+          chk.checked = false;
+          return alert(`Bạn chỉ được chọn tối đa ${qNames.length} đáp án cho nhóm câu hỏi này.`);
+        }
+        const selectedValues = checkedBoxes.map(b => b.value).sort();
+        qNames.forEach((qKey, idx) => {
+          if (selectedValues[idx]) userAnswers[qKey] = selectedValues[idx];
+          else delete userAnswers[qKey];
+        });
+        updateFooterNav();
+      });
+    });
+  };
+
+  restoreUserAnswersInDOM = function(scope) {
+    if (!scope) return;
+
+    Object.keys(userAnswers).forEach(rawKey => {
+      const name = normalizeQKey(rawKey);
+      const rawNum = name.replace(/^q/i, '');
+      const val = userAnswers[rawKey];
+      if (val === undefined || val === null) return;
+
+      scope.querySelectorAll(`input[name="${name}"]:not([type="radio"]):not([type="checkbox"]), input[name="${rawNum}"]:not([type="radio"]):not([type="checkbox"]), textarea[name="${name}"]`).forEach(inp => {
+        inp.value = val;
+      });
+
+      scope.querySelectorAll(`select[name="${name}"], select[name="${rawNum}"]`).forEach(sel => {
+        sel.value = val;
+      });
+
+      scope.querySelectorAll(`input[type="radio"][name="${name}"], input[type="radio"][name="${rawNum}"]`).forEach(rad => {
+        if (String(rad.value).trim().toLowerCase() === String(val).trim().toLowerCase()) {
+          rad.checked = true;
+        }
+      });
+
+      const zone = scope.querySelector(`.drop-zone[data-target="${name}"], .drop-zone[data-target="${rawNum}"]`);
+      if (zone && String(val).trim() !== '') {
+        const item = scope.querySelector(`.drag-item[data-answer="${val}"]`);
+        zone.textContent = item ? item.textContent.trim() : val;
+        zone.classList.add('filled');
+        if (item) item.classList.add('used');
+      }
+    });
+
+    const pairGroups = new Set();
+    scope.querySelectorAll('input[type="checkbox"][data-pair-group]').forEach(chk => {
+      pairGroups.add(chk.getAttribute('data-pair-group'));
+    });
+    pairGroups.forEach(groupName => {
+      const qKeys = groupName.split(/[_,\s]+/).map(normalizeQKey).filter(Boolean);
+      const chosenVals = qKeys.map(k => userAnswers[k]).filter(Boolean).map(v => String(v).trim());
+      scope.querySelectorAll(`input[type="checkbox"][data-pair-group="${groupName}"]`).forEach(box => {
+        box.checked = chosenVals.includes(String(box.value).trim());
+      });
+    });
+
+    scope.querySelectorAll('[data-multi-pair]').forEach(container => {
+      const pairKeys = (container.getAttribute('data-multi-pair') || '').split(/[_,\s]+/).map(normalizeQKey).filter(Boolean);
+      const chosenVals = pairKeys.map(k => userAnswers[k]).filter(Boolean).map(v => String(v).trim());
+      container.querySelectorAll('input[type="checkbox"]').forEach(box => {
+        box.checked = chosenVals.includes(String(box.value).trim());
+      });
+    });
+  };
+
+  // Tự động lưu chặt đáp án trên màn hình trước khi chuyển sang Passage/Part khác
+  const _fixPassageSwitchOrig = switchExamPassage;
+  switchExamPassage = function(partNum) {
+    harvestCurrentDOMAnswers();
+    _fixPassageSwitchOrig(partNum);
+  };
+</script>
+<!-- ============================================================================
+     BẢN FIX 2 LỖI TRỌNG TÂM:
+     1. Sửa thanh Footer của Writing (Dọn sạch 40 câu Reading, chỉ hiện Part 1 & Part 2 ở dưới)
+     2. Khóa chặt phân bổ câu hỏi theo Part (Chống nhảy câu 15 sang Part 1 & chống mất đáp án)
+     Dán ngay phía trên thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<script>
+  /* ==========================================================================
+     1. KHÓA CHẶT CÂU HỎI ĐÚNG PART (CHỐNG LẪN CÂU SANG PART KHÁC & MẤT ĐÁP ÁN)
+     ========================================================================== */
+  window.findPartForQuestionKey = function(qKey) {
+    if (!activeExam) return 1;
+    const qNum = parseInt(String(qKey || '').replace(/\D/g, ''), 10);
+    const passages = activeExam.passages || [];
+    if (!passages.length) return 1;
+
+    // Bước 1: Quét DOM thực tế chỉ riêng trong ô câu hỏi (questionsHtml) và ô drop-zone của từng Part
+    // (Tuyệt đối không quét chuỗi văn bản passageHtml để tránh bắt nhầm chữ q15 trong đoạn văn)
+    for (const p of passages) {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = (p.questionsHtml || '');
+      const hasInputInQuestions = tempDiv.querySelector(
+        `[name="${qKey}"], [data-target="${qKey}"], [data-question="${qNum}"], [data-multi-pair*="${qKey}"], [data-pair-group*="${qKey}"]`
+      );
+      if (hasInputInQuestions) {
+        // Kiểm tra chéo với dải câu chuẩn của Listening (4 Parts: 1-10, 11-20, 21-30, 31-40)
+        // Nếu đề có đủ 4 Part mà câu 15 lại bị dán nhầm HTML vào Part 1, tự động trả về đúng Part theo chuẩn số câu!
+        if (activeExamType === 'listening' && passages.length === 4 && !isNaN(qNum)) {
+          const standardPart = qNum <= 10 ? 1 : (qNum <= 20 ? 2 : (qNum <= 30 ? 3 : 4));
+          // Chỉ cho phép nằm ở p.partNum nếu thực sự Part chuẩn không có ô input của câu đó
+          const stdPassage = passages.find(x => x.partNum === standardPart);
+          if (stdPassage && stdPassage.partNum !== p.partNum) {
+            const stdDiv = document.createElement('div');
+            stdDiv.innerHTML = (stdPassage.questionsHtml || '');
+            const existsInStd = stdDiv.querySelector(
+              `[name="${qKey}"], [data-target="${qKey}"], [data-question="${qNum}"], [data-multi-pair*="${qKey}"], [data-pair-group*="${qKey}"]`
+            );
+            if (existsInStd) return standardPart;
+          }
+        }
+        return p.partNum;
+      }
+
+      // Kiểm tra riêng trường hợp Matching Headings (drop-zone nằm bên passageHtml)
+      const leftDiv = document.createElement('div');
+      leftDiv.innerHTML = (p.passageHtml || '');
+      if (leftDiv.querySelector(`.drop-zone[data-target="${qKey}"]`)) {
+        return p.partNum;
+      }
+    }
+
+    // Bước 2: Phân bổ dự phòng chuẩn xác theo dải số câu IELTS nếu không dò thấy trong HTML
+    if (!isNaN(qNum)) {
+      if (activeExamType === 'listening' || passages.length === 4) {
+        if (qNum <= 10) return passages[0]?.partNum || 1;
+        if (qNum <= 20) return passages[1]?.partNum || 2;
+        if (qNum <= 30) return passages[2]?.partNum || 3;
+        return passages[3]?.partNum || 4;
+      }
+      if (passages.length === 3) {
+        if (qNum <= 13) return passages[0]?.partNum || 1;
+        if (qNum <= 26) return passages[1]?.partNum || 2;
+        return passages[2]?.partNum || 3;
+      }
+    }
+    return passages[0]?.partNum || 1;
+  };
+
+  /* ==========================================================================
+     2. SỬA TRIỆT ĐỂ THANH ĐIỀU HƯỚNG DƯỚI CHÂN TRANG CHO BÀI WRITING
+        (XÓA SẠCH 40 CÂU READING, CHỈ ĐỂ PART 1 & PART 2 Ở DƯỚI CÙNG)
+     ========================================================================== */
+  function renderCleanWritingFooterBar() {
+    if (activeExamType !== 'writing' || !activeExam) return;
+
+    // Ẩn thanh Part Tabs ở phía trên cùng khi làm bài Writing (chỉ dùng thanh dưới cùng)
+    const topTabs = document.getElementById('insperaPartTabs');
+    if (topTabs) {
+      topTabs.innerHTML = '';
+      topTabs.style.display = 'none';
+    }
+
+    const hasT1 = Boolean(activeExam.task1 && String(activeExam.task1.prompt || '').trim());
+    const hasT2 = Boolean(activeExam.task2 && String(activeExam.task2.prompt || '').trim());
+
+    const footerLabel = document.getElementById('footerSectionLabel');
+    if (footerLabel) {
+      footerLabel.textContent = `Writing Task ${activePartNum}`;
+    }
+
+    const footerList = document.getElementById('insperaFooterList');
+    if (!footerList) return;
+
+    const w1Text = (writingAnswers && writingAnswers.task1) ? writingAnswers.task1.trim() : '';
+    const w2Text = (writingAnswers && writingAnswers.task2) ? writingAnswers.task2.trim() : '';
+    const currentText = activePartNum === 1 ? w1Text : w2Text;
+    const currentWords = currentText ? currentText.split(/\s+/).length : 0;
+
+    // Xóa sạch mọi nút câu hỏi 1..40 của Reading/Listening còn sót lại và chỉ vẽ Part 1 & Part 2
+    footerList.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px;">
+        ${hasT1 ? `
+          <button type="button" class="progress-item ${activePartNum === 1 ? 'current' : ''} ${w1Text.length > 0 ? 'answered' : ''}" 
+            id="wfoot_1" onclick="switchWritingTask(1)" 
+            style="min-width:92px; height:32px; padding:0 14px; font-size:13px; font-weight:800; border-radius:4px;">
+            Part 1 (Task 1)
+          </button>
+        ` : ''}
+        ${hasT2 ? `
+          <button type="button" class="progress-item ${activePartNum === 2 ? 'current' : ''} ${w2Text.length > 0 ? 'answered' : ''}" 
+            id="wfoot_2" onclick="switchWritingTask(2)" 
+            style="min-width:92px; height:32px; padding:0 14px; font-size:13px; font-weight:800; border-radius:4px;">
+            Part 2 (Task 2)
+          </button>
+        ` : ''}
+        <span id="writingWordCountDisplay" style="margin-left:14px; font-weight:800; color:#111827; font-size:13px; background:#f3f4f6; padding:5px 12px; border-radius:4px; border:1px solid #d1d5db;">
+          Word count: ${currentWords}
+        </span>
+      </div>
+    `;
+  }
+
+  // Khôi phục lại hiển thị thanh Part Tabs phía trên khi làm bài Reading hoặc Listening
+  const _fixOrigRenderPartPills = renderPartPills;
+  renderPartPills = function() {
+    if (activeExamType === 'writing') {
+      const topTabs = document.getElementById('insperaPartTabs');
+      if (topTabs) { topTabs.innerHTML = ''; topTabs.style.display = 'none'; }
+      return;
+    }
+    const topTabs = document.getElementById('insperaPartTabs');
+    if (topTabs) topTabs.style.display = 'flex';
+    _fixOrigRenderPartPills();
+  };
+
+  // Chặn mọi lệnh buildFooterNav() và updateFooterNav() của Reading/Listening không cho ghi đè lên Writing
+  const _fixOrigBuildFooterNav = buildFooterNav;
+  buildFooterNav = function() {
+    if (activeExamType === 'writing') {
+      renderCleanWritingFooterBar();
+      return;
+    }
+    _fixOrigBuildFooterNav();
+  };
+
+  const _fixOrigUpdateFooterNav = updateFooterNav;
+  updateFooterNav = function() {
+    if (activeExamType === 'writing') {
+      renderCleanWritingFooterBar();
+      return;
+    }
+    _fixOrigUpdateFooterNav();
+  };
+
+  // Đảm bảo khi khởi chạy bài Writing (kể cả trong Mock Test) luôn ép đúng activeExamType = 'writing' và hiện đủ Part 1 & Part 2
+  const _fixOrigLaunchWriting = launchWritingExam;
+  launchWritingExam = function(examId) {
+    activeExamType = 'writing';
+    _fixOrigLaunchWriting(examId);
+    renderCleanWritingFooterBar();
+    // Chạy lại thêm 1 nhịp sau 60ms để xóa triệt để nếu có script Mock Test nào vừa vẽ đè thanh 40 câu
+    setTimeout(renderCleanWritingFooterBar, 60);
+  };
+
+  // Đảm bảo khi bấm chuyển giữa Part 1 (Task 1) và Part 2 (Task 2) luôn lưu bài đang gõ và cập nhật nút dưới chân trang
+  window.switchWritingTask = function(taskNum) {
+    activeExamType = 'writing';
+    const currentEditor = document.getElementById('writingEditor');
+    if (currentEditor) {
+      if (activePartNum === 1) writingAnswers.task1 = currentEditor.value;
+      else writingAnswers.task2 = currentEditor.value;
+    }
+    activePartNum = taskNum;
+    loadWritingWorkspace(taskNum);
+    renderCleanWritingFooterBar();
+  };
+
+  const _fixOrigHandleWritingInput = handleWritingInput;
+  window.handleWritingInput = function(text) {
+    _fixOrigHandleWritingInput(text);
+    const wFootBtn = document.getElementById('wfoot_' + activePartNum);
+    if (wFootBtn) {
+      wFootBtn.classList.toggle('answered', String(text || '').trim().length > 0);
+    }
+  };
+</script>
+<!-- ============================================================================
+     HOTFIX NÚT PART 1 & PART 2 WRITING:
+     1. Chống bị CSS .progress-item (!important) bóp bé thành ô vuông 28px
+     2. Chặn triệt để thanh "Part 1 0 of 13... 27-40" hiện ra khi vào Writing Mock
+     ============================================================================ -->
+<style>
+  /* Ép kích thước chuẩn rộng rãi cho 2 nút chuyển Task của Writing */
+  #wfoot_1, #wfoot_2, .writing-footer-pill {
+    width: auto !important;
+    min-width: 105px !important;
+    max-width: none !important;
+    height: 32px !important;
+    padding: 0 16px !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    border: 1.5px solid #9ca3af !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+  }
+  #wfoot_1.current, #wfoot_2.current, .writing-footer-pill.current {
+    background: #111827 !important;
+    color: #ffffff !important;
+    border-color: #111827 !important;
+    outline: 2px solid #2563eb !important;
+    outline-offset: 1px !important;
+  }
+  #wfoot_1.answered:not(.current), #wfoot_2.answered:not(.current) {
+    background: #e5e7eb !important;
+    color: #111827 !important;
+    border-color: #374151 !important;
+  }
+</style>
+
+<script>
+  function forceRenderWritingFooterClean() {
+    const isWritingScreen = (activeExamType === 'writing') || Boolean(document.getElementById('writingEditor'));
+    if (!isWritingScreen || !activeExam) return;
+
+    activeExamType = 'writing';
+
+    const topTabs = document.getElementById('insperaPartTabs');
+    if (topTabs) {
+      topTabs.innerHTML = '';
+      topTabs.style.display = 'none';
+    }
+
+    // Dò xem đề có Task 1 và Task 2 hay không (nếu là Mock Test thì mặc định bật cả 2 nút Part 1 & Part 2)
+    const hasT1 = Boolean((activeExam.task1 && String(activeExam.task1.prompt || '').trim()) || (window.mockSession && window.mockSession.active));
+    const hasT2 = Boolean((activeExam.task2 && String(activeExam.task2.prompt || '').trim()) || (window.mockSession && window.mockSession.active));
+
+    const footerLabel = document.getElementById('footerSectionLabel');
+    if (footerLabel) {
+      footerLabel.style.display = '';
+      footerLabel.textContent = `Writing Task ${activePartNum}`;
+    }
+
+    const footerList = document.getElementById('insperaFooterList');
+    if (!footerList) return;
+
+    const w1Text = (writingAnswers && writingAnswers.task1) ? writingAnswers.task1.trim() : '';
+    const w2Text = (writingAnswers && writingAnswers.task2) ? writingAnswers.task2.trim() : '';
+    const currentText = activePartNum === 1 ? w1Text : w2Text;
+    const currentWords = currentText ? currentText.split(/\s+/).length : 0;
+
+    footerList.style.cssText = 'display:flex !important; align-items:center !important; gap:10px !important; overflow:visible !important;';
+    footerList.innerHTML = `
+      ${hasT1 || (!hasT1 && !hasT2) ? `
+        <button type="button" id="wfoot_1" class="writing-footer-pill ${activePartNum === 1 ? 'current' : ''} ${w1Text.length > 0 ? 'answered' : ''}" onclick="switchWritingTask(1)">
+          Part 1 (Task 1)
+        </button>
+      ` : ''}
+      ${hasT2 || (!hasT1 && !hasT2) ? `
+        <button type="button" id="wfoot_2" class="writing-footer-pill ${activePartNum === 2 ? 'current' : ''} ${w2Text.length > 0 ? 'answered' : ''}" onclick="switchWritingTask(2)">
+          Part 2 (Task 2)
+        </button>
+      ` : ''}
+      <span id="writingWordCountDisplay" style="margin-left:10px; font-weight:800; color:#111827; font-size:13px; background:#f3f4f6; padding:6px 14px; border-radius:6px; border:1px solid #d1d5db; white-space:nowrap;">
+        Word count: ${currentWords}
+      </span>
+    `;
+  }
+
+  // Ghi đè hàm renderCleanWritingFooterBar trước đó
+  window.renderCleanWritingFooterBar = forceRenderWritingFooterClean;
+
+  // Tự động theo dõi thanh Footer: Hễ đang ở màn hình Writing mà có hàm nào vẽ "Part 1 0 of 13" đè vào là lập tức đổi về 2 nút Part 1 & Part 2 ngay!
+  const footerObserverTarget = document.getElementById('insperaFooterList');
+  if (footerObserverTarget) {
+    const writingFooterGuard = new MutationObserver(() => {
+      const isWritingNow = (activeExamType === 'writing') || Boolean(document.getElementById('writingEditor'));
+      if (isWritingNow && !document.getElementById('wfoot_1') && !document.getElementById('wfoot_2')) {
+        forceRenderWritingFooterClean();
+      }
+    });
+    writingFooterGuard.observe(footerObserverTarget, { childList: true });
+  }
+</script>
+<!-- ============================================================================
+     HOTFIX DỨT ĐIỂM THANH FOOTER WRITING NGAY TỪ GIÂY ĐẦU TIÊN:
+     1. Tự động hiện ngay Part 1 (Task 1) & Part 2 (Task 2) khi vừa vào Writing (không cần bấm)
+     2. Chặn mọi hàm hẹn giờ vẽ "Part 1 0 of 13" của Reading đè lên màn hình Writing
+     ============================================================================ -->
+<style>
+  /* Ép kích thước chuẩn đẹp cho 2 nút chuyển Task của Writing */
+  #wfoot_1, #wfoot_2, .writing-footer-pill {
+    width: auto !important;
+    min-width: 120px !important;
+    max-width: none !important;
+    height: 32px !important;
+    padding: 0 18px !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    border: 1.5px solid #9ca3af !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+  }
+  #wfoot_1.current, #wfoot_2.current, .writing-footer-pill.current {
+    background: #111827 !important;
+    color: #ffffff !important;
+    border-color: #111827 !important;
+    outline: 2px solid #2563eb !important;
+    outline-offset: 1px !important;
+  }
+  #wfoot_1.answered:not(.current), #wfoot_2.answered:not(.current) {
+    background: #e5e7eb !important;
+    color: #111827 !important;
+    border-color: #374151 !important;
+  }
+</style>
+
+<script>
+  function forceRenderWritingFooterClean() {
+    // Nhận diện chính xác đang ở màn hình làm bài Writing
+    const hasWritingBox = Boolean(document.getElementById('writingEditor'));
+    if (!hasWritingBox && activeExamType !== 'writing') return;
+
+    activeExamType = 'writing';
+
+    // Ẩn thanh Part Tabs ở trên cùng
+    const topTabs = document.getElementById('insperaPartTabs');
+    if (topTabs) {
+      topTabs.innerHTML = '';
+      topTabs.style.display = 'none';
+    }
+
+    const footerLabel = document.getElementById('footerSectionLabel');
+    if (footerLabel) {
+      footerLabel.style.display = 'none';
+    }
+
+    const footerList = document.getElementById('insperaFooterList');
+    if (!footerList) return;
+
+    const w1Text = (writingAnswers && writingAnswers.task1) ? writingAnswers.task1.trim() : '';
+    const w2Text = (writingAnswers && writingAnswers.task2) ? writingAnswers.task2.trim() : '';
+    const currentEditor = document.getElementById('writingEditor');
+    const liveText = currentEditor ? currentEditor.value.trim() : (activePartNum === 1 ? w1Text : w2Text);
+    const currentWords = liveText ? liveText.split(/\s+/).length : 0;
+
+    footerList.style.cssText = 'display:flex !important; align-items:center !important; justify-content:space-between !important; width:100% !important; max-width:92% !important; gap:12px !important; overflow:visible !important; padding:0 8px !important;';
+    footerList.innerHTML = `
+      <button type="button" id="wfoot_1" class="writing-footer-pill ${activePartNum === 1 ? 'current' : ''} ${w1Text.length > 0 ? 'answered' : ''}" onclick="switchWritingTask(1)">
+        Part 1 (Task 1)
+      </button>
+      <button type="button" id="wfoot_2" class="writing-footer-pill ${activePartNum === 2 ? 'current' : ''} ${w2Text.length > 0 ? 'answered' : ''}" onclick="switchWritingTask(2)">
+        Part 2 (Task 2)
+      </button>
+      <span id="writingWordCountDisplay" style="font-weight:800; color:#111827; font-size:13px; background:#f3f4f6; padding:6px 14px; border-radius:6px; border:1px solid #d1d5db; white-space:nowrap;">
+        Word count: ${currentWords}
+      </span>
+    `;
+  }
+
+  window.renderCleanWritingFooterBar = forceRenderWritingFooterClean;
+
+  // Bọc trực tiếp vào hàm loadWritingWorkspace (hàm tạo ra ô #writingEditor mỗi khi mở bài Writing)
+  const _guardOrigLoadWritingWorkspace = loadWritingWorkspace;
+  window.loadWritingWorkspace = function(taskNum) {
+    activeExamType = 'writing';
+    _guardOrigLoadWritingWorkspace(taskNum);
+    forceRenderWritingFooterClean();
+    // Khóa chặt ở mọi mốc thời gian để đè bẹp mọi lệnh setTimeout của Reading/Mock Test chạy trễ
+    [30, 100, 220, 400, 700].forEach(ms => setTimeout(forceRenderWritingFooterClean, ms));
+  };
+
+  // Canh gác toàn bộ khung phòng thi (#examShell): Hễ thấy #writingEditor xuất hiện mà dưới đáy chưa phải là nút #wfoot_1 thì lập tức sửa ngay lập tức!
+  const examShellEl = document.getElementById('examShell');
+  if (examShellEl) {
+    const masterWritingObserver = new MutationObserver(() => {
+      if (document.getElementById('writingEditor')) {
+        const fList = document.getElementById('insperaFooterList');
+        if (fList && (!document.getElementById('wfoot_1') || fList.textContent.includes(' of '))) {
+          forceRenderWritingFooterClean();
+        }
+      }
+    });
+    masterWritingObserver.observe(examShellEl, { childList: true, subtree: true });
+  }
+</script>
 </body>
 </html>
