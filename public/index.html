@@ -21233,5 +21233,1699 @@ Câu dẫn chứng: "${eviVal}"`;
     masterWritingObserver.observe(examShellEl, { childList: true, subtree: true });
   }
 </script>
+<!-- ============================================================================
+     BẢN CẬP NHẬT 5 MỤC MỚI (KHÔNG ĐỤNG CHẠM NÚT PART 1 / PART 2 ĐÃ CÓ):
+     1. Hiện danh sách Học viên đang Online công khai cho tất cả học sinh cùng thấy
+     2. Khôi phục Giữ chuỗi học tập (🔥 Study Streak) & Bảng xếp hạng (🏆 Leaderboard)
+     3. Sửa triệt để Bộ lọc Đã hoàn thành (Done) / Chưa làm (To-Do) ở mức dữ liệu gốc
+     4. Tự động gộp kết quả Mock Test 3 kỹ năng thành 1 dòng + Chấm Writing + In Phiếu Điểm
+     5. Khóa gợi ý trình duyệt (autocomplete="off") cho các ô điền đáp án
+     ============================================================================ -->
+<style>
+  /* 1. KHUNG GIỮ CHUỖI (STREAK) & BẢNG XẾP HẠNG (LEADERBOARD) */
+  .gamification-row {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 900px) {
+    .gamification-row { grid-template-columns: 1fr; }
+  }
+  .streak-card-box {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px solid #fcd34d;
+    border-radius: 16px;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.08);
+  }
+  .streak-days-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 14px;
+    justify-content: space-between;
+  }
+  .streak-day-circle {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid #fde68a;
+    font-size: 11px;
+    font-weight: 800;
+    color: #92400e;
+  }
+  .streak-day-circle.active {
+    background: #f59e0b;
+    color: #ffffff;
+    border-color: #d97706;
+    box-shadow: 0 3px 8px rgba(217, 119, 6, 0.25);
+  }
+  .leaderboard-card-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 18px 22px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+  }
+  .lb-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    margin-bottom: 7px;
+    font-size: 13px;
+  }
+  .lb-item-row:nth-child(1) { background: #fefce8; border-color: #fef08a; }
+  .lb-item-row:nth-child(2) { background: #f8fafc; border-color: #cbd5e1; }
+  .lb-item-row:nth-child(3) { background: #fff7ed; border-color: #fed7aa; }
+
+  /* 2. BẢNG ĐIỀU KHIỂN & PHIẾU IN ĐIỂM MOCK TEST SẠCH SẼ */
+  .mock-hub-skill-row {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  #mockCleanPrintableSheet {
+    background: #ffffff;
+    border: 2px solid #0f172a;
+    border-radius: 10px;
+    padding: 28px 32px;
+    color: #0f172a;
+    font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  }
+  .mock-print-score-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 22px 0;
+  }
+  .mock-print-score-box {
+    border: 1.5px solid #0f172a;
+    border-radius: 8px;
+    padding: 14px 10px;
+    text-align: center;
+    background: #f8fafc;
+  }
+  .mock-print-score-box .sk-lbl {
+    font-size: 11.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #475569;
+    margin-bottom: 6px;
+  }
+  .mock-print-score-box .sk-val {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .mock-print-score-box .sk-sub {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  /* CHẾ ĐỘ IN: CHỈ IN ĐÚNG PHIẾU ĐIỂM MOCK TEST, ẨN TOÀN BỘ THỨ LINH TINH */
+  @media print {
+    @page { size: A4 portrait; margin: 15mm; }
+    body * { visibility: hidden !important; }
+    #mockCleanPrintableSheet, #mockCleanPrintableSheet * {
+      visibility: visible !important;
+    }
+    #mockCleanPrintableSheet {
+      position: fixed !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 24px !important;
+      border: 2px solid #000000 !important;
+      box-shadow: none !important;
+      background: #ffffff !important;
+    }
+  }
+</style>
+
+<!-- MODAL 1: BẢNG ĐIỀU KHIỂN KẾT QUẢ MOCK TEST 3 KỸ NĂNG -->
+<div class="modal-overlay" id="mockTestHubModal" style="z-index: 9800;">
+  <div class="modal-window" style="width: 680px; max-width: 95vw;">
+    <div class="modal-header">
+      <span id="mockHubModalTitle">🎓 Kết Quả Kỳ Thi Mock Test (3 Kỹ Năng)</span>
+      <button class="btn btn-secondary" onclick="closeModal('mockTestHubModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" id="mockHubModalBody" style="padding: 20px;"></div>
+    <div class="modal-footer" id="mockHubModalFooter" style="justify-content: space-between;"></div>
+  </div>
+</div>
+
+<!-- MODAL 2: XEM TRƯỚC & IN PHIẾU ĐIỂM MOCK TEST (CHỈ IN ĐIỂM SỐ) -->
+<div class="modal-overlay" id="mockCleanScorePrintModal" style="z-index: 9999;">
+  <div class="modal-window" style="width: 680px; max-width: 95vw;">
+    <div class="modal-header">
+      <span>🖨️ Phiếu Kết Quả Điểm Mock Test</span>
+      <button class="btn btn-secondary" onclick="closeModal('mockCleanScorePrintModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" style="padding: 22px; background: #f1f5f9;">
+      <div id="mockCleanPrintableSheet">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #0f172a; padding-bottom:14px; margin-bottom:18px;">
+          <div>
+            <div style="font-size:22px; font-weight:800; color:#064e3b;">IELTS WITH AMURO</div>
+            <div style="font-size:11.5px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.6px;">Official Mock Test Score Report</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:13px; font-weight:800; color:#0f172a;" id="prtMockExamTitle">MOCK TEST</div>
+            <div style="font-size:12px; color:#64748b; margin-top:2px;" id="prtMockDate">Date: --/--/----</div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px 16px;">
+          <div>
+            <span style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; display:block;">Candidate Name</span>
+            <span style="font-size:17px; font-weight:800; color:#0f172a;" id="prtMockStudentName">Student Name</span>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; display:block;">Assessment Status</span>
+            <span style="font-size:13px; font-weight:800; color:#059669;">✓ Official Graded Result</span>
+          </div>
+        </div>
+
+        <div class="mock-print-score-grid">
+          <div class="mock-print-score-box">
+            <div class="sk-lbl">Listening</div>
+            <div class="sk-val" id="prtMockLBand">—</div>
+            <div class="sk-sub" id="prtMockLRaw"></div>
+          </div>
+          <div class="mock-print-score-box">
+            <div class="sk-lbl">Reading</div>
+            <div class="sk-val" id="prtMockRBand">—</div>
+            <div class="sk-sub" id="prtMockRRaw"></div>
+          </div>
+          <div class="mock-print-score-box">
+            <div class="sk-lbl">Writing</div>
+            <div class="sk-val" id="prtMockWBand">—</div>
+            <div class="sk-sub">Examiner Graded</div>
+          </div>
+          <div class="mock-print-score-box" style="background:#ecfdf5; border-color:#059669;">
+            <div class="sk-lbl" style="color:#047857;">Overall Band</div>
+            <div class="sk-val" style="color:#059669;" id="prtMockOverall">—</div>
+            <div class="sk-sub" style="color:#065f46;">IELTS Scale</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('mockCleanScorePrintModal')">Đóng</button>
+      <button class="btn btn-emerald" onclick="window.print()">🖨️ In Kết Quả Ngay</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ==========================================================================
+     1. TẮT GỢI Ý TRÌNH DUYỆT (AUTOCOMPLETE="OFF") CHO TOÀN BỘ Ô NHẬP ĐÁP ÁN
+     ========================================================================== */
+  function disableBrowserAutofillInExam() {
+    document.querySelectorAll('#examShell input, #examShell textarea, #examShell select').forEach(el => {
+      el.setAttribute('autocomplete', 'off');
+      el.setAttribute('autocorrect', 'off');
+      el.setAttribute('autocapitalize', 'off');
+      el.setAttribute('spellcheck', 'false');
+    });
+  }
+
+  const _afOrigBindInputs = bindInputListeners;
+  bindInputListeners = function(scope) {
+    _afOrigBindInputs(scope);
+    disableBrowserAutofillInExam();
+  };
+
+  /* ==========================================================================
+     2. HIỂN THỊ "AI ĐANG ONLINE" CHO TẤT CẢ HỌC SINH & GIÁO VIÊN CÙNG THẤY
+     ========================================================================== */
+  renderTeacherOnlineMonitor = function() {
+    const existingBar = document.getElementById('teacherOnlineMonitorBar');
+    if (!activeUser) {
+      if (existingBar) existingBar.style.display = 'none';
+      return;
+    }
+    const homeTab = document.getElementById('tab-home');
+    if (!homeTab) return;
+    let bar = existingBar;
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'teacherOnlineMonitorBar';
+      bar.className = 'online-monitor-bar';
+      homeTab.insertBefore(bar, homeTab.firstChild);
+    }
+    bar.style.display = 'flex';
+    const now = Date.now();
+
+    const activeMembers = Object.values(onlinePresenceMap || {}).filter(p =>
+      p && p.name && (now - (p.lastSeen || 0)) < 180000
+    );
+
+    if (!activeMembers.some(m => m.username === activeUser.username)) {
+      activeMembers.unshift({
+        username: activeUser.username,
+        name: activeUser.name,
+        role: activeUser.role,
+        isPro: Boolean(typeof isStudentPro === 'function' && isStudentPro(activeUser)),
+        activity: getCurrentStudentActivityLabel()
+      });
+    }
+
+    bar.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%;">
+        <span style="font-weight:800; font-size:13.5px; color:#065f46; margin-right:6px;">
+          🟢 Thành viên đang Online (${activeMembers.length}):
+        </span>
+        ${activeMembers.map(st => {
+          const roleBadge = st.role === 'teacher' ? '👨‍🏫' : (st.isPro ? '👑' : '👤');
+          return `
+            <div class="online-user-pill" title="${st.className || ''}">
+              <span class="online-pulse-dot"></span>
+              <span>${roleBadge} ${st.name}</span>
+              <span style="font-weight:500; color:#047857; font-size:11.5px;">• ${st.activity || 'Đang học'}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  };
+
+  /* ==========================================================================
+     3. KHÔI PHỤC GIỮ CHUỖI HỌC TẬP (🔥 STREAK) & BẢNG XẾP HẠNG (🏆 LEADERBOARD)
+     ========================================================================== */
+  function extractResultIsoDate(res) {
+    if (!res) return null;
+    if (res.isoDate && /^\d{4}-\d{2}-\d{2}$/.test(res.isoDate)) return res.isoDate;
+    const idMatch = String(res.id || '').match(/(\d{13})/);
+    if (idMatch) {
+      const dt = new Date(Number(idMatch[1]));
+      if (!isNaN(dt.getTime())) {
+        return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+      }
+    }
+    const parsed = new Date(res.timestamp);
+    if (!isNaN(parsed.getTime())) {
+      return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
+    }
+    return null;
+  }
+
+  function calculateUserStreakInfo(userName) {
+    const myResults = (db.results || []).filter(r =>
+      String(r.userName || '').trim().toLowerCase() === String(userName || '').trim().toLowerCase()
+    );
+    const activeDates = new Set();
+    myResults.forEach(r => {
+      const d = extractResultIsoDate(r);
+      if (d) activeDates.add(d);
+    });
+
+    let streak = 0;
+    const today = new Date();
+    for (let i = 0; i < 365; i++) {
+      const checkDate = new Date(today);
+      checkDate.setDate(today.getDate() - i);
+      const iso = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+      if (activeDates.has(iso)) {
+        streak++;
+      } else {
+        if (i === 0) continue;
+        break;
+      }
+    }
+
+    const last7Days = [];
+    const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      last7Days.push({
+        label: i === 0 ? 'H.Nay' : dayNames[d.getDay()],
+        done: activeDates.has(iso)
+      });
+    }
+
+    return { streak, totalTests: myResults.length, last7Days };
+  }
+
+  function renderStreakAndLeaderboardSection() {
+    if (!activeUser) return;
+    const homeTab = document.getElementById('tab-home');
+    const statGrid = homeTab ? homeTab.querySelector('.stat-grid') : null;
+    if (!homeTab || !statGrid) return;
+
+    let container = document.getElementById('gamificationStreakLeaderboardBox');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'gamificationStreakLeaderboardBox';
+      container.className = 'gamification-row';
+      statGrid.insertAdjacentElement('afterend', container);
+    }
+
+    const myStreakInfo = calculateUserStreakInfo(activeUser.name);
+
+    const studentStatsMap = new Map();
+    (db.results || []).forEach(r => {
+      if (!r || !r.userName) return;
+      const lowName = String(r.userName).trim().toLowerCase();
+      if (lowName.includes('amuro') || lowName.includes('teacher') || lowName === 'admin') return;
+      const uObj = (db.users || []).find(u => String(u.name || '').trim().toLowerCase() === lowName);
+      if (uObj && uObj.role === 'teacher') return;
+
+      if (!studentStatsMap.has(r.userName)) {
+        studentStatsMap.set(r.userName, {
+          name: r.userName,
+          isPro: Boolean(uObj && uObj.isPro),
+          count: 0,
+          bands: []
+        });
+      }
+      const entry = studentStatsMap.get(r.userName);
+      entry.count++;
+      const bNum = parseFloat(String(r.band || '').replace(/Band/i, '').replace(/\(Overall\)/i, '').trim());
+      if (!isNaN(bNum) && bNum >= 1 && bNum <= 9) {
+        entry.bands.push(bNum);
+      }
+    });
+
+    const leaderboardList = Array.from(studentStatsMap.values()).map(item => {
+      const avg = item.bands.length
+        ? (item.bands.reduce((a, b) => a + b, 0) / item.bands.length).toFixed(1)
+        : '—';
+      const stInfo = calculateUserStreakInfo(item.name);
+      return { ...item, avgBand: avg, streak: stInfo.streak };
+    }).sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count;
+      return (parseFloat(b.avgBand) || 0) - (parseFloat(a.avgBand) || 0);
+    }).slice(0, 5);
+
+    container.innerHTML = `
+      <div class="streak-card-box">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; font-weight:800; color:#b45309; text-transform:uppercase; letter-spacing:0.6px;">🔥 Chuỗi Học Tập Liên Tục</span>
+            <span style="background:#fef3c7; border:1px solid #f59e0b; color:#92400e; padding:2px 9px; border-radius:999px; font-size:11.5px; font-weight:800;">
+              Tổng: ${myStreakInfo.totalTests} bài đã hoàn thành
+            </span>
+          </div>
+          <div style="display:flex; align-items:baseline; gap:10px; margin-top:10px;">
+            <span style="font-size:38px; font-weight:900; color:#d97706; line-height:1;">${myStreakInfo.streak}</span>
+            <span style="font-size:15px; font-weight:800; color:#78350f;">ngày giữ chuỗi liên tiếp!</span>
+          </div>
+          <div style="font-size:12.5px; color:#92400e; margin-top:6px;">
+            ${myStreakInfo.streak > 0
+              ? 'Tuyệt vời! Hãy hoàn thành ít nhất 1 bài mỗi ngày để giữ ngọn lửa không tắt nhé!'
+              : 'Hãy làm ngay 1 đề Reading, Listening hoặc Writing hôm nay để bắt đầu thắp sáng chuỗi Streak!'}
+          </div>
+        </div>
+        <div class="streak-days-row">
+          ${myStreakInfo.last7Days.map(d => `
+            <div class="streak-day-circle ${d.done ? 'active' : ''}">
+              <div>${d.label}</div>
+              <div style="font-size:13px; margin-top:2px;">${d.done ? '🔥' : '⚪'}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="leaderboard-card-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div style="font-size:15px; font-weight:800; color:#0f172a;">🏆 Bảng Xếp Hạng Học Viên Chăm Chỉ</div>
+          <span style="font-size:11.5px; color:#64748b; font-weight:700;">Cập nhật theo thời gian thực</span>
+        </div>
+        ${!leaderboardList.length ? `
+          <div style="text-align:center; color:#94a3b8; padding:26px 10px; font-size:13px;">Chưa có dữ liệu xếp hạng học viên.</div>
+        ` : leaderboardList.map((stu, idx) => {
+          const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
+          return `
+            <div class="lb-item-row">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:16px; font-weight:900; min-width:24px; text-align:center;">${medal}</span>
+                <div>
+                  <b style="color:#0f172a;">${stu.name}</b> ${stu.isPro ? '<span style="color:#d97706; font-size:11px; font-weight:800;">👑 PRO</span>' : ''}
+                  ${stu.streak > 0 ? `<span style="background:#ffedd5; color:#c2410c; padding:1px 6px; border-radius:6px; font-size:10.5px; font-weight:800; margin-left:6px;">🔥 ${stu.streak}d</span>` : ''}
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="background:#ecfdf5; color:#047857; padding:3px 9px; border-radius:999px; font-weight:800; font-size:11.5px;">
+                  ✅ ${stu.count} đề
+                </span>
+                <span style="font-weight:800; color:#0f172a; font-size:12.5px; min-width:68px; text-align:right;">
+                  Avg: ${stu.avgBand}
+                </span>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  /* ==========================================================================
+     4. SỬA TRIỆT ĐỂ BỘ LỌC "ĐÃ HOÀN THÀNH (DONE) / CHƯA LÀM (TO-DO)" Ở MỨC DỮ LIỆU GỐC
+     ========================================================================== */
+  function isExamCompletedByActiveUser(examObj, skillType) {
+    if (!activeUser || !examObj) return false;
+    const doneIds = (typeof getStudentCompletedExamIds === 'function') ? getStudentCompletedExamIds(skillType) : [];
+    if (doneIds.includes(examObj.id)) return true;
+
+    const cleanExamTitle = String(examObj.title || '').trim().toLowerCase();
+    return (db.results || []).some(r => {
+      if (String(r.userName || '').trim().toLowerCase() !== String(activeUser.name || '').trim().toLowerCase()) return false;
+      if (r.examId === examObj.id) return true;
+      if (cleanExamTitle && String(r.examTitle || '').trim().toLowerCase() === cleanExamTitle) return true;
+      if (r.mockData) {
+        if (skillType === 'listening' && (r.mockData.listening?.examId === examObj.id || String(r.mockData.listening?.examTitle || '').trim().toLowerCase() === cleanExamTitle)) return true;
+        if (skillType === 'reading' && (r.mockData.reading?.examId === examObj.id || String(r.mockData.reading?.examTitle || '').trim().toLowerCase() === cleanExamTitle)) return true;
+        if (skillType === 'writing' && (r.mockData.writing?.examId === examObj.id || String(r.mockData.writing?.examTitle || '').trim().toLowerCase() === cleanExamTitle)) return true;
+      }
+      return false;
+    });
+  }
+
+  const _filterOrigGetVisibleExams = getVisibleExams;
+  getVisibleExams = function(examList) {
+    const baseList = _filterOrigGetVisibleExams(examList);
+    if (!Array.isArray(baseList) || !baseList.length) return baseList;
+
+    let skillType = null;
+    let statusSelectId = null;
+    if (examList === db.readingExams) {
+      skillType = 'reading';
+      statusSelectId = 'filterReadingDoneStatus';
+    } else if (examList === db.listeningExams) {
+      skillType = 'listening';
+      statusSelectId = 'filterListeningDoneStatus';
+    } else if (examList === db.writingExams) {
+      skillType = 'writing';
+      statusSelectId = 'filterWritingDoneStatus';
+    }
+
+    if (!skillType || !statusSelectId) return baseList;
+    const statusFilterVal = document.getElementById(statusSelectId)?.value || 'ALL';
+    if (statusFilterVal === 'ALL') return baseList;
+
+    return baseList.filter(ex => {
+      const done = isExamCompletedByActiveUser(ex, skillType);
+      return statusFilterVal === 'DONE' ? done : !done;
+    });
+  };
+
+  /* ==========================================================================
+     5. TỰ ĐỘNG GỘP 3 BÀI LẺ CỦA MOCK TEST (L + R + W) THÀNH 1 DÒNG MOCK TEST DUY NHẤT
+        & MỞ KHÓA NÚT IN PHIẾU ĐIỂM SAU KHI CHẤM WRITING
+     ========================================================================== */
+  function roundIeltsBand(num) {
+    const n = parseFloat(num);
+    if (isNaN(n) || n <= 0) return null;
+    return (Math.round(n * 2) / 2).toFixed(1);
+  }
+
+  function extractNumericBand(bandStr) {
+    if (!bandStr) return null;
+    const str = String(bandStr).replace(/Band/i, '').replace(/\(Overall\)/i, '').trim();
+    if (!str || str.toLowerCase().includes('submit') || str.toLowerCase().includes('pending') || str.toLowerCase().includes('chờ')) return null;
+    const m = str.match(/(\d+(?:\.\d+)?)/);
+    return m ? parseFloat(m[1]) : null;
+  }
+
+  function isConsolidatedMockResult(res) {
+    if (!res) return false;
+    return Boolean(
+      res.isMockConsolidated ||
+      res.mockData ||
+      String(res.examTitle || '').includes('[Full Mock Test]') ||
+      (String(res.score || '').includes('🎧 L:') && String(res.score || '').includes('📖 R:'))
+    );
+  }
+
+  function isMockWritingGraded(res) {
+    if (!res) return false;
+    if (res.mockData && res.mockData.writing) {
+      if (extractNumericBand(res.mockData.writing.band) !== null) return true;
+    }
+    if (extractNumericBand(res.writingBand) !== null) return true;
+    if (/✍️\s*W:[^|]*\((?:Band\s*)?(\d+(?:\.\d+)?)\)/i.test(String(res.score || ''))) return true;
+    return false;
+  }
+
+  async function autoMergeStandaloneMockTriplets() {
+    if (!db || !Array.isArray(db.results) || db.results.length < 3) return false;
+    let mergedAny = false;
+    const fs = (typeof getActiveFirestore === 'function') ? getActiveFirestore() : CLOUD_DB;
+
+    for (let i = db.results.length - 1; i >= 2; i--) {
+      const wRes = db.results[i];
+      if (!wRes || isConsolidatedMockResult(wRes)) continue;
+      const isWriting = Boolean(wRes.writingSubmission || String(wRes.id || '').startsWith('res_w_'));
+      if (!isWriting) continue;
+
+      const isWritingMockNamed = String(wRes.examTitle || '').toLowerCase().includes('mock');
+      let rIdx = -1, lIdx = -1;
+      for (let j = i - 1; j >= Math.max(0, i - 5); j--) {
+        const cand = db.results[j];
+        if (!cand || isConsolidatedMockResult(cand)) continue;
+        if (String(cand.userName || '').toLowerCase() !== String(wRes.userName || '').toLowerCase()) continue;
+        if (cand.isoDate && wRes.isoDate && cand.isoDate !== wRes.isoDate) continue;
+
+        const sType = (typeof detectResultSkillType === 'function') ? detectResultSkillType(cand) : 'reading';
+        if (sType === 'reading' && rIdx === -1) rIdx = j;
+        else if (sType === 'listening' && lIdx === -1) lIdx = j;
+      }
+
+      if (isWritingMockNamed && rIdx !== -1 && lIdx !== -1) {
+        const lRes = db.results[lIdx];
+        const rRes = db.results[rIdx];
+
+        const lBandNum = extractNumericBand(lRes.band);
+        const rBandNum = extractNumericBand(rRes.band);
+        const wBandNum = extractNumericBand(wRes.band);
+
+        const wWords = String(wRes.score || '0w');
+        const wBandText = wBandNum !== null ? ` (${wBandNum.toFixed(1)})` : ' (Chờ chấm)';
+
+        let overallBandStr = 'Chờ chấm Writing';
+        if (wBandNum !== null) {
+          const valid = [lBandNum, rBandNum, wBandNum].filter(x => x !== null);
+          overallBandStr = `Band ${roundIeltsBand(valid.reduce((a, b) => a + b, 0) / valid.length)} (Overall)`;
+        }
+
+        const cleanWTitle = String(wRes.examTitle || '').replace(/^Writing Mock\s*/i, '').trim();
+        const mockTitle = `🎓 [Full Mock Test] ${lRes.examTitle} + ${rRes.examTitle}`;
+
+        wRes.isMockConsolidated = true;
+        wRes.examTitle = mockTitle;
+        wRes.score = `🎧 L: ${lRes.score} (${lBandNum !== null ? lBandNum.toFixed(1) : '—'}) | 📖 R: ${rRes.score} (${rBandNum !== null ? rBandNum.toFixed(1) : '—'}) | ✍️ W: ${wWords}${wBandText}`;
+        wRes.band = overallBandStr;
+        wRes.writingBand = wBandNum !== null ? wBandNum.toFixed(1) : null;
+        wRes.mockData = {
+          listening: {
+            examId: lRes.examId,
+            examTitle: lRes.examTitle,
+            score: lRes.score,
+            band: lBandNum !== null ? lBandNum.toFixed(1) : lRes.band,
+            userAnswersCopy: lRes.userAnswersCopy || {}
+          },
+          reading: {
+            examId: rRes.examId,
+            examTitle: rRes.examTitle,
+            score: rRes.score,
+            band: rBandNum !== null ? rBandNum.toFixed(1) : rRes.band,
+            userAnswersCopy: rRes.userAnswersCopy || {}
+          },
+          writing: {
+            examId: wRes.examId,
+            examTitle: cleanWTitle || wRes.examTitle,
+            score: wRes.score,
+            band: wBandNum !== null ? wBandNum.toFixed(1) : 'Submitted'
+          }
+        };
+
+        const removeIds = [lRes.id, rRes.id];
+        db.results = db.results.filter(item => !removeIds.includes(item.id));
+        mergedAny = true;
+
+        if (fs) {
+          try {
+            await fs.collection('suite_results').doc(String(wRes.id)).set(JSON.parse(JSON.stringify(wRes)));
+            for (const oldId of removeIds) {
+              if (oldId) await fs.collection('suite_results').doc(String(oldId)).delete();
+            }
+          } catch (e) {}
+        }
+        break;
+      }
+    }
+    return mergedAny;
+  }
+
+  function parseMockScoresFromRecord(res) {
+    const mData = res.mockData || {};
+    const scoreStr = String(res.score || '');
+
+    let lRaw = mData.listening?.score || '';
+    let lBand = extractNumericBand(mData.listening?.band);
+    if (!lRaw || lBand === null) {
+      const lm = scoreStr.match(/L:\s*([0-9/]+)\s*\((?:Band\s*)?([0-9.]+)\)/i);
+      if (lm) { lRaw = lRaw || lm[1]; if (lBand === null) lBand = parseFloat(lm[2]); }
+    }
+
+    let rRaw = mData.reading?.score || '';
+    let rBand = extractNumericBand(mData.reading?.band);
+    if (!rRaw || rBand === null) {
+      const rm = scoreStr.match(/R:\s*([0-9/]+)\s*\((?:Band\s*)?([0-9.]+)\)/i);
+      if (rm) { rRaw = rRaw || rm[1]; if (rBand === null) rBand = parseFloat(rm[2]); }
+    }
+
+    let wBand = extractNumericBand(res.writingBand) ?? extractNumericBand(mData.writing?.band);
+    if (wBand === null) {
+      const wm = scoreStr.match(/W:[^|]*\((?:Band\s*)?([0-9.]+)\)/i);
+      if (wm) wBand = parseFloat(wm[1]);
+    }
+
+    const validBands = [lBand, rBand, wBand].filter(b => b !== null && !isNaN(b));
+    const overall = (wBand !== null && validBands.length)
+      ? roundIeltsBand(validBands.reduce((a, b) => a + b, 0) / validBands.length)
+      : 'Chờ chấm W';
+
+    return {
+      lRaw: lRaw || '—',
+      lBand: lBand !== null ? lBand.toFixed(1) : '—',
+      rRaw: rRaw || '—',
+      rBand: rBand !== null ? rBand.toFixed(1) : '—',
+      wBand: wBand !== null ? wBand.toFixed(1) : null,
+      overall: overall
+    };
+  }
+
+  window.openMockTestHubModal = function(resId) {
+    const res = (db.results || []).find(r => r.id === resId);
+    if (!res) return alert('Không tìm thấy dữ liệu bài thi Mock Test này.');
+
+    const parsed = parseMockScoresFromRecord(res);
+    const isTeacher = activeUser && activeUser.role === 'teacher';
+    const writingGraded = isMockWritingGraded(res);
+
+    document.getElementById('mockHubModalTitle').textContent = `${res.examTitle} — ${res.userName}`;
+
+    const body = document.getElementById('mockHubModalBody');
+    body.innerHTML = `
+      <div style="background:linear-gradient(135deg,#ecfdf5,#eff6ff); border:1px solid #a7f3d0; border-radius:12px; padding:16px 20px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+          <div style="font-size:12px; font-weight:800; color:#047857; text-transform:uppercase;">Thí sinh: ${res.userName}</div>
+          <div style="font-size:13px; color:#475569; margin-top:2px;">Thời gian nộp: ${res.timestamp}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px; font-weight:800; color:#065f46; text-transform:uppercase;">Overall Mock Band</div>
+          <div style="font-size:24px; font-weight:800; color:#059669;">${writingGraded ? 'Band ' + parsed.overall : '⏳ Chờ chấm Writing'}</div>
+        </div>
+      </div>
+
+      <div class="mock-hub-skill-row">
+        <div>
+          <div style="font-weight:800; font-size:14.5px; color:#0f172a;">🎧 Kỹ năng 1: Listening (${res.mockData?.listening?.examTitle || 'Listening'})</div>
+          <div style="font-size:13px; color:#475569; margin-top:2px;">Điểm: <b>${parsed.lRaw}</b> — <b style="color:#2563eb;">Band ${parsed.lBand}</b></div>
+        </div>
+        <button class="btn btn-secondary" onclick="reviewMockSkillPart('${res.id}', 'listening')">🔍 Xem lại Listening</button>
+      </div>
+
+      <div class="mock-hub-skill-row">
+        <div>
+          <div style="font-weight:800; font-size:14.5px; color:#0f172a;">📖 Kỹ năng 2: Reading (${res.mockData?.reading?.examTitle || 'Reading'})</div>
+          <div style="font-size:13px; color:#475569; margin-top:2px;">Điểm: <b>${parsed.rRaw}</b> — <b style="color:#059669;">Band ${parsed.rBand}</b></div>
+        </div>
+        <button class="btn btn-secondary" onclick="reviewMockSkillPart('${res.id}', 'reading')">🔍 Xem lại Reading</button>
+      </div>
+
+      <div class="mock-hub-skill-row">
+        <div>
+          <div style="font-weight:800; font-size:14.5px; color:#0f172a;">✍️ Kỹ năng 3: Writing (Task 1 & Task 2)</div>
+          <div style="font-size:13px; color:#475569; margin-top:2px;">
+            Trạng thái: ${writingGraded ? `<b style="color:#d97706;">Đã chấm — Band ${parsed.wBand}</b>` : `<span style="color:#dc2626; font-weight:700;">⏳ Chưa chấm điểm</span>`}
+          </div>
+        </div>
+        <button class="btn btn-emerald" onclick="reviewMockSkillPart('${res.id}', 'writing')">
+          ✍️ ${isTeacher ? 'Chấm điểm Writing' : 'Xem bài & Nhận xét Writing'}
+        </button>
+      </div>
+    `;
+
+    const footer = document.getElementById('mockHubModalFooter');
+    footer.innerHTML = `
+      <div>
+        ${writingGraded ? `
+          <button class="btn btn-emerald" style="background:#047857;" onclick="openCleanMockScorePrintModal('${res.id}')">
+            🖨️ In Phiếu Điểm Mock Test
+          </button>
+        ` : `<span style="font-size:12px; color:#64748b;">💡 Sau khi giáo viên chấm điểm Writing, nút In Phiếu Điểm sẽ xuất hiện tại đây.</span>`}
+      </div>
+      <button class="btn btn-secondary" onclick="closeModal('mockTestHubModal')">Đóng</button>
+    `;
+
+    openModal('mockTestHubModal');
+  };
+
+  window.reviewMockSkillPart = function(resId, skill) {
+    const res = (db.results || []).find(r => r.id === resId);
+    if (!res) return;
+    closeModal('mockTestHubModal');
+
+    const mData = res.mockData || {};
+    if (skill === 'listening') {
+      const lInfo = mData.listening || {};
+      const lExam = (db.listeningExams || []).find(e => e.id === lInfo.examId || e.title === lInfo.examTitle) || (db.listeningExams || [])[0];
+      if (!lExam) return alert('Không tìm thấy đề Listening gốc.');
+      launchListeningExam(lExam.id);
+      userAnswers = lInfo.userAnswersCopy || {};
+      enterReviewModeFromSummary();
+    } else if (skill === 'reading') {
+      const rInfo = mData.reading || {};
+      const rExam = (db.readingExams || []).find(e => e.id === rInfo.examId || e.title === rInfo.examTitle) || (db.readingExams || [])[0];
+      if (!rExam) return alert('Không tìm thấy đề Reading gốc.');
+      launchExam(rExam.id);
+      userAnswers = rInfo.userAnswersCopy || {};
+      enterReviewModeFromSummary();
+    } else if (skill === 'writing') {
+      if (activeUser && activeUser.role === 'teacher') {
+        openGradeWritingModal(res.id);
+      } else {
+        openStudentViewWritingModal(res.id);
+      }
+    }
+  };
+
+  saveWritingEvaluation = async function() {
+    const resId = document.getElementById('gradeSubmissionId').value;
+    const res = (db.results || []).find(r => r.id === resId);
+    if (!res) return;
+
+    const bandVal = document.getElementById('gradeBandInput').value.trim();
+    const fbVal = document.getElementById('gradeFeedbackInput').value.trim();
+
+    if (isConsolidatedMockResult(res)) {
+      const wNumeric = extractNumericBand(bandVal);
+      if (wNumeric === null) return alert('Vui lòng nhập điểm Band Writing hợp lệ (ví dụ: 6.5, 7.0)!');
+
+      if (!res.mockData) res.mockData = {};
+      if (!res.mockData.writing) res.mockData.writing = {};
+      res.mockData.writing.band = wNumeric.toFixed(1);
+      res.writingBand = wNumeric.toFixed(1);
+      res.teacherFeedback = fbVal;
+
+      const parsed = parseMockScoresFromRecord(res);
+      const lB = extractNumericBand(parsed.lBand);
+      const rB = extractNumericBand(parsed.rBand);
+      const validList = [lB, rB, wNumeric].filter(v => v !== null && !isNaN(v));
+      const newOverall = validList.length
+        ? roundIeltsBand(validList.reduce((a, b) => a + b, 0) / validList.length)
+        : wNumeric.toFixed(1);
+
+      res.band = `Band ${newOverall} (Overall)`;
+      const baseScore = String(res.score || '').replace(/\s*\|\s*✍️\s*W:.*$/i, '');
+      const w1 = res.writingSubmission?.task1?.trim() ? res.writingSubmission.task1.trim().split(/\s+/).length : 0;
+      const w2 = res.writingSubmission?.task2?.trim() ? res.writingSubmission.task2.trim().split(/\s+/).length : 0;
+      res.score = `${baseScore} | ✍️ W: T1: ${w1}w, T2: ${w2}w (${wNumeric.toFixed(1)})`;
+
+      const fs = (typeof getActiveFirestore === 'function') ? getActiveFirestore() : CLOUD_DB;
+      if (fs && res.id) {
+        try { await fs.collection('suite_results').doc(String(res.id)).set(JSON.parse(JSON.stringify(res))); } catch (e) {}
+      }
+      await persist();
+      closeModal('gradeWritingModal');
+      renderDashboard();
+      alert(`✅ Đã chấm Writing (Band ${wNumeric.toFixed(1)}) và tính điểm Overall Mock Test: Band ${newOverall}!\n\nBây giờ học sinh đã có thể bấm nút "🖨️ In Phiếu Điểm" cho bài Mock Test này.`);
+      return;
+    }
+
+    if (bandVal) res.band = bandVal.startsWith('Band') ? bandVal : `Band ${bandVal}`;
+    res.teacherFeedback = fbVal;
+    const fs = (typeof getActiveFirestore === 'function') ? getActiveFirestore() : CLOUD_DB;
+    if (fs && res.id) {
+      try { await fs.collection('suite_results').doc(String(res.id)).set(JSON.parse(JSON.stringify(res))); } catch (e) {}
+    }
+    await persist();
+    closeModal('gradeWritingModal');
+    renderDashboard();
+    alert('Đã lưu điểm và nhận xét bài Writing!');
+  };
+
+  window.openCleanMockScorePrintModal = function(resId) {
+    const res = (db.results || []).find(r => r.id === resId);
+    if (!res) return alert('Không tìm thấy kết quả Mock Test.');
+    if (!isMockWritingGraded(res)) {
+      return alert('Bài Mock Test này cần được giáo viên chấm điểm Writing trước khi in phiếu điểm!');
+    }
+
+    const parsed = parseMockScoresFromRecord(res);
+    document.getElementById('prtMockExamTitle').textContent = String(res.examTitle || 'IELTS MOCK TEST').replace('🎓', '').trim();
+    document.getElementById('prtMockDate').textContent = `Date: ${res.timestamp || res.isoDate || ''}`;
+    document.getElementById('prtMockStudentName').textContent = res.userName || '';
+
+    document.getElementById('prtMockLBand').textContent = parsed.lBand;
+    document.getElementById('prtMockLRaw').textContent = parsed.lRaw !== '—' ? `Score: ${parsed.lRaw}` : '';
+
+    document.getElementById('prtMockRBand').textContent = parsed.rBand;
+    document.getElementById('prtMockRRaw').textContent = parsed.rRaw !== '—' ? `Score: ${parsed.rRaw}` : '';
+
+    document.getElementById('prtMockWBand').textContent = parsed.wBand !== null ? parsed.wBand : '—';
+    document.getElementById('prtMockOverall').textContent = parsed.overall;
+
+    openModal('mockCleanScorePrintModal');
+  };
+
+  function upgradeMockTestRowsInTables() {
+    const allTbodies = [
+      document.getElementById('homeRecentActivityTbody'),
+      document.getElementById('analyticsTbody')
+    ].filter(Boolean);
+
+    allTbodies.forEach(tbody => {
+      tbody.querySelectorAll('tr').forEach(tr => {
+        const actionCell = tr.querySelector('td:last-child');
+        if (!actionCell) return;
+        const firstBtn = actionCell.querySelector('button[onclick]');
+        if (!firstBtn) return;
+
+        const onclickStr = firstBtn.getAttribute('onclick') || '';
+        const idMatch = onclickStr.match(/'([^']+)'/);
+        if (!idMatch) return;
+        const resId = idMatch[1];
+        const res = (db.results || []).find(r => r.id === resId);
+        if (!res || !isConsolidatedMockResult(res)) return;
+
+        const graded = isMockWritingGraded(res);
+        const isTeacher = activeUser && activeUser.role === 'teacher';
+
+        actionCell.innerHTML = `
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-emerald" style="padding:5px 11px; font-size:12px;" onclick="openMockTestHubModal('${res.id}')">
+              🎓 ${isTeacher && !graded ? 'Chấm Mock Test' : 'Chi tiết Mock Test'}
+            </button>
+            ${graded ? `
+              <button class="btn btn-secondary" style="padding:5px 11px; font-size:12px; color:#047857; border-color:#6ee7b7; background:#ecfdf5; font-weight:800;" onclick="openCleanMockScorePrintModal('${res.id}')">
+                🖨️ In Phiếu Điểm
+              </button>
+            ` : ''}
+          </div>
+        `;
+      });
+    });
+  }
+
+  /* ==========================================================================
+     6. KẾT NỐI ĐỒNG BỘ VÀO DASHBOARD
+     ========================================================================== */
+  const _finalOrigRenderHome = renderHomeTab;
+  renderHomeTab = function() {
+    autoMergeStandaloneMockTriplets();
+    _finalOrigRenderHome();
+    renderTeacherOnlineMonitor();
+    renderStreakAndLeaderboardSection();
+    upgradeMockTestRowsInTables();
+  };
+
+  const _finalOrigRenderAnalytics = renderAnalyticsTable;
+  renderAnalyticsTable = function() {
+    autoMergeStandaloneMockTriplets();
+    _finalOrigRenderAnalytics();
+    upgradeMockTestRowsInTables();
+  };
+
+  window.addEventListener('load', () => {
+    setTimeout(async () => {
+      await autoMergeStandaloneMockTriplets();
+      if (activeUser) renderDashboard();
+    }, 1000);
+  });
+</script>
+<!-- ============================================================================
+     TINH CHỈNH TRANG HOME (3 TRONG 1):
+     1. Ẩn khối 5 ô thống kê (Reading/Listening/Writing/Vocab/Submissions) đối với Học sinh
+     2. Bỏ dòng "Thành viên đang Online" thứ 2 bị trùng & khối Streak/BXH to bị lặp
+     3. Lọc bỏ tài khoản Giáo viên (Amuro) khỏi danh sách Online của học sinh
+     ============================================================================ -->
+<style>
+  /* Ẩn vĩnh viễn dòng Online thứ 2 và khối BXH to bị trùng với thanh mini trên cùng */
+  #teacherOnlineMonitorBar,
+  #gamificationStreakLeaderboardBox {
+    display: none !important;
+  }
+</style>
+
+<script>
+  function applyCleanHomeDisplayRules() {
+    if (!activeUser) return;
+    const isTeacher = (activeUser.role === 'teacher');
+
+    // 1. Chỉ hiện khối 5 ô thống kê (.stat-grid) cho Giáo viên, ẩn hoàn toàn đối với Học sinh
+    const statGrid = document.querySelector('#tab-home .stat-grid');
+    if (statGrid) {
+      statGrid.style.display = isTeacher ? 'grid' : 'none';
+    }
+
+    // 2. Xóa bỏ dòng Online thứ 2 và khối BXH to nếu đã từng được tạo ra
+    const dupOnlineBar = document.getElementById('teacherOnlineMonitorBar');
+    if (dupOnlineBar) dupOnlineBar.style.display = 'none';
+    const dupGamification = document.getElementById('gamificationStreakLeaderboardBox');
+    if (dupGamification) dupGamification.style.display = 'none';
+
+    // 3. Lọc bỏ tài khoản Giáo viên (Amuro) ra khỏi dữ liệu Online Presence & thanh Phòng Tự Học
+    if (typeof onlinePresenceMap === 'object' && onlinePresenceMap) {
+      Object.keys(onlinePresenceMap).forEach(k => {
+        const p = onlinePresenceMap[k];
+        if (!p) return;
+        const lowName = String(p.name || '').toLowerCase();
+        const lowUser = String(p.username || k || '').toLowerCase();
+        if (p.role === 'teacher' || lowName.includes('amuro') || lowUser === 'amuro') {
+          delete onlinePresenceMap[k];
+        }
+      });
+    }
+
+    // Ẩn mọi thẻ pill trên thanh Phòng Tự Học Trực Tuyến nếu có chứa tên Amuro / Teacher
+    document.querySelectorAll('#tab-home span, #tab-home div').forEach(el => {
+      if (el.children.length === 0 && /amuro/i.test(el.textContent || '')) {
+        const pill = el.closest('[class*="pill"], [style*="border-radius: 999px"], [style*="border-radius:999px"]');
+        if (pill) pill.style.display = 'none';
+      }
+    });
+  }
+
+  // Không phát tín hiệu Online lên danh sách học sinh nếu người đang đăng nhập là Giáo viên (Amuro)
+  if (typeof sendStudentHeartbeat === 'function') {
+    const _origSendHeartbeat = sendStudentHeartbeat;
+    sendStudentHeartbeat = async function() {
+      if (!activeUser) return;
+      if (activeUser.role === 'teacher' || String(activeUser.username || '').toLowerCase() === 'amuro') {
+        const fs = (typeof getActiveFirestore === 'function') ? getActiveFirestore() : CLOUD_DB;
+        if (fs) {
+          try { await fs.collection('suite_presence').doc(String(activeUser.username)).delete(); } catch (e) {}
+        }
+        return;
+      }
+      return _origSendHeartbeat();
+    };
+  }
+
+  // Tự động áp dụng mỗi khi vẽ lại trang Home hoặc Dashboard
+  const _cleanHomeOrigRenderHome = renderHomeTab;
+  renderHomeTab = function() {
+    _cleanHomeOrigRenderHome();
+    applyCleanHomeDisplayRules();
+  };
+
+  const _cleanHomeOrigCheckSession = checkSession;
+  checkSession = function() {
+    _cleanHomeOrigCheckSession();
+    applyCleanHomeDisplayRules();
+  };
+
+  window.addEventListener('load', () => {
+    applyCleanHomeDisplayRules();
+    setTimeout(applyCleanHomeDisplayRules, 600);
+  });
+</script>
+<!-- ============================================================================
+     MODULE KHÔI PHỤC ĐỘC LẬP (DÁN NGAY TRƯỚC THẺ </body> Ở CUỐI FILE DÒNG 22248):
+     1. 🟢 Hiển thị thanh Học sinh đang Online theo thời gian thực ở đầu trang Home
+     2. 🔥 Khôi phục nút Chuỗi Kỷ Luật (Streak) trên Header & Bảng Vinh Danh
+     3. 📓 Khôi phục tab Sổ Lỗi Sai & nút Lưu câu sai trong chế độ Review
+     ============================================================================ -->
+<style>
+  .header-streak-pill {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px solid #f59e0b; color: #b45309; padding: 6px 14px;
+    border-radius: 999px; font-size: 12.5px; font-weight: 800; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; transition: 0.15s;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+  }
+  .header-streak-pill:hover { background: #fde68a; transform: translateY(-1px); }
+
+  .btn-save-mistake-inline {
+    background: #fffbeb; border: 1px solid #f59e0b; color: #b45309;
+    padding: 3px 9px; border-radius: 4px; font-size: 11px; font-weight: 700;
+    cursor: pointer; margin-top: 6px; margin-left: 6px;
+    display: inline-flex; align-items: center; gap: 4px; transition: 0.15s;
+  }
+  .btn-save-mistake-inline:hover { background: #f59e0b; color: #ffffff; }
+  .btn-save-mistake-inline.saved { background: #dcfce7; border-color: #16a34a; color: #15803d; }
+
+  .mistake-card {
+    background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #ef4444;
+    border-radius: 12px; padding: 16px 18px; margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+  }
+  .mistake-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+  .mistake-tag-skill { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; }
+  .mistake-note-input {
+    width: 100%; margin-top: 8px; padding: 8px 12px; border: 1px dashed #cbd5e1;
+    border-radius: 8px; background: #f8fafc; font-size: 12.5px; color: #334155; outline: none;
+  }
+  .mistake-note-input:focus { border-color: #059669; background: #ffffff; }
+
+  .streak-leaderboard-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-radius: 10px; background: #f8fafc;
+    border: 1px solid #e2e8f0; margin-bottom: 8px;
+  }
+</style>
+
+<!-- MODAL CHUỖI KỶ LUẬT (STREAK) & BIỂU ĐỒ XU HƯỚNG -->
+<div class="modal-overlay" id="streakAndTrendModal" style="z-index: 97000;">
+  <div class="modal-window" style="width: 820px; max-height: 90vh;">
+    <div class="modal-header" style="background:#064e3b; color:#ffffff;">
+      <span>🔥 Chuỗi Kỷ Luật Học Tập (Study Streak) & Biểu Đồ Xu Hướng Điểm Số</span>
+      <button class="btn btn-secondary" onclick="closeModal('streakAndTrendModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" id="streakAndTrendModalBody" style="padding: 22px; overflow-y: auto;"></div>
+  </div>
+</div>
+
+<script>
+  /* 1. KÍCH HOẠT LẠI THANH HỌC SINH ĐANG ONLINE Ở ĐẦU TAB HOME */
+  let _v14PresenceMap = {};
+
+  function _v14GetActivityLabel() {
+    const shell = document.getElementById('examShell');
+    if (shell && shell.style.display !== 'none' && activeExam) {
+      const icon = activeExamType === 'reading' ? '📖' : (activeExamType === 'listening' ? '🎧' : '✍️');
+      return `Đang làm ${icon} ${activeExam.title}`;
+    }
+    return 'Đang ở Dashboard';
+  }
+
+  async function _v14SendHeartbeat() {
+    if (!activeUser) return;
+    const fs = typeof getActiveFirestore === 'function' ? getActiveFirestore() : CLOUD_DB;
+    if (!fs) return;
+    try {
+      const cls = (db.classes || []).find(c => c.id === activeUser.classId);
+      await fs.collection('suite_presence').doc(String(activeUser.username)).set({
+        username: activeUser.username,
+        name: activeUser.name,
+        role: activeUser.role,
+        isPro: Boolean(typeof isStudentPro === 'function' && isStudentPro(activeUser)),
+        className: cls ? cls.name : '',
+        activity: _v14GetActivityLabel(),
+        lastSeen: Date.now()
+      });
+    } catch (e) {}
+  }
+
+  function _v14RenderOnlineMonitor() {
+    const existingBar = document.getElementById('teacherOnlineMonitorBar');
+    if (!activeUser || activeUser.role !== 'teacher') {
+      if (existingBar) existingBar.style.display = 'none';
+      return;
+    }
+    const homeTab = document.getElementById('tab-home');
+    if (!homeTab) return;
+
+    let bar = existingBar;
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'teacherOnlineMonitorBar';
+      bar.className = 'online-monitor-bar';
+      homeTab.insertBefore(bar, homeTab.firstChild);
+    }
+    bar.style.display = 'flex';
+
+    const now = Date.now();
+    const activeStudents = Object.values(_v14PresenceMap).filter(p =>
+      p && p.role === 'student' && (now - (p.lastSeen || 0)) < 180000
+    );
+
+    if (!activeStudents.length) {
+      bar.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; width:100%; justify-content:space-between; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="online-pulse-dot" style="background:#94a3b8; box-shadow:none;"></span>
+            <span style="font-weight:800; font-size:13.5px; color:#475569;">🟢 Học sinh đang Online (0):</span>
+            <span style="font-size:13px; color:#94a3b8;">Hiện chưa có học sinh nào đang mở trang web.</span>
+          </div>
+          <button class="btn btn-secondary" style="padding:4px 10px; font-size:11.5px;" onclick="openStreakAndTrendModal()">🔥 Xem BXH Streak Lớp</button>
+        </div>
+      `;
+      return;
+    }
+
+    bar.innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:space-between; width:100%; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <span style="font-weight:800; font-size:13.5px; color:#065f46; margin-right:4px;">
+            🟢 Học sinh đang Online (${activeStudents.length}):
+          </span>
+          ${activeStudents.map(st => `
+            <div class="online-user-pill" title="${st.className || 'Unassigned'}">
+              <span class="online-pulse-dot"></span>
+              <span>${st.name}${st.isPro ? ' 👑' : ''}</span>
+              <span style="font-weight:500; color:#047857; font-size:11.5px;">• ${st.activity || 'Online'}</span>
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn btn-secondary" style="padding:4px 10px; font-size:11.5px;" onclick="openStreakAndTrendModal()">🔥 BXH Streak</button>
+      </div>
+    `;
+  }
+
+  let _v14PresenceStarted = false;
+  function _v14InitPresence() {
+    if (_v14PresenceStarted) return;
+    const fs = typeof getActiveFirestore === 'function' ? getActiveFirestore() : CLOUD_DB;
+    if (!fs) return;
+    _v14PresenceStarted = true;
+    _v14SendHeartbeat();
+    setInterval(_v14SendHeartbeat, 35000);
+    fs.collection('suite_presence').onSnapshot(snap => {
+      _v14PresenceMap = {};
+      snap.forEach(doc => { _v14PresenceMap[doc.id] = doc.data(); });
+      _v14RenderOnlineMonitor();
+    });
+    setInterval(_v14RenderOnlineMonitor, 15000);
+  }
+
+  /* 2. CHUỖI KỶ LUẬT (STUDY STREAK 🔥) & BIỂU ĐỒ XU HƯỚNG */
+  function _v14ExtractIsoDate(resItem) {
+    if (!resItem) return null;
+    if (resItem.isoDate && /^\d{4}-\d{2}-\d{2}$/.test(resItem.isoDate)) return resItem.isoDate;
+    const idMatch = String(resItem.id || '').match(/(\d{13})/);
+    if (idMatch) {
+      const dt = new Date(Number(idMatch[1]));
+      if (!isNaN(dt.getTime())) {
+        return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+      }
+    }
+    const parsed = new Date(resItem.timestamp);
+    if (!isNaN(parsed.getTime())) {
+      return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
+    }
+    return null;
+  }
+
+  function calculateUserStreak(userName) {
+    if (!userName) return { currentStreak: 0, totalDays: 0, activeToday: false };
+    const uLow = String(userName).toLowerCase().trim();
+    const dateSet = new Set();
+    (db.results || []).forEach(r => {
+      if (String(r.userName || '').toLowerCase().trim() === uLow) {
+        const dStr = _v14ExtractIsoDate(r);
+        if (dStr) dateSet.add(dStr);
+      }
+    });
+    if (dateSet.size === 0) return { currentStreak: 0, totalDays: 0, activeToday: false };
+
+    const today = new Date();
+    const toIso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const todayStr = toIso(today);
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const yesterdayStr = toIso(yesterday);
+
+    const activeToday = dateSet.has(todayStr);
+    if (!activeToday && !dateSet.has(yesterdayStr)) {
+      return { currentStreak: 0, totalDays: dateSet.size, activeToday: false };
+    }
+    let streak = 0;
+    let cursor = new Date(activeToday ? today : yesterday);
+    while (true) {
+      if (dateSet.has(toIso(cursor))) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      } else break;
+    }
+    return { currentStreak: streak, totalDays: dateSet.size, activeToday };
+  }
+
+  function injectHeaderStreakBadge() {
+    if (!activeUser) return;
+    const controls = document.querySelector('.dash-user-controls');
+    const profileLabel = document.getElementById('userProfileLabel');
+    if (!controls || !profileLabel) return;
+
+    let badge = document.getElementById('headerStreakBadgeBtn');
+    if (!badge) {
+      badge = document.createElement('button');
+      badge.id = 'headerStreakBadgeBtn';
+      badge.type = 'button';
+      badge.className = 'header-streak-pill';
+      badge.onclick = () => openStreakAndTrendModal();
+      controls.insertBefore(badge, profileLabel);
+    }
+    const st = calculateUserStreak(activeUser.name);
+    badge.innerHTML = activeUser.role === 'teacher'
+      ? `🔥 Streak & Xu Hướng Lớp`
+      : `🔥 ${st.currentStreak} ngày liên tục`;
+  }
+
+  window.openStreakAndTrendModal = function() {
+    if (!activeUser) return;
+    const body = document.getElementById('streakAndTrendModalBody');
+    if (!body) return;
+
+    const students = (db.users || []).filter(u => u.role === 'student');
+    const leaderboard = students.map(u => {
+      const st = calculateUserStreak(u.name);
+      const subCount = (db.results || []).filter(r => String(r.userName || '').toLowerCase() === String(u.name || '').toLowerCase()).length;
+      return { name: u.name, isPro: u.isPro, streak: st.currentStreak, totalDays: st.totalDays, subCount };
+    }).sort((a, b) => (b.streak - a.streak) || (b.subCount - a.subCount));
+
+    let targetResults = (db.results || []).slice();
+    if (activeUser.role === 'student') {
+      targetResults = targetResults.filter(r => String(r.userName || '').toLowerCase() === String(activeUser.name || '').toLowerCase());
+    }
+    const bandPoints = [];
+    targetResults.forEach(r => {
+      const num = parseFloat(String(r.band || '').replace(/[^0-9.]/g, ''));
+      if (!isNaN(num) && num >= 1 && num <= 9) {
+        bandPoints.push({ title: r.examTitle || 'Test', band: num, date: _v14ExtractIsoDate(r) || '' });
+      }
+    });
+    const recentPoints = bandPoints.slice(-10);
+
+    let svgChartHtml = '';
+    if (recentPoints.length < 2) {
+      svgChartHtml = `<div style="text-align:center; padding:30px; color:#94a3b8; font-weight:600; background:#f8fafc; border-radius:12px; border:1px dashed #cbd5e1;">Cần tối thiểu 2 bài thi có điểm Band để vẽ biểu đồ xu hướng tiến bộ.</div>`;
+    } else {
+      const w = 700, h = 210, padL = 42, padR = 28, padT = 24, padB = 34;
+      const plotW = w - padL - padR, plotH = h - padT - padB;
+      const coords = recentPoints.map((pt, idx) => ({
+        ...pt,
+        x: padL + (idx / (recentPoints.length - 1)) * plotW,
+        y: padT + plotH - ((pt.band - 3.0) / 6.0) * plotH
+      }));
+      const polyPoints = coords.map(c => `${c.x},${c.y}`).join(' ');
+      svgChartHtml = `
+        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:14px; overflow-x:auto;">
+          <svg viewBox="0 0 ${w} ${h}" style="width:100%; height:auto; min-width:520px;">
+            ${[4.0, 5.5, 7.0, 8.5].map(bVal => {
+              const y = padT + plotH - ((bVal - 3.0) / 6.0) * plotH;
+              return `<line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="#f1f5f9" stroke-width="1.5" /><text x="${padL - 8}" y="${y + 4}" text-anchor="end" font-size="11" font-weight="700" fill="#64748b">${bVal.toFixed(1)}</text>`;
+            }).join('')}
+            <polyline fill="none" stroke="#059669" stroke-width="3" points="${polyPoints}" />
+            ${coords.map(c => `<circle cx="${c.x}" cy="${c.y}" r="5.5" fill="#ffffff" stroke="#059669" stroke-width="3"><title>${c.title}: Band ${c.band}</title></circle><text x="${c.x}" y="${c.y - 10}" text-anchor="middle" font-size="11" font-weight="800" fill="#065f46">${c.band}</text><text x="${c.x}" y="${h - 10}" text-anchor="middle" font-size="10" fill="#64748b">${c.date ? c.date.slice(5) : ''}</text>`).join('')}
+          </svg>
+        </div>
+      `;
+    }
+
+    const myStreak = calculateUserStreak(activeUser.name);
+    body.innerHTML = `
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap:14px; margin-bottom:20px;">
+        <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7); border:1px solid #fcd34d; border-radius:14px; padding:16px;">
+          <div style="font-size:12px; font-weight:800; color:#b45309; text-transform:uppercase;">🔥 Chuỗi Streak Hiện Tại</div>
+          <div style="font-size:28px; font-weight:800; color:#92400e; margin-top:4px;">${myStreak.currentStreak} Ngày</div>
+          <div style="font-size:12px; color:#b45309; margin-top:4px;">${myStreak.activeToday ? '✅ Hôm nay đã hoàn thành bài!' : '⏳ Hãy làm 1 bài hôm nay để giữ lửa!'}</div>
+        </div>
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:14px; padding:16px;">
+          <div style="font-size:12px; font-weight:800; color:#047857; text-transform:uppercase;">📅 Tổng Số Ngày Tích Lũy</div>
+          <div style="font-size:28px; font-weight:800; color:#065f46; margin-top:4px;">${myStreak.totalDays} Ngày</div>
+          <div style="font-size:12px; color:#047857; margin-top:4px;">Duy trì đều đặn mỗi ngày</div>
+        </div>
+      </div>
+      <div style="font-size:15px; font-weight:800; color:#0f172a; margin-bottom:10px;">📈 Biểu Đồ Xu Hướng Điểm Số (${recentPoints.length} bài gần nhất)</div>
+      ${svgChartHtml}
+      <div style="font-size:15px; font-weight:800; color:#0f172a; margin:22px 0 10px;">🏆 Bảng Vinh Danh Chuỗi Kỷ Luật Lớp (Top Study Streak)</div>
+      <div>
+        ${!leaderboard.length ? `<p style="color:#94a3b8;">Chưa có dữ liệu học sinh.</p>` : leaderboard.slice(0, 10).map((item, idx) => {
+          const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
+          return `<div class="streak-leaderboard-row"><div style="display:flex; align-items:center; gap:10px;"><span style="font-weight:800; font-size:15px; width:28px;">${medal}</span><div><div style="font-weight:800; color:#0f172a; font-size:13.5px;">${item.name} ${item.isPro ? '👑' : ''}</div><div style="font-size:11.5px; color:#64748b;">Đã nộp ${item.subCount} bài • Tích lũy ${item.totalDays} ngày học</div></div></div><span style="background:#fef3c7; color:#b45309; border:1px solid #fde68a; padding:4px 12px; border-radius:999px; font-weight:800; font-size:12.5px;">🔥 ${item.streak} ngày</span></div>`;
+        }).join('')}
+      </div>
+    `;
+    openModal('streakAndTrendModal');
+  };
+
+  /* 3. KHÔI PHỤC SỔ TAY LỖI SAI (MISTAKE NOTEBOOK TAB & NÚT LƯU TRONG REVIEW) */
+  function ensureMistakeVaultInitialized() {
+    if (!db.mistakeNotebook) db.mistakeNotebook = {};
+    if (activeUser && !db.mistakeNotebook[activeUser.username]) {
+      try {
+        const cached = localStorage.getItem(`AMURO_MISTAKE_VAULT_${activeUser.username}`);
+        db.mistakeNotebook[activeUser.username] = cached ? JSON.parse(cached) : [];
+      } catch (e) {
+        db.mistakeNotebook[activeUser.username] = [];
+      }
+    }
+  }
+
+  function saveUserMistakesToStorage() {
+    if (!activeUser) return;
+    ensureMistakeVaultInitialized();
+    const list = db.mistakeNotebook[activeUser.username] || [];
+    try { localStorage.setItem(`AMURO_MISTAKE_VAULT_${activeUser.username}`, JSON.stringify(list)); } catch (e) {}
+    const fs = typeof getActiveFirestore === 'function' ? getActiveFirestore() : CLOUD_DB;
+    if (fs) {
+      try { fs.collection('suite_meta').doc('core').set({ mistakeNotebook: db.mistakeNotebook }, { merge: true }); } catch (e) {}
+    }
+  }
+
+  function injectMistakeNotebookTab() {
+    const tabsBar = document.querySelector('.dash-tabs');
+    const vocabTabBtn = document.getElementById('tabbtn-myvocab');
+    if (tabsBar && vocabTabBtn && !document.getElementById('tabbtn-mistakes')) {
+      const btn = document.createElement('button');
+      btn.className = 'dash-tab-btn';
+      btn.id = 'tabbtn-mistakes';
+      btn.innerHTML = '📓 Sổ Lỗi Sai (<span id="mistakeVaultTabCount">0</span>)';
+      btn.onclick = () => switchDashTab('mistakes');
+      vocabTabBtn.insertAdjacentElement('afterend', btn);
+    }
+    const dashBody = document.querySelector('.dash-body');
+    if (dashBody && !document.getElementById('tab-mistakes')) {
+      const pane = document.createElement('div');
+      pane.id = 'tab-mistakes';
+      pane.className = 'dash-pane';
+      pane.style.display = 'none';
+      dashBody.appendChild(pane);
+    }
+    if (activeUser) {
+      ensureMistakeVaultInitialized();
+      const cntEl = document.getElementById('mistakeVaultTabCount');
+      if (cntEl) cntEl.textContent = (db.mistakeNotebook[activeUser.username] || []).length;
+    }
+  }
+
+  window.saveQuestionToMistakeVault = function(qKey, btnEl) {
+    if (!activeUser || !activeExam) return;
+    ensureMistakeVaultInitialized();
+    const list = db.mistakeNotebook[activeUser.username];
+    const scope = document.getElementById('insperaSplitBox') || document.body;
+    const itemId = `${activeExam.id}_${qKey}`;
+    if (list.some(x => x.id === itemId)) return alert('Câu hỏi này đã có trong Sổ Lỗi Sai!');
+
+    const qNum = qKey.replace(/\D/g, '');
+    const qBox = scope.querySelector(`[data-question="${qNum}"]`) || scope.querySelector(`[name="${qKey}"]`)?.closest('.question, tr, li, p, div');
+    let stemText = `Câu hỏi ${qNum}`;
+    if (qBox) {
+      const clone = qBox.cloneNode(true);
+      clone.querySelectorAll('.answer-indicator, .teacher-edit-badge, button').forEach(el => el.remove());
+      stemText = String(clone.textContent || '').replace(/\s+/g, ' ').trim().substring(0, 260);
+    }
+
+    list.unshift({
+      id: itemId,
+      examId: activeExam.id,
+      examTitle: activeExam.title,
+      skill: activeExamType || 'reading',
+      qKey,
+      qNum,
+      stem: stemText,
+      userAnswer: userAnswers[qKey] || '(Bỏ trống)',
+      correctKey: (activeExam.correctAnswers && activeExam.correctAnswers[qKey]) || '',
+      explanation: (activeExam.explanations && activeExam.explanations[qKey]) || '',
+      evidence: (activeExam.evidences && activeExam.evidences[qKey]) || '',
+      note: '',
+      savedAt: new Date().toLocaleString()
+    });
+
+    saveUserMistakesToStorage();
+    injectMistakeNotebookTab();
+    if (btnEl) {
+      btnEl.classList.add('saved');
+      btnEl.innerHTML = '✓ Đã lưu vào Sổ lỗi';
+    }
+  };
+
+  let _v14MistakeFilter = 'ALL';
+  window.renderMistakeNotebookTab = function() {
+    ensureMistakeVaultInitialized();
+    injectMistakeNotebookTab();
+    const pane = document.getElementById('tab-mistakes');
+    if (!pane || !activeUser) return;
+    const allMistakes = db.mistakeNotebook[activeUser.username] || [];
+    const filtered = allMistakes.filter(m => _v14MistakeFilter === 'ALL' || m.skill === _v14MistakeFilter);
+
+    pane.innerHTML = `
+      <div class="card">
+        <div class="card-title">
+          <span>📓 Sổ Tay Lỗi Sai Cá Nhân (${allMistakes.length} câu cần ôn)</span>
+          <div style="display:flex; gap:8px;">
+            <button class="btn ${_v14MistakeFilter === 'ALL' ? 'btn-emerald' : 'btn-secondary'}" onclick="_v14MistakeFilter='ALL'; renderMistakeNotebookTab();">Tất cả (${allMistakes.length})</button>
+            <button class="btn ${_v14MistakeFilter === 'reading' ? 'btn-emerald' : 'btn-secondary'}" onclick="_v14MistakeFilter='reading'; renderMistakeNotebookTab();">📖 Reading</button>
+            <button class="btn ${_v14MistakeFilter === 'listening' ? 'btn-emerald' : 'btn-secondary'}" onclick="_v14MistakeFilter='listening'; renderMistakeNotebookTab();">🎧 Listening</button>
+          </div>
+        </div>
+        ${!filtered.length ? `<div style="text-align:center; padding:40px; color:#94a3b8;">Sổ lỗi sai đang trống. Khi xem đáp án (Review Keys), hãy bấm <b>"📌 Lưu vào Sổ lỗi"</b> ở câu sai để lưu về đây nhé!</div>` : filtered.map(item => `
+          <div class="mistake-card">
+            <div class="mistake-card-header">
+              <div>
+                <span class="mistake-tag-skill" style="background:${item.skill === 'listening' ? '#eff6ff' : '#ecfdf5'}; color:${item.skill === 'listening' ? '#2563eb' : '#059669'};">${item.skill === 'listening' ? '🎧 Listening' : '📖 Reading'}</span>
+                <b style="font-size:14.5px; margin-left:6px;">${item.examTitle} — Câu ${item.qNum}</b>
+              </div>
+              <button class="btn btn-danger" style="padding:4px 10px; font-size:11.5px;" onclick="removeMistakeItem('${item.id}')">Xóa</button>
+            </div>
+            <div style="font-size:13.5px; background:#f8fafc; padding:10px 12px; border-radius:8px; margin-bottom:10px;"><b>Câu hỏi:</b> ${item.stem}</div>
+            <div style="display:flex; gap:16px; font-size:13px; margin-bottom:8px;">
+              <span>❌ <b>Bạn chọn:</b> <b style="color:#dc2626;">${item.userAnswer}</b></span>
+              <span>✅ <b>Đáp án đúng:</b> <b style="color:#16a34a;">${item.correctKey}</b></span>
+            </div>
+            ${item.explanation ? `<div style="font-size:12.5px; margin-bottom:6px;">💡 <b>Giải thích:</b> ${item.explanation}</div>` : ''}
+            ${item.evidence ? `<div style="font-size:12.5px; color:#065f46; background:#f0fdf4; padding:6px 10px; border-radius:6px; margin-bottom:6px;">🔍 <b>Dẫn chứng:</b> "${item.evidence}"</div>` : ''}
+            <input type="text" class="mistake-note-input" placeholder="✍️ Ghi chú nguyên nhân sai..." value="${(item.note || '').replace(/"/g, '&quot;')}" onchange="updateMistakePersonalNote('${item.id}', this.value)">
+          </div>
+        `).join('')}
+      </div>
+    `;
+  };
+
+  window.updateMistakePersonalNote = function(itemId, noteText) {
+    if (!activeUser) return;
+    ensureMistakeVaultInitialized();
+    const target = (db.mistakeNotebook[activeUser.username] || []).find(x => x.id === itemId);
+    if (target) { target.note = noteText.trim(); saveUserMistakesToStorage(); }
+  };
+
+  window.removeMistakeItem = function(itemId) {
+    if (!activeUser) return;
+    ensureMistakeVaultInitialized();
+    db.mistakeNotebook[activeUser.username] = (db.mistakeNotebook[activeUser.username] || []).filter(x => x.id !== itemId);
+    saveUserMistakesToStorage();
+    renderMistakeNotebookTab();
+  };
+
+  // Tự động gắn nút "📌 Lưu vào Sổ lỗi" trong chế độ Review & duy trì hiển thị Streak + Online Monitor
+  setInterval(() => {
+    if (!activeUser) return;
+    injectMistakeNotebookTab();
+    injectHeaderStreakBadge();
+    _v14InitPresence();
+    _v14RenderOnlineMonitor();
+
+    if (isReviewMode && activeExam && activeExamType !== 'writing') {
+      ensureMistakeVaultInitialized();
+      const savedList = db.mistakeNotebook[activeUser.username] || [];
+      document.querySelectorAll('#insperaSplitBox .answer-indicator[data-ind]').forEach(indBox => {
+        const k = indBox.getAttribute('data-ind');
+        if (k && !indBox.querySelector(`.btn-save-mistake-inline[data-mkey="${k}"]`)) {
+          const alreadySaved = savedList.some(x => x.id === `${activeExam.id}_${k}`);
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn-save-mistake-inline' + (alreadySaved ? ' saved' : '');
+          btn.setAttribute('data-mkey', k);
+          btn.innerHTML = alreadySaved ? '✓ Đã lưu vào Sổ lỗi' : '📌 Lưu vào Sổ lỗi';
+          btn.onclick = function() { saveQuestionToMistakeVault(k, this); };
+          indBox.appendChild(btn);
+        }
+      });
+    }
+  }, 600);
+
+  const _v14OrigSwitchTab = switchDashTab;
+  switchDashTab = function(tab) {
+    injectMistakeNotebookTab();
+    _v14OrigSwitchTab(tab);
+    if (tab === 'mistakes') renderMistakeNotebookTab();
+  };
+</script>
+<!-- ============================================================================
+     HOTFIX V15: HIỂN THỊ THANH HỌC SINH ĐANG ONLINE BẤT TỬ (#liveStudentOnlineBannerV15)
+     - Dùng ID mới hoàn toàn để vượt qua mọi lệnh display:none !important cũ
+     - Hiện ngay đầu tab Home (phía trên khung Welcome back) cho mọi tài khoản
+     - Chỉ hiện duy nhất các tài khoản Học sinh, lọc bỏ 100% tài khoản Giáo viên (Amuro)
+     Dán đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  #teacherOnlineMonitorBar {
+    display: none !important;
+  }
+  #liveStudentOnlineBannerV15 {
+    background: #ffffff !important;
+    border: 1.5px solid #86efac !important;
+    border-radius: 14px !important;
+    padding: 12px 18px !important;
+    margin-bottom: 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.07) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+</style>
+
+<script>
+  (function() {
+    let _v15OnlineMap = {};
+    let _v15ListenerBound = false;
+
+    function _v15IsTeacher(u) {
+      if (!u) return true;
+      const r = String(u.role || '').toLowerCase().trim();
+      const un = String(u.username || '').toLowerCase().trim();
+      const nm = String(u.name || '').toLowerCase().trim();
+      if (r === 'teacher' || r === 'admin') return true;
+      if (un === 'amuro' || nm.includes('teacher amuro') || nm.includes('wibu')) return true;
+      return false;
+    }
+
+    function _v15GetCurrentActivity() {
+      const shell = document.getElementById('examShell');
+      if (shell && shell.style.display !== 'none' && typeof activeExam !== 'undefined' && activeExam) {
+        const icon = activeExamType === 'reading' ? '📖' : (activeExamType === 'listening' ? '🎧' : '✍️');
+        return `Đang làm ${icon} ${activeExam.title}`;
+      }
+      return 'Đang ở Dashboard';
+    }
+
+    async function _v15PushHeartbeat() {
+      if (typeof activeUser === 'undefined' || !activeUser) return;
+      const fs = (typeof getActiveFirestore === 'function' ? getActiveFirestore() : null)
+        || (typeof CLOUD_DB !== 'undefined' ? CLOUD_DB : null)
+        || (typeof firebase !== 'undefined' && firebase.firestore ? firebase.firestore() : null);
+
+      // Nếu là tài khoản của anh (Giáo viên) -> Xóa khỏi danh sách Online và không gửi heartbeat
+      if (_v15IsTeacher(activeUser)) {
+        delete _v15OnlineMap[activeUser.username];
+        if (fs) {
+          try { await fs.collection('suite_presence').doc(String(activeUser.username)).delete(); } catch (e) {}
+        }
+        _v15RenderBanner();
+        return;
+      }
+
+      const cls = (typeof db !== 'undefined' && db.classes || []).find(c => c.id === activeUser.classId);
+      const record = {
+        username: activeUser.username,
+        name: activeUser.name,
+        role: 'student',
+        isPro: Boolean(typeof isStudentPro === 'function' && isStudentPro(activeUser)),
+        className: cls ? cls.name : '',
+        activity: _v15GetCurrentActivity(),
+        lastSeen: Date.now()
+      };
+
+      _v15OnlineMap[activeUser.username] = record;
+      _v15RenderBanner();
+
+      if (fs) {
+        try {
+          await fs.collection('suite_presence').doc(String(activeUser.username)).set(record);
+        } catch (e) {}
+      }
+    }
+
+    function _v15StartFirestoreListener() {
+      if (_v15ListenerBound) return;
+      const fs = (typeof getActiveFirestore === 'function' ? getActiveFirestore() : null)
+        || (typeof CLOUD_DB !== 'undefined' ? CLOUD_DB : null)
+        || (typeof firebase !== 'undefined' && firebase.firestore ? firebase.firestore() : null);
+      if (!fs) return;
+      _v15ListenerBound = true;
+
+      fs.collection('suite_presence').onSnapshot(snap => {
+        snap.forEach(doc => {
+          const data = doc.data();
+          if (data && data.username) {
+            _v15OnlineMap[data.username] = data;
+          }
+        });
+        _v15RenderBanner();
+      });
+    }
+
+    function _v15RenderBanner() {
+      if (typeof activeUser === 'undefined' || !activeUser) return;
+      const homeTab = document.getElementById('tab-home');
+      if (!homeTab) return;
+
+      let banner = document.getElementById('liveStudentOnlineBannerV15');
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'liveStudentOnlineBannerV15';
+        const heroBanner = homeTab.querySelector('.home-hero-banner');
+        if (heroBanner) {
+          homeTab.insertBefore(banner, heroBanner);
+        } else {
+          homeTab.insertBefore(banner, homeTab.firstChild);
+        }
+      }
+
+      // Nếu tài khoản đang đăng nhập là Học sinh (như demo), luôn đảm bảo có mặt ngay lập tức
+      if (!_v15IsTeacher(activeUser) && !_v15OnlineMap[activeUser.username]) {
+        const cls = (typeof db !== 'undefined' && db.classes || []).find(c => c.id === activeUser.classId);
+        _v15OnlineMap[activeUser.username] = {
+          username: activeUser.username,
+          name: activeUser.name,
+          role: 'student',
+          isPro: Boolean(typeof isStudentPro === 'function' && isStudentPro(activeUser)),
+          className: cls ? cls.name : '',
+          activity: _v15GetCurrentActivity(),
+          lastSeen: Date.now()
+        };
+      }
+
+      const now = Date.now();
+      const onlineStudents = Object.values(_v15OnlineMap).filter(st =>
+        st && !_v15IsTeacher(st) && (now - (st.lastSeen || 0)) < 180000
+      );
+
+      if (onlineStudents.length === 0) {
+        banner.innerHTML = `
+          <div style="display:flex; align-items:center; justify-content:space-between; width:100%; flex-wrap:wrap; gap:10px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="online-pulse-dot" style="background:#94a3b8; box-shadow:none;"></span>
+              <span style="font-weight:800; font-size:13.5px; color:#334155;">🟢 Học sinh đang Online (0):</span>
+              <span style="font-size:13px; color:#64748b;">Hiện chưa có học sinh nào đang trực tuyến.</span>
+            </div>
+            <button type="button" class="btn btn-secondary" style="padding:5px 12px; font-size:12px;" onclick="openStreakAndTrendModal()">🔥 Xem BXH Streak Lớp</button>
+          </div>
+        `;
+      } else {
+        banner.innerHTML = `
+          <div style="display:flex; align-items:center; justify-content:space-between; width:100%; flex-wrap:wrap; gap:10px;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <span style="font-weight:800; font-size:13.5px; color:#065f46; margin-right:4px;">
+                🟢 Học sinh đang Online (${onlineStudents.length}):
+              </span>
+              ${onlineStudents.map(st => `
+                <div class="online-user-pill" title="${st.className || 'Học viên'}">
+                  <span class="online-pulse-dot"></span>
+                  <span>${st.name}${st.isPro ? ' 👑' : ''}</span>
+                  <span style="font-weight:500; color:#047857; font-size:11.5px;">• ${st.activity || 'Đang ở Dashboard'}</span>
+                </div>
+              `).join('')}
+            </div>
+            <button type="button" class="btn btn-secondary" style="padding:5px 12px; font-size:12px;" onclick="openStreakAndTrendModal()">🔥 BXH Streak</button>
+          </div>
+        `;
+      }
+    }
+
+    // Chạy ngay lập tức và duy trì liên tục
+    setTimeout(() => {
+      _v15StartFirestoreListener();
+      _v15PushHeartbeat();
+      _v15RenderBanner();
+    }, 200);
+
+    setInterval(() => {
+      _v15StartFirestoreListener();
+      _v15RenderBanner();
+    }, 1000);
+
+    setInterval(_v15PushHeartbeat, 30000);
+  })();
+</script>
 </body>
 </html>
