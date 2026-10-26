@@ -22927,5 +22927,74 @@ Câu dẫn chứng: "${eviVal}"`;
     setInterval(_v15PushHeartbeat, 30000);
   })();
 </script>
+<!-- ============================================================================
+     MODULE TẮT & XÓA VĨNH VIỄN CHỨC NĂNG SỔ LỖI SAI (KHÔNG NHẤP NHÁY):
+     - Dùng CSS khóa chết (display: none !important) mọi nút và tab Sổ lỗi sai
+     - Vô hiệu hóa toàn bộ hàm render của Sổ lỗi sai
+     Dán đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* Ẩn chết vĩnh viễn toàn bộ nút Lưu vào Sổ lỗi trong bài thi & Tab Sổ Lỗi Sai (Không bao giờ nhấp nháy) */
+  .btn-save-mistake-inline,
+  button[data-mkey],
+  button[onclick*="Mistake" i],
+  button[onclick*="mistake" i],
+  #tabbtn-mistakes,
+  #tabbtn-mistake,
+  #tab-mistakes,
+  #tab-mistake,
+  #tab-mistakenotebook,
+  .mistake-card {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+  }
+</style>
+
+<script>
+  (function() {
+    // Ngắt toàn bộ các hàm của Sổ lỗi sai để không chạy ngầm nữa
+    window.injectMistakeNotebookTab = function() {};
+    window.renderMistakeNotebookTab = function() {};
+    window.renderUnifiedMistakeNotebook = function() {};
+    window.saveQuestionToMistakeVault = function() {};
+    window.unifiedSaveMistakeItem = function() {};
+
+    function nukeAllMistakeUI() {
+      // Ẩn mọi nút trên thanh menu Dashboard có chữ "Sổ Lỗi Sai"
+      document.querySelectorAll('.dash-tabs button').forEach(btn => {
+        const txt = (btn.textContent || '').toLowerCase();
+        if (txt.includes('sổ lỗi') || txt.includes('mistake')) {
+          btn.style.setProperty('display', 'none', 'important');
+        }
+      });
+
+      // Ẩn mọi nút trong khung giải thích câu hỏi có chữ "Sổ Lỗi"
+      document.querySelectorAll('#insperaSplitBox .answer-indicator button').forEach(btn => {
+        const txt = (btn.textContent || '').toLowerCase();
+        if (txt.includes('sổ lỗi') || txt.includes('mistake')) {
+          btn.style.setProperty('display', 'none', 'important');
+        }
+      });
+
+      // Nếu đang đứng ở tab Sổ lỗi sai thì tự động chuyển về tab Home
+      const mPane = document.getElementById('tab-mistakes');
+      if (mPane && mPane.style.display !== 'none') {
+        mPane.style.setProperty('display', 'none', 'important');
+        if (typeof switchDashTab === 'function') switchDashTab('home');
+      }
+    }
+
+    nukeAllMistakeUI();
+    setInterval(nukeAllMistakeUI, 400);
+  })();
+</script>
 </body>
 </html>
