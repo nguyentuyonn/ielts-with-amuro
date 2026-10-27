@@ -23657,5 +23657,67 @@ Câu dẫn chứng: "${eviVal}"`;
     }
   })();
 </script>
+<!-- ============================================================================
+     MODULE SẮP XẾP THỨ TỰ KHUNG GIẢI THÍCH & DẪN CHỨNG TRONG REVIEW MODE (Q1 -> Q40)
+     - Giữ nguyên 100% logic gốc, Locate Evidence và Gạch chân cấu trúc câu
+     - Tự động sắp xếp đúng thứ tự từ bé đến lớn trong mọi nhóm câu hỏi
+     ============================================================================ -->
+<script>
+  (function() {
+    function getQuestionNumFromKey(keyStr) {
+      return parseInt(String(keyStr || '').replace(/\D/g, ''), 10) || 0;
+    }
+
+    function sortReviewIndicatorsInScope(scope) {
+      if (!scope) return;
+
+      // Tìm tất cả các thẻ cha đang chứa từ 2 khung giải thích (.answer-indicator) trở lên
+      const parents = new Set();
+      scope.querySelectorAll('.answer-indicator[data-ind]').forEach(ind => {
+        if (ind.parentElement) parents.add(ind.parentElement);
+      });
+
+      parents.forEach(parent => {
+        // Chỉ sắp xếp khi các khung giải thích là anh em trực tiếp trong cùng 1 nhóm (như Matrix / Matching / Summary)
+        const directIndicators = Array.from(parent.children).filter(el =>
+          el.classList && el.classList.contains('answer-indicator') && el.hasAttribute('data-ind')
+        );
+
+        if (directIndicators.length > 1) {
+          directIndicators
+            .sort((a, b) => {
+              const numA = getQuestionNumFromKey(a.getAttribute('data-ind'));
+              const numB = getQuestionNumFromKey(b.getAttribute('data-ind'));
+              return numA - numB;
+            })
+            .forEach(ind => parent.appendChild(ind)); // Đưa lần lượt từng câu theo đúng thứ tự Q14 -> Q15 -> Q16...
+        }
+      });
+    }
+
+    if (typeof window.showReviewAnswersInDOM === 'function') {
+      const _origShowReviewAnswersForSort = window.showReviewAnswersInDOM;
+
+      window.showReviewAnswersInDOM = function(scope) {
+        // 1. Sắp xếp lại thứ tự key trong activeExam.correctAnswers từ bé đến lớn trước khi render
+        if (typeof activeExam !== 'undefined' && activeExam && activeExam.correctAnswers) {
+          const sortedObj = {};
+          Object.keys(activeExam.correctAnswers)
+            .sort((a, b) => getQuestionNumFromKey(a) - getQuestionNumFromKey(b))
+            .forEach(k => {
+              sortedObj[k] = activeExam.correctAnswers[k];
+            });
+          activeExam.correctAnswers = sortedObj;
+        }
+
+        // 2. Gọi nguyên vẹn hàm hiển thị Review gốc (giữ nguyên mọi nút Locate Evidence & Gạch chân cấu trúc)
+        _origShowReviewAnswersForSort.apply(this, arguments);
+
+        // 3. Đảm bảo các hộp giải thích trong cùng một nhóm luôn nằm đúng thứ tự số câu
+        sortReviewIndicatorsInScope(scope || document.getElementById('insperaSplitBox'));
+      };
+    }
+  })();
+</script>
 </body>
 </html>
