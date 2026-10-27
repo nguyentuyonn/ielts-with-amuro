@@ -1794,50 +1794,87 @@ Return your evaluation in JSON format with two fields:
     }
 
     async function callGeminiWritingEvaluator(wExam, submission) {
-      const apiKey = getEffectiveGeminiKey();
-      if (!apiKey) throw new Error('Missing Gemini API Key. Click "🤖 AI Grader Config" in the top header to add your key.');
+      const rawKeyStr = getEffectiveGeminiKey();
+      if (!rawKeyStr) throw new Error('Missing Gemini API Key. Click "🤖 AI Grader Config" in the top header to add your key.');
 
+      // 1. Tách danh sách nhiều API Key (ngăn cách bởi dấu phẩy, chấm phẩy hoặc xuống dòng) để tự động xoay vòng khi hết quota (429)
+      const apiKeys = rawKeyStr.split(/[,;\r\n]+/).map(k => k.trim()).filter(Boolean);
       const promptText = buildIeltsExaminerPrompt(wExam, submission);
-      const candidateModels = [
+
+      // 2. Lấy danh sách các model thực tế đang sống trên tài khoản (Loại bỏ vĩnh viễn 2.0-flash đã bị đóng gây lỗi 404)
+      let activeModels = [
         'gemini-3.8-flash',
-        'gemini-flash-latest',
-        'gemini-3.0-flash',
-        'gemini-2.5-pro',
-        'gemini-2.0-flash'
+        'gemini-2.5-flash',
+        'gemini-1.5-flash'
       ];
 
+      try {
+        const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKeys[0])}`);
+        if (listRes.ok) {
+          const listData = await listRes.json();
+          const serverModels = (listData.models || [])
+            .filter(m => (m.supportedGenerationMethods || []).includes('generateContent'))
+            .map(m => m.name.replace('models/', ''))
+            .filter(name => !name.includes('2.0') && !name.includes('vision')); // Chặn tuyệt đối model 2.0 đã khai tử
+
+          const priority = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
+          const matched = [];
+          priority.forEach(p => { if (serverModels.includes(p)) matched.push(p); });
+          serverModels.forEach(m => { if (m.includes('flash') && !matched.includes(m)) matched.push(m); });
+
+          if (matched.length > 0) activeModels = matched;
+        }
+      } catch (e) {
+        console.warn('Auto-list models skipped:', e);
+      }
+
+      // 3. Vòng lặp kép: Thử từng Key kết hợp từng Model (Có AbortController chống treo 15s)
       let lastError = '';
-      for (const modelName of candidateModels) {
-        try {
-          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
-          const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: promptText }] }],
-              generationConfig: { responseMimeType: 'application/json' }
-            })
-          });
+      for (const currentKey of apiKeys) {
+        for (const modelName of activeModels) {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-          if (!response.ok) {
-            lastError = await response.text();
-            continue;
+          try {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(currentKey)}`;
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: promptText }] }],
+                generationConfig: { 
+                  responseMimeType: 'application/json',
+                  temperature: 0.2
+                }
+              }),
+              signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+              const errText = await response.text();
+              lastError = `[${modelName}] ${errText}`;
+              // Nếu gặp 429 (hết quota), 503 (quá tải), 404 -> Lập tức nhảy sang model/key tiếp theo
+              continue;
+            }
+
+            const data = await response.json();
+            const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            const cleanJson = rawText.replace(/```json|```/g, '').trim();
+            const parsed = JSON.parse(cleanJson);
+
+            return {
+              band: String(parsed.band || parsed.overallBand || '6.0').replace('Band', '').trim(),
+              feedback: cleanMarkdownSymbols(parsed.feedback || rawText)
+            };
+          } catch (err) {
+            clearTimeout(timeoutId);
+            lastError = err.name === 'AbortError' ? `Timeout (15s) on ${modelName}` : err.message;
           }
-
-          const data = await response.json();
-          const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          const cleanJson = rawText.replace(/```json|```/g, '').trim();
-          const parsed = JSON.parse(cleanJson);
-          return {
-            band: String(parsed.band || '6.0').replace('Band', '').trim(),
-            feedback: cleanMarkdownSymbols(parsed.feedback || rawText)
-          };
-        } catch (err) {
-          lastError = err.message;
         }
       }
 
-      throw new Error(`Gemini API Error: ${lastError}`);
+      throw new Error(`Gemini API Error (Đã thử tất cả Model & Key dự phòng): ${lastError}`);
     }
 
     async function runAiWritingEvaluation() {
