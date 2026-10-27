@@ -9544,11 +9544,11 @@ Câu dẫn chứng: "${eviVal}"`;
     text.split(/\r?\n/).forEach(rawLine => {
       const line = rawLine.trim();
       if (!line) return;
-      if (/(?:1\.|TASK ACHIEVEMENT|TASK RESPONSE)/i.test(line) && line.length < 85) { activeBucket = 'tr'; return; }
-      if (/(?:2\.|COHERENCE\s*&\s*COHESION)/i.test(line) && line.length < 85) { activeBucket = 'cc'; return; }
-      if (/(?:3\.|LEXICAL RESOURCE)/i.test(line) && line.length < 85) { activeBucket = 'lr'; return; }
-      if (/(?:4\.|GRAMMATICAL RANGE)/i.test(line) && line.length < 85) { activeBucket = 'gra'; return; }
-      if (/(?:5\.|KEY CORRECTIONS|UPGRADES|OVERALL)/i.test(line) && line.length < 85) { activeBucket = 'overview'; return; }
+      if (/(?:\[\s*1\s*\]|1\.\s*(?:TASK|TA|TR)|TASK ACHIEVEMENT|TASK RESPONSE)/i.test(line) && line.length < 85) { activeBucket = 'tr'; return; }
+    if (/(?:\[\s*2\s*\]|2\.\s*(?:COHERENCE|CC)|COHERENCE\s*&\s*COHESION)/i.test(line) && line.length < 85) { activeBucket = 'cc'; return; }
+    if (/(?:\[\s*3\s*\]|3\.\s*(?:LEXICAL|LR)|LEXICAL RESOURCE)/i.test(line) && line.length < 85) { activeBucket = 'lr'; return; }
+    if (/(?:\[\s*4\s*\]|4\.\s*(?:GRAMMAR|GRA)|GRAMMATICAL RANGE)/i.test(line) && line.length < 85) { activeBucket = 'gra'; return; }
+    if (/(?:\[\s*5\s*\]|5\.\s*(?:KEY|UPGRADE|OVERALL)|KEY CORRECTIONS|UPGRADES|OVERALL)/i.test(line) && line.length < 85) { activeBucket = 'overview'; return; }
       sections[activeBucket].push(line);
     });
 
