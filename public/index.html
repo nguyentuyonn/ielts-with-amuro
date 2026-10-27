@@ -5438,7 +5438,7 @@ ${vocabPool.slice(0, 45).join('; ')}
 Return ONLY a valid JSON array of question objects:
 [{"sec":"A"|"B"|"C"|"D"|"E"|"F","type":"word_form"|"bank_fill"|"mcq"|"collocation"|"pair"|"error","stem":"...","options":["..."],"answer":"...","word":"...","pos":"...","mean":"Vietnamese explanation","syn":"..."}]`;
 
-    const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.8-flash', 'gemini-flash-latest'];
+    const candidateModels = ['gemini-2.5-flash', 'gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-flash-latest'];
     for (const modelName of candidateModels) {
       try {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${encodeURIComponent(apiKey)}`;
@@ -23031,6 +23031,630 @@ Câu dẫn chứng: "${eviVal}"`;
 
     nukeAllMistakeUI();
     setInterval(nukeAllMistakeUI, 400);
+  })();
+</script>
+<!-- ============================================================================
+     MODULE INSPERA AUTHENTIC HIGHLIGHT & NOTE ENGINE (STANDALONE)
+     - Giao diện Tooltip trắng có mũi tên chuẩn demo-ielts.inspera.com (Note | Highlight)
+     - Click 1 chạm vào đoạn đã tô để xóa riêng từng đoạn (Clear) mà không cần bôi đen lại
+     - Hỗ trợ tạo/xem/sửa Note nổi mượt mà và lưu giữ khi chuyển qua lại giữa các Part
+     Dán đoạn này ngay trước thẻ đóng </body> ở cuối file index.html
+     ============================================================================ -->
+<style>
+  /* 1. Ẩn triệt để các thanh highlight cũ để không bị đè giao diện */
+  #selectionTooltip,
+  #floatingDualHighlighter {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* 2. Màu Highlight & Note chuẩn Inspera */
+  mark.inspera-hl-mark {
+    background-color: #fff299 !important;
+    color: inherit !important;
+    padding: 1px 0 !important;
+    border-radius: 2px !important;
+    cursor: pointer !important;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    transition: filter 0.12s ease;
+  }
+  mark.inspera-hl-mark:hover {
+    filter: brightness(0.93);
+  }
+
+  /* Đoạn có gắn Note: màu nâu tím đặc trưng của Inspera ("at language" / "uses of la") */
+  mark.inspera-hl-mark.has-note {
+    background-color: #6b4c52 !important;
+    color: #ffffff !important;
+    padding: 1px 3px !important;
+    border-radius: 2px !important;
+  }
+  mark.inspera-hl-mark.has-note:hover {
+    background-color: #553a3f !important;
+  }
+
+  /* 3. Menu Popup nổi chuẩn Inspera (Nền trắng, viền xám mảnh, mũi tên chỉ lên) */
+  #insperaHlPopup {
+    position: fixed;
+    z-index: 100050;
+    display: none;
+    background: #ffffff;
+    border: 1px solid #c4c9d0;
+    border-radius: 5px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+    padding: 3px 4px;
+    align-items: center;
+    gap: 2px;
+    user-select: none;
+    font-family: Arial, Helvetica, sans-serif;
+    animation: insperaPopFade 0.1s ease-out;
+  }
+  @keyframes insperaPopFade {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mũi tên nhỏ phía trên Popup giống hệt Inspera */
+  #insperaHlPopup::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: var(--arrow-left, 50%);
+    transform: translateX(-50%);
+    border-width: 0 6px 6px 6px;
+    border-style: solid;
+    border-color: transparent transparent #c4c9d0 transparent;
+  }
+  #insperaHlPopup::after {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: var(--arrow-left, 50%);
+    transform: translateX(-50%);
+    border-width: 0 5px 5px 5px;
+    border-style: solid;
+    border-color: transparent transparent #ffffff transparent;
+  }
+
+  .inspera-pop-btn {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    min-width: 54px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: #374151;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.1;
+    transition: background 0.12s, color 0.12s;
+  }
+  .inspera-pop-btn:hover {
+    background: #f3f4f6;
+    color: #111827;
+  }
+  .inspera-pop-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+  .inspera-pop-divider {
+    width: 1px;
+    height: 28px;
+    background: #e5e7eb;
+    margin: 0 1px;
+  }
+
+  /* 4. Khung nhập / xem Note chuẩn Inspera */
+  #insperaNoteCard {
+    position: fixed;
+    z-index: 100060;
+    display: none;
+    width: 270px;
+    background: #ffffff;
+    border: 1px solid #9ca3af;
+    border-radius: 6px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .inspera-note-header {
+    background: #f3f4f6;
+    border-bottom: 1px solid #d1d5db;
+    padding: 7px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 700;
+    color: #111827;
+  }
+  .inspera-note-close {
+    background: none;
+    border: none;
+    font-size: 15px;
+    line-height: 1;
+    color: #4b5563;
+    cursor: pointer;
+    padding: 0 4px;
+  }
+  .inspera-note-close:hover { color: #111827; }
+  .inspera-note-body {
+    padding: 10px;
+  }
+  #insperaNoteTextarea {
+    width: 100%;
+    height: 85px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #111827;
+    resize: none;
+    outline: none;
+  }
+  #insperaNoteTextarea:focus {
+    border-color: #2563eb;
+  }
+  .inspera-note-footer {
+    padding: 0 10px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .inspera-note-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #9ca3af;
+    background: #ffffff;
+    color: #111827;
+  }
+  .inspera-note-btn.primary {
+    background: #111827;
+    color: #ffffff;
+    border-color: #111827;
+  }
+  .inspera-note-btn.danger {
+    color: #dc2626;
+    border-color: #fca5a5;
+    background: #fef2f2;
+  }
+</style>
+
+<!-- POPUP MENU HIGHLIGHT & NOTE CHUẨN INSPERA -->
+<div id="insperaHlPopup"></div>
+
+<!-- CỬA SỔ GHI CHÚ (NOTE CARD) -->
+<div id="insperaNoteCard">
+  <div class="inspera-note-header">
+    <span>💬 Note</span>
+    <button type="button" class="inspera-note-close" id="insperaNoteCloseBtn" title="Close">✕</button>
+  </div>
+  <div class="inspera-note-body">
+    <textarea id="insperaNoteTextarea" placeholder="Type your note here..."></textarea>
+  </div>
+  <div class="inspera-note-footer">
+    <button type="button" class="inspera-note-btn danger" id="insperaNoteDeleteBtn" style="display:none;">Delete Note</button>
+    <div style="margin-left:auto; display:flex; gap:6px;">
+      <button type="button" class="inspera-note-btn primary" id="insperaNoteSaveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // Vô hiệu hóa hàm highlight cũ để không xung đột
+    window.setupInExamHighlightEngine = function() {};
+    window.applyUserHighlight = function() {};
+    window.removeUserHighlight = function() {};
+
+    const popup = document.getElementById('insperaHlPopup');
+    const noteCard = document.getElementById('insperaNoteCard');
+    const noteInput = document.getElementById('insperaNoteTextarea');
+    const noteSaveBtn = document.getElementById('insperaNoteSaveBtn');
+    const noteDeleteBtn = document.getElementById('insperaNoteDeleteBtn');
+    const noteCloseBtn = document.getElementById('insperaNoteCloseBtn');
+
+    let savedRange = null;
+    let activeHlGroupId = null;
+    let notesStore = {}; // { hlId: "nội dung ghi chú" }
+    let partDomSnapshots = {}; // Lưu HTML đã highlight của từng Part để chuyển Part không bị mất
+
+    // Icon SVG chuẩn theo đúng thiết kế của Inspera
+    const ICON_NOTE = `<svg viewBox="0 0 24 24"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>`;
+    const ICON_MARKER = `<svg viewBox="0 0 24 24"><path d="M18.5 1.15c-.53 0-1.04.19-1.43.58l-5.81 5.82 5.65 5.65 5.82-5.81c.77-.78.77-2.04 0-2.83l-2.84-2.83c-.39-.39-.89-.58-1.39-.58zM10.3 8.5L4 14.8V19h4.2l6.3-6.3-4.2-4.2zM3 21v2h18v-2H3z"/></svg>`;
+    const ICON_CLEAR = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
+
+    function getCurrentPartStorageKey() {
+      if (typeof activeExam === 'undefined' || !activeExam) return null;
+      return `${activeExam.id}_part_${typeof activePartNum !== 'undefined' ? activePartNum : 1}`;
+    }
+
+    function savePartHighlightSnapshot() {
+      if (typeof isReviewMode !== 'undefined' && isReviewMode) return;
+      const key = getCurrentPartStorageKey();
+      const leftPane = document.getElementById('insperaLeftPane');
+      if (!key || !leftPane) return;
+      const contentEl = leftPane.querySelector('.passage-content');
+      if (contentEl) {
+        partDomSnapshots[key] = contentEl.innerHTML;
+      }
+    }
+
+    function restorePartHighlightSnapshot() {
+      if (typeof isReviewMode !== 'undefined' && isReviewMode) return;
+      const key = getCurrentPartStorageKey();
+      const leftPane = document.getElementById('insperaLeftPane');
+      if (!key || !leftPane || !partDomSnapshots[key]) return;
+      const contentEl = leftPane.querySelector('.passage-content');
+      if (contentEl && partDomSnapshots[key].includes('inspera-hl-mark')) {
+        contentEl.innerHTML = partDomSnapshots[key];
+        if (typeof setupDragDropEngine === 'function') setupDragDropEngine();
+        if (typeof restoreUserAnswersInDOM === 'function') {
+          restoreUserAnswersInDOM(document.getElementById('insperaSplitBox'));
+        }
+      }
+    }
+
+    function hidePopup() {
+      popup.style.display = 'none';
+    }
+
+    function hideNoteCard() {
+      noteCard.style.display = 'none';
+    }
+
+    function positionPopupAtRect(rect) {
+      popup.style.display = 'flex';
+      const popRect = popup.getBoundingClientRect();
+      let left = rect.left + (rect.width / 2) - (popRect.width / 2);
+      left = Math.max(10, Math.min(window.innerWidth - popRect.width - 10, left));
+
+      let top = rect.bottom + 8;
+      if (top + popRect.height > window.innerHeight - 10) {
+        top = Math.max(10, rect.top - popRect.height - 8);
+      }
+
+      const arrowOffset = Math.max(14, Math.min(popRect.width - 14, (rect.left + rect.width / 2) - left));
+      popup.style.setProperty('--arrow-left', `${arrowOffset}px`);
+      popup.style.left = `${left}px`;
+      popup.style.top = `${top}px`;
+    }
+
+    // Bọc vùng chọn bằng thẻ <mark> an toàn (hỗ trợ cả khi bôi đen qua nhiều thẻ in nghiêng/in đậm/đoạn văn)
+    function highlightRangeWithGroupId(range, groupId, isNote = false) {
+      if (!range || range.collapsed) return null;
+
+      const root = range.commonAncestorContainer.nodeType === 1
+        ? range.commonAncestorContainer
+        : range.commonAncestorContainer.parentNode;
+
+      const textNodes = [];
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode: function(node) {
+          if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+          if (!range.intersectsNode(node)) return NodeFilter.FILTER_REJECT;
+          const p = node.parentElement;
+          if (!p) return NodeFilter.FILTER_REJECT;
+          if (p.closest('input, textarea, select, button, .drop-zone, .drag-item, .q-badge, .answer-indicator, #insperaHlPopup, #insperaNoteCard')) {
+            return NodeFilter.FILTER_REJECT;
+          }
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+
+      let current;
+      while ((current = walker.nextNode())) {
+        textNodes.push(current);
+      }
+
+      if (textNodes.length === 0 && range.startContainer.nodeType === 3) {
+        textNodes.push(range.startContainer);
+      }
+
+      let firstCreatedMark = null;
+
+      textNodes.forEach(node => {
+        const isStart = (node === range.startContainer);
+        const isEnd = (node === range.endContainer);
+        const startOff = isStart ? range.startOffset : 0;
+        const endOff = isEnd ? range.endOffset : node.nodeValue.length;
+
+        if (startOff >= endOff) return;
+
+        // Nếu text node này đã nằm sẵn trong 1 thẻ mark cùng loại thì chỉ cập nhật trạng thái Note
+        const existingMark = node.parentElement && node.parentElement.closest('mark.inspera-hl-mark');
+        if (existingMark && startOff === 0 && endOff === node.nodeValue.length) {
+          existingMark.setAttribute('data-hl-id', groupId);
+          if (isNote) existingMark.classList.add('has-note');
+          if (!firstCreatedMark) firstCreatedMark = existingMark;
+          return;
+        }
+
+        let targetNode = node;
+        if (endOff < targetNode.nodeValue.length) {
+          targetNode.splitText(endOff);
+        }
+        if (startOff > 0) {
+          targetNode = targetNode.splitText(startOff);
+        }
+
+        const mark = document.createElement('mark');
+        mark.className = 'inspera-hl-mark' + (isNote ? ' has-note' : '');
+        mark.setAttribute('data-hl-id', groupId);
+        targetNode.parentNode.insertBefore(mark, targetNode);
+        mark.appendChild(targetNode);
+        if (!firstCreatedMark) firstCreatedMark = mark;
+      });
+
+      window.getSelection().removeAllRanges();
+      savePartHighlightSnapshot();
+      return firstCreatedMark;
+    }
+
+    // Xóa riêng 1 cụm Highlight theo đúng ID (Tuyệt đối không ảnh hưởng các câu khác)
+    function removeSingleHighlightGroup(groupId) {
+      if (!groupId) return;
+      const workspace = document.getElementById('insperaSplitBox');
+      if (!workspace) return;
+
+      workspace.querySelectorAll(`mark.inspera-hl-mark[data-hl-id="${groupId}"]`).forEach(mark => {
+        const parent = mark.parentNode;
+        while (mark.firstChild) {
+          parent.insertBefore(mark.firstChild, mark);
+        }
+        parent.removeChild(mark);
+        parent.normalize();
+      });
+
+      delete notesStore[groupId];
+      savePartHighlightSnapshot();
+    }
+
+    // Xóa toàn bộ Highlight trong màn hình hiện tại (khi người dùng chủ động bấm Clear all)
+    function removeAllHighlightsInWorkspace() {
+      const workspace = document.getElementById('insperaSplitBox');
+      if (!workspace) return;
+      workspace.querySelectorAll('mark.inspera-hl-mark').forEach(mark => {
+        const id = mark.getAttribute('data-hl-id');
+        if (id) delete notesStore[id];
+        const parent = mark.parentNode;
+        while (mark.firstChild) {
+          parent.insertBefore(mark.firstChild, mark);
+        }
+        parent.removeChild(mark);
+        parent.normalize();
+      });
+      savePartHighlightSnapshot();
+    }
+
+    // Mở khung Note ngay cạnh cụm từ được chọn
+    function openNoteCardForGroup(groupId, anchorEl) {
+      activeHlGroupId = groupId;
+      hidePopup();
+
+      const existingNote = notesStore[groupId] || '';
+      noteInput.value = existingNote;
+      noteDeleteBtn.style.display = existingNote ? 'inline-block' : 'none';
+
+      noteCard.style.display = 'block';
+      const rect = anchorEl ? anchorEl.getBoundingClientRect() : { left: window.innerWidth / 2 - 135, bottom: 180, top: 150 };
+      let left = Math.max(12, Math.min(window.innerWidth - 285, rect.left));
+      let top = rect.bottom + 8;
+      if (top + 175 > window.innerHeight) {
+        top = Math.max(12, rect.top - 175);
+      }
+
+      noteCard.style.left = `${left}px`;
+      noteCard.style.top = `${top}px`;
+      setTimeout(() => noteInput.focus(), 20);
+    }
+
+    // 1. Render Popup khi người dùng BÔI ĐEN văn bản mới (Chỉ hiện Note | Highlight giống hệt Inspera)
+    function showCreationPopup(rect) {
+      popup.innerHTML = `
+        <button type="button" class="inspera-pop-btn" id="insperaBtnCreateNote">
+          ${ICON_NOTE}
+          <span>Note</span>
+        </button>
+        <div class="inspera-pop-divider"></div>
+        <button type="button" class="inspera-pop-btn" id="insperaBtnCreateHl">
+          ${ICON_MARKER}
+          <span>Highlight</span>
+        </button>
+      `;
+      positionPopupAtRect(rect);
+
+      document.getElementById('insperaBtnCreateHl').onclick = function(e) {
+        e.stopPropagation();
+        if (!savedRange) return;
+        const newId = 'hl_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+        highlightRangeWithGroupId(savedRange, newId, false);
+        savedRange = null;
+        hidePopup();
+      };
+
+      document.getElementById('insperaBtnCreateNote').onclick = function(e) {
+        e.stopPropagation();
+        if (!savedRange) return;
+        const newId = 'hl_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+        const markEl = highlightRangeWithGroupId(savedRange, newId, true);
+        savedRange = null;
+        openNoteCardForGroup(newId, markEl);
+      };
+    }
+
+    // 2. Render Popup khi người dùng CLICK TRỰC TIẾP vào một từ đã Highlight (Không cần bôi đen)
+    function showExistingMarkPopup(markEl) {
+      const groupId = markEl.getAttribute('data-hl-id');
+      activeHlGroupId = groupId;
+      const hasNote = Boolean(notesStore[groupId]);
+
+      popup.innerHTML = `
+        <button type="button" class="inspera-pop-btn" id="insperaBtnEditNote">
+          ${ICON_NOTE}
+          <span>${hasNote ? 'View Note' : 'Note'}</span>
+        </button>
+        <div class="inspera-pop-divider"></div>
+        <button type="button" class="inspera-pop-btn" id="insperaBtnClearOne">
+          ${ICON_CLEAR}
+          <span>Clear</span>
+        </button>
+        <div class="inspera-pop-divider"></div>
+        <button type="button" class="inspera-pop-btn" id="insperaBtnClearAll">
+          ${ICON_CLEAR}
+          <span>Clear all</span>
+        </button>
+      `;
+      positionPopupAtRect(markEl.getBoundingClientRect());
+
+      document.getElementById('insperaBtnEditNote').onclick = function(e) {
+        e.stopPropagation();
+        openNoteCardForGroup(groupId, markEl);
+      };
+
+      document.getElementById('insperaBtnClearOne').onclick = function(e) {
+        e.stopPropagation();
+        removeSingleHighlightGroup(groupId);
+        hidePopup();
+      };
+
+      document.getElementById('insperaBtnClearAll').onclick = function(e) {
+        e.stopPropagation();
+        removeAllHighlightsInWorkspace();
+        hidePopup();
+      };
+    }
+
+    // Xử lý các nút trong cửa sổ Note Card
+    noteSaveBtn.onclick = function() {
+      if (!activeHlGroupId) return;
+      const val = noteInput.value.trim();
+      const workspace = document.getElementById('insperaSplitBox');
+      if (val) {
+        notesStore[activeHlGroupId] = val;
+        if (workspace) {
+          workspace.querySelectorAll(`mark.inspera-hl-mark[data-hl-id="${activeHlGroupId}"]`).forEach(m => {
+            m.classList.add('has-note');
+            m.title = `💬 Note: ${val}`;
+          });
+        }
+      } else {
+        delete notesStore[activeHlGroupId];
+        if (workspace) {
+          workspace.querySelectorAll(`mark.inspera-hl-mark[data-hl-id="${activeHlGroupId}"]`).forEach(m => {
+            m.classList.remove('has-note');
+            m.removeAttribute('title');
+          });
+        }
+      }
+      savePartHighlightSnapshot();
+      hideNoteCard();
+    };
+
+    noteDeleteBtn.onclick = function() {
+      if (!activeHlGroupId) return;
+      removeSingleHighlightGroup(activeHlGroupId);
+      hideNoteCard();
+    };
+
+    noteCloseBtn.onclick = function() {
+      // Nếu vừa bấm tạo Note mới mà chưa gõ chữ nào đã đóng lại thì gỡ luôn vệt màu Note rỗng
+      if (activeHlGroupId && !notesStore[activeHlGroupId]) {
+        const workspace = document.getElementById('insperaSplitBox');
+        const marks = workspace ? workspace.querySelectorAll(`mark.inspera-hl-mark.has-note[data-hl-id="${activeHlGroupId}"]`) : [];
+        if (marks.length) removeSingleHighlightGroup(activeHlGroupId);
+      }
+      hideNoteCard();
+    };
+
+    // Lắng nghe sự kiện Bôi đen & Click trong vùng làm bài (#insperaSplitBox)
+    document.addEventListener('mouseup', function(e) {
+      if (popup.contains(e.target) || noteCard.contains(e.target)) return;
+
+      const workspace = document.getElementById('insperaSplitBox');
+      if (!workspace || !workspace.contains(e.target)) {
+        hidePopup();
+        return;
+      }
+
+      // Bỏ qua nếu đang thao tác trên ô nhập đáp án hoặc nút bấm câu hỏi
+      if (e.target.closest('input, textarea, select, button, .drop-zone, .drag-item')) {
+        hidePopup();
+        return;
+      }
+
+      setTimeout(() => {
+        const sel = window.getSelection();
+        if (sel && !sel.isCollapsed && sel.toString().trim().length > 0) {
+          const range = sel.getRangeAt(0);
+          if (!workspace.contains(range.commonAncestorContainer)) return;
+          savedRange = range.cloneRange();
+          hideNoteCard();
+          showCreationPopup(range.getBoundingClientRect());
+        } else {
+          // Nếu không bôi đen mà CLICK TRỰC TIẾP vào một chữ đã highlight -> Hiện ngay menu Clear / Note!
+          const clickedMark = e.target.closest('mark.inspera-hl-mark');
+          if (clickedMark) {
+            savedRange = null;
+            // Nếu đoạn đó đã có Note sẵn, click vào mở xem Note hoặc hiện thanh công cụ
+            showExistingMarkPopup(clickedMark);
+          } else {
+            hidePopup();
+          }
+        }
+      }, 15);
+    });
+
+    // Tự động ẩn popup khi cuộn trang hoặc bấm ra ngoài
+    document.addEventListener('mousedown', function(e) {
+      if (!popup.contains(e.target) && !e.target.closest('mark.inspera-hl-mark')) {
+        hidePopup();
+      }
+      if (!noteCard.contains(e.target) && !popup.contains(e.target) && !e.target.closest('mark.inspera-hl-mark')) {
+        hideNoteCard();
+      }
+    });
+
+    ['insperaLeftPane', 'insperaRightPane'].forEach(paneId => {
+      const pane = document.getElementById(paneId);
+      if (pane) {
+        pane.addEventListener('scroll', () => {
+          hidePopup();
+        }, { passive: true });
+      }
+    });
+
+    // Giữ nguyên các đoạn đã Highlight khi học sinh chuyển qua lại giữa các Part / Passage
+    if (typeof loadPassageView === 'function') {
+      const _origLoadPassageView = loadPassageView;
+      loadPassageView = function(partNum) {
+        _origLoadPassageView(partNum);
+        restorePartHighlightSnapshot();
+      };
+    }
+
+    if (typeof switchExamPassage === 'function') {
+      const _origSwitchPassage = switchExamPassage;
+      switchExamPassage = function(partNum) {
+        savePartHighlightSnapshot();
+        hidePopup();
+        hideNoteCard();
+        _origSwitchPassage(partNum);
+      };
+    }
   })();
 </script>
 </body>
