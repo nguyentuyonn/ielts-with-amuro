@@ -9533,10 +9533,10 @@ Câu dẫn chứng: "${eviVal}"`;
       const m = text.match(rx);
       return m ? m[1] : '—';
     };
-    const taScore  = extractScore(/(?:Task Achievement|Task Response|TA|TR)[^:\n0-9]*:\s*(?:Band\s*)?([0-9.]+)/i);
-    const ccScore  = extractScore(/(?:Coherence\s*&\s*Cohesion|CC)[^:\n0-9]*:\s*(?:Band\s*)?([0-9.]+)/i);
-    const lrScore  = extractScore(/(?:Lexical Resource|LR)[^:\n0-9]*:\s*(?:Band\s*)?([0-9.]+)/i);
-    const graScore = extractScore(/(?:Grammatical Range|GRA)[^:\n0-9]*:\s*(?:Band\s*)?([0-9.]+)/i);
+    const taScore  = extractScore(/(?:Task Achievement|Task Response|TA|TR)[^\n0-9]{0,35}(?:Band|Score|Điểm)?[\s:=-]*([4-9](?:\.[05])?)/i);
+    const ccScore  = extractScore(/(?:Coherence\s*(?:&|and)\s*Cohesion|CC)[^\n0-9]{0,35}(?:Band|Score|Điểm)?[\s:=-]*([4-9](?:\.[05])?)/i);
+    const lrScore  = extractScore(/(?:Lexical Resource|Vocabulary|LR)[^\n0-9]{0,35}(?:Band|Score|Điểm)?[\s:=-]*([4-9](?:\.[05])?)/i);
+    const graScore = extractScore(/(?:Grammatical Range(?:\s*(?:&|and)\s*Accuracy)?|Grammar|GRA)[^\n0-9]{0,35}(?:Band|Score|Điểm)?[\s:=-]*([4-9](?:\.[05])?)/i);
 
     const sections = { overview: [], tr: [], cc: [], lr: [], gra: [] };
     let activeBucket = 'overview';
