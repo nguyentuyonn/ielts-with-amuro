@@ -3527,17 +3527,30 @@ Return your evaluation in JSON format with two fields:
         if (isAnswerCorrect(k)) correct++;
       });
 
-      let band = '4.5';
-      const pct = total > 0 ? correct / total : 0;
-      if (pct >= 0.95) band = '9.0';
-      else if (pct >= 0.88) band = '8.5';
-      else if (pct >= 0.82) band = '8.0';
-      else if (pct >= 0.75) band = '7.5';
-      else if (pct >= 0.68) band = '7.0';
-      else if (pct >= 0.58) band = '6.5';
-      else if (pct >= 0.48) band = '6.0';
-      else if (pct >= 0.38) band = '5.5';
-      else if (pct >= 0.28) band = '5.0';
+      let band = '4.0';
+      if (total === 40) {
+        if (correct >= 39) band = '9.0';
+        else if (correct >= 37) band = '8.5';
+        else if (correct >= 35) band = '8.0';
+        else if (correct >= 33) band = '7.5';
+        else if (correct >= 30) band = '7.0';
+        else if (correct >= 27) band = '6.5';
+        else if (correct >= 23) band = '6.0';
+        else if (correct >= 19) band = '5.5';
+        else if (correct >= 15) band = '5.0';
+        else if (correct >= 13) band = '4.5';
+      } else {
+        const pct = total > 0 ? correct / total : 0;
+        if (pct >= 0.95) band = '9.0';
+        else if (pct >= 0.90) band = '8.5';
+        else if (pct >= 0.85) band = '8.0';
+        else if (pct >= 0.78) band = '7.5';
+        else if (pct >= 0.70) band = '7.0';
+        else if (pct >= 0.63) band = '6.5';
+        else if (pct >= 0.55) band = '6.0';
+        else if (pct >= 0.45) band = '5.5';
+        else if (pct >= 0.35) band = '5.0';
+      }
 
       const res = {
         id: 'res_' + Date.now(),
