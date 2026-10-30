@@ -13,6 +13,37 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
   <style>
+  /* MÀU SẮC CHUẨN REVIEW FOOTER (XANH NHẠT / ĐỎ NHẠT / TRUNG TÍNH) */
+.progress-item.review-correct,
+.progress-item.correct {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border: 1.5px solid #16a34a !important;
+  border-top: 3px solid #16a34a !important;
+}
+
+.progress-item.review-incorrect,
+.progress-item.incorrect {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border: 1.5px solid #dc2626 !important;
+  border-top: 3px solid #dc2626 !important;
+}
+
+.progress-item.review-unanswered {
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+  border: 1px solid #cbd5e1 !important;
+  border-top: 3px solid #94a3b8 !important;
+}
+
+.question-scroll-focus {
+  border: 2px solid #2563eb !important;
+  background: #eff6ff !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
+  transition: all 0.2s ease;
+}
     :root {
       --bg-main: #f8fafc;
       --surface: #ffffff;
@@ -23732,5 +23763,936 @@ Câu dẫn chứng: "${eviVal}"`;
     }
   })();
 </script>
+<script>
+  function formatSmartFeedbackHtml(rawText) {
+    if (!rawText) return '<span style="color:#94a3b8; font-style:italic;">Chưa có nhận xét cho bài viết này.</span>';
+    let safe = String(rawText)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    safe = safe.replace(/\[([^\]]+)\]/g, '<div style="font-weight:800; color:#0f172a; margin-top:12px; margin-bottom:4px; font-size:14px;">[$1]</div>');
+    safe = safe.replace(/([a-zA-Z0-9\s,.'"-]+)\s*(?:->|➔|➜|-->)\s*([a-zA-Z0-9\s,.'"-]+)/g, '<span class="smart-err-bad">$1</span> ➔ <span class="smart-err-good">$2</span>');
+    return '<div style="line-height:1.7; font-size:13.5px; color:#334155;">' + safe.replace(/\n/g, '<br>') + '</div>';
+  }
+  </script>
+
+  <!-- ============================================================================
+       MODULE NÂNG CẤP HỆ THỐNG LUYỆN THI V3.0 (4 TRONG 1)
+       ============================================================================ -->
+  <style>
+    /* 1. FOOTER REVIEW NAVIGATION & QUESTION FOCUS */
+    .progress-item.review-correct {
+      background: #dcfce7 !important;
+      color: #15803d !important;
+      border: 1.5px solid #16a34a !important;
+      border-top: 3px solid #16a34a !important;
+    }
+    .progress-item.review-incorrect {
+      background: #fee2e2 !important;
+      color: #b91c1c !important;
+      border: 1.5px solid #dc2626 !important;
+      border-top: 3px solid #dc2626 !important;
+    }
+    .progress-item.review-unanswered {
+      background: #f1f5f9 !important;
+      color: #475569 !important;
+      border: 1.5px solid #94a3b8 !important;
+      border-top: 3px solid #94a3b8 !important;
+    }
+    .progress-item.active-footer-focus {
+      outline: 2.5px solid #111827 !important;
+      outline-offset: 1px;
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+    }
+    .question-scroll-focus {
+      border: 2px solid #2563eb !important;
+      background: #eff6ff !important;
+      border-radius: 6px !important;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
+      transition: all 0.25s ease;
+    }
+
+    /* 2. TRANG HỌC TẬP CỦA TÔI */
+    .pd-top-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .pd-metric-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+    }
+    .pd-metric-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .pd-comp-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1.1fr;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 1024px) {
+      .pd-comp-grid { grid-template-columns: 1fr; }
+    }
+    .pd-band-box {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .pd-skill-pill {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+    .pd-bar-chart {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 150px;
+      padding: 16px 8px 4px;
+      gap: 8px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .pd-bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .pd-bar-fill {
+      width: 100%;
+      max-width: 28px;
+      background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+      border-radius: 6px 6px 0 0;
+      min-height: 4px;
+      transition: height 0.3s ease;
+    }
+    .pd-heatmap-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .pd-heat-cell {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #64748b;
+    }
+    .pd-heat-cell.lv-1 { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+    .pd-heat-cell.lv-2 { background: #34d399; color: #064e3b; border-color: #10b981; }
+    .pd-heat-cell.lv-3 { background: #059669; color: #ffffff; border-color: #047857; }
+
+    .score-ring-badge {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: #0f172a;
+      position: relative;
+    }
+    .score-ring-inner {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #ffffff;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* 3. MY ASSIGNMENTS (HOME) */
+    .asg-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .asg-tab-btn {
+      padding: 8px 18px; border-radius: 999px; font-size: 13px; font-weight: 800;
+      cursor: pointer; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #475569;
+      transition: 0.15s;
+    }
+    .asg-tab-btn.active {
+      background: #059669; color: #ffffff; border-color: #059669;
+      box-shadow: 0 4px 10px rgba(5, 150, 105, 0.2);
+    }
+    .asg-card {
+      background: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid #059669;
+      border-radius: 12px; padding: 16px 20px; margin-bottom: 12px;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+      transition: 0.15s;
+    }
+    .asg-card:hover { border-color: #a7f3d0; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04); }
+    .asg-card.overdue { border-left-color: #ef4444; }
+    .asg-empty-box {
+      text-align: center; padding: 36px 20px; background: #f8fafc;
+      border: 1.5px dashed #cbd5e1; border-radius: 14px;
+    }
+  </style>
+
+  <!-- MODAL: GIAO BÀI TẬP (TEACHER / ADMIN) -->
+  <div class="modal-overlay" id="createHomeworkModal" style="z-index: 9500;">
+    <div class="modal-window" style="width: 680px;">
+      <div class="modal-header">
+        <span>📋 Giao Bài Tập Về Nhà (Assign Homework)</span>
+        <button class="btn btn-secondary" onclick="closeModal('createHomeworkModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid; grid-template-columns: 1fr 1.6fr; gap:12px;">
+          <div class="form-group">
+            <label>1. Kỹ năng</label>
+            <select id="hwSkillSelect" class="form-input" onchange="populateHwExamOptions()">
+              <option value="reading">📖 Reading</option>
+              <option value="listening">🎧 Listening</option>
+              <option value="writing">✍️ Writing</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>2. Chọn đề thi</label>
+            <select id="hwExamSelect" class="form-input"></select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:8px;">
+            <label style="margin-bottom:0;">3. Chọn danh sách học sinh nhận bài</label>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <select id="hwFilterClassSelect" class="form-input" style="padding:4px 10px; font-size:12px; width:auto;" onchange="renderHwStudentChecklist()">
+                <option value="ALL">🏫 Tất cả các lớp</option>
+              </select>
+              <button type="button" class="btn btn-secondary" style="padding:4px 10px; font-size:11.5px;" onclick="toggleAllHwStudents(true)">☑️ Chọn tất cả</button>
+              <button type="button" class="btn btn-secondary" style="padding:4px 10px; font-size:11.5px;" onclick="toggleAllHwStudents(false)">⬜ Bỏ chọn</button>
+            </div>
+          </div>
+          <div id="hwStudentCheckListBox" style="max-height: 185px; overflow-y: auto; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; background: #f8fafc; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px;"></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:12px;">
+          <div class="form-group">
+            <label>4. Hạn nộp (Deadline)</label>
+            <input type="date" id="hwDeadlineInput" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>5. Lời nhắn / Ghi chú của Giáo viên</label>
+            <input type="text" id="hwNoteInput" class="form-input" placeholder="VD: Làm nghiêm túc bấm giờ 60 phút, nộp trước 21h...">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('createHomeworkModal')">Hủy</button>
+        <button class="btn btn-emerald" onclick="saveNewHomeworkAssignment()">🚀 Giao bài ngay</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+ 
+    // 1. Chống lỗi ReferenceError cho các hàm gọi ngoài màn hình
+    if (typeof window.finishExam === 'undefined') {
+      window.finishExam = function() {
+        if (typeof submitExam === 'function') submitExam();
+      };
+    }
+    if (typeof window.launchReadingExam === 'undefined') {
+      window.launchReadingExam = function(examId) {
+        if (typeof launchExam === 'function') launchExam(examId);
+      };
+    }
+
+    // 2. Khởi tạo mảng dữ liệu mới an toàn
+    var _lmsEnsureArrays = ensureArraysExist;
+    ensureArraysExist = function() {
+      if (typeof _lmsEnsureArrays === 'function') _lmsEnsureArrays();
+      if (!db.assignments) db.assignments = [];
+      if (!db.userProfiles) db.userProfiles = {};
+    };
+
+    var _lmsPersist = persist;
+    persist = async function() {
+      if (typeof _lmsPersist === 'function') await _lmsPersist();
+      var fs = (typeof getActiveFirestore === 'function') ? getActiveFirestore() : (typeof CLOUD_DB !== 'undefined' ? CLOUD_DB : null);
+      if (fs) {
+        try {
+          await fs.collection('suite_meta').doc('core').set(cleanForFirestore({
+            assignments: db.assignments || [],
+            userProfiles: db.userProfiles || {}
+          }), { merge: true });
+        } catch (e) {}
+      }
+    };
+
+    // 3. Tự động đồng bộ Realtime từ Firebase
+    window.addEventListener('load', function() {
+      var fs = (typeof getActiveFirestore === 'function') ? getActiveFirestore() : (typeof CLOUD_DB !== 'undefined' ? CLOUD_DB : null);
+      if (fs) {
+        fs.collection('suite_meta').doc('core').onSnapshot(function(doc) {
+          if (doc.exists) {
+            var d = doc.data() || {};
+            if (Array.isArray(d.assignments)) db.assignments = d.assignments;
+            if (d.userProfiles) db.userProfiles = Object.assign({}, db.userProfiles || {}, d.userProfiles);
+            if (typeof activeUser !== 'undefined' && activeUser) {
+              renderHomeAssignmentsSection();
+              var dashPane = document.getElementById('tab-mydashboard');
+              if (dashPane && dashPane.style.display === 'block') {
+                renderMyLearningDashboard();
+              }
+            }
+          }
+        });
+      }
+    });
+
+    // 4. LOGIC TÔ MÀU VÀ GẮN SỰ KIỆN CUỘN CHO FOOTER REVIEW
+    function applyReviewColoringToCurrentFooter() {
+      if (typeof isReviewMode === 'undefined' || !isReviewMode) return;
+
+      var allBtns = document.querySelectorAll('#insperaFooterList button, .progress-container button, .progress-item');
+      allBtns.forEach(function(btn) {
+        var txt = btn.textContent.trim();
+        if (!/^\d+$/.test(txt)) return;
+
+        var num = txt;
+        var qKey = 'q' + num;
+
+        var userVal = '';
+        if (typeof userAnswers !== 'undefined' && userAnswers) {
+          if (userAnswers[qKey] !== undefined) userVal = String(userAnswers[qKey]).trim();
+          else if (userAnswers[num] !== undefined) userVal = String(userAnswers[num]).trim();
+        }
+
+        var isCorrect = false;
+        if (typeof isAnswerCorrect === 'function') {
+          isCorrect = isAnswerCorrect(qKey) || isAnswerCorrect(num);
+        } else if (typeof activeExam !== 'undefined' && activeExam && activeExam.correctAnswers) {
+          var cor = (activeExam.correctAnswers[qKey] || activeExam.correctAnswers[num] || '').toString().trim().toLowerCase();
+          isCorrect = userVal !== '' && userVal.toLowerCase() === cor;
+        }
+
+        if (!userVal) {
+          btn.style.setProperty('background-color', '#f1f5f9', 'important');
+          btn.style.setProperty('color', '#64748b', 'important');
+          btn.style.setProperty('border', '1.5px solid #cbd5e1', 'important');
+          btn.style.setProperty('border-top', '3px solid #94a3b8', 'important');
+        } else if (isCorrect) {
+          btn.style.setProperty('background-color', '#dcfce7', 'important');
+          btn.style.setProperty('color', '#15803d', 'important');
+          btn.style.setProperty('border', '1.5px solid #16a34a', 'important');
+          btn.style.setProperty('border-top', '3px solid #16a34a', 'important');
+        } else {
+          btn.style.setProperty('background-color', '#fee2e2', 'important');
+          btn.style.setProperty('color', '#b91c1c', 'important');
+          btn.style.setProperty('border', '1.5px solid #dc2626', 'important');
+          btn.style.setProperty('border-top', '3px solid #dc2626', 'important');
+        }
+
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          var targetPart = (typeof findPartForQuestionKey === 'function') ? (findPartForQuestionKey(qKey) || findPartForQuestionKey(num)) : null;
+          if (targetPart && targetPart !== activePartNum && typeof switchExamPassage === 'function') {
+            switchExamPassage(targetPart);
+          }
+          setTimeout(function() {
+            document.querySelectorAll('.question-scroll-focus').forEach(function(el) {
+              el.classList.remove('question-scroll-focus');
+            });
+            var targetEl = document.querySelector('[data-question="' + num + '"]') || 
+                           document.querySelector('[name="' + qKey + '"]') || 
+                           document.querySelector('[name="' + num + '"]') || 
+                           document.querySelector('.answer-indicator[data-ind="' + qKey + '"]');
+            if (targetEl) {
+              var box = targetEl.closest('.question') || targetEl.closest('tr') || targetEl;
+              box.classList.add('question-scroll-focus');
+              box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }, 70);
+        };
+      });
+    }
+
+    var _lmsEnterReview = enterReviewModeFromSummary;
+    enterReviewModeFromSummary = function() {
+      if (typeof _lmsEnterReview === 'function') _lmsEnterReview();
+      setTimeout(applyReviewColoringToCurrentFooter, 60);
+    };
+
+    var _lmsSwitchPassage = switchExamPassage;
+    switchExamPassage = function(partNum) {
+      if (typeof _lmsSwitchPassage === 'function') _lmsSwitchPassage(partNum);
+      if (typeof isReviewMode !== 'undefined' && isReviewMode) {
+        setTimeout(applyReviewColoringToCurrentFooter, 60);
+      }
+    };
+
+    // 5. TRANG HỌC TẬP CỦA TÔI (MY DASHBOARD)
+    function injectPersonalDashboardTabAndPane() {
+      var dashTabs = document.querySelector('.dash-tabs');
+      if (dashTabs && !document.getElementById('tabbtn-mydashboard')) {
+        var btn = document.createElement('button');
+        btn.className = 'dash-tab-btn';
+        btn.id = 'tabbtn-mydashboard';
+        btn.innerHTML = '🎓 Trang học tập của tôi';
+        btn.onclick = function() { switchDashTab('mydashboard'); };
+        var homeBtn = document.getElementById('tabbtn-home');
+        if (homeBtn && homeBtn.nextSibling) {
+          dashTabs.insertBefore(btn, homeBtn.nextSibling);
+        } else {
+          dashTabs.appendChild(btn);
+        }
+
+        var hwBtn = document.createElement('button');
+        hwBtn.className = 'dash-tab-btn teacher-item';
+        hwBtn.id = 'tabbtn-assign-hw';
+        hwBtn.style.cssText = 'background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;';
+        hwBtn.innerHTML = '📋 + Giao bài tập';
+        hwBtn.onclick = function() { openCreateHomeworkModal(); };
+        dashTabs.appendChild(hwBtn);
+      }
+
+      var dashBody = document.querySelector('.dash-body');
+      if (dashBody && !document.getElementById('tab-mydashboard')) {
+        var pane = document.createElement('div');
+        pane.id = 'tab-mydashboard';
+        pane.className = 'dash-pane';
+        pane.style.display = 'none';
+        pane.innerHTML = 
+          '<div class="card" style="padding:20px 24px;">' +
+            '<div class="card-title" style="margin-bottom:14px;">' +
+              '<span>🎯 Hồ Sơ Học Tập & Mục Tiêu Cá Nhân</span>' +
+              '<button class="btn btn-secondary" style="font-size:12px; padding:5px 12px;" onclick="promptUpdateStudyGoals()">⚙️ Chỉnh mục tiêu & Ngày thi</button>' +
+            '</div>' +
+            '<div class="pd-top-grid" id="pdPersonalMetricsBox"></div>' +
+          '</div>' +
+          '<div class="pd-comp-grid">' +
+            '<div class="card" style="margin-bottom:0;">' +
+              '<div class="card-title" style="font-size:15px;">📊 Đánh Giá Năng Lực Hiện Tại</div>' +
+              '<div class="pd-band-box" id="pdCurrentBandsBox"></div>' +
+            '</div>' +
+            '<div class="card" style="margin-bottom:0;">' +
+              '<div class="card-title" style="font-size:15px;">⏱️ Hoạt Động Học Trong Tuần (7 ngày)</div>' +
+              '<div class="pd-bar-chart" id="pdWeeklyChartBox"></div>' +
+            '</div>' +
+            '<div class="card" style="margin-bottom:0;">' +
+              '<div class="card-title" style="font-size:15px;">' +
+                '<span>📅 Lịch Học Theo Tháng (Heatmap)</span>' +
+                '<span id="pdHeatmapMonthLabel" style="font-size:12px; color:#059669; font-weight:700; margin-left:8px;"></span>' +
+              '</div>' +
+              '<div class="pd-heatmap-grid" id="pdMonthlyHeatmapBox"></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="card">' +
+            '<div class="card-title"><span>📚 Lịch Sử Bài Đã Làm</span></div>' +
+            '<div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;" id="pdTypeFilterPills">' +
+              '<button class="btn btn-emerald" data-type="ALL" onclick="setPdHistoryType(\'ALL\')">Tất cả</button>' +
+              '<button class="btn btn-secondary" data-type="SINGLE" onclick="setPdHistoryType(\'SINGLE\')">Thi 1 kỹ năng</button>' +
+              '<button class="btn btn-secondary" data-type="PRACTICE" onclick="setPdHistoryType(\'PRACTICE\')">Luyện tập</button>' +
+              '<button class="btn btn-secondary" data-type="DICTATION" onclick="setPdHistoryType(\'DICTATION\')">Từ vựng / Chính tả</button>' +
+              '<button class="btn btn-secondary" data-type="MOCK" onclick="setPdHistoryType(\'MOCK\')">Thi thật (Full Test)</button>' +
+            '</div>' +
+            '<div style="display:grid; grid-template-columns: 1.4fr 1fr 1fr 1fr auto; gap:10px; margin-bottom:16px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0; align-items:center;">' +
+              '<input type="text" id="pdSearchInput" class="form-input" placeholder="🔍 Tìm kiếm theo tên đề thi..." oninput="renderPdHistoryTable()">' +
+              '<select id="pdSkillSelect" class="form-input" onchange="renderPdHistoryTable()">' +
+                '<option value="ALL">🎯 Tất cả kỹ năng</option>' +
+                '<option value="reading">📖 Reading</option>' +
+                '<option value="listening">🎧 Listening</option>' +
+                '<option value="writing">✍️ Writing</option>' +
+                '<option value="speaking">🗣️ Speaking</option>' +
+                '<option value="full">🏆 Full Test</option>' +
+              '</select>' +
+              '<input type="date" id="pdDateFrom" class="form-input" onchange="renderPdHistoryTable()">' +
+              '<input type="date" id="pdDateTo" class="form-input" onchange="renderPdHistoryTable()">' +
+              '<button class="btn btn-secondary" onclick="resetPdHistoryFilters()">Xóa lọc</button>' +
+            '</div>' +
+            '<table>' +
+              '<thead>' +
+                '<tr>' +
+                  '<th>Tên Bài Thi / Bài Tập</th>' +
+                  '<th>Kỹ Năng</th>' +
+                  '<th>Tỷ Lệ Đúng</th>' +
+                  '<th>Band Score</th>' +
+                  '<th>Thời Gian Nộp</th>' +
+                  '<th>Thao Tác</th>' +
+                '</tr>' +
+              '</thead>' +
+              '<tbody id="pdHistoryTbody"></tbody>' +
+            '</table>' +
+          '</div>';
+        dashBody.appendChild(pane);
+      }
+    }
+
+    var currentPdHistoryType = 'ALL';
+
+    function getUserGoalProfile() {
+      ensureArraysExist();
+      if (!activeUser) return { targetBand: '7.5', examDate: '2026-12-30', targetDays: 30 };
+      if (!db.userProfiles[activeUser.username]) {
+        db.userProfiles[activeUser.username] = { targetBand: '7.5', examDate: '2026-12-30', targetDays: 30 };
+      }
+      return db.userProfiles[activeUser.username];
+    }
+
+    window.promptUpdateStudyGoals = function() {
+      var prof = getUserGoalProfile();
+      var newBand = prompt('Nhập Band mục tiêu (VD: 6.5, 7.0, 7.5, 8.0):', prof.targetBand);
+      if (newBand === null) return;
+      var newDate = prompt('Nhập Ngày thi dự kiến (YYYY-MM-DD):', prof.examDate);
+      if (newDate === null) return;
+      var newDays = prompt('Nhập tổng số ngày cần học:', prof.targetDays || 30);
+
+      prof.targetBand = newBand.trim() || '7.5';
+      prof.examDate = newDate.trim() || '2026-12-30';
+      prof.targetDays = parseInt(newDays) || 30;
+      persist();
+      renderMyLearningDashboard();
+    };
+
+    function getResultIsoDate(r) {
+      if (r.isoDate) return r.isoDate;
+      var idMatch = String(r.id || '').match(/(\d{13})/);
+      if (idMatch) {
+        var d = new Date(Number(idMatch[1]));
+        return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      }
+      return (typeof getTodayIsoString === 'function') ? getTodayIsoString() : '2026-10-30';
+    }
+
+    function calculateUserStreakAndDays(userResults) {
+      var dateSet = new Set(userResults.map(function(r) { return getResultIsoDate(r); }));
+      var totalActiveDays = dateSet.size;
+      var streak = 0;
+      var cur = new Date();
+      for (var i = 0; i < 365; i++) {
+        var d = new Date(cur);
+        d.setDate(cur.getDate() - i);
+        var iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        if (dateSet.has(iso)) {
+          streak++;
+        } else if (i === 0) {
+          continue;
+        } else {
+          break;
+        }
+      }
+      return { streak: streak, totalActiveDays: totalActiveDays };
+    }
+
+    function renderMyLearningDashboard() {
+      if (typeof activeUser === 'undefined' || !activeUser) return;
+      injectPersonalDashboardTabAndPane();
+
+      var myResults = (db.results || []).filter(function(r) {
+        return activeUser.role === 'teacher' ? true : String(r.userName || '').toLowerCase() === String(activeUser.name || '').toLowerCase();
+      });
+
+      var stats = calculateUserStreakAndDays(myResults);
+      var prof = getUserGoalProfile();
+
+      var todayMs = new Date().setHours(0,0,0,0);
+      var examMs = new Date(prof.examDate).setHours(0,0,0,0);
+      var daysLeft = !isNaN(examMs) ? Math.max(0, Math.ceil((examMs - todayMs) / 86400000)) : '--';
+
+      var metricsBox = document.getElementById('pdPersonalMetricsBox');
+      if (metricsBox) {
+        metricsBox.innerHTML = 
+          '<div class="pd-metric-card"><div class="pd-metric-icon" style="background:#ffedd5; color:#ea580c;">🔥</div><div><div style="font-size:22px; font-weight:800; color:#0f172a;">' + stats.streak + ' ngày</div><div style="font-size:11.5px; font-weight:700; color:#64748b;">STREAK HỌC TẬP</div></div></div>' +
+          '<div class="pd-metric-card"><div class="pd-metric-icon" style="background:#ecfdf5; color:#059669;">📝</div><div><div style="font-size:22px; font-weight:800; color:#0f172a;">' + myResults.length + ' lượt</div><div style="font-size:11.5px; font-weight:700; color:#64748b;">TỔNG LƯỢT LÀM BÀI</div></div></div>' +
+          '<div class="pd-metric-card"><div class="pd-metric-icon" style="background:#eff6ff; color:#2563eb;">📆</div><div><div style="font-size:22px; font-weight:800; color:#0f172a;">' + stats.totalActiveDays + '/' + (prof.targetDays || 30) + '</div><div style="font-size:11.5px; font-weight:700; color:#64748b;">NGÀY CẦN HỌC</div></div></div>' +
+          '<div class="pd-metric-card"><div class="pd-metric-icon" style="background:#fef3c7; color:#d97706;">🎯</div><div><div style="font-size:22px; font-weight:800; color:#059669;">Band ' + prof.targetBand + '</div><div style="font-size:11.5px; font-weight:700; color:#64748b;">BAND MỤC TIÊU</div></div></div>' +
+          '<div class="pd-metric-card"><div class="pd-metric-icon" style="background:#f3e8ff; color:#7c3aed;">⏳</div><div><div style="font-size:16px; font-weight:800; color:#0f172a;">' + prof.examDate + '</div><div style="font-size:11.5px; font-weight:700; color:#7c3aed;">CÒN ' + daysLeft + ' NGÀY THI</div></div></div>';
+      }
+
+      function calcAvgBandForSkill(skill) {
+        var nums = myResults
+          .filter(function(r) { return (typeof detectResultSkillType === 'function') ? detectResultSkillType(r) === skill : false; })
+          .map(function(r) { return parseFloat(String(r.band || '').replace('Band', '').trim()); })
+          .filter(function(n) { return !isNaN(n) && n > 0; });
+        if (!nums.length) return '—';
+        var avg = nums.reduce(function(a, b) { return a + b; }, 0) / nums.length;
+        return (Math.round(avg * 2) / 2).toFixed(1);
+      }
+
+      var bandsBox = document.getElementById('pdCurrentBandsBox');
+      if (bandsBox) {
+        bandsBox.innerHTML = 
+          '<div class="pd-skill-pill"><div style="font-size:12px; font-weight:700; color:#64748b;">📖 Reading</div><div style="font-size:24px; font-weight:800; color:#059669; margin-top:4px;">' + calcAvgBandForSkill('reading') + '</div></div>' +
+          '<div class="pd-skill-pill"><div style="font-size:12px; font-weight:700; color:#64748b;">🎧 Listening</div><div style="font-size:24px; font-weight:800; color:#2563eb; margin-top:4px;">' + calcAvgBandForSkill('listening') + '</div></div>' +
+          '<div class="pd-skill-pill"><div style="font-size:12px; font-weight:700; color:#64748b;">✍️ Writing</div><div style="font-size:24px; font-weight:800; color:#d97706; margin-top:4px;">' + calcAvgBandForSkill('writing') + '</div></div>' +
+          '<div class="pd-skill-pill"><div style="font-size:12px; font-weight:700; color:#64748b;">🗣️ Speaking</div><div style="font-size:24px; font-weight:800; color:#7c3aed; margin-top:4px;">—</div></div>';
+      }
+
+      var chartBox = document.getElementById('pdWeeklyChartBox');
+      if (chartBox) {
+        var dayLabels = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+        var cols = [];
+        var maxMins = 60;
+        for (var i = 6; i >= 0; i--) {
+          var dt = new Date();
+          dt.setDate(dt.getDate() - i);
+          var isoDate = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+          var count = myResults.filter(function(r) { return getResultIsoDate(r) === isoDate; }).length;
+          var mins = count * 30;
+          if (mins > maxMins) maxMins = mins;
+          cols.push({ label: dayLabels[dt.getDay()], mins: mins, count: count });
+        }
+        chartBox.innerHTML = cols.map(function(c) {
+          var hPct = Math.max(6, Math.round((c.mins / maxMins) * 100));
+          return '<div class="pd-bar-col" title="' + c.mins + ' phút (' + c.count + ' bài)">' +
+            '<div style="font-size:10px; font-weight:700; color:#059669;">' + (c.mins > 0 ? c.mins + 'p' : '') + '</div>' +
+            '<div class="pd-bar-fill" style="height:' + hPct + 'px; opacity:' + (c.mins > 0 ? 1 : 0.25) + ';"></div>' +
+            '<div style="font-size:11px; font-weight:700; color:#475569;">' + c.label + '</div>' +
+          '</div>';
+        }).join('');
+      }
+
+      var heatBox = document.getElementById('pdMonthlyHeatmapBox');
+      var monthLbl = document.getElementById('pdHeatmapMonthLabel');
+      if (heatBox) {
+        var now = new Date();
+        var y = now.getFullYear();
+        var m = now.getMonth();
+        if (monthLbl) monthLbl.textContent = 'Tháng ' + (m + 1) + '/' + y;
+        var daysInMonth = new Date(y, m + 1, 0).getDate();
+        var cells = '';
+        for (var day = 1; day <= daysInMonth; day++) {
+          var dIso = y + '-' + String(m+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+          var cCnt = myResults.filter(function(r) { return getResultIsoDate(r) === dIso; }).length;
+          var lv = cCnt >= 3 ? 'lv-3' : (cCnt === 2 ? 'lv-2' : (cCnt === 1 ? 'lv-1' : ''));
+          cells += '<div class="pd-heat-cell ' + lv + '" title="Ngày ' + day + '/' + (m+1) + ': ' + cCnt + ' bài">' + day + '</div>';
+        }
+        heatBox.innerHTML = cells;
+      }
+
+      renderPdHistoryTable();
+    }
+
+    window.setPdHistoryType = function(typeKey) {
+      currentPdHistoryType = typeKey;
+      document.querySelectorAll('#pdTypeFilterPills button').forEach(function(b) {
+        b.className = b.getAttribute('data-type') === typeKey ? 'btn btn-emerald' : 'btn btn-secondary';
+      });
+      renderPdHistoryTable();
+    };
+
+    window.resetPdHistoryFilters = function() {
+      currentPdHistoryType = 'ALL';
+      if (document.getElementById('pdSearchInput')) document.getElementById('pdSearchInput').value = '';
+      if (document.getElementById('pdSkillSelect')) document.getElementById('pdSkillSelect').value = 'ALL';
+      if (document.getElementById('pdDateFrom')) document.getElementById('pdDateFrom').value = '';
+      if (document.getElementById('pdDateTo')) document.getElementById('pdDateTo').value = '';
+      setPdHistoryType('ALL');
+    };
+
+    function classifySubmissionMode(r) {
+      var sk = (typeof detectResultSkillType === 'function') ? detectResultSkillType(r) : '';
+      if (sk === 'quiz') return 'DICTATION';
+      var title = String(r.examTitle || '').toLowerCase();
+      var scoreStr = String(r.score || '');
+      var m = scoreStr.match(/(\d+)\s*\/\s*(\d+)/);
+      var totalQ = m ? parseInt(m[2]) : 0;
+      if (title.indexOf('full') !== -1 || totalQ >= 38) return 'MOCK';
+      if (totalQ > 0 && totalQ <= 20) return 'PRACTICE';
+      return 'SINGLE';
+    }
+
+    window.retakeFullExamById = function(examId, skillType) {
+      if (skillType === 'listening' && typeof launchListeningExam === 'function') {
+        launchListeningExam(examId);
+      } else if (skillType === 'writing' && typeof launchWritingExam === 'function') {
+        launchWritingExam(examId);
+      } else if (typeof launchExam === 'function') {
+        launchExam(examId);
+      }
+    };
+
+    function renderPdHistoryTable() {
+      var tbody = document.getElementById('pdHistoryTbody');
+      if (!tbody || typeof activeUser === 'undefined' || !activeUser) return;
+      tbody.innerHTML = '';
+
+      var kw = (document.getElementById('pdSearchInput') ? document.getElementById('pdSearchInput').value : '').toLowerCase().trim();
+      var skillFilter = document.getElementById('pdSkillSelect') ? document.getElementById('pdSkillSelect').value : 'ALL';
+      var dateFrom = document.getElementById('pdDateFrom') ? document.getElementById('pdDateFrom').value : '';
+      var dateTo = document.getElementById('pdDateTo') ? document.getElementById('pdDateTo').value : '';
+
+      var list = (db.results || []).slice().reverse().filter(function(r) {
+        if (activeUser.role === 'student' && String(r.userName || '').toLowerCase() !== String(activeUser.name || '').toLowerCase()) {
+          return false;
+        }
+        if (kw && String(r.examTitle || '').toLowerCase().indexOf(kw) === -1) return false;
+
+        var sk = (typeof detectResultSkillType === 'function') ? detectResultSkillType(r) : '';
+        if (skillFilter !== 'ALL') {
+          if (skillFilter === 'full') {
+            if (classifySubmissionMode(r) !== 'MOCK') return false;
+          } else if (sk !== skillFilter) {
+            return false;
+          }
+        }
+
+        if (currentPdHistoryType !== 'ALL' && classifySubmissionMode(r) !== currentPdHistoryType) {
+          return false;
+        }
+
+        var iso = getResultIsoDate(r);
+        if (dateFrom && iso < dateFrom) return false;
+        if (dateTo && iso > dateTo) return false;
+        return true;
+      });
+
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:24px; color:#94a3b8;">Không có dữ liệu bài làm phù hợp.</td></tr>';
+        return;
+      }
+
+      list.forEach(function(r) {
+        var sk = (typeof detectResultSkillType === 'function') ? detectResultSkillType(r) : 'reading';
+        var isWriting = sk === 'writing';
+        var isQuiz = sk === 'quiz';
+
+        var ringHtml = '<span style="font-weight:700; color:#475569;">' + (r.score || '—') + '</span>';
+        var ratioMatch = String(r.score || '').match(/(\d+)\s*\/\s*(\d+)/);
+        if (ratioMatch) {
+          var c = parseInt(ratioMatch[1]);
+          var t = Math.max(1, parseInt(ratioMatch[2]));
+          var pct = Math.round((c / t) * 100);
+          var color = pct >= 70 ? '#16a34a' : (pct >= 50 ? '#d97706' : '#dc2626');
+          ringHtml = '<div style="display:flex; align-items:center; gap:8px;">' +
+            '<div class="score-ring-badge" style="background: conic-gradient(' + color + ' ' + (pct * 3.6) + 'deg, #e2e8f0 0deg);">' +
+              '<div class="score-ring-inner">' + c + '/' + t + '</div>' +
+            '</div>' +
+            '<span style="font-size:12px; font-weight:700; color:#64748b;">' + pct + '%</span>' +
+          '</div>';
+        }
+
+        var skillBadges = {
+          reading: '<span style="background:#ecfdf5; color:#059669; padding:3px 10px; border-radius:99px; font-weight:700; font-size:12px;">📖 Reading</span>',
+          listening: '<span style="background:#eff6ff; color:#2563eb; padding:3px 10px; border-radius:99px; font-weight:700; font-size:12px;">🎧 Listening</span>',
+          writing: '<span style="background:#fef3c7; color:#d97706; padding:3px 10px; border-radius:99px; font-weight:700; font-size:12px;">✍️ Writing</span>',
+          quiz: '<span style="background:#f3e8ff; color:#7c3aed; padding:3px 10px; border-radius:99px; font-weight:700; font-size:12px;">🎯 Quiz</span>'
+        };
+
+        var tr = document.createElement('tr');
+        tr.innerHTML = 
+          '<td><b>' + r.examTitle + '</b>' + (activeUser.role === 'teacher' ? '<div style="font-size:11.5px; color:#64748b;">Học sinh: <b>' + r.userName + '</b></div>' : '') + '</td>' +
+          '<td>' + (skillBadges[sk] || sk) + '</td>' +
+          '<td>' + ringHtml + '</td>' +
+          '<td><b style="color:var(--emerald-accent);">' + (String(r.band).indexOf('Band') !== -1 ? r.band : 'Band ' + r.band) + '</b></td>' +
+          '<td><span style="font-size:12px; color:#64748b;">' + (r.timestamp || '') + '</span></td>' +
+          '<td style="display:flex; gap:6px; flex-wrap:wrap;">' +
+            (isWriting ? 
+              '<button class="btn btn-secondary" onclick="openStudentViewWritingModal(\'' + r.id + '\')">👁️ Xem lại</button>' +
+              '<button class="btn btn-emerald" onclick="retakeFullExamById(\'' + r.examId + '\', \'writing\')">🔄 Làm lại</button>' :
+             (isQuiz ? 
+              '<button class="btn btn-emerald" onclick="triggerVocabMilestoneQuiz(5)">🔄 Làm lại Quiz</button>' :
+              '<button class="btn btn-secondary" onclick="reopenReviewFromHistory(\'' + r.id + '\')">🔍 Xem lại</button>' +
+              '<button class="btn btn-emerald" onclick="retakeFullExamById(\'' + r.examId + '\', \'' + sk + '\')">🔄 Làm lại</button>'
+             )
+            ) +
+          '</td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 6. TRANG CHỦ (MY ASSIGNMENTS)
+    var currentHomeAsgTab = 'todo';
+
+    window.switchHomeAsgTab = function(tabName) {
+      currentHomeAsgTab = tabName;
+      renderHomeAssignmentsSection();
+    };
+
+    function isHomeworkCompletedByUser(asg, userObj) {
+      if (!userObj) return false;
+      return (db.results || []).some(function(r) {
+        var sameUser = String(r.userName || '').toLowerCase() === String(userObj.name || '').toLowerCase();
+        var sameExam = r.examId === asg.examId;
+        return sameUser && sameExam;
+      });
+    }
+
+    function renderHomeAssignmentsSection() {
+      if (typeof activeUser === 'undefined' || !activeUser) return;
+      var oldTbody = document.getElementById('homeRecentActivityTbody');
+      if (!oldTbody) return;
+      var card = oldTbody.closest('.card');
+      if (!card) return;
+
+      ensureArraysExist();
+      var myAsgs = (db.assignments || []).filter(function(a) {
+        if (activeUser.role === 'teacher') return true;
+        return (a.studentIds || []).indexOf(activeUser.id) !== -1 || (a.studentUsernames || []).indexOf(activeUser.username) !== -1;
+      });
+
+      var todoList = myAsgs.filter(function(a) { return !isHomeworkCompletedByUser(a, activeUser); });
+      var doneList = myAsgs.filter(function(a) { return isHomeworkCompletedByUser(a, activeUser); });
+      var activeList = currentHomeAsgTab === 'todo' ? todoList : doneList;
+
+      card.innerHTML = 
+        '<div class="card-title" style="margin-bottom:14px;">' +
+          '<div style="display:flex; align-items:center; gap:10px;"><span>📌 Nhiệm vụ / Bài tập được giao (My Assignments)</span></div>' +
+          '<div style="display:flex; gap:8px;">' +
+            (activeUser.role === 'teacher' ? '<button class="btn btn-emerald" onclick="openCreateHomeworkModal()">📋 + Giao bài tập mới</button>' : '') +
+            '<button class="btn btn-secondary" onclick="switchDashTab(\'mydashboard\')">📊 Xem Lịch sử bài đã làm ➔</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="asg-tabs">' +
+          '<button class="asg-tab-btn ' + (currentHomeAsgTab === 'todo' ? 'active' : '') + '" onclick="switchHomeAsgTab(\'todo\')">⏳ Cần làm (To-do) (' + todoList.length + ')</button>' +
+          '<button class="asg-tab-btn ' + (currentHomeAsgTab === 'done' ? 'active' : '') + '" onclick="switchHomeAsgTab(\'done\')">✅ Đã hoàn thành (' + doneList.length + ')</button>' +
+        '</div>' +
+        '<div id="homeAssignmentsListContainer">' +
+          (!activeList.length ? 
+            '<div class="asg-empty-box">' +
+              '<div style="font-size:32px; margin-bottom:8px;">🎉</div>' +
+              '<div style="font-size:16px; font-weight:800; color:#0f172a;">' + (currentHomeAsgTab === 'todo' ? 'Bạn đã hoàn thành hết bài tập được giao!' : 'Chưa có bài tập nào hoàn thành.') + '</div>' +
+              '<div style="font-size:13px; color:#64748b; margin-top:4px; margin-bottom:16px;">Tự luyện thêm trong thư viện để nâng Band điểm nhé!</div>' +
+              '<div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">' +
+                '<button class="btn btn-emerald" onclick="switchDashTab(\'reading\')">📖 Reading</button>' +
+                '<button class="btn btn-secondary" onclick="switchDashTab(\'listening\')">🎧 Listening</button>' +
+                '<button class="btn btn-secondary" onclick="switchDashTab(\'writing\')">✍️ Writing</button>' +
+              '</div>' +
+            '</div>' :
+            activeList.map(function(a) {
+              var isOverdue = a.deadline && (new Date(a.deadline).setHours(23,59,59) < Date.now()) && currentHomeAsgTab === 'todo';
+              var skillBadge = a.skill === 'listening' ? '🎧 Listening' : (a.skill === 'writing' ? '✍️ Writing' : '📖 Reading');
+              return '<div class="asg-card ' + (isOverdue ? 'overdue' : '') + '">' +
+                '<div>' +
+                  '<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; flex-wrap:wrap;">' +
+                    '<span style="background:#ecfdf5; color:#047857; padding:2px 9px; border-radius:6px; font-size:11.5px; font-weight:800;">' + skillBadge + '</span>' +
+                    '<b style="font-size:15px; color:#0f172a;">' + a.examTitle + '</b>' +
+                    (a.deadline ? '<span style="background:' + (isOverdue ? '#fee2e2' : '#fef3c7') + '; color:' + (isOverdue ? '#dc2626' : '#b45309') + '; padding:2px 8px; border-radius:6px; font-size:11.5px; font-weight:700;">⏰ Hạn: ' + a.deadline + '</span>' : '') +
+                  '</div>' +
+                  (a.note ? '<div style="font-size:13px; color:#334155; background:#f8fafc; padding:6px 10px; border-radius:6px; border-left:3px solid #3b82f6;">💬 <b>Ghi chú:</b> ' + a.note + '</div>' : '') +
+                  (activeUser.role === 'teacher' ? '<div style="font-size:11.5px; color:#64748b; margin-top:4px;">👥 Giao cho: ' + (a.studentNames || []).join(', ') + '</div>' : '') +
+                '</div>' +
+                '<div style="display:flex; gap:8px; align-items:center;">' +
+                  '<button class="btn btn-emerald" onclick="retakeFullExamById(\'' + a.examId + '\', \'' + a.skill + '\')">' + (currentHomeAsgTab === 'todo' ? '🚀 Làm bài' : '🔄 Làm lại') + '</button>' +
+                  (activeUser.role === 'teacher' ? '<button class="btn btn-danger" style="padding:7px 10px;" onclick="deleteHomeworkAssignment(\'' + a.id + '\')">🗑️</button>' : '') +
+                '</div>' +
+              '</div>';
+            }).join('')
+          ) +
+        '</div>';
+    }
+
+    // 7. GIAO BÀI TẬP (TEACHER)
+    window.openCreateHomeworkModal = function() {
+      ensureArraysExist();
+      populateHwExamOptions();
+      var clsSel = document.getElementById('hwFilterClassSelect');
+      if (clsSel) {
+        clsSel.innerHTML = '<option value="ALL">🏫 Tất cả các lớp</option>' +
+          (db.classes || []).map(function(c) { return '<option value="' + c.id + '">' + c.name + '</option>'; }).join('');
+      }
+      var d = new Date();
+      d.setDate(d.getDate() + 3);
+      var iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      if (document.getElementById('hwDeadlineInput')) document.getElementById('hwDeadlineInput').value = iso;
+      if (document.getElementById('hwNoteInput')) document.getElementById('hwNoteInput').value = '';
+      renderHwStudentChecklist();
+      openModal('createHomeworkModal');
+    };
+
+    window.populateHwExamOptions = function() {
+      var sk = document.getElementById('hwSkillSelect') ? document.getElementById('hwSkillSelect').value : 'reading';
+      var exSel = document.getElementById('hwExamSelect');
+      if (!exSel) return;
+      var pool = sk === 'listening' ? (db.listeningExams || []) : (sk === 'writing' ? (db.writingExams || []) : (db.readingExams || []));
+      if (!pool.length) {
+        exSel.innerHTML = '<option value="">-- Chưa có đề thi nào --</option>';
+        return;
+      }
+      exSel.innerHTML = pool.map(function(e) { return '<option value="' + e.id + '">' + e.title + '</option>'; }).join('');
+    };
+
+    window.renderHwStudentChecklist = function() {
+      var box = document.getElementById('hwStudentCheckListBox');
+      if (!box) return;
+      var clsFilter = document.getElementById('hwFilterClassSelect') ? document.getElementById('hwFilterClassSelect').value : 'ALL';
+      var students = (db.users || []).filter(function(u) { return u.role === 'student' && (clsFilter === 'ALL' || u.classId === clsFilter); });
+      if (!students.length) {
+        box.innerHTML = '<div style="color:#94a3b8; font-style:italic; grid-column: 1 / -1;">Không có học sinh trong lớp này.</div>';
+        return;
+      }
+      box.innerHTML = students.map(function(s) {
+        var cls = (db.classes || []).find(function(c) { return c.id === s.classId; });
+        return '<label style="display:flex; align-items:center; gap:8px; background:#fff; border:1px solid #e2e8f0; padding:7px 10px; border-radius:8px; cursor:pointer; font-size:12.5px; font-weight:600;">' +
+          '<input type="checkbox" class="hw-stu-checkbox" value="' + s.id + '" data-uname="' + s.username + '" data-name="' + s.name + '" checked style="width:16px; height:16px; accent-color:#059669;">' +
+          '<span>' + s.name + ' <small style="color:#64748b;">(' + (cls ? cls.name : 'Chưa xếp lớp') + ')</small></span>' +
+        '</label>';
+      }).join('');
+    };
+
+    window.toggleAllHwStudents = function(checkState) {
+      document.querySelectorAll('#hwStudentCheckListBox .hw-stu-checkbox').forEach(function(cb) { cb.checked = checkState; });
+    };
+
+    window.saveNewHomeworkAssignment = async function() {
+      var skill = document.getElementById('hwSkillSelect').value;
+      var examId = document.getElementById('hwExamSelect').value;
+      if (!examId) return alert('Vui lòng chọn đề thi!');
+      var pool = skill === 'listening' ? (db.listeningExams || []) : (skill === 'writing' ? (db.writingExams || []) : (db.readingExams || []));
+      var examObj = pool.find(function(e) { return e.id === examId; });
+      var checked = Array.from(document.querySelectorAll('#hwStudentCheckListBox .hw-stu-checkbox:checked'));
+      if (!checked.length) return alert('Vui lòng chọn học sinh!');
+
+      var newAsg = {
+        id: 'asg_' + Date.now(),
+        skill: skill,
+        examId: examId,
+        examTitle: examObj ? examObj.title : 'Bài tập IELTS',
+        studentIds: checked.map(function(b) { return b.value; }),
+        studentUsernames: checked.map(function(b) { return b.getAttribute('data-uname'); }),
+        studentNames: checked.map(function(b) { return b.getAttribute('data-name'); }),
+        deadline: document.getElementById('hwDeadlineInput').value,
+        note: document.getElementById('hwNoteInput').value.trim(),
+        createdAt: Date.now()
+      };
+
+      ensureArraysExist();
+      db.assignments.unshift(newAsg);
+      await persist();
+      closeModal('createHomeworkModal');
+      renderHomeAssignmentsSection();
+      alert('Đã giao bài tập thành công!');
+    };
+
+    window.deleteHomeworkAssignment = async function(asgId) {
+      if (!confirm('Xóa bài tập này?')) return;
+      db.assignments = (db.assignments || []).filter(function(a) { return a.id !== asgId; });
+      await persist();
+      renderHomeAssignmentsSection();
+    };
+
+    // 8. ĐIỀU HƯỚNG TỔNG QUÁT
+    var _lmsHomeTab = renderHomeTab;
+    renderHomeTab = function() {
+      injectPersonalDashboardTabAndPane();
+      if (typeof _lmsHomeTab === 'function') _lmsHomeTab();
+      renderHomeAssignmentsSection();
+    };
+
+    var _lmsSwitchTab = switchDashTab;
+    switchDashTab = function(tab) {
+      injectPersonalDashboardTabAndPane();
+      if (typeof _lmsSwitchTab === 'function') _lmsSwitchTab(tab);
+      if (tab === 'mydashboard') {
+        renderMyLearningDashboard();
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', function() {
+      injectPersonalDashboardTabAndPane();
+    });
+  </script>
 </body>
 </html>
