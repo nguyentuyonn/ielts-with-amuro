@@ -24693,6 +24693,42 @@ Câu dẫn chứng: "${eviVal}"`;
     window.addEventListener('DOMContentLoaded', function() {
       injectPersonalDashboardTabAndPane();
     });
+	// =========================================================================
+    // 9. KHÓA NÚT "Open Audio" & ĐỒNG BỘ ĐỒNG HỒ LISTENING AN TOÀN (KHÔNG LỖI)
+    // =========================================================================
+    (function() {
+      // 1. Dùng CSS thuần để ẩn nút Open Audio khi làm bài (tự hiện lại khi Review)
+      var st = document.createElement('style');
+      st.innerHTML = 'body:not(.review-mode) [title="Open Audio"] { display: none !important; pointer-events: none !important; }';
+      document.head.appendChild(st);
+
+      // 2. Chỉ đồng bộ thời gian khi có thẻ <audio> đang phát trực tiếp
+      setInterval(function() {
+        // Nếu không phải đang làm bài Listening hoặc đang ở chế độ Review thì thoát ngay, không can thiệp bất cứ thứ gì
+        if (typeof activeExamType === 'undefined' || activeExamType !== 'listening') return;
+        if (typeof isReviewMode !== 'undefined' && isReviewMode) return;
+
+        // Ẩn riêng nút Open Audio nếu chưa có class
+        var openBtn = document.querySelector('[title="Open Audio"]');
+        if (openBtn) openBtn.style.display = 'none';
+
+        // Tìm thẻ audio đang chạy để lấy thời lượng thực tế
+        var audioEl = document.querySelector('audio');
+        if (audioEl && !audioEl.paused && audioEl.duration && !isNaN(audioEl.duration) && audioEl.duration > 60) {
+          var remainAudio = Math.max(0, Math.ceil(audioEl.duration - audioEl.currentTime));
+          var targetSec = remainAudio + 120; // Thời gian còn lại của Audio + 2 phút check đáp án
+
+          // Chỉ cập nhật vào biến số đếm giờ gốc nếu chênh lệch > 3 giây (để bộ đếm gốc tự chạy mượt, không bao giờ nháy)
+          if (typeof remainingSeconds !== 'undefined' && Math.abs(remainingSeconds - targetSec) > 3) {
+            remainingSeconds = targetSec;
+          } else if (typeof timeLeft !== 'undefined' && Math.abs(timeLeft - targetSec) > 3) {
+            timeLeft = targetSec;
+          } else if (typeof examSecondsLeft !== 'undefined' && Math.abs(examSecondsLeft - targetSec) > 3) {
+            examSecondsLeft = targetSec;
+          }
+        }
+      }, 1000);
+    })();
   </script>
 </body>
 </html>
