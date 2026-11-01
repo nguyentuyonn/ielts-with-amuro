@@ -1,0 +1,4991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IELTS WITH AMURO - Official Computer-Delivered Testing</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  
+  <!-- FIREBASE CLOUD REALTIME & STORAGE SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <style>
+/* MÀU SẮC CHUẨN REVIEW FOOTER (XANH NHẠT / ĐỎ NHẠT / TRUNG TÍNH) */
+.progress-item.review-correct,
+.progress-item.correct {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border: 1.5px solid #16a34a !important;
+  border-top: 3px solid #16a34a !important;
+}
+
+.progress-item.review-incorrect,
+.progress-item.incorrect {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border: 1.5px solid #dc2626 !important;
+  border-top: 3px solid #dc2626 !important;
+}
+
+.progress-item.review-unanswered {
+  background: #f1f5f9 !important;
+  color: #64748b !important;
+  border: 1px solid #cbd5e1 !important;
+  border-top: 3px solid #94a3b8 !important;
+}
+
+.question-scroll-focus {
+  border: 2px solid #2563eb !important;
+  background: #eff6ff !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
+  transition: all 0.2s ease;
+}
+    :root {
+      --bg-main: #f8fafc;
+      --surface: #ffffff;
+      --emerald-dark: #064e3b;
+      --emerald-accent: #059669;
+      --emerald-hover: #047857;
+      --emerald-soft: #ecfdf5;
+      --royal-accent: #2563eb;
+      --royal-soft: #eff6ff;
+      --inspera-dark: #111827;
+      --inspera-border: #d1d5db;
+      --highlight-yellow: #fef08a;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', 'Segoe UI', system-ui, sans-serif; }
+    body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+    /* THEME MODES FOR EXAM WORKSPACE (INSPERA CONTRAST MODES) */
+    #examShell.theme-dark { background: #111827; color: #f9fafb; }
+    #examShell.theme-dark .inspera-top,
+    #examShell.theme-dark .inspera-instruction-banner,
+    #examShell.theme-dark .inspera-part-tabs,
+    #examShell.theme-dark .passage-col,
+    #examShell.theme-dark .questions-col,
+    #examShell.theme-dark .progress-container,
+    #examShell.theme-dark .question { background: #111827; color: #f9fafb; border-color: #374151; }
+    #examShell.theme-dark .section-title,
+    #examShell.theme-dark .question-group-title,
+    #examShell.theme-dark .question-text,
+    #examShell.theme-dark .inspera-timer { color: #f9fafb; }
+    #examShell.theme-dark .input-field.inline-input,
+    #examShell.theme-dark .form-input,
+    #examShell.theme-dark select { background: #1f2937; color: #fff; border-color: #6b7280; }
+
+    #examShell.theme-yellow { background: #000; color: #fde047; }
+    #examShell.theme-yellow .inspera-top,
+    #examShell.theme-yellow .inspera-instruction-banner,
+    #examShell.theme-yellow .inspera-part-tabs,
+    #examShell.theme-yellow .passage-col,
+    #examShell.theme-yellow .questions-col,
+    #examShell.theme-yellow .progress-container,
+    #examShell.theme-yellow .question { background: #000; color: #fde047; border-color: #ca8a04; }
+    #examShell.theme-yellow .section-title,
+    #examShell.theme-yellow .question-group-title,
+    #examShell.theme-yellow .question-text,
+    #examShell.theme-yellow .inspera-timer { color: #fde047; }
+    #examShell.theme-yellow .input-field.inline-input,
+    #examShell.theme-yellow .form-input,
+    #examShell.theme-yellow select { background: #111; color: #fde047; border-color: #eab308; }
+
+    /* 1. ATTRACTIVE MODERN IELTS LOGIN SCREEN */
+    #loginScreen {
+      position: fixed; inset: 0; z-index: 9999; display: flex;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(16, 185, 129, 0.14) 0%, transparent 38%),
+        radial-gradient(circle at 88% 82%, rgba(37, 99, 235, 0.12) 0%, transparent 42%),
+        linear-gradient(135deg, #f0fdf4 0%, #f8fafc 50%, #eff6ff 100%);
+      overflow-y: auto;
+    }
+    .login-left-banner {
+      width: 58%; display: flex; flex-direction: column; justify-content: center;
+      padding: 50px 72px; position: relative;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    .login-brand-pill {
+      display: inline-flex; align-items: center; gap: 8px; width: fit-content;
+      background: #ffffff; border: 1px solid #a7f3d0; color: var(--emerald-accent);
+      padding: 7px 16px; border-radius: 999px; font-size: 12px; font-weight: 800;
+      letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 18px;
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.1);
+    }
+    .login-hero-logo { font-size: 54px; font-weight: 800; line-height: 1.06; color: #0f172a; margin-bottom: 14px; letter-spacing: -1.2px; }
+    .login-hero-logo span {
+      background: linear-gradient(135deg, #059669 0%, #2563eb 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .login-hero-desc { font-size: 15.5px; color: #475569; line-height: 1.65; max-width: 540px; margin-bottom: 24px; font-weight: 500; }
+
+    .trf-showcase-card {
+      background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(12px);
+      border: 1px solid #e2e8f0; border-radius: 18px; padding: 18px 22px;
+      max-width: 540px; margin-bottom: 22px;
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+    }
+    .trf-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px dashed #cbd5e1;
+    }
+    .trf-title { font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 8px; }
+    .trf-overall-pill {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #fff;
+      padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 800;
+    }
+    .trf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .trf-box {
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 10px 8px; text-align: center; transition: 0.2s;
+    }
+    .trf-box:hover { transform: translateY(-2px); border-color: #a7f3d0; background: #fff; }
+    .trf-skill-name { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; }
+    .trf-skill-score { font-size: 20px; font-weight: 800; color: #0f172a; }
+
+    .ielts-skill-pills {
+      display: grid; grid-template-columns: repeat(2, minmax(200px, 260px)); gap: 12px; margin-bottom: 22px;
+    }
+    .skill-badge-card {
+      background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(8px);
+      border: 1px solid #e2e8f0; border-radius: 12px; padding: 11px 14px;
+      display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+    }
+    .skill-badge-icon {
+      width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; flex-shrink: 0;
+    }
+    .skill-badge-title { font-size: 12.5px; font-weight: 800; color: #0f172a; }
+    .skill-badge-sub { font-size: 11px; font-weight: 600; color: #64748b; }
+
+    .login-motto-badge {
+      display: inline-block; width: fit-content; background: #ffffff;
+      border-left: 4px solid var(--emerald-accent); padding: 10px 18px;
+      font-size: 13px; font-style: italic; color: #334155; font-weight: 600;
+      border-radius: 0 10px 10px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .login-right-area { width: 42%; display: flex; align-items: center; justify-content: center; padding: 40px; }
+    .login-card {
+      width: 100%; max-width: 420px; background: #ffffff; padding: 40px 36px; border-radius: 24px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.09); border: 1px solid #e2e8f0; position: relative; overflow: hidden;
+    }
+    .login-card::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+      background: linear-gradient(90deg, #059669 0%, #2563eb 100%);
+    }
+    .login-card-visual {
+      width: 100%; height: 115px; border-radius: 14px; margin-bottom: 20px; overflow: hidden; position: relative;
+      background: linear-gradient(135deg, #064e3b 0%, #1e3a8a 100%);
+      display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; color: #fff;
+    }
+    .login-card h2 { font-size: 23px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+    .login-card p { font-size: 13px; color: #64748b; margin-bottom: 22px; font-weight: 500; }
+    
+    .form-group { margin-bottom: 16px; text-align: left; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .form-input {
+      width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1;
+      border-radius: 10px; font-size: 14px; outline: none; transition: 0.15s; background: #fff; color: #0f172a;
+    }
+    .form-input:focus { border-color: var(--emerald-accent); box-shadow: 0 0 0 3px rgba(5,150,105,0.12); }
+
+    .btn {
+      padding: 9px 16px; border-radius: 10px; border: 1px solid transparent;
+      font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.15s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-emerald { background: var(--emerald-accent); color: #fff; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2); }
+    .btn-emerald:hover { background: var(--emerald-hover); transform: translateY(-1px); }
+    .btn-secondary { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+
+    /* 2. BRIGHT MODERN DASHBOARD */
+    #dashboardApp { display: none; min-height: 100vh; flex-direction: column; }
+    header.dash-header {
+      background: #ffffff; color: #0f172a; height: 64px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 32px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .dash-brand { font-size: 19px; font-weight: 800; display: flex; align-items: center; gap: 12px; color: #0f172a; letter-spacing: -0.3px; }
+    .brand-icon-box {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px;
+    }
+    .sync-badge {
+      font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 999px;
+      background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block; }
+    .dash-user-controls { display: flex; align-items: center; gap: 10px; }
+    .dash-user-badge {
+      background: #f8fafc; padding: 7px 16px; border-radius: 999px;
+      font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #e2e8f0; color: #0f172a;
+    }
+    .dash-user-badge:hover { background: #f1f5f9; }
+    
+    .dash-body { max-width: 1340px; margin: 28px auto; padding: 0 24px; width: 100%; flex: 1; }
+    .dash-tabs {
+      display: flex; gap: 6px; background: #ffffff; padding: 6px;
+      border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 24px; flex-wrap: wrap;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+    }
+    .dash-tab-btn {
+      padding: 10px 18px; border: none; background: transparent; font-weight: 700;
+      font-size: 13px; color: #64748b; cursor: pointer; border-radius: 10px; transition: 0.15s;
+    }
+    .dash-tab-btn:hover { color: #0f172a; background: #f8fafc; }
+    .dash-tab-btn.active { color: #ffffff; background: var(--emerald-accent); box-shadow: 0 4px 10px rgba(5, 150, 105, 0.2); }
+    
+    .card {
+      background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0;
+      padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+    }
+    .card-title { font-size: 17px; font-weight: 800; color: #0f172a; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+    th { background: #f8fafc; font-weight: 700; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    tbody tr:hover { background: #f8fafc; }
+
+    .student-group-row { cursor: pointer; transition: 0.15s; }
+    .student-group-row:hover { background: #f0fdf4 !important; }
+    .student-history-drawer { background: #f8fafc; padding: 16px 22px; border-left: 4px solid var(--emerald-accent); border-radius: 8px; margin: 6px 0; }
+
+    /* HOME HERO */
+    .home-hero-banner {
+      background: linear-gradient(135deg, #ecfdf5 0%, #eff6ff 100%);
+      color: #0f172a; border-radius: 20px; padding: 34px 40px; margin-bottom: 24px;
+      border: 1px solid #bbf7d0; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap;
+    }
+    .home-hero-title { font-size: 26px; font-weight: 800; margin-bottom: 8px; color: #064e3b; }
+    .home-hero-sub { font-size: 14px; color: #334155; line-height: 1.6; max-width: 680px; font-weight: 500; }
+    .hero-band-badge {
+      background: #ffffff; border: 1px solid #a7f3d0; padding: 14px 22px; border-radius: 16px;
+      text-align: center; box-shadow: 0 8px 20px rgba(5, 150, 105, 0.06);
+    }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card {
+      background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;
+      padding: 20px; display: flex; align-items: center; gap: 16px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02);
+    }
+    .stat-icon {
+      width: 48px; height: 48px; border-radius: 12px; background: var(--emerald-soft);
+      color: var(--emerald-accent); display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .stat-value { font-size: 24px; font-weight: 800; color: #0f172a; }
+    .stat-label { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    /* =================================================================
+       3. AUTHENTIC MINIMALIST INSPERA EXAM WORKSPACE (demo-ielts.inspera.com)
+       ================================================================= */
+    #examShell {
+      display: none; position: fixed; inset: 0; background: #ffffff;
+      z-index: 5000; flex-direction: column; overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif; color: #111827;
+    }
+    #examShell * { font-family: Arial, Helvetica, sans-serif; }
+    #examShell .fas, #examShell .far { font-family: "Font Awesome 6 Free" !important; }
+
+    .inspera-top {
+      background: #ffffff; color: #111827; height: 50px;
+      border-bottom: 1px solid #d1d5db;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 18px; font-size: 13px; font-weight: 600; flex-shrink: 0;
+    }
+    .inspera-top-left { display: flex; align-items: center; gap: 16px; }
+    .inspera-brand-logo {
+      font-size: 16px; font-weight: 900; color: #dc2626; letter-spacing: -0.5px;
+      padding-right: 14px; border-right: 1px solid #d1d5db;
+    }
+    .inspera-timer {
+      background: transparent; padding: 4px 10px; border-radius: 3px;
+      font-size: 14px; font-weight: 700; color: #111827; border: 1px solid transparent;
+    }
+    .inspera-flat-btn {
+      padding: 6px 12px; border-radius: 3px; border: 1px solid #9ca3af;
+      background: #ffffff; color: #111827; font-size: 12.5px; font-weight: 600;
+      cursor: pointer; transition: 0.1s; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .inspera-flat-btn:hover { background: #f3f4f6; border-color: #4b5563; }
+    .inspera-flat-btn.primary { background: #111827; color: #ffffff; border-color: #111827; }
+    .inspera-flat-btn.primary:hover { background: #374151; }
+
+    /* INSPERA GREY PART BANNER */
+    .inspera-instruction-banner {
+      background: #f3f4f6; border-bottom: 1px solid #d1d5db;
+      padding: 10px 20px; font-size: 13.5px; color: #111827;
+      display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+      margin: 8px 16px 0 16px; border: 1px solid #d1d5db; border-radius: 2px;
+    }
+
+    /* INSPERA PART TABS */
+    .inspera-part-tabs {
+      background: #ffffff; border-bottom: 1px solid #d1d5db;
+      padding: 8px 16px 0; display: flex; gap: 4px; flex-shrink: 0;
+    }
+    .part-pill {
+      padding: 7px 20px; border: 1px solid #d1d5db; border-bottom: none;
+      border-radius: 2px 2px 0 0; background: #f3f4f6; font-size: 13px;
+      font-weight: 700; color: #4b5563; cursor: pointer;
+    }
+    .part-pill.active {
+      background: #ffffff; border-color: #9ca3af; border-bottom: 2px solid #ffffff;
+      color: #111827; margin-bottom: -1px;
+    }
+
+    .inspera-workspace { flex: 1; display: flex; overflow: hidden; position: relative; }
+    .passage-col {
+      width: 50%; padding: 24px 30px; overflow-y: auto; font-size: 15px;
+      line-height: 1.75; border-right: 1px solid #9ca3af; user-select: text; background: #ffffff;
+    }
+    .passage-col p { margin-bottom: 14px; }
+    .resizer-bar {
+      width: 8px; cursor: col-resize; background: #e5e7eb;
+      border-left: 1px solid #d1d5db; border-right: 1px solid #d1d5db;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    }
+    .resizer-bar::after { content: "⋮"; color: #4b5563; font-weight: bold; }
+    .resizer-bar:hover { background: #d1d5db; }
+    .questions-col {
+      width: 50%; padding: 24px 30px; overflow-y: auto; background: #ffffff;
+      font-size: 14.5px; line-height: 1.65; user-select: text;
+    }
+
+    /* HIGHLIGHT TOOLTIP */
+    #selectionTooltip {
+      display: none; position: absolute; z-index: 99999; background: #111827; border-radius: 3px;
+      padding: 4px 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); gap: 6px;
+    }
+    #selectionTooltip button {
+      background: none; border: none; color: #fff; font-size: 12px; font-weight: 700;
+      cursor: pointer; padding: 4px 8px; border-radius: 2px; display: inline-flex; align-items: center; gap: 4px;
+    }
+    #selectionTooltip button:hover { background: #374151; }
+    #selectionTooltip button.btn-hl-yellow { color: #fde047; }
+    .user-highlight-span { background-color: #fef08a !important; color: #000 !important; }
+
+    /* INSPERA MINIMALIST QUESTION STYLES */
+    .section-title {
+      font-size: 1.15rem; font-weight: 700; color: #111827;
+      margin-bottom: 16px; padding-bottom: 6px; border-bottom: 1px solid #d1d5db;
+    }
+    .question-group { background: transparent; padding: 0; margin-bottom: 28px; }
+    .question-group-title { font-weight: 700; margin-bottom: 6px; color: #111827; font-size: 1rem; }
+    .question-group p { margin-bottom: 10px; line-height: 1.55; }
+    
+    .question {
+      margin-bottom: 14px; padding: 10px 12px; border: 1px solid transparent;
+      border-radius: 2px; background: transparent; position: relative;
+    }
+    .question:focus-within, .question.active-question-box {
+      border-color: #2563eb; background: #f8fafc;
+    }
+    .question-text { font-weight: 700; margin-bottom: 8px; line-height: 1.5; color: #111827; }
+    .q-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 24px; height: 22px; padding: 0 5px; background: #ffffff; color: #111827;
+      border: 1.5px solid #111827; font-size: 12px; font-weight: 700;
+      border-radius: 2px; margin-right: 6px;
+    }
+    .options { display: flex; flex-direction: column; gap: 6px; padding-left: 4px; }
+    .options label {
+      display: flex; align-items: center; gap: 10px; cursor: pointer;
+      line-height: 1.45; padding: 5px 8px; border-radius: 2px; font-weight: 400;
+    }
+    .options label:hover { background: #f3f4f6; }
+    .options input[type="radio"], .options input[type="checkbox"] {
+      width: 16px; height: 16px; accent-color: #1d4ed8; cursor: pointer;
+    }
+
+    .input-field.inline-input {
+      display: inline-block; width: 140px; border: 1px solid #4b5563;
+      border-radius: 2px; padding: 3px 8px; background: #fff; color: #111827;
+      font-size: 14px; text-align: center; font-weight: 700; margin: 2px 4px;
+      vertical-align: baseline; outline: none;
+    }
+    .input-field.inline-input:focus {
+      border: 2px solid #2563eb; box-shadow: none;
+    }
+    .inline-select {
+      display: inline-block; min-width: 90px; border: 1px solid #4b5563;
+      border-radius: 2px; padding: 3px 8px; background: #fff; font-size: 14px;
+      font-weight: 700; margin: 2px 4px; outline: none; cursor: pointer;
+    }
+
+    /* MATRIX TABLE */
+    .matrix-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13.5px; }
+    .matrix-table th, .matrix-table td { border: 1px solid #9ca3af; padding: 9px 10px; text-align: center; }
+    .matrix-table th { background: #f3f4f6; font-weight: 700; color: #111827; }
+    .matrix-table td.matrix-statement { text-align: left; font-weight: 400; width: 55%; }
+    .matrix-table tr:hover { background: #f9fafb; }
+
+    /* DRAG & DROP (INSPERA SHARP BOXES) */
+    .drag-options {
+      display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px;
+      padding: 12px; background: #f9fafb; border: 1px solid #9ca3af; border-radius: 2px;
+    }
+    .drag-options.headings-bank { flex-direction: column; align-items: flex-start; }
+    .drag-item {
+      padding: 5px 12px; border: 1px solid #4b5563; border-radius: 2px; background: #fff;
+      font-size: 13.5px; font-weight: 600; cursor: grab; user-select: none; color: #111827;
+    }
+    .drag-item:hover { border-color: #1d4ed8; background: #eff6ff; }
+    .drag-item:active { cursor: grabbing; }
+    .drag-item.used {
+      opacity: 0.35; pointer-events: none; background: #e5e7eb; border-style: dashed;
+    }
+
+    .drop-zone {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 95px; min-height: 28px; padding: 2px 10px;
+      border: 1px dashed #4b5563; border-radius: 2px; background: #ffffff;
+      font-weight: 700; color: #111827; margin: 2px 4px; vertical-align: middle;
+      line-height: normal; cursor: pointer; font-size: 13.5px;
+    }
+    .drop-zone.heading-drop {
+      display: flex; width: 100%; justify-content: flex-start; padding: 6px 12px;
+      margin: 10px 0 6px 0; background: #f9fafb; border: 1px dashed #4b5563; color: #111827;
+    }
+    .drop-zone.over { border: 2px solid #2563eb; background: #eff6ff; }
+    .drop-zone.filled { border-style: solid; border-color: #111827; background: #f3f4f6; color: #111827; }
+
+    .answer-indicator {
+      display: block; margin-top: 8px; padding: 8px 12px; border-radius: 3px; font-size: 13px; font-weight: 600;
+    }
+    .answer-indicator.correct { background: #f0fdf4; border: 1px solid #16a34a; color: #14532d; }
+    .answer-indicator.incorrect { background: #fef2f2; border: 1px solid #dc2626; color: #7f1d1d; }
+
+    .btn-locate {
+      background: #ffffff; border: 1px solid #4b5563; color: #111827;
+      padding: 3px 9px; border-radius: 2px; font-size: 11px; font-weight: 700;
+      cursor: pointer; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .btn-locate:hover { background: #f3f4f6; }
+    .evidence-highlight-active {
+      background-color: #fef08a !important; color: #000 !important; padding: 1px 3px;
+      outline: 2px solid #eab308;
+    }
+
+    /* INSPERA BOTTOM PROGRESS BAR */
+    .progress-container {
+      height: 50px; background: #ffffff; border-top: 1px solid #9ca3af;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0;
+    }
+    .progress-items { display: flex; gap: 3px; overflow-x: auto; max-width: 76%; align-items: center; padding: 4px 0; }
+    .progress-item {
+      min-width: 28px; height: 28px; border: 1px solid #9ca3af; border-radius: 2px;
+      background: #ffffff; font-size: 12px; font-weight: 700; color: #111827;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      border-top: 3px solid #d1d5db;
+    }
+    .progress-item:hover { border-color: #111827; }
+    .progress-item.answered {
+      background: #374151; color: #ffffff; border-color: #111827; border-top-color: #111827;
+    }
+    .progress-item.current {
+      outline: 2px solid #2563eb; outline-offset: 1px;
+    }
+    .progress-item.correct { background: #16a34a !important; color: #fff !important; border-color: #15803d !important; }
+    .progress-item.incorrect { background: #dc2626 !important; color: #fff !important; border-color: #b91c1c !important; }
+
+    .teacher-edit-badge {
+      display: inline-block; background: #f3f4f6; border: 1px solid #6b7280; color: #111827;
+      font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 2px; cursor: pointer; margin-left: 6px;
+    }
+    .teacher-edit-badge:hover { background: #e5e7eb; }
+
+    /* MODALS */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(3px); z-index: 7000; align-items: center; justify-content: center; }
+    .modal-window {
+      background: #fff; width: 980px; max-width: 96vw; max-height: 92vh;
+      border-radius: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px rgba(15, 23, 42, 0.18);
+    }
+    .modal-header { padding: 16px 24px; border-bottom: 1px solid #e2e8f0; font-weight: 800; font-size: 16px; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+    .modal-body { padding: 24px; overflow-y: auto; flex: 1; font-size: 13px; }
+    .modal-footer { padding: 14px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px; background: #f8fafc; }
+    .active-subtab { background: var(--emerald-accent) !important; color: #fff !important; border-color: var(--emerald-accent) !important; }
+    .template-toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; margin-bottom: 14px; }
+
+/* NHÃN ĐỀ THI (BADGES) & TIẾN ĐỘ */
+  .badge-new { background: #fee2e2; color: #dc2626; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; margin-right: 6px; display: inline-block; }
+  .badge-pop { background: #f3e8ff; color: #7c3aed; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
+  .badge-diff-Easy { background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
+  .badge-diff-Standard { background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
+  .badge-diff-Hard { background: #ffedd5; color: #c2410c; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 6px; display: inline-block; }
+  .skill-progress-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .skill-progress-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 20px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02); }
+  .skill-progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 800; font-size: 14px; }
+  .skill-progress-bar-bg { width: 100%; height: 10px; background: #f1f5f9; border-radius: 999px; overflow: hidden; margin-bottom: 8px; }
+  .skill-progress-bar-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+  .skill-progress-meta { font-size: 12px; color: #64748b; font-weight: 600; display: flex; justify-content: space-between; }
+  .milestone-banner {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px solid #f59e0b; border-radius: 14px; padding: 16px 20px;
+    margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .btn-locked { background: #e2e8f0 !important; color: #64748b !important; cursor: not-allowed !important; border-color: #cbd5e1 !important; box-shadow: none !important; }
+  .audio-speed-select {
+    background: #ffffff; color: #111827; border: 1px solid #9ca3af;
+    border-radius: 3px; padding: 3px 6px; font-size: 12px; font-weight: 700; cursor: pointer; outline: none;
+  }
+  .quiz-q-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  .quiz-q-title { font-weight: 700; font-size: 14px; color: #0f172a; margin-bottom: 10px; }
+
+/* NÚT BẤM TRONG KHUNG REVIEW CÂU HỎI */
+  .btn-syntax {
+    background: #eff6ff; border: 1px solid #2563eb; color: #1d4ed8;
+    padding: 3px 9px; border-radius: 2px; font-size: 11px; font-weight: 700;
+    cursor: pointer; margin-top: 6px; margin-left: 6px;
+    display: inline-flex; align-items: center; gap: 4px; transition: 0.15s;
+  }
+  .btn-syntax:hover, .btn-syntax.active-syntax {
+    background: #2563eb; color: #ffffff; border-color: #1e40af;
+  }
+
+  /* KHUNG CÂU DẪN CHỨNG ĐANG ĐƯỢC PHÂN TÍCH TRÊN ĐOẠN VĂN BÊN TRÁI */
+  .passage-syntax-sentence-focus {
+    background-color: rgba(248, 250, 252, 0.6);
+    outline: 1.5px dashed #3b82f6;
+    border-radius: 3px;
+    padding: 1px 2px;
+    transition: 0.2s;
+  }
+
+  /* GẠCH CHÂN & TÔ MÀU TRỰC TIẾP TỪNG THÀNH PHẦN (KHÔNG HIỆN NHÃN S, V, O/C, M) */
+  .inline-syn-seg {
+    padding: 1px 2px;
+    margin: 0;
+    border-radius: 2px;
+    font-weight: 600;
+    transition: 0.15s;
+  }
+  .inline-syn-seg.syn-s {
+    background: rgba(59, 130, 246, 0.14);
+    border-bottom: 2.5px solid #2563eb;
+    color: #1e3a8a;
+  }
+  .inline-syn-seg.syn-v {
+    background: rgba(22, 163, 74, 0.15);
+    border-bottom: 3px double #15803d;
+    color: #14532d;
+  }
+  .inline-syn-seg.syn-o {
+    background: rgba(245, 158, 11, 0.16);
+    border-bottom: 2.5px solid #d97706;
+    color: #78350f;
+  }
+  .inline-syn-seg.syn-m {
+    background: rgba(147, 51, 234, 0.12);
+    border-bottom: 2px dashed #7e22ce;
+    color: #581c87;
+  }
+
+  /* KHI CẢ LOCATE EVIDENCE (TÔ VÀNG) VÀ GẠCH CHÂN CẤU TRÚC CÙNG BẬT */
+  .evidence-highlight-active .inline-syn-seg {
+    background-color: rgba(255, 255, 255, 0.45) !important;
+  }
+
+.online-monitor-bar {
+    background: #ffffff; border: 1px solid #bbf7d0; border-radius: 14px;
+    padding: 12px 18px; margin-bottom: 20px; display: flex; align-items: center;
+    justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.05);
+  }
+  .online-user-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #ecfdf5; border: 1px solid #6ee7b7; color: #065f46;
+    padding: 4px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 700;
+  }
+  .online-pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  }
+  .smart-err-bad {
+    background: #fee2e2; color: #b91c1c; padding: 1px 6px;
+    border-radius: 4px; text-decoration: line-through; font-weight: 700;
+  }
+  .smart-err-good {
+    background: #dcfce7; color: #15803d; padding: 1px 6px;
+    border-radius: 4px; font-weight: 800; border: 1px solid #86efac;
+  }
+  .pro-sample-box {
+    background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%);
+    border: 1.5px solid #6ee7b7; border-radius: 12px; padding: 16px; margin-top: 14px;
+  }
+  .pro-locked-card {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px dashed #f59e0b; border-radius: 12px; padding: 18px;
+    text-align: center; color: #92400e; margin-top: 14px;
+  }
+
+/* 1. BẢNG MÀU MATCHA TRẦM & NỀN VÂN GIẤY MỸ THUẬT */
+  #loginScreen {
+    background: 
+      radial-gradient(circle at 14% 22%, rgba(122, 154, 139, 0.16) 0%, transparent 48%),
+      radial-gradient(circle at 86% 78%, rgba(163, 177, 155, 0.15) 0%, transparent 48%),
+      linear-gradient(135deg, #f4f5f0 0%, #f7f6f2 52%, #eff2ec 100%) !important;
+  }
+  .login-left-banner {
+    background-image: radial-gradient(#cbd5c8 0.85px, transparent 0.85px) !important;
+    background-size: 30px 30px !important;
+    padding: 52px 72px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+  }
+
+  /* 2. HUY HIỆU HỢP TÁC THE EZ TRANG NHÃ */
+  .matcha-collab-pill {
+    display: inline-flex; align-items: center; gap: 10px; width: fit-content;
+    background: rgba(255, 255, 255, 0.85); border: 1px solid #d5ddd3;
+    padding: 7px 16px; border-radius: 999px; font-size: 11.5px; font-weight: 700;
+    color: #3f5248; box-shadow: 0 4px 14px rgba(45, 74, 62, 0.04);
+    margin-bottom: 22px; letter-spacing: 0.2px;
+  }
+  .matcha-ez-tag {
+    background: #7c2d2e; color: #ffffff; font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700; font-size: 11.5px; padding: 2px 8px; border-radius: 4px;
+    letter-spacing: 0.8px;
+  }
+
+  /* 3. TIÊU ĐỀ & CÂU CHÂM NGÔN PHONG CÁCH EDITORIAL */
+  .login-hero-logo {
+    font-size: 52px !important; font-weight: 800 !important;
+    letter-spacing: -1.3px !important; margin-bottom: 10px !important;
+    color: #1f2e27 !important; line-height: 1.05 !important;
+  }
+  .login-hero-logo span {
+    background: linear-gradient(135deg, #2d4a3e 0%, #52796f 100%) !important;
+    -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important;
+  }
+  .matcha-editorial-motto {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 21px; font-style: italic; font-weight: 600;
+    color: #4a6356; margin-bottom: 30px; padding-left: 14px;
+    border-left: 3px solid #6b8e7b; letter-spacing: 0.2px;
+  }
+
+  /* 4. THẺ CHỨNG CHỈ IELTS 9.0 DẬP NỔI TỐI GIẢN */
+  .matcha-trf-card {
+    background: #fcfcfa;
+    border: 1px solid #d8e0d5; border-radius: 20px; padding: 24px 28px;
+    max-width: 530px; position: relative;
+    box-shadow: 
+      0 20px 45px rgba(31, 46, 39, 0.06),
+      inset 0 0 0 4px #f4f5f0;
+  }
+  .matcha-trf-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 16px; margin-bottom: 18px; border-bottom: 1px dashed #cbd5c8;
+  }
+  .matcha-trf-badge-icon {
+    width: 42px; height: 42px; border-radius: 11px;
+    background: #eef2eb; border: 1px solid #d5ddd3; color: #2d4a3e;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .matcha-overall-pill {
+    background: #2d4a3e; color: #f4f5f0; padding: 7px 16px;
+    border-radius: 12px; text-align: right;
+    box-shadow: 0 4px 12px rgba(45, 74, 62, 0.15);
+  }
+  .matcha-score-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;
+  }
+  .matcha-skill-box {
+    background: #f4f5f0; border: 1px solid #e2e8df; border-radius: 13px;
+    padding: 13px 8px; text-align: center; transition: all 0.25s ease;
+  }
+  .matcha-skill-box:hover {
+    background: #ffffff; border-color: #8fa899; transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(45, 74, 62, 0.06);
+  }
+  .matcha-skill-label {
+    font-size: 11px; font-weight: 700; color: #5c7065; margin-bottom: 4px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .matcha-skill-num {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 26px; font-weight: 700; color: #2d4a3e; line-height: 1.1;
+  }
+  .matcha-trf-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11.5px; color: #64746b; font-weight: 600; padding-top: 12px;
+    border-top: 1px solid #edf0ea;
+  }
+  .matcha-partner-footnote {
+    font-size: 12px; color: #5c7065; font-weight: 600; margin-top: 28px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* 5. ĐỒNG BỘ KHUNG ĐĂNG NHẬP BÊN PHẢI SANG TÔNG MATCHA TRẦM */
+  .login-card {
+    background: #fcfcfa !important;
+    border-radius: 24px !important; border: 1px solid #d8e0d5 !important;
+    box-shadow: 0 22px 50px rgba(31, 46, 39, 0.07) !important;
+  }
+  .login-card::before {
+    background: linear-gradient(90deg, #2d4a3e 0%, #6b8e7b 50%, #c8a97e 100%) !important;
+    height: 5px !important;
+  }
+  .login-card-visual {
+    background: linear-gradient(135deg, #2d4a3e 0%, #3f5e50 100%) !important;
+    border: 1px solid #243c32 !important; color: #f4f5f0 !important;
+  }
+  .login-card-visual div { color: #f4f5f0 !important; }
+  .login-card .form-input {
+    background: #f7f8f5 !important; border-color: #d5ddd3 !important;
+  }
+  .login-card .form-input:focus {
+    background: #ffffff !important; border-color: #3b5a4b !important;
+    box-shadow: 0 0 0 3px rgba(59, 90, 75, 0.12) !important;
+  }
+  .login-card .btn-emerald {
+    background: #2d4a3e !important; color: #ffffff !important;
+    border-radius: 12px !important; transition: all 0.25s ease !important;
+    box-shadow: 0 6px 16px rgba(45, 74, 62, 0.2) !important;
+  }
+  .login-card .btn-emerald:hover {
+    background: #22382f !important; transform: translateY(-1px) !important;
+  }
+
+/* 1. ĐỔI BIẾN MÀU GỐC SANG TÔNG MATCHA TRẦM & KEM YẾN MẠCH */
+  :root {
+    --bg-main: #f4f5f0 !important;
+    --surface: #fcfcfa !important;
+    --emerald-dark: #1f2e27 !important;
+    --emerald-accent: #2d4a3e !important;
+    --emerald-hover: #22382f !important;
+    --emerald-soft: #eef2eb !important;
+    --royal-accent: #3b5978 !important;
+    --royal-soft: #eef2f6 !important;
+    --text-main: #1f2e27 !important;
+    --text-muted: #5c7065 !important;
+  }
+
+  /* 2. NỀN TỔNG THỂ, HEADER, TABS VÀ CÁC THẺ CARD */
+  body {
+    background: var(--bg-main) !important;
+    color: var(--text-main) !important;
+  }
+  header.dash-header {
+    background: #fcfcfa !important;
+    border-bottom: 1px solid #d8e0d5 !important;
+  }
+  .brand-icon-box {
+    background: linear-gradient(135deg, #2d4a3e 0%, #4a6b5b 100%) !important;
+  }
+  .sync-badge {
+    background: #eef2eb !important;
+    border-color: #c5d1c1 !important;
+    color: #2d4a3e !important;
+  }
+  .sync-dot {
+    background: #3b5a4b !important;
+  }
+  .dash-user-badge {
+    background: #f4f5f0 !important;
+    border-color: #d8e0d5 !important;
+    color: #1f2e27 !important;
+  }
+  .dash-tabs {
+    background: #fcfcfa !important;
+    border-color: #d8e0d5 !important;
+  }
+  .dash-tab-btn {
+    color: #5c7065 !important;
+  }
+  .dash-tab-btn:hover {
+    background: #f4f5f0 !important;
+    color: #1f2e27 !important;
+  }
+  .dash-tab-btn.active {
+    background: #2d4a3e !important;
+    color: #fcfcfa !important;
+    box-shadow: 0 4px 12px rgba(45, 74, 62, 0.18) !important;
+  }
+
+  /* 3. BANNER WELCOME & THẺ THỐNG KÊ (STAT CARDS) */
+  .home-hero-banner {
+    background: linear-gradient(135deg, #eef2eb 0%, #e7ece4 100%) !important;
+    border: 1px solid #cfd8cb !important;
+  }
+  .home-hero-title {
+    color: #1f2e27 !important;
+    font-family: 'Cormorant Garamond', Georgia, serif !important;
+    font-size: 30px !important;
+    letter-spacing: -0.3px !important;
+  }
+  .home-hero-sub {
+    color: #4a6356 !important;
+  }
+  .hero-band-badge {
+    background: #fcfcfa !important;
+    border: 1px solid #cfd8cb !important;
+    box-shadow: 0 8px 20px rgba(31, 46, 39, 0.05) !important;
+  }
+  .hero-band-badge div:first-child {
+    color: #52796f !important;
+  }
+  .hero-band-badge div:last-child {
+    font-family: 'Cormorant Garamond', Georgia, serif !important;
+    color: #2d4a3e !important;
+  }
+  .card, .stat-card, .skill-progress-card, .modal-window {
+    background: #fcfcfa !important;
+    border-color: #d8e0d5 !important;
+  }
+  .modal-header, .modal-footer, th {
+    background: #f4f5f0 !important;
+    border-color: #e2e8df !important;
+    color: #3f5248 !important;
+  }
+  td {
+    border-bottom: 1px solid #edf0ea !important;
+  }
+  tbody tr:hover {
+    background: #f7f8f5 !important;
+  }
+
+  /* 4. LÀM DỊU CÁC MÀU PHỤ (LISTENING, WRITING, VOCAB, BADGES) SANG TÔNG ĐẤT TRẦM */
+  .stat-icon {
+    background: #eef2eb !important;
+    color: #2d4a3e !important;
+  }
+  /* Listening Icon & Progress -> Xanh Slate trầm */
+  .stat-card:nth-child(2) .stat-icon {
+    background: #ebf0f5 !important;
+    color: #3b5978 !important;
+  }
+  /* Writing Icon & Progress -> Nâu Caramel / Hổ phách trầm */
+  .stat-card:nth-child(3) .stat-icon {
+    background: #f5efe6 !important;
+    color: #9c6631 !important;
+  }
+  /* Saved Words Icon -> Tím khói trầm */
+  .stat-card:nth-child(4) .stat-icon {
+    background: #f2eef5 !important;
+    color: #644d78 !important;
+  }
+
+  /* Thanh Progress Bar của 3 kỹ năng */
+  .skill-progress-bar-bg {
+    background: #e9ede6 !important;
+  }
+  .skill-progress-card:nth-child(1) .skill-progress-bar-fill {
+    background: #2d4a3e !important;
+  }
+  .skill-progress-card:nth-child(1) .skill-progress-header span:last-child {
+    color: #2d4a3e !important;
+  }
+  .skill-progress-card:nth-child(2) .skill-progress-bar-fill {
+    background: #3b5978 !important;
+  }
+  .skill-progress-card:nth-child(2) .skill-progress-header span:last-child {
+    color: #3b5978 !important;
+  }
+  .skill-progress-card:nth-child(3) .skill-progress-bar-fill {
+    background: #9c6631 !important;
+  }
+  .skill-progress-card:nth-child(3) .skill-progress-header span:last-child {
+    color: #9c6631 !important;
+  }
+
+  /* Banner PRO & Thanh Online Monitor */
+  .online-monitor-bar {
+    background: #fcfcfa !important;
+    border-color: #cfd8cb !important;
+  }
+  .online-user-pill {
+    background: #eef2eb !important;
+    border-color: #b8c7b4 !important;
+    color: #2d4a3e !important;
+  }
+  .milestone-banner {
+    background: linear-gradient(135deg, #f3f6f0 0%, #eef2ec 100%) !important;
+    border: 1px solid #b8c7b4 !important;
+  }
+  .milestone-banner div {
+    color: #2d4a3e !important;
+  }
+
+  /* Nút bấm và Nhãn phân loại đề thi (Badges) */
+  .btn-emerald {
+    background: #2d4a3e !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(45, 74, 62, 0.16) !important;
+  }
+  .btn-emerald:hover {
+    background: #22382f !important;
+  }
+  .btn-secondary {
+    background: #f0f2ec !important;
+    color: #2d4a3e !important;
+    border-color: #cfd8cb !important;
+  }
+  .btn-secondary:hover {
+    background: #e4e9df !important;
+  }
+  .btn-danger {
+    background: #9e3a3a !important;
+  }
+  .btn-danger:hover {
+    background: #822d2d !important;
+  }
+  .badge-new {
+    background: #f7e6e6 !important;
+    color: #8c2d2d !important;
+  }
+  .badge-pop {
+    background: #f0ebf5 !important;
+    color: #5c4373 !important;
+  }
+  .badge-diff-Easy {
+    background: #e6efe9 !important;
+    color: #2d4a3e !important;
+  }
+  .badge-diff-Standard {
+    background: #e8eef5 !important;
+    color: #3b5978 !important;
+  }
+  .badge-diff-Hard {
+    background: #f5ebe1 !important;
+    color: #8f5322 !important;
+  }
+
+  /* Thanh lọc kỹ năng ở bảng Recent Submissions */
+  #homeSubmissionFilterBar button[style*="#059669"] {
+    background: #2d4a3e !important;
+    border-color: #2d4a3e !important;
+    color: #ffffff !important;
+  }
+
+/* --- MỞ RỘNG & LÀM RÕ NÉT CỬA SỔ WRITING MODAL --- */
+  #writingReviewModal .modal-window {
+    width: 92vw !important;
+    max-width: 1380px !important;
+    max-height: 92vh !important;
+  }
+  #writingReviewModal .modal-body {
+    font-size: 14.5px !important;
+    line-height: 1.68 !important;
+    color: #1f2e27 !important;
+  }
+  #wRevTask1Text, #wRevTask2Text {
+    font-size: 15px !important;
+    line-height: 1.75 !important;
+    color: #1f2e27 !important;
+    background: #fcfcfa !important;
+    border: 1px solid #cfd8cb !important;
+    padding: 18px 20px !important;
+    border-radius: 14px !important;
+    white-space: pre-wrap !important;
+  }
+
+  /* --- ĐỊNH DẠNG DÀN Ý & BÀI MẪU DỄ ĐỌC --- */
+  .outline-section-block {
+    background: #fcfcfa;
+    border: 1px solid #d8e0d5;
+    border-left: 4px solid #2d4a3e;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    font-size: 14.5px;
+    line-height: 1.68;
+    color: #1f2e27;
+  }
+  .outline-section-title {
+    font-weight: 800;
+    color: #2d4a3e;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  /* --- THẺ FEEDBACK WRITING 4 TIÊU CHÍ (FORMATTED FEEDBACK CARDS) --- */
+  .fb-Formatted-Wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-height: 540px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+  .fb-score-summary-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    background: #eef2eb;
+    border: 1px solid #cfd8cb;
+    border-radius: 12px;
+    padding: 10px;
+  }
+  .fb-score-pill {
+    background: #fcfcfa;
+    border: 1px solid #d8e0d5;
+    border-radius: 9px;
+    padding: 8px 6px;
+    text-align: center;
+  }
+  .fb-score-pill .lbl {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #5c7065;
+    display: block;
+  }
+  .fb-score-pill .val {
+    font-size: 18px;
+    font-weight: 800;
+    color: #2d4a3e;
+  }
+  .fb-criterion-card {
+    background: #fcfcfa;
+    border: 1px solid #d8e0d5;
+    border-radius: 14px;
+    padding: 14px 16px;
+    box-shadow: 0 4px 12px rgba(31, 46, 39, 0.04);
+  }
+  .fb-criterion-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #d8e0d5;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    font-weight: 800;
+    font-size: 14px;
+    color: #1f2e27;
+  }
+  .fb-sub-box {
+    border-radius: 10px;
+    padding: 10px 13px;
+    margin-bottom: 8px;
+    font-size: 13.8px;
+    line-height: 1.62;
+  }
+  .fb-sub-strength {
+    background: #eef6f0;
+    border-left: 3.5px solid #2d6a4f;
+    color: #1b4332;
+  }
+  .fb-sub-error {
+    background: #fdf2f2;
+    border-left: 3.5px solid #b91c1c;
+    color: #7f1d1d;
+  }
+  .fb-sub-suggest {
+    background: #fdf8ee;
+    border-left: 3.5px solid #b45309;
+    color: #78350f;
+  }
+
+  /* --- FLASHCARD 3D TRONG VOCABULARY VAULT --- */
+  .vault-flashcard-stage {
+    perspective: 1000px;
+    width: 100%;
+    max-width: 560px;
+    margin: 16px auto;
+  }
+  .vault-flashcard-inner {
+    position: relative;
+    width: 100%;
+    min-height: 230px;
+    transition: transform 0.55s;
+    transform-style: preserve-3d;
+    cursor: pointer;
+  }
+  .vault-flashcard-inner.is-flipped {
+    transform: rotateY(180deg);
+  }
+  .vault-fc-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 18px;
+    padding: 26px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 14px 34px rgba(31, 46, 39, 0.08);
+  }
+  .vault-fc-front {
+    background: linear-gradient(135deg, #fcfcfa 0%, #eef2eb 100%);
+    border: 1.5px solid #b8c7b4;
+    color: #1f2e27;
+  }
+  .vault-fc-back {
+    background: linear-gradient(135deg, #2d4a3e 0%, #3b5a4b 100%);
+    border: 1.5px solid #22382f;
+    color: #fcfcfa;
+    transform: rotateY(180deg);
+  }
+
+  /* --- SKILL ANALYTICS & MISTAKE NOTEBOOK --- */
+  .skill-analytics-card {
+    background: #fcfcfa;
+    border: 1px solid #d8e0d5;
+    border-radius: 16px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+  }
+  .qtype-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .qtype-stat-item {
+    background: #f4f5f0;
+    border: 1px solid #e2e8df;
+    border-radius: 11px;
+    padding: 11px 14px;
+  }
+
+/* 1. MỞ RỘNG & CÂN ĐỐI CỬA SỔ WRITING (#gradeWritingModal) */
+  #gradeWritingModal .modal-window {
+    width: 94vw !important;
+    max-width: 1380px !important;
+    height: 92vh !important;
+  }
+  #gradeWritingModal .modal-body {
+    gap: 22px !important;
+  }
+  /* Mở rộng cột Feedback bên phải lên 48% để không bị hẹp */
+  #gradeWritingModal .modal-body > div:first-child {
+    flex: 1.08 !important;
+  }
+  #gradeWritingModal .modal-body > div:last-child {
+    width: 47% !important;
+    min-width: 420px !important;
+  }
+  #gradeTask1Text, #gradeTask2Text {
+    font-size: 15px !important;
+    line-height: 1.75 !important;
+    color: #1f2e27 !important;
+    padding: 16px 18px !important;
+  }
+
+  /* 2. THANH 4 TAB NGANG CHO WRITING FEEDBACK */
+  .wfb-tabs-nav {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    background: #e2e8df;
+    padding: 6px;
+    border-radius: 11px;
+    margin-bottom: 10px;
+  }
+  .wfb-tab-item {
+    flex: 1;
+    min-width: 78px;
+    border: none;
+    background: transparent;
+    color: #3f5248;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 7px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+  }
+  .wfb-tab-item:hover {
+    background: rgba(255, 255, 255, 0.7);
+    color: #1f2e27;
+  }
+  .wfb-tab-item.active {
+    background: #2d4a3e;
+    color: #ffffff;
+    box-shadow: 0 3px 8px rgba(45, 74, 62, 0.22);
+  }
+  .wfb-tab-pane {
+    display: none;
+    background: #ffffff;
+    border: 1.5px solid #cbd5c8;
+    border-radius: 12px;
+    padding: 14px 16px;
+    max-height: 420px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.68;
+    color: #1f2e27;
+  }
+  .wfb-tab-pane.active {
+    display: block;
+  }
+  .wfb-box-good {
+    background: #ecfdf5;
+    border-left: 4px solid #059669;
+    color: #064e3b;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .wfb-box-err {
+    background: #fef2f2;
+    border-left: 4px solid #dc2626;
+    color: #7f1d1d;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .wfb-box-tip {
+    background: #fffbeb;
+    border-left: 4px solid #d97706;
+    color: #78350f;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+
+  /* 3. LÀM RÕ NÉT DÀN Ý & BÀI MẪU PRO */
+  .pro-clean-section {
+    background: #fcfcfa;
+    border: 1px solid #cbd5c8;
+    border-left: 4px solid #2d4a3e;
+    border-radius: 9px;
+    padding: 11px 14px;
+    margin-bottom: 9px;
+    font-size: 14.5px;
+    line-height: 1.68;
+    color: #0f172a;
+  }
+  .pro-clean-section-title {
+    font-weight: 800;
+    color: #047857;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+/* --- 1. PHÂN TRANG (PAGINATION) CHO DANH SÁCH 100-200 ĐỀ --- */
+  .amuro-pagination-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    border-radius: 0 0 12px 12px;
+    margin-top: 6px;
+  }
+  .amuro-page-btns {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .amuro-page-btn {
+    min-width: 34px;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    font-size: 12.5px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .amuro-page-btn:hover:not(:disabled) {
+    border-color: #2d4a3e;
+    color: #2d4a3e;
+    background: #f0fdf4;
+  }
+  .amuro-page-btn.active {
+    background: #2d4a3e;
+    color: #ffffff;
+    border-color: #2d4a3e;
+  }
+  .amuro-page-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  /* --- 2. LIVE STUDY FEED CHIỀU DỌC (KHÔNG HIỆN ĐIỂM - LOẠI BỎ GIÁO VIÊN) --- */
+  .live-study-feed-card {
+    background: #ffffff;
+    border: 1px solid #d8e0d5;
+    border-radius: 16px;
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+  }
+  .live-feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .live-feed-row {
+    background: #f8faf7;
+    border: 1px solid #e2e8df;
+    border-radius: 10px;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    transition: 0.18s ease;
+  }
+  .live-feed-row:hover {
+    background: #ffffff;
+    border-color: #8fa899;
+    transform: translateX(3px);
+  }
+  .live-feed-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.16);
+    flex-shrink: 0;
+  }
+
+  /* --- 3. PHÒNG CHAT THỜI GIAN THỰC (STUDY LOUNGE CHAT - DISCORD WIDGET) --- */
+  #loungeChatLauncher {
+    position: fixed;
+    bottom: 22px;
+    right: 24px;
+    z-index: 8888;
+    background: #2d4a3e;
+    color: #ffffff;
+    border: 1.5px solid #4a6b5d;
+    border-radius: 999px;
+    padding: 11px 20px;
+    font-size: 13.5px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    box-shadow: 0 12px 28px rgba(31, 46, 39, 0.25);
+    transition: all 0.2s ease;
+  }
+  #loungeChatLauncher:hover {
+    transform: translateY(-2px);
+    background: #1f352c;
+  }
+  #loungeChatUnreadBadge {
+    background: #ef4444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 1px 7px;
+    border-radius: 999px;
+    display: none;
+  }
+  #loungeChatWindow {
+    position: fixed;
+    bottom: 78px;
+    right: 24px;
+    width: 370px;
+    max-width: calc(100vw - 32px);
+    height: 490px;
+    max-height: calc(100vh - 110px);
+    background: #fcfcfa;
+    border: 1.5px solid #cfd8cb;
+    border-radius: 18px;
+    z-index: 8889;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+  }
+  .lounge-chat-head {
+    background: #2d4a3e;
+    color: #ffffff;
+    padding: 13px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 800;
+    font-size: 14px;
+  }
+  .lounge-chat-messages {
+    flex: 1;
+    padding: 14px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f4f5f0;
+  }
+  .lounge-msg-item {
+    max-width: 86%;
+    padding: 9px 13px;
+    border-radius: 13px;
+    font-size: 13px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+  .lounge-msg-item.me {
+    align-self: flex-end;
+    background: #2d4a3e;
+    color: #ffffff;
+    border-bottom-right-radius: 3px;
+  }
+  .lounge-msg-item.other {
+    align-self: flex-start;
+    background: #ffffff;
+    color: #1f2e27;
+    border: 1px solid #d8e0d5;
+    border-bottom-left-radius: 3px;
+  }
+  .lounge-msg-sender {
+    font-size: 11px;
+    font-weight: 800;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.9;
+  }
+  .lounge-chat-input-bar {
+    padding: 10px 12px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8df;
+    display: flex;
+    gap: 8px;
+  }
+
+  /* --- 4. WRITING 4 TAB & MỞ RỘNG MODAL --- */
+  #gradeWritingModal .modal-window {
+    width: 94vw !important;
+    max-width: 1380px !important;
+    height: 92vh !important;
+  }
+  #gradeWritingModal .modal-body > div:first-child { flex: 1.08 !important; }
+  #gradeWritingModal .modal-body > div:last-child { width: 47% !important; min-width: 410px !important; }
+  .wfb-tabs-nav {
+    display: flex; gap: 6px; flex-wrap: wrap; background: #e2e8df;
+    padding: 6px; border-radius: 11px; margin-bottom: 10px;
+  }
+  .wfb-tab-item {
+    flex: 1; min-width: 76px; border: none; background: transparent;
+    color: #3f5248; font-size: 12px; font-weight: 800; padding: 7px 8px;
+    border-radius: 8px; cursor: pointer; transition: 0.15s; text-align: center;
+  }
+  .wfb-tab-item.active {
+    background: #2d4a3e; color: #ffffff;
+  }
+  .wfb-tab-pane {
+    display: none; background: #ffffff; border: 1.5px solid #cbd5c8;
+    border-radius: 12px; padding: 14px 16px; max-height: 420px;
+    overflow-y: auto; font-size: 14px; line-height: 1.68; color: #1f2e27;
+  }
+  .wfb-tab-pane.active { display: block; }
+  .wfb-box-good { background: #ecfdf5; border-left: 4px solid #059669; color: #064e3b; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; }
+  .wfb-box-err  { background: #fef2f2; border-left: 4px solid #dc2626; color: #7f1d1d; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; }
+  .wfb-box-tip  { background: #fffbeb; border-left: 4px solid #d97706; color: #78350f; padding: 10px 12px; border-radius: 8px; margin-bottom: 8px; }
+  .pro-clean-section {
+    background: #fcfcfa; border: 1px solid #cbd5c8; border-left: 4px solid #2d4a3e;
+    border-radius: 9px; padding: 11px 14px; margin-bottom: 9px; font-size: 14.5px; line-height: 1.68; color: #0f172a;
+  }
+  .pro-clean-section-title {
+    font-weight: 800; color: #047857; font-size: 12.5px; text-transform: uppercase; margin-bottom: 4px; display: block;
+  }
+
+/* 1. KỆ ĐỀ HOT, BANNER BÀI TẬP ĐƯỢC GIAO & BẢNG MỤC TIÊU NGÀY */
+  .hot-new-showcase {
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    border: 1.5px solid #a7f3d0; border-radius: 18px; padding: 18px 22px;
+    margin-bottom: 20px; box-shadow: 0 6px 20px rgba(5, 150, 105, 0.05);
+  }
+  .hot-new-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px; margin-top: 12px;
+  }
+  .hot-exam-card {
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px;
+    padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between;
+    gap: 10px; transition: 0.2s;
+  }
+  .hot-exam-card:hover { transform: translateY(-2px); border-color: #10b981; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06); }
+
+  .homework-alert-banner {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px solid #f59e0b; border-radius: 16px; padding: 16px 20px;
+    margin-bottom: 20px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.08);
+  }
+  .homework-item-row {
+    background: #ffffff; border: 1px solid #fde68a; border-radius: 10px;
+    padding: 10px 14px; margin-top: 8px; display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+
+  /* BẢNG MỤC TIÊU HÀNG NGÀY (DAILY GOALS) */
+  .daily-goal-card {
+    background: #ffffff; border: 1.5px solid #a7f3d0; border-radius: 16px;
+    padding: 18px 22px; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(5, 150, 105, 0.04);
+  }
+  .goal-progress-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px; margin-top: 12px;
+  }
+  .goal-skill-box {
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px;
+  }
+  .goal-bar-bg { width: 100%; height: 8px; background: #e2e8f0; border-radius: 99px; overflow: hidden; margin-top: 8px; }
+  .goal-bar-fill { height: 100%; border-radius: 99px; transition: width 0.35s ease; }
+
+  /* 2. KHỐI PHÂN TÍCH DẠNG CÂU SAI NHIỀU / ĐÚNG NHIỀU & DAILY VOCAB DRILL */
+  .analytics-drill-row {
+    display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px; margin-bottom: 22px;
+  }
+  @media (max-width: 960px) { .analytics-drill-row { grid-template-columns: 1fr; } }
+  .qtype-stat-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 10px; font-size: 13px;
+  }
+  .qtype-bar-wrap { flex: 1; height: 9px; background: #f1f5f9; border-radius: 999px; overflow: hidden; }
+  .qtype-bar-fill { height: 100%; border-radius: 999px; transition: width 0.35s ease; }
+
+  /* 3. FOLDER ACCORDION & PHÂN TRANG SUBMISSIONS */
+  .folder-accordion-box {
+    border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px;
+    overflow: hidden; background: #ffffff;
+  }
+  .folder-accordion-header {
+    background: #f8fafc; padding: 13px 18px; font-weight: 800; font-size: 14px;
+    color: #0f172a; cursor: pointer; display: flex; justify-content: space-between;
+    align-items: center; border-bottom: 1px solid transparent; transition: 0.15s;
+  }
+  .folder-accordion-header:hover { background: #f0fdf4; color: #059669; }
+  .folder-accordion-body { display: none; padding: 0; }
+  .folder-accordion-box.open .folder-accordion-header { border-bottom-color: #e2e8f0; background: #ecfdf5; color: #065f46; }
+  .folder-accordion-box.open .folder-accordion-body { display: block; }
+
+  .sub-pagination-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 14px; margin-top: 10px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+  }
+  .page-num-btn {
+    min-width: 32px; height: 32px; padding: 0 8px; border-radius: 8px;
+    border: 1px solid #cbd5e1; background: #ffffff; color: #334155;
+    font-weight: 700; font-size: 12.5px; cursor: pointer; transition: 0.15s;
+  }
+  .page-num-btn:hover { background: #f1f5f9; }
+  .page-num-btn.active { background: #059669; color: #ffffff; border-color: #059669; }
+
+  /* 4. FLASHCARD & POPUP CHỌN CHẾ ĐỘ THI / LUYỆN TẬP */
+  .mode-choice-card {
+    border: 2px solid #e2e8f0; border-radius: 14px; padding: 18px; cursor: pointer;
+    transition: 0.2s; background: #ffffff; text-align: left;
+  }
+  .mode-choice-card:hover { border-color: #059669; background: #f0fdf4; transform: translateY(-2px); }
+  .mode-choice-card.exam-mode:hover { border-color: #dc2626; background: #fef2f2; }
+  .flashcard-box {
+    background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+    color: #ffffff; border-radius: 16px; padding: 32px 24px; min-height: 210px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; cursor: pointer; user-select: none;
+    box-shadow: 0 12px 30px rgba(6, 78, 59, 0.15); margin-bottom: 16px;
+  }
+  .writing-live-outline-drawer {
+    margin-top: 16px; background: #f0fdf4; border: 1.5px solid #6ee7b7;
+    border-radius: 10px; padding: 14px 16px; color: #064e3b; font-size: 13.5px; line-height: 1.65;
+  }
+
+/* 1. BỐ CỤC TẦNG 1 TRANG HOME: MỤC TIÊU NGÀY (TRÁI) + VOCAB DRILL (PHẢI) */
+  .home-top-action-grid {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 16px;
+    margin-bottom: 18px;
+    align-items: stretch;
+  }
+  @media (max-width: 960px) {
+    .home-top-action-grid { grid-template-columns: 1fr; }
+  }
+  .home-top-action-grid .daily-goal-card {
+    margin-bottom: 0 !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .vocab-drill-top-card {
+    background: linear-gradient(135deg, #1f3d32 0%, #064e3b 100%);
+    color: #faf8f2;
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 6px 18px rgba(6, 78, 59, 0.12);
+    border: 1.5px solid #2d5a47;
+  }
+
+  /* 2. BỐ CỤC TẦNG 3: PHÂN TÍCH DẠNG BÀI (TRÁI) + LIVE FEED GỌN (PHẢI) */
+  .home-analytics-feed-grid {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: stretch;
+  }
+  @media (max-width: 960px) {
+    .home-analytics-feed-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Thu gọn Hero Banner chào mừng để không chiếm nửa màn hình */
+  #tab-home .home-hero-banner {
+    padding: 14px 22px !important;
+    margin-bottom: 16px !important;
+    min-height: auto !important;
+  }
+  #tab-home .home-hero-banner h1,
+  #tab-home .home-hero-banner h2 {
+    font-size: 20px !important;
+    margin-bottom: 2px !important;
+  }
+  #tab-home .home-hero-banner p {
+    font-size: 12.5px !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* 3. THANH TRƯỢT TỐC ĐỘ AUDIO LISTENING (0.5x -> 2.0x) */
+  .audio-speed-slider-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .audio-speed-slider-wrap input[type="range"] {
+    width: 82px;
+    height: 5px;
+    accent-color: #059669;
+    cursor: pointer;
+  }
+  .audio-speed-reset-chip {
+    background: #e2e8f0;
+    border: none;
+    border-radius: 5px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #1e293b;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .audio-speed-reset-chip:hover {
+    background: #059669;
+    color: #ffffff;
+  }
+
+  /* 4. HIỆU ỨNG CHỌN ĐÁP ÁN INLINE TRONG VOCAB DRILL (KHÔNG DÙNG ALERT) */
+  .drill-opt-btn {
+    justify-content: flex-start !important;
+    padding: 12px 16px !important;
+    text-align: left !important;
+    font-size: 13.5px !important;
+    border: 1.5px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    color: #1e293b !important;
+    transition: 0.15s !important;
+  }
+  .drill-opt-btn:hover:not(:disabled) {
+    border-color: #059669 !important;
+    background: #f0fdf4 !important;
+  }
+  .drill-opt-btn.correct-choice {
+    background: #dcfce7 !important;
+    border-color: #16a34a !important;
+    color: #14532d !important;
+    font-weight: 800 !important;
+  }
+  .drill-opt-btn.wrong-choice {
+    background: #fee2e2 !important;
+    border-color: #dc2626 !important;
+    color: #7f1d1d !important;
+  }
+
+.vocab-speak-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.16);
+    color: #ecfdf5;
+    border: 1px solid rgba(167, 243, 208, 0.45);
+    border-radius: 999px;
+    padding: 5px 13px;
+    font-size: 12.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .vocab-speak-btn:hover {
+    background: #059669;
+    color: #ffffff;
+    transform: scale(1.04);
+  }
+  .vocab-speak-btn-light {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    border-radius: 999px;
+    padding: 4px 11px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.15s;
+  }
+  .vocab-speak-btn-light:hover {
+    background: #059669;
+    color: #ffffff;
+  }
+
+/* 1. THANH PHÒNG TỰ HỌC TRỰC TUYẾN & STREAK BAR TRÊN ĐẦU TRANG */
+  .live-lounge-streak-bar {
+    background: linear-gradient(135deg, #faf8f2 0%, #f0fdf4 100%);
+    border: 1.5px solid #bdd0c4;
+    border-radius: 14px;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    box-shadow: 0 4px 12px rgba(6, 78, 59, 0.05);
+  }
+  .online-pill-list {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  .online-student-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 4px 11px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e293b;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+  .online-dot-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
+    display: inline-block;
+  }
+  .streak-action-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .my-streak-badge {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px solid #f59e0b;
+    color: #92400e;
+    padding: 5px 13px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* 2. BẢNG XẾP HẠNG STREAK & SỔ TAY LỖI SAI */
+  .streak-rank-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 8px;
+  }
+  .streak-rank-row.top-1 { background: #fffbeb; border-color: #fcd34d; }
+  .streak-rank-row.top-2 { background: #f0fdf4; border-color: #86efac; }
+  .streak-rank-row.top-3 { background: #eff6ff; border-color: #93c5fd; }
+
+  .mistake-card-item {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-left: 4px solid #dc2626;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+  }
+  .btn-save-mistake-inline {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #f59e0b;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: 0.15s;
+  }
+  .btn-save-mistake-inline:hover {
+    background: #f59e0b;
+    color: #ffffff;
+  }
+
+  /* 3. BÚT TÔ SÁNG 2 MÀU (DUAL-COLOR HIGHLIGHTER POPUP) */
+#floatingDualHighlighter {
+  position: fixed;
+  z-index: 99999;
+  background: #1f3d32;
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 5px 10px;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.25);
+  border: 1px solid #2d5a47;
+}
+  .hl-swatch-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .user-hl-yellow {
+    background-color: #fef08a;
+    color: #0f172a;
+    border-radius: 3px;
+    padding: 0 2px;
+  }
+  .user-hl-green {
+    background-color: #bbf7d0;
+    color: #064e3b;
+    border-radius: 3px;
+    padding: 0 2px;
+  }
+
+/* 1. THẺ FLASHCARD BÓC TÁCH BẪY NGỮ CẢNH TRONG SỔ LỖI SAI */
+  .trap-flashcard-front {
+    background: #faf8f2;
+    border: 2px solid #bdd0c4;
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 18px rgba(6, 78, 59, 0.06);
+  }
+  .trap-context-box {
+    background: #ffffff;
+    border-left: 4px solid #1f3d32;
+    border-radius: 10px;
+    padding: 16px 18px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #0f172a;
+    margin: 12px 0;
+    border-top: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .trap-blank-pill {
+    display: inline-block;
+    background: #fef3c7;
+    color: #92400e;
+    border: 1.5px dashed #f59e0b;
+    border-radius: 6px;
+    padding: 1px 12px;
+    font-weight: 800;
+    margin: 0 4px;
+  }
+  .trap-flashcard-back {
+    background: #f0fdf4;
+    border: 2px solid #86efac;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-top: 12px;
+  }
+
+  /* 2. MODAL CHẾ ĐỘ VIẾT LẠI BẢN SỬA WRITING (REWRITE WORKSPACE) */
+  .rewrite-split-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 18px;
+    max-height: 72vh;
+  }
+  @media (max-width: 960px) {
+    .rewrite-split-grid { grid-template-columns: 1fr; max-height: none; }
+  }
+  .rewrite-left-panel {
+    background: #faf8f2;
+    border: 1px solid #d5cfc0;
+    border-radius: 12px;
+    padding: 16px;
+    overflow-y: auto;
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+  .rewrite-right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .rewrite-textarea {
+    width: 100%;
+    min-height: 210px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    line-height: 1.65;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .rewrite-textarea:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+  }
+
+/* Mở rộng tối đa cửa sổ Modal Viết Lại Bản Sửa */
+  #writingRewriteModal .modal-window {
+    width: 96vw !important;
+    max-width: 1280px !important;
+    height: 92vh !important;
+    max-height: 92vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #writingRewriteModal .modal-body {
+    flex: 1 !important;
+    padding: 16px 20px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Tỷ lệ mới: Cột trái 40% (Đề + Biểu đồ + Lỗi cần sửa) | Cột phải 60% (Khung viết rộng thoáng) */
+  .rewrite-v7-grid {
+    display: grid;
+    grid-template-columns: 4fr 6fr;
+    gap: 18px;
+    height: 100%;
+    flex: 1;
+    min-height: 0;
+  }
+  @media (max-width: 980px) {
+    .rewrite-v7-grid {
+      grid-template-columns: 1fr;
+      overflow-y: auto;
+    }
+  }
+
+  .rewrite-v7-left {
+    background: #faf8f2;
+    border: 1.5px solid #d5cfc0;
+    border-radius: 14px;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .rewrite-v7-right {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .rewrite-task-editor-card {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 460px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  }
+
+  .rewrite-v7-textarea {
+    width: 100%;
+    flex: 1;
+    min-height: 430px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 16px 18px;
+    font-size: 15.5px;
+    line-height: 1.75;
+    color: #0f172a;
+    background: #fcfbf7;
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
+    resize: vertical;
+  }
+  .rewrite-v7-textarea:focus {
+    outline: none;
+    background: #ffffff;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.14);
+  }
+
+  .rewrite-fix-pair-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #f59e0b;
+    border-radius: 9px;
+    padding: 9px 12px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .rewrite-chart-img-box {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    margin-top: 8px;
+  }
+  .rewrite-chart-img-box img {
+    max-width: 100%;
+    max-height: 260px;
+    object-fit: contain;
+    border-radius: 6px;
+    cursor: zoom-in;
+    transition: transform 0.15s;
+  }
+  .rewrite-chart-img-box img:hover {
+    opacity: 0.95;
+  }
+
+/* 1. TỐI ƯU KHÔNG GIAN THANH TOPBAR PHÒNG THI CHO THOÁNG MẮT */
+  #insperaExamOverlay .inspera-topbar {
+    padding: 6px 14px !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important;
+  }
+  /* Mở rộng thanh Audio Player ở trung tâm */
+  #insperaAudioPlayer {
+    min-width: 250px !important;
+    max-width: 380px !important;
+    height: 34px !important;
+  }
+  /* Tinh giản thanh kéo tốc độ nghe: Chỉ giữ [Thanh kéo] + số tốc độ (Click vào số để về 1.0x) */
+  .audio-speed-slider-wrap {
+    padding: 3px 8px !important;
+    gap: 5px !important;
+    border-radius: 999px !important;
+    background: #f1f5f9 !important;
+  }
+  .audio-speed-slider-wrap input[type="range"] {
+    width: 68px !important;
+  }
+  #listeningSpeedValueLabel {
+    cursor: pointer;
+    padding: 1px 5px;
+    border-radius: 5px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    font-size: 11.5px !important;
+  }
+  #listeningSpeedValueLabel:hover {
+    background: #059669;
+    color: #ffffff !important;
+    border-color: #059669;
+  }
+
+  /* Nút ⚙️ Hiển thị gom nhóm Standard Text & Black on White */
+  .topbar-display-gear-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .topbar-gear-btn {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e293b;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: 0.15s;
+    white-space: nowrap;
+  }
+  .topbar-gear-btn:hover {
+    background: #e2e8f0;
+  }
+  .topbar-gear-popover {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+    z-index: 99999;
+    min-width: 210px;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .topbar-gear-popover.open {
+    display: flex;
+  }
+  .topbar-gear-popover label {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #475569;
+    margin-bottom: 3px;
+    display: block;
+  }
+  .topbar-gear-popover select {
+    width: 100% !important;
+    display: block !important;
+  }
+
+/* 1. CĂN CHỈNH THANH TOPBAR (#examShell .inspera-top) THOÁNG & KHÔNG RỚT DÒNG */
+  #examShell .inspera-top {
+    height: 52px !important;
+    padding: 0 14px !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+  }
+  #examShell .inspera-top-left {
+    gap: 10px !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+    overflow: hidden !important;
+  }
+  #insperaExamTitle {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 220px !important;
+    font-size: 13.5px !important;
+  }
+  #insperaCandidateTag {
+    white-space: nowrap !important;
+    background: #f1f5f9 !important;
+    padding: 3px 9px !important;
+    border-radius: 999px !important;
+    font-weight: 700 !important;
+    color: #334155 !important;
+    font-size: 11.5px !important;
+  }
+  #insperaTimer {
+    white-space: nowrap !important;
+    padding: 3px 8px !important;
+    font-size: 13px !important;
+  }
+
+  /* 2. KÉO RỘNG TRÌNH PHÁT AUDIO & THU GỌN THANH TRƯỢT SPEED */
+  #listeningAudioHeaderContainer {
+    padding: 2px 8px !important;
+    gap: 6px !important;
+    border-radius: 8px !important;
+    flex-wrap: nowrap !important;
+  }
+  #examAudioPlayer {
+    width: 300px !important;
+    height: 30px !important;
+  }
+  .audio-speed-slider-wrap {
+    padding: 2px 7px !important;
+    gap: 5px !important;
+    border-radius: 999px !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    white-space: nowrap !important;
+  }
+  .audio-speed-slider-wrap input[type="range"] {
+    width: 64px !important;
+    height: 4px !important;
+  }
+  /* Ẩn nút 1.0x thừa bên cạnh, tích hợp thẳng thao tác bấm reset vào nhãn số */
+  .audio-speed-reset-chip {
+    display: none !important;
+  }
+  #listeningSpeedValueLabel {
+    cursor: pointer !important;
+    padding: 1px 6px !important;
+    border-radius: 6px !important;
+    background: #ecfdf5 !important;
+    color: #059669 !important;
+    border: 1px solid #a7f3d0 !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    min-width: 34px !important;
+    text-align: center !important;
+  }
+  #listeningSpeedValueLabel:hover {
+    background: #059669 !important;
+    color: #ffffff !important;
+  }
+
+  /* 3. NÚT "⚙️ HIỂN THỊ" GOM NHÓM CỠ CHỮ & MÀU NỀN */
+  .exam-display-gear-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .exam-display-gear-btn {
+    padding: 6px 11px;
+    border-radius: 4px;
+    border: 1px solid #9ca3af;
+    background: #ffffff;
+    color: #111827;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+  }
+  .exam-display-gear-btn:hover {
+    background: #f3f4f6;
+  }
+  .exam-display-gear-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 12px 14px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+    z-index: 99999;
+    min-width: 215px;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .exam-display-gear-dropdown.show {
+    display: flex;
+  }
+  .exam-display-gear-dropdown .gear-field-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #475569;
+    margin-bottom: 4px;
+    display: block;
+    text-transform: uppercase;
+  }
+  .exam-display-gear-dropdown select {
+    width: 100% !important;
+    padding: 6px 8px !important;
+    border-radius: 6px !important;
+    border: 1px solid #cbd5e1 !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+  }
+
+/* 1. GIAO DIỆN PHẲNG TỐI GIẢN CHUẨN INSPERA (DEMO-IELTS.INSPERA.COM) */
+  #examShell .inspera-instruction-banner {
+    background: #f3f4f6 !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 0 !important;
+    margin: 6px 14px 0 14px !important;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+  }
+  #examShell .inspera-part-tabs {
+    padding: 6px 14px 0 !important;
+    background: #ffffff !important;
+  }
+  #examShell .part-pill {
+    border-radius: 0 !important;
+    padding: 6px 18px !important;
+    font-size: 12.5px !important;
+  }
+  #examShell .resizer-bar {
+    width: 6px !important;
+    background: #f3f4f6 !important;
+    border-left: 1px solid #d1d5db !important;
+    border-right: 1px solid #d1d5db !important;
+  }
+  #examShell .question {
+    border: 1px solid transparent !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 12px 14px !important;
+    margin-bottom: 10px !important;
+    border-radius: 0 !important;
+    transition: background 0.12s;
+  }
+  #examShell .question:focus-within {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    border-left: 3px solid #111827 !important;
+  }
+
+  /* 2. NÚT BOOKMARK CHUẨN INSPERA TRÊN TỪNG CÂU HỎI */
+  .inspera-bookmark-btn {
+  width: fit-content !important;
+  max-width: 28px !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #374151;
+  border: 1px solid #cbd5e1;
+  border-radius: 2px;
+  padding: 4px 6px !important;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.12s ease;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+.inspera-bookmark-btn span {
+  display: none !important; /* Tự động ẩn luôn chữ Bookmark mà không cần tìm xóa ở dưới */
+}
+  .inspera-bookmark-btn:hover {
+    background: #f3f4f6;
+    border-color: #6b7280;
+    color: #111827;
+  }
+  .inspera-bookmark-btn.active {
+    background: #111827 !important;
+    color: #ffffff !important;
+    border-color: #111827 !important;
+  }
+  .inspera-bookmark-btn svg {
+    width: 11px;
+    height: 11px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  .inspera-bookmark-btn.active svg {
+    fill: #fbbf24;
+    stroke: #fbbf24;
+  }
+
+  /* Khi câu hỏi là khối .question, đẩy nút Bookmark sang gọn góc phải */
+  .question > .question-text {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .question > .question-text > .inspera-bookmark-btn {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* 3. Ô SỐ DƯỚI FOOTER CÓ GÓC ĐÁNH DẤU BOOKMARK CHUẨN INSPERA */
+  #examShell .progress-item {
+    position: relative !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    border-radius: 0 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    overflow: hidden;
+  }
+  /* Tam giác góc trên bên phải khi câu hỏi được Bookmark */
+  #examShell .progress-item.bookmarked-pill::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 10px 10px 0;
+    border-color: transparent #f59e0b transparent transparent;
+    z-index: 2;
+  }
+  #examShell .progress-item.bookmarked-pill {
+    border-color: #d97706 !important;
+  }
+
+  /* 4. BỐ CỤC CHIA ĐÔI 2 CỘT CHO DẠNG BÀI MAP / DIAGRAM LISTENING (ẢNH TRÁI - CÂU HỎI PHẢI) */
+  .inspera-map-split-layout {
+    display: grid;
+    grid-template-columns: 1.08fr 1fr;
+    gap: 22px;
+    align-items: start;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    padding: 16px;
+    margin-top: 10px;
+  }
+  @media (max-width: 900px) {
+    .inspera-map-split-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+  .inspera-map-left-sticky {
+    position: sticky;
+    top: 8px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    padding: 10px;
+    text-align: center;
+  }
+  .inspera-map-left-sticky img {
+    max-width: 100%;
+    max-height: 62vh;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+    cursor: zoom-in;
+  }
+  .inspera-map-right-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    line-height: 2.2;
+  }
+
+/* 1. FIX TRIỆT ĐỂ NÚT BOOKMARK CHỈ CÒN ICON NHỎ GỌN (KHÔNG BỊ KÉO DÀI) */
+  .inspera-bookmark-btn {
+    width: 26px !important;
+    min-width: 26px !important;
+    max-width: 26px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 4px !important;
+    color: #64748b !important;
+    margin-left: 6px !important;
+    vertical-align: middle !important;
+    box-shadow: none !important;
+  }
+  .inspera-bookmark-btn:hover {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+  }
+  .inspera-bookmark-btn.active {
+    background: #fef3c7 !important;
+    border-color: #f59e0b !important;
+    color: #d97706 !important;
+  }
+  .inspera-bookmark-btn span {
+    display: none !important;
+  }
+  .inspera-bookmark-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  /* 2. THANH CHIA ĐÔI MÀN HÌNH (SPLITTER ⮂) CHUẨN IELTS MATE */
+  #examShell .resizer-bar {
+    width: 2px !important;
+    background: #e2e8f0 !important;
+    border: none !important;
+    position: relative !important;
+    z-index: 20 !important;
+  }
+  #examShell .resizer-bar::after {
+    content: "⮂" !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 26px;
+    height: 32px;
+    background: #ffffff;
+    border: 1px solid #94a3b8;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #334155;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+  }
+  #examShell .resizer-bar:hover {
+    background: #94a3b8 !important;
+  }
+
+  /* 3. POPUP HIGHLIGHT THẺ TRẮNG MINIMALIST (IELTS MATE LIGHT POPOVER) */
+  #selectionTooltip,
+  #customHighlightPopover {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    padding: 6px 8px !important;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.14) !important;
+    gap: 4px !important;
+    align-items: center !important;
+  }
+  #selectionTooltip button,
+  #customHighlightPopover button {
+    background: transparent !important;
+    color: #1e293b !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 5px 10px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    cursor: pointer !important;
+  }
+  #selectionTooltip button:hover,
+  #customHighlightPopover button:hover {
+    background: #f1f5f9 !important;
+  }
+
+  /* 4. FOOTER ĐIỀU HƯỚNG GOM CỤM THEO PART + NÚT MŨI TÊN ← → (IELTS MATE STYLE) */
+  #examShell .progress-container {
+    height: 54px !important;
+    background: #ffffff !important;
+    border-top: 1px solid #e2e8f0 !important;
+    padding: 0 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    position: relative !important;
+  }
+  #footerSectionLabel {
+    display: none !important;
+  }
+  #insperaFooterList {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    max-width: calc(100% - 68px) !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+  }
+  .mate-footer-part-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .mate-footer-part-group:hover {
+    background: #f8fafc;
+  }
+  .mate-footer-part-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .mate-footer-part-count {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #64748b;
+  }
+  .mate-footer-q-pills {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  #examShell .progress-item {
+    min-width: 24px !important;
+    width: 24px !important;
+    height: 26px !important;
+    border: 1px solid transparent !important;
+    border-top: 2px solid #cbd5e1 !important;
+    border-radius: 3px !important;
+    background: transparent !important;
+    color: #334155 !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    padding: 0 !important;
+  }
+  #examShell .progress-item:hover {
+    background: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+  }
+  #examShell .progress-item.answered {
+    border-top-color: #0f172a !important;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: 800 !important;
+  }
+  #examShell .progress-item.current {
+    border: 1.5px solid #2563eb !important;
+    color: #2563eb !important;
+    background: #eff6ff !important;
+    outline: none !important;
+    font-weight: 800 !important;
+  }
+
+  /* Nút Mũi tên ← → nổi góc dưới bên phải */
+  .mate-floating-prev-next {
+    position: fixed;
+    right: 22px;
+    bottom: 66px;
+    display: none;
+    gap: 6px;
+    z-index: 5500;
+  }
+  #examShell[style*="flex"] .mate-floating-prev-next {
+    display: flex;
+  }
+  .mate-nav-arrow-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    border: none;
+    background: #94a3b8;
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.14);
+    transition: 0.15s;
+  }
+  .mate-nav-arrow-btn.next-dark {
+    background: #111827;
+  }
+  .mate-nav-arrow-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+  /* Nút dấu tích ✓ ở góc phải thanh Footer */
+  #btnSubmitBottom {
+    min-width: 46px !important;
+    height: 40px !important;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    padding: 0 12px !important;
+  }
+  #btnSubmitBottom:hover {
+    background: #059669 !important;
+    color: #ffffff !important;
+    border-color: #059669 !important;
+  }
+
+/* 1. ẨN HOÀN TOÀN THANH PART 1, 2, 3 THỪA Ở PHÍA TRÊN (#insperaPartTabs) */
+  #examShell #insperaPartTabs,
+  #examShell .inspera-part-tabs {
+    display: none !important;
+  }
+
+  /* 2. TỰ ĐỘNG ẨN KHUNG CHAT STUDY LOUNGE KHI ĐANG TRONG PHÒNG THI */
+  body.in-active-exam-room [id*="chat" i],
+  body.in-active-exam-room [class*="chat" i],
+  body.in-active-exam-room [id*="lounge" i],
+  body.in-active-exam-room [class*="lounge" i] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* 3. ÉP TRIỆT ĐỂ MỌI POPUP HIGHLIGHT SANG THẺ TRẮNG MINIMALIST (LIGHT POPOVER) */
+  #selectionTooltip,
+  [id*="highlight" i][style*="position: absolute"],
+  [id*="highlight" i][style*="position: fixed"],
+  [class*="highlight-tooltip" i],
+  [class*="hl-tooltip" i] {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    padding: 5px 8px !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.15) !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+  #selectionTooltip button,
+  [id*="highlight" i] button {
+    background: #f8fafc !important;
+    color: #1e293b !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    padding: 5px 10px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    transition: all 0.12s ease !important;
+  }
+  #selectionTooltip button:hover,
+  [id*="highlight" i] button:hover {
+    background: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+    transform: translateY(-1px);
+  }
+  .user-highlight-green {
+    background-color: #bbf7d0 !important;
+    color: #064e3b !important;
+  }
+
+  /* 4. CHẾ ĐỘ AUDIO KHẢO THÍ TRONG MOCK TEST (KHÓA TUA & ẨN PAUSE) */
+  #examShell.mock-strict-audio #examAudioPlayer,
+  #examShell.mock-strict-audio .audio-speed-slider-wrap,
+  #examShell.mock-strict-audio #examAudioSpeedSelect,
+  #examShell.mock-strict-audio [onclick*="Pause" i] {
+    display: none !important;
+  }
+  #mockStrictAudioBar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  #examShell.mock-strict-audio #mockStrictAudioBar {
+    display: inline-flex !important;
+  }
+
+  /* 5. CỔNG THI THỬ 4 BƯỚC (OFFICIAL INSPERA ACCORDION LOBBY NHƯ VIDEO) */
+  #officialMockLobbyOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #f8fafc;
+    z-index: 99000;
+    flex-direction: column;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111827;
+  }
+  .lobby-top-bar {
+    height: 52px;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+  .lobby-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 20px 80px;
+  }
+  .lobby-accordion-stack {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .lobby-step-card {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+    overflow: hidden;
+  }
+  .lobby-step-header {
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .lobby-step-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #111827;
+  }
+  .lobby-step-sub {
+    font-size: 12.5px;
+    color: #6b7280;
+    margin-top: 3px;
+  }
+  .lobby-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid #d1d5db;
+    background: #f9fafb;
+    color: #6b7280;
+  }
+  .lobby-status-pill.completed {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #16a34a;
+  }
+  .lobby-step-body {
+    padding: 0 24px 24px;
+    border-top: 1px solid #f1f5f9;
+  }
+  .inspera-slide-box {
+    margin-top: 16px;
+    background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+    border: 1px solid #bfdbfe;
+    border-radius: 4px;
+    padding: 42px 28px;
+    text-align: center;
+    min-height: 230px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .inspera-slide-main-text {
+    font-size: 23px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.45;
+    max-width: 520px;
+  }
+  .inspera-slide-main-text b {
+    color: #dc2626;
+  }
+  .inspera-slide-controls {
+    background: #cbd5e1;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    border-radius: 0 0 4px 4px;
+    margin-bottom: 16px;
+  }
+  .lobby-black-btn {
+    background: #111827;
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    padding: 9px 24px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.15s;
+  }
+  .lobby-black-btn:hover {
+    background: #374151;
+  }
+  .lobby-bottom-bar {
+    height: 48px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    font-size: 12.5px;
+    color: #475569;
+  }
+
+/* 1. ẨN VĨNH VIỄN THANH HIGHLIGHT CŨ (#selectionTooltip) ĐỂ KHÔNG BỊ ĐÈ 2 LỚP */
+  #selectionTooltip {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+  }
+
+  /* Ép chuẩn giao diện thẻ trắng viền xám mảnh phẳng cho #floatingDualHighlighter */
+  #floatingDualHighlighter {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    padding: 4px 6px !important;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12) !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+
+  /* 2. BẢNG ĐIỀU KHIỂN CHI TIẾT KỲ THI THỬ (MOCK TEST HUB MODAL) */
+  .mock-hub-skill-row {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .mock-hub-skill-row:hover {
+    border-color: #cbd5e1;
+    background: #ffffff;
+  }
+
+  /* 3. PHIẾU ĐIỂM MOCK TEST SẠCH SẼ (CHỈ IN ĐIỂM SỐ) */
+  #mockCleanScorePrintModal .modal-window {
+    width: 680px;
+    max-width: 95vw;
+    border-radius: 14px;
+    background: #ffffff;
+  }
+  #mockCleanPrintableSheet {
+    background: #ffffff;
+    border: 2px solid #0f172a;
+    border-radius: 10px;
+    padding: 28px 32px;
+    color: #0f172a;
+    font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  }
+  .mock-print-score-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 22px 0;
+  }
+  .mock-print-score-box {
+    border: 1.5px solid #0f172a;
+    border-radius: 8px;
+    padding: 14px 10px;
+    text-align: center;
+    background: #f8fafc;
+  }
+  .mock-print-score-box .sk-lbl {
+    font-size: 11.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #475569;
+    margin-bottom: 6px;
+  }
+  .mock-print-score-box .sk-val {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .mock-print-score-box .sk-sub {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  /* CHẾ ĐỘ IN ẤN: CHỈ IN ĐÚNG KHUNG ĐIỂM MOCK TEST, ẨN TOÀN BỘ THỨ LINH TINH */
+  @media print {
+    @page {
+      size: A4 portrait;
+      margin: 15mm;
+    }
+    body * {
+      visibility: hidden !important;
+    }
+    #mockCleanPrintableSheet,
+    #mockCleanPrintableSheet * {
+      visibility: visible !important;
+    }
+    #mockCleanPrintableSheet {
+      position: fixed !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 24px !important;
+      border: 2px solid #000000 !important;
+      box-shadow: none !important;
+      background: #ffffff !important;
+    }
+  }
+
+/* Ép kích thước chuẩn rộng rãi cho 2 nút chuyển Task của Writing */
+  #wfoot_1, #wfoot_2, .writing-footer-pill {
+    width: auto !important;
+    min-width: 105px !important;
+    max-width: none !important;
+    height: 32px !important;
+    padding: 0 16px !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    border: 1.5px solid #9ca3af !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+  }
+  #wfoot_1.current, #wfoot_2.current, .writing-footer-pill.current {
+    background: #111827 !important;
+    color: #ffffff !important;
+    border-color: #111827 !important;
+    outline: 2px solid #2563eb !important;
+    outline-offset: 1px !important;
+  }
+  #wfoot_1.answered:not(.current), #wfoot_2.answered:not(.current) {
+    background: #e5e7eb !important;
+    color: #111827 !important;
+    border-color: #374151 !important;
+  }
+
+/* Ép kích thước chuẩn đẹp cho 2 nút chuyển Task của Writing */
+  #wfoot_1, #wfoot_2, .writing-footer-pill {
+    width: auto !important;
+    min-width: 120px !important;
+    max-width: none !important;
+    height: 32px !important;
+    padding: 0 18px !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    border: 1.5px solid #9ca3af !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+  }
+  #wfoot_1.current, #wfoot_2.current, .writing-footer-pill.current {
+    background: #111827 !important;
+    color: #ffffff !important;
+    border-color: #111827 !important;
+    outline: 2px solid #2563eb !important;
+    outline-offset: 1px !important;
+  }
+  #wfoot_1.answered:not(.current), #wfoot_2.answered:not(.current) {
+    background: #e5e7eb !important;
+    color: #111827 !important;
+    border-color: #374151 !important;
+  }
+
+/* 1. KHUNG GIỮ CHUỖI (STREAK) & BẢNG XẾP HẠNG (LEADERBOARD) */
+  .gamification-row {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 900px) {
+    .gamification-row { grid-template-columns: 1fr; }
+  }
+  .streak-card-box {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px solid #fcd34d;
+    border-radius: 16px;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.08);
+  }
+  .streak-days-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 14px;
+    justify-content: space-between;
+  }
+  .streak-day-circle {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid #fde68a;
+    font-size: 11px;
+    font-weight: 800;
+    color: #92400e;
+  }
+  .streak-day-circle.active {
+    background: #f59e0b;
+    color: #ffffff;
+    border-color: #d97706;
+    box-shadow: 0 3px 8px rgba(217, 119, 6, 0.25);
+  }
+  .leaderboard-card-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 18px 22px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+  }
+  .lb-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    margin-bottom: 7px;
+    font-size: 13px;
+  }
+  .lb-item-row:nth-child(1) { background: #fefce8; border-color: #fef08a; }
+  .lb-item-row:nth-child(2) { background: #f8fafc; border-color: #cbd5e1; }
+  .lb-item-row:nth-child(3) { background: #fff7ed; border-color: #fed7aa; }
+
+  /* 2. BẢNG ĐIỀU KHIỂN & PHIẾU IN ĐIỂM MOCK TEST SẠCH SẼ */
+  .mock-hub-skill-row {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  #mockCleanPrintableSheet {
+    background: #ffffff;
+    border: 2px solid #0f172a;
+    border-radius: 10px;
+    padding: 28px 32px;
+    color: #0f172a;
+    font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+  }
+  .mock-print-score-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 22px 0;
+  }
+  .mock-print-score-box {
+    border: 1.5px solid #0f172a;
+    border-radius: 8px;
+    padding: 14px 10px;
+    text-align: center;
+    background: #f8fafc;
+  }
+  .mock-print-score-box .sk-lbl {
+    font-size: 11.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #475569;
+    margin-bottom: 6px;
+  }
+  .mock-print-score-box .sk-val {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+  .mock-print-score-box .sk-sub {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  /* CHẾ ĐỘ IN: CHỈ IN ĐÚNG PHIẾU ĐIỂM MOCK TEST, ẨN TOÀN BỘ THỨ LINH TINH */
+  @media print {
+    @page { size: A4 portrait; margin: 15mm; }
+    body * { visibility: hidden !important; }
+    #mockCleanPrintableSheet, #mockCleanPrintableSheet * {
+      visibility: visible !important;
+    }
+    #mockCleanPrintableSheet {
+      position: fixed !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 24px !important;
+      border: 2px solid #000000 !important;
+      box-shadow: none !important;
+      background: #ffffff !important;
+    }
+  }
+
+/* Ẩn vĩnh viễn dòng Online thứ 2 và khối BXH to bị trùng với thanh mini trên cùng */
+  #teacherOnlineMonitorBar,
+  #gamificationStreakLeaderboardBox {
+    display: none !important;
+  }
+
+.header-streak-pill {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1.5px solid #f59e0b; color: #b45309; padding: 6px 14px;
+    border-radius: 999px; font-size: 12.5px; font-weight: 800; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; transition: 0.15s;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+  }
+  .header-streak-pill:hover { background: #fde68a; transform: translateY(-1px); }
+
+  .btn-save-mistake-inline {
+    background: #fffbeb; border: 1px solid #f59e0b; color: #b45309;
+    padding: 3px 9px; border-radius: 4px; font-size: 11px; font-weight: 700;
+    cursor: pointer; margin-top: 6px; margin-left: 6px;
+    display: inline-flex; align-items: center; gap: 4px; transition: 0.15s;
+  }
+  .btn-save-mistake-inline:hover { background: #f59e0b; color: #ffffff; }
+  .btn-save-mistake-inline.saved { background: #dcfce7; border-color: #16a34a; color: #15803d; }
+
+  .mistake-card {
+    background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #ef4444;
+    border-radius: 12px; padding: 16px 18px; margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+  }
+  .mistake-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+  .mistake-tag-skill { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; }
+  .mistake-note-input {
+    width: 100%; margin-top: 8px; padding: 8px 12px; border: 1px dashed #cbd5e1;
+    border-radius: 8px; background: #f8fafc; font-size: 12.5px; color: #334155; outline: none;
+  }
+  .mistake-note-input:focus { border-color: #059669; background: #ffffff; }
+
+  .streak-leaderboard-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-radius: 10px; background: #f8fafc;
+    border: 1px solid #e2e8f0; margin-bottom: 8px;
+  }
+
+#teacherOnlineMonitorBar {
+    display: none !important;
+  }
+  #liveStudentOnlineBannerV15 {
+    background: #ffffff !important;
+    border: 1.5px solid #86efac !important;
+    border-radius: 14px !important;
+    padding: 12px 18px !important;
+    margin-bottom: 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.07) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+/* Ẩn chết vĩnh viễn toàn bộ nút Lưu vào Sổ lỗi trong bài thi & Tab Sổ Lỗi Sai (Không bao giờ nhấp nháy) */
+  .btn-save-mistake-inline,
+  button[data-mkey],
+  button[onclick*="Mistake" i],
+  button[onclick*="mistake" i],
+  #tabbtn-mistakes,
+  #tabbtn-mistake,
+  #tab-mistakes,
+  #tab-mistake,
+  #tab-mistakenotebook,
+  .mistake-card {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+  }
+
+/* 1. Ẩn triệt để các thanh highlight cũ để không bị đè giao diện */
+  #selectionTooltip,
+  #floatingDualHighlighter {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* 2. Màu Highlight & Note chuẩn Inspera */
+  mark.inspera-hl-mark {
+    background-color: #fff299 !important;
+    color: inherit !important;
+    padding: 1px 0 !important;
+    border-radius: 2px !important;
+    cursor: pointer !important;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    transition: filter 0.12s ease;
+  }
+  mark.inspera-hl-mark:hover {
+    filter: brightness(0.93);
+  }
+
+  /* Đoạn có gắn Note: màu nâu tím đặc trưng của Inspera ("at language" / "uses of la") */
+  mark.inspera-hl-mark.has-note {
+    background-color: #6b4c52 !important;
+    color: #ffffff !important;
+    padding: 1px 3px !important;
+    border-radius: 2px !important;
+  }
+  mark.inspera-hl-mark.has-note:hover {
+    background-color: #553a3f !important;
+  }
+
+  /* 3. Menu Popup nổi chuẩn Inspera (Nền trắng, viền xám mảnh, mũi tên chỉ lên) */
+  #insperaHlPopup {
+    position: fixed;
+    z-index: 100050;
+    display: none;
+    background: #ffffff;
+    border: 1px solid #c4c9d0;
+    border-radius: 5px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+    padding: 3px 4px;
+    align-items: center;
+    gap: 2px;
+    user-select: none;
+    font-family: Arial, Helvetica, sans-serif;
+    animation: insperaPopFade 0.1s ease-out;
+  }
+  @keyframes insperaPopFade {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mũi tên nhỏ phía trên Popup giống hệt Inspera */
+  #insperaHlPopup::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: var(--arrow-left, 50%);
+    transform: translateX(-50%);
+    border-width: 0 6px 6px 6px;
+    border-style: solid;
+    border-color: transparent transparent #c4c9d0 transparent;
+  }
+  #insperaHlPopup::after {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: var(--arrow-left, 50%);
+    transform: translateX(-50%);
+    border-width: 0 5px 5px 5px;
+    border-style: solid;
+    border-color: transparent transparent #ffffff transparent;
+  }
+
+  .inspera-pop-btn {
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    min-width: 54px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: #374151;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.1;
+    transition: background 0.12s, color 0.12s;
+  }
+  .inspera-pop-btn:hover {
+    background: #f3f4f6;
+    color: #111827;
+  }
+  .inspera-pop-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+  .inspera-pop-divider {
+    width: 1px;
+    height: 28px;
+    background: #e5e7eb;
+    margin: 0 1px;
+  }
+
+  /* 4. Khung nhập / xem Note chuẩn Inspera */
+  #insperaNoteCard {
+    position: fixed;
+    z-index: 100060;
+    display: none;
+    width: 270px;
+    background: #ffffff;
+    border: 1px solid #9ca3af;
+    border-radius: 6px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .inspera-note-header {
+    background: #f3f4f6;
+    border-bottom: 1px solid #d1d5db;
+    padding: 7px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 700;
+    color: #111827;
+  }
+  .inspera-note-close {
+    background: none;
+    border: none;
+    font-size: 15px;
+    line-height: 1;
+    color: #4b5563;
+    cursor: pointer;
+    padding: 0 4px;
+  }
+  .inspera-note-close:hover { color: #111827; }
+  .inspera-note-body {
+    padding: 10px;
+  }
+  #insperaNoteTextarea {
+    width: 100%;
+    height: 85px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #111827;
+    resize: none;
+    outline: none;
+  }
+  #insperaNoteTextarea:focus {
+    border-color: #2563eb;
+  }
+  .inspera-note-footer {
+    padding: 0 10px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .inspera-note-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #9ca3af;
+    background: #ffffff;
+    color: #111827;
+  }
+  .inspera-note-btn.primary {
+    background: #111827;
+    color: #ffffff;
+    border-color: #111827;
+  }
+  .inspera-note-btn.danger {
+    color: #dc2626;
+    border-color: #fca5a5;
+    background: #fef2f2;
+  }
+
+/* 1. FOOTER REVIEW NAVIGATION & QUESTION FOCUS */
+    .progress-item.review-correct {
+      background: #dcfce7 !important;
+      color: #15803d !important;
+      border: 1.5px solid #16a34a !important;
+      border-top: 3px solid #16a34a !important;
+    }
+    .progress-item.review-incorrect {
+      background: #fee2e2 !important;
+      color: #b91c1c !important;
+      border: 1.5px solid #dc2626 !important;
+      border-top: 3px solid #dc2626 !important;
+    }
+    .progress-item.review-unanswered {
+      background: #f1f5f9 !important;
+      color: #475569 !important;
+      border: 1.5px solid #94a3b8 !important;
+      border-top: 3px solid #94a3b8 !important;
+    }
+    .progress-item.active-footer-focus {
+      outline: 2.5px solid #111827 !important;
+      outline-offset: 1px;
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+    }
+    .question-scroll-focus {
+      border: 2px solid #2563eb !important;
+      background: #eff6ff !important;
+      border-radius: 6px !important;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15) !important;
+      transition: all 0.25s ease;
+    }
+
+    /* 2. TRANG HỌC TẬP CỦA TÔI */
+    .pd-top-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+    .pd-metric-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+    }
+    .pd-metric-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .pd-comp-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1.1fr;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 1024px) {
+      .pd-comp-grid { grid-template-columns: 1fr; }
+    }
+    .pd-band-box {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .pd-skill-pill {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+    .pd-bar-chart {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 150px;
+      padding: 16px 8px 4px;
+      gap: 8px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .pd-bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .pd-bar-fill {
+      width: 100%;
+      max-width: 28px;
+      background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+      border-radius: 6px 6px 0 0;
+      min-height: 4px;
+      transition: height 0.3s ease;
+    }
+    .pd-heatmap-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .pd-heat-cell {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #64748b;
+    }
+    .pd-heat-cell.lv-1 { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+    .pd-heat-cell.lv-2 { background: #34d399; color: #064e3b; border-color: #10b981; }
+    .pd-heat-cell.lv-3 { background: #059669; color: #ffffff; border-color: #047857; }
+
+    .score-ring-badge {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: #0f172a;
+      position: relative;
+    }
+    .score-ring-inner {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #ffffff;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* 3. MY ASSIGNMENTS (HOME) */
+    .asg-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .asg-tab-btn {
+      padding: 8px 18px; border-radius: 999px; font-size: 13px; font-weight: 800;
+      cursor: pointer; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #475569;
+      transition: 0.15s;
+    }
+    .asg-tab-btn.active {
+      background: #059669; color: #ffffff; border-color: #059669;
+      box-shadow: 0 4px 10px rgba(5, 150, 105, 0.2);
+    }
+    .asg-card {
+      background: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid #059669;
+      border-radius: 12px; padding: 16px 20px; margin-bottom: 12px;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+      transition: 0.15s;
+    }
+    .asg-card:hover { border-color: #a7f3d0; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04); }
+    .asg-card.overdue { border-left-color: #ef4444; }
+    .asg-empty-box {
+      text-align: center; padding: 36px 20px; background: #f8fafc;
+      border: 1.5px dashed #cbd5e1; border-radius: 14px;
+    }
+
+/* ============================================================================
+   CHUẨN HÓA 100% GIAO DIỆN INSPERA & FIX CÁC LỖI HIỂN THỊ (TOPBAR, PAUSE, POPUP)
+   ============================================================================ */
+/* 1. Chống tràn đề bài dài lên thanh Topbar (Đặc biệt ở bài Writing) */
+#insperaExamTitle {
+  max-width: 340px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+/* 2. Ẩn triệt để nút Pause & Chỉnh tốc độ Audio khi đang thi thật (Exam Mode / Mock Test) */
+#examShell.exam-strict-mode #btnPracticePauseToggle,
+#examShell.exam-strict-mode #examAudioSpeedSelect,
+#examShell.exam-strict-mode #listeningSpeedSliderBox,
+#examShell.mock-strict-audio #btnPracticePauseToggle,
+#examShell.mock-strict-audio #examAudioSpeedSelect,
+#examShell.mock-strict-audio #listeningSpeedSliderBox {
+  display: none !important;
+}
+
+/* 3. Ẩn vĩnh viễn nút Tải Phiếu Chẩn Đoán trong Popup báo điểm theo yêu cầu */
+#btnDownloadDiagnosticReport,
+#scoreSummaryModal [onclick*="Diagnostic" i],
+#scoreSummaryModal [onclick*="Chẩn Đoán" i] {
+  display: none !important;
+}
+
+/* 4. Chuẩn hóa thanh Footer nhóm theo từng Part (Inspera Official Style) */
+.progress-container {
+  height: 54px !important;
+  background: #ffffff !important;
+  border-top: 1px solid #cbd5e1 !important;
+  padding: 0 18px !important;
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- 1. ATTRACTIVE IELTS LOGIN SCREEN -->
+  <div id="loginScreen">
+    <div class="login-left-banner">
+      <div class="login-brand-pill"><i class="fas fa-graduation-cap"></i> Official Computer-Delivered IELTS Suite</div>
+      <div class="login-hero-logo">IELTS WITH <span>AMURO</span></div>
+      <div class="login-hero-desc">
+        Step into an authentic Inspera-style Computer-Delivered IELTS testing room. Practice Academic Reading, Listening, and Writing with real-time timers, interactive question formats, and instant evidence localization.
+      </div>
+
+      <!-- IELTS OFFICIAL TRF BAND SHOWCASE -->
+      <div class="trf-showcase-card">
+        <div class="trf-header">
+          <div class="trf-title"><i class="fas fa-certificate" style="color:var(--emerald-accent);"></i> Target IELTS Test Report Form</div>
+          <div class="trf-overall-pill">Overall Band 9.0</div>
+        </div>
+        <div class="trf-grid">
+          <div class="trf-box">
+            <div class="trf-skill-name">Listening</div>
+            <div class="trf-skill-score" style="color:#2563eb;">9.0</div>
+          </div>
+          <div class="trf-box">
+            <div class="trf-skill-name">Reading</div>
+            <div class="trf-skill-score" style="color:#059669;">9.0</div>
+          </div>
+          <div class="trf-box">
+            <div class="trf-skill-name">Writing</div>
+            <div class="trf-skill-score" style="color:#d97706;">9.0</div>
+          </div>
+          <div class="trf-box">
+            <div class="trf-skill-name">Speaking</div>
+            <div class="trf-skill-score" style="color:#7c3aed;">9.0</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="ielts-skill-pills">
+        <div class="skill-badge-card">
+          <div class="skill-badge-icon" style="background:#ecfdf5; color:#059669;"><i class="fas fa-book-open"></i></div>
+          <div>
+            <div class="skill-badge-title">Academic Reading</div>
+            <div class="skill-badge-sub">Split-Screen & Evidence</div>
+          </div>
+        </div>
+        <div class="skill-badge-card">
+          <div class="skill-badge-icon" style="background:#eff6ff; color:#2563eb;"><i class="fas fa-headphones"></i></div>
+          <div>
+            <div class="skill-badge-title">IELTS Listening</div>
+            <div class="skill-badge-sub">Top Audio Bar & Transcript</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="login-motto-badge">"Let justice be done though the heavens fall"</div>
+    </div>
+
+    <div class="login-right-area">
+      <div class="login-card">
+        <div class="login-card-visual">
+          <div>
+            <div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#a7f3d0; margin-bottom:4px;">CD-IELTS Examination Room</div>
+            <div style="font-size:18px; font-weight:800;">Academic Portal</div>
+            <div style="font-size:11.5px; color:#cbd5e1; margin-top:2px;">Real-Time Cloud Assessment</div>
+          </div>
+          <div style="font-size:42px; color:rgba(255,255,255,0.22);"><i class="fas fa-laptop-code"></i></div>
+        </div>
+
+        <h2>Student & Teacher Sign In</h2>
+        <p>Enter your account credentials to enter the practice portal</p>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="logUser" class="form-input" placeholder="Enter username" autocomplete="off" onkeydown="if(event.key==='Enter') execLogin()">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="logPass" class="form-input" placeholder="Enter password" autocomplete="off" onkeydown="if(event.key==='Enter') execLogin()">
+        </div>
+        <button class="btn btn-emerald" style="width: 100%; padding: 12px; margin-top: 8px; font-size: 14px;" onclick="execLogin()">
+          Enter Practice Room <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. DASHBOARD -->
+  <div id="dashboardApp">
+    <header class="dash-header">
+      <div class="dash-brand">
+        <div class="brand-icon-box"><i class="fas fa-globe"></i></div>
+        <span>IELTS WITH AMURO</span>
+        <span class="sync-badge" id="realtimeSyncBadge">
+          <span class="sync-dot" id="realtimeSyncDot"></span>
+          <span id="realtimeSyncText">Connecting Cloud...</span>
+        </span>
+      </div>
+      <div class="dash-user-controls">
+        <button class="btn btn-secondary teacher-item" onclick="openAiConfigModal()" title="Configure Gemini AI Writing Grader">🤖 AI Grader Config</button>
+        <div class="dash-user-badge" onclick="openProfileModal()" id="userProfileLabel">👤 Account</div>
+        <button class="btn btn-secondary" onclick="execLogout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+      </div>
+    </header>
+
+    <div class="dash-body">
+      <div class="dash-tabs">
+        <button class="dash-tab-btn active" id="tabbtn-home" onclick="switchDashTab('home')">🏠 Home</button>
+        <button class="dash-tab-btn" id="tabbtn-reading" onclick="switchDashTab('reading')">📖 Reading Tests</button>
+        <button class="dash-tab-btn" id="tabbtn-listening" onclick="switchDashTab('listening')">🎧 Listening Tests</button>
+        <button class="dash-tab-btn" id="tabbtn-writing" onclick="switchDashTab('writing')">✍️ Writing Tests</button>
+        <button class="dash-tab-btn" id="tabbtn-myvocab" onclick="switchDashTab('myvocab')">⭐ Vocabulary Vault</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-classes" onclick="switchDashTab('classes')">🏫 Classes</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-students" onclick="switchDashTab('students')">👤 Students</button>
+        <button class="dash-tab-btn teacher-item" id="tabbtn-analytics" onclick="switchDashTab('analytics')">📊 Submissions & Scores</button>
+      </div>
+
+      <!-- TAB 0: HOME -->
+      <div id="tab-home" class="dash-pane">
+        <div class="home-hero-banner">
+          <div>
+            <div class="home-hero-title" id="homeWelcomeTitle">Welcome to IELTS WITH AMURO</div>
+            <div class="home-hero-sub">Official Computer-Delivered IELTS preparation suite with real-time cloud synchronization, minimalist Inspera exam interface, and AI-powered band analytics.</div>
+          </div>
+          <div class="hero-band-badge">
+            <div style="font-size:11px; font-weight:800; color:#059669; text-transform:uppercase; letter-spacing:1px;">Target Standard</div>
+            <div style="font-size:26px; font-weight:800; color:#0f172a;">CD-IELTS 9.0</div>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-book-open"></i></div>
+            <div>
+              <div class="stat-value" id="statReadingCount">0</div>
+              <div class="stat-label">Reading Tests</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#eff6ff; color:#2563eb;"><i class="fas fa-headphones"></i></div>
+            <div>
+              <div class="stat-value" id="statListeningCount">0</div>
+              <div class="stat-label">Listening Tests</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7; color:#d97706;"><i class="fas fa-pen-nib"></i></div>
+            <div>
+              <div class="stat-value" id="statWritingCount">0</div>
+              <div class="stat-label">Writing Tests</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#f3e8ff; color:#7c3aed;"><i class="fas fa-bookmark"></i></div>
+            <div>
+              <div class="stat-value" id="statVocabCount">0</div>
+              <div class="stat-label">Saved Words</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+            <div>
+              <div class="stat-value" id="statSubmissionsCount">0</div>
+              <div class="stat-label">Submissions</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span>Recent Assessment Submissions</span></div>
+          <table>
+            <thead>
+              <tr><th>Student</th><th>Assessment Title</th><th>Score / Word Count</th><th>Band Score</th><th>Date & Time</th><th>Action / Feedback</th></tr>
+            </thead>
+            <tbody id="homeRecentActivityTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 1: READING -->
+      <div id="tab-reading" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Reading Test Library</span>
+            <button class="btn btn-emerald teacher-item" onclick="openReadingEditorModal()">+ Create Reading Test</button>
+          </div>
+          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:16px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0;">
+            <input type="text" id="filterReadingSearch" class="form-input" placeholder="🔍 Search by test title..." oninput="renderReadingTable()">
+            <select id="filterReadingPart" class="form-input" onchange="renderReadingTable()">
+              <option value="ALL">📂 All Sections</option>
+              <option value="Full Test">Full Test (3 Passages)</option>
+              <option value="Passage 1">Passage 1</option>
+              <option value="Passage 2">Passage 2</option>
+              <option value="Passage 3">Passage 3</option>
+            </select>
+            <input type="text" id="filterReadingTopic" class="form-input" placeholder="🏷️ Filter by topic (e.g. Environment, Cam 19...)" oninput="renderReadingTable()">
+          </div>
+          <table>
+            <thead>
+              <tr><th>Test Title</th><th>Duration</th><th>Passages</th><th>Assigned Class</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="readingTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: LISTENING -->
+      <div id="tab-listening" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Listening Test Library</span>
+            <button class="btn btn-emerald teacher-item" onclick="openListeningEditorModal()">+ Create Listening Test</button>
+          </div>
+          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:16px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0;">
+            <input type="text" id="filterListeningSearch" class="form-input" placeholder="🔍 Search listening test title..." oninput="renderListeningTable()">
+            <select id="filterListeningPart" class="form-input" onchange="renderListeningTable()">
+              <option value="ALL">📂 All Parts</option>
+              <option value="Listening Full">Full Test (Part 1-4)</option>
+              <option value="Listening Part 1">Part 1</option>
+              <option value="Listening Part 2">Part 2</option>
+              <option value="Listening Part 3">Part 3</option>
+              <option value="Listening Part 4">Part 4</option>
+            </select>
+            <input type="text" id="filterListeningTopic" class="form-input" placeholder="🏷️ Filter by topic or source..." oninput="renderListeningTable()">
+          </div>
+          <table>
+            <thead>
+              <tr><th>Test Title</th><th>Duration</th><th>Parts</th><th>Assigned Class</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="listeningTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 3: WRITING -->
+      <div id="tab-writing" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Writing Assessment Library (Task 1 & Task 2)</span>
+            <button class="btn btn-emerald teacher-item" onclick="openWritingEditorModal()">+ Create Writing Test</button>
+          </div>
+          <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap:10px; margin-bottom:16px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0;">
+            <input type="text" id="filterWritingSearch" class="form-input" placeholder="🔍 Search writing test title..." oninput="renderWritingTable()">
+            <select id="filterWritingPart" class="form-input" onchange="renderWritingTable()">
+              <option value="ALL">📂 All Formats</option>
+              <option value="Task 1 Only">Task 1 Only (20 mins)</option>
+              <option value="Task 2 Only">Task 2 Only (40 mins)</option>
+              <option value="Full Writing">Full Writing (Task 1 & 2)</option>
+            </select>
+            <input type="text" id="filterWritingTopic" class="form-input" placeholder="🏷️ Filter by task type or topic (e.g. Bar Chart, Opinion...)" oninput="renderWritingTable()">
+          </div>
+          <table>
+            <thead>
+              <tr><th>Test Title</th><th>Duration</th><th>Tasks</th><th>Assigned Class</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="writingTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 4: MY SAVED VOCAB -->
+      <div id="tab-myvocab" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title"><span>My Personal Saved Vocabulary</span></div>
+          <div id="mySavedVocabList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;"></div>
+        </div>
+      </div>
+
+      <!-- TAB 5: CLASSES -->
+      <div id="tab-classes" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Class Management</span>
+            <button class="btn btn-emerald" onclick="openCreateClassModal()">+ Add New Class</button>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Class Name</th><th>Total Students</th><th>Action</th></tr>
+            </thead>
+            <tbody id="classTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 6: STUDENTS -->
+      <div id="tab-students" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Student Accounts & Class Placement</span>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-secondary" onclick="openBulkStudentModal()">⚡ Bulk Add Students</button>
+              <button class="btn btn-emerald" onclick="openCreateStudentModal()">+ Register Student</button>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Full Name</th><th>Username</th><th>Password</th><th>Assigned Class</th><th>Action</th></tr>
+            </thead>
+            <tbody id="studentTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 7: ANALYTICS -->
+      <div id="tab-analytics" class="dash-pane" style="display: none;">
+        <div class="card">
+          <div class="card-title">
+            <span>Student Performance History & Writing Grading</span>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-emerald" id="btnAnalyticsGroupStu" onclick="setAnalyticsViewMode('student')">👥 Group by Student</button>
+              <button class="btn btn-secondary" id="btnAnalyticsAllSub" onclick="setAnalyticsViewMode('all')">🕒 All Submissions</button>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1.5fr 1fr 1fr auto; gap:10px; margin-bottom:16px; background:#f8fafc; padding:12px; border-radius:12px; border:1px solid #e2e8f0; align-items:center;">
+            <input type="text" id="filterAnalyticsSearch" class="form-input" placeholder="🔍 Search student name or exam title..." oninput="renderAnalyticsTable()">
+            <select id="filterAnalyticsClass" class="form-input" onchange="renderAnalyticsTable()">
+              <option value="ALL">🏫 All Classes</option>
+            </select>
+            <input type="date" id="filterAnalyticsDate" class="form-input" onchange="renderAnalyticsTable()" title="Filter by submission date">
+            <button class="btn btn-secondary" onclick="clearAnalyticsFilters()">Reset</button>
+          </div>
+
+          <table>
+            <thead id="analyticsThead">
+              <tr><th>Student Name</th><th>Class</th><th>Total Submissions</th><th>Latest Band</th><th>Latest Activity</th><th>Action</th></tr>
+            </thead>
+            <tbody id="analyticsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. MINIMALIST INSPERA EXAM WORKSPACE -->
+  <div id="examShell">
+    <div class="inspera-top">
+      <div class="inspera-top-left">
+        <span class="inspera-brand-logo">IELTS</span>
+        <span id="insperaExamTitle" style="font-weight:700; color:#111827;">IELTS Assessment</span>
+        <span id="insperaCandidateTag" style="font-size:12px; color:#4b5563; font-weight:400;"></span>
+      </div>
+      
+      <!-- MINIMALIST CENTER TIMER & AUDIO -->
+      <div style="display:flex; align-items:center; gap:16px;">
+        <span class="inspera-timer" id="insperaTimer">60:00</span>
+
+        <div id="listeningAudioHeaderContainer" style="display: none; align-items: center; gap: 8px; background: #f3f4f6; padding: 3px 10px; border-radius: 3px; border: 1px solid #d1d5db;">
+          <span style="font-size: 11.5px; color: #111827; font-weight: 700;"><i class="fas fa-volume-up"></i> Audio</span>
+          <audio id="examAudioPlayer" controls preload="auto" style="height: 28px; width: 280px;"></audio>
+          <iframe id="examDriveAudioIframe" allow="autoplay" style="display:none; width: 310px; height: 36px; border: none; border-radius: 2px; background: #111827;"></iframe>
+          <a id="examAudioFallbackLink" href="#" target="_blank" style="font-size: 11px; color: #111827; font-weight: 700; text-decoration: none; display: none;" title="Open Audio"><i class="fas fa-external-link-alt"></i></a>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <select id="examFontSizeSelect" onchange="changeExamFontSize(this.value)" style="background:#fff; color:#111827; border:1px solid #9ca3af; padding:5px 8px; border-radius:3px; font-size:12px; font-weight:600;">
+          <option value="15px">Standard Text</option>
+          <option value="17px">Large Text</option>
+          <option value="19px">Extra Large</option>
+        </select>
+        <select id="examThemeSelect" onchange="changeExamTheme(this.value)" style="background:#fff; color:#111827; border:1px solid #9ca3af; padding:5px 8px; border-radius:3px; font-size:12px; font-weight:600;">
+          <option value="light">Black on White</option>
+          <option value="dark">White on Black</option>
+          <option value="yellow">Yellow on Black</option>
+        </select>
+        <button class="inspera-flat-btn teacher-item" id="btnToggleTeacherMode" onclick="toggleTeacherEditMode()">Edit Keys</button>
+        <button class="inspera-flat-btn" onclick="exitExamShell()">Exit</button>
+        <button class="inspera-flat-btn primary" id="btnSubmitExam" onclick="submitExam()">Submit</button>
+      </div>
+    </div>
+
+    <div class="inspera-instruction-banner" id="insperaInstructionBanner">
+      <span id="insperaPartInstructionText"><b>Part 1</b> &nbsp; Read the text and answer the questions.</span>
+      <span style="font-size:12px; color:#4b5563;">Select text to highlight</span>
+    </div>
+
+    <div class="inspera-part-tabs" id="insperaPartTabs"></div>
+
+    <div class="inspera-workspace" id="insperaSplitBox">
+      <div class="passage-col" id="insperaLeftPane"></div>
+      <div class="resizer-bar" id="insperaResizer"></div>
+      <div class="questions-col" id="insperaRightPane"></div>
+    </div>
+
+    <div id="selectionTooltip">
+      <button class="btn-hl-yellow" onclick="applyUserHighlight()">Highlight</button>
+      <button onclick="removeUserHighlight()">Clear</button>
+    </div>
+
+    <div class="progress-container">
+      <span style="font-size: 12px; font-weight: 700; color: #111827;" id="footerSectionLabel">Part 1</span>
+      <div class="progress-items" id="insperaFooterList"></div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button class="inspera-flat-btn primary" id="btnSubmitBottom" onclick="submitExam()">Finish Test ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AI GRADER SETTINGS (GEMINI API KEY) -->
+  <div class="modal-overlay" id="aiConfigModal">
+    <div class="modal-window" style="width: 520px;">
+      <div class="modal-header">
+        <span>🤖 Gemini AI Writing Grader Configuration</span>
+        <button class="btn btn-secondary" onclick="closeModal('aiConfigModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Google Gemini API Key (From aistudio.google.com)</label>
+          <input type="password" id="aiApiKeyInput" class="form-input" placeholder="AIzaSy...">
+          <small style="color:#64748b; display:block; margin-top:4px;">Stored securely in your database/browser for automated IELTS Writing evaluation.</small>
+        </div>
+        <div class="form-group">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; text-transform:none; font-size:13.5px;">
+            <input type="checkbox" id="aiAutoGradeOnSubmit" style="width:17px; height:17px; accent-color:var(--emerald-accent);">
+            Automatically grade Writing with AI immediately when a student submits
+          </label>
+        </div>
+        <div class="form-group">
+          <label>Custom Examiner Instructions (Optional)</label>
+          <textarea id="aiCustomInstructions" class="form-input" style="height:75px;" placeholder="e.g. Provide feedback in both English and Vietnamese, and include a Band 8.0 sample rewrite..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('aiConfigModal')">Cancel</button>
+        <button class="btn btn-emerald" onclick="saveAiConfig()">Save AI Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: STUDY PASSAGE VOCABULARY -->
+  <div class="modal-overlay" id="studyVocabModal">
+    <div class="modal-window" style="width: 1050px; height: 85vh;">
+      <div class="modal-header">
+        <span id="studyVocabModalTitle">Passage Vocabulary Study</span>
+        <button class="btn btn-secondary" onclick="closeModal('studyVocabModal')">Close</button>
+      </div>
+      <div class="modal-body" style="display:flex; gap:16px; padding:16px; overflow:hidden;">
+        <div style="width: 60%; height: 100%; overflow-y: auto; padding: 20px; border: 1px solid var(--inspera-border); border-radius: 12px; line-height: 1.8;" id="modalVocabPassagePane"></div>
+        <div style="width: 40%; height: 100%; overflow-y: auto; padding: 14px; background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 12px;" id="modalVocabCardsPane"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: TEACHER GRADE WRITING SUBMISSION (WITH AI AUTO-GRADE) -->
+  <div class="modal-overlay" id="gradeWritingModal">
+    <div class="modal-window" style="width: 1040px; height: 90vh;">
+      <div class="modal-header">
+        <span id="gradeWritingTitle">Writing Submission & Teacher Feedback</span>
+        <button class="btn btn-secondary" onclick="closeModal('gradeWritingModal')">Close</button>
+      </div>
+      <div class="modal-body" style="display:flex; gap:20px; overflow-y:auto; padding:20px;">
+        <div style="flex:1; display:flex; flex-direction:column; gap:16px;">
+          <div style="background:#f8fafc; border:1px solid var(--inspera-border); border-radius:12px; padding:16px;">
+            <h4 style="color:var(--emerald-accent); margin-bottom:8px;">Task 1 Response</h4>
+            <div id="gradeTask1Text" style="white-space:pre-wrap; line-height:1.7; font-size:14px; background:#fff; padding:12px; border-radius:8px; border:1px solid #e2e8f0; min-height:140px;"></div>
+          </div>
+          <div style="background:#f8fafc; border:1px solid var(--inspera-border); border-radius:12px; padding:16px;">
+            <h4 style="color:var(--emerald-accent); margin-bottom:8px;">Task 2 Response</h4>
+            <div id="gradeTask2Text" style="white-space:pre-wrap; line-height:1.7; font-size:14px; background:#fff; padding:12px; border-radius:8px; border:1px solid #e2e8f0; min-height:180px;"></div>
+          </div>
+        </div>
+        <div style="width: 360px; background:#f8fafc; border:1px solid var(--inspera-border); border-radius:12px; padding:18px; display:flex; flex-direction:column; gap:12px;">
+          <input type="hidden" id="gradeSubmissionId">
+          <div><b>Student:</b> <span id="gradeStudentName"></span></div>
+          <div><b>Assessment:</b> <span id="gradeExamTitle"></span></div>
+
+          <div id="teacherAiToolsBox" style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-emerald" id="btnRunAiGrade" style="flex:1; background:#2563eb;" onclick="runAiWritingEvaluation()">🤖 AI Auto-Grade</button>
+            <button type="button" class="btn btn-secondary" onclick="copyEssayPromptForGemini()" title="Copy full prompt & essay for Gemini Pro chat">📋 Copy Prompt</button>
+          </div>
+
+          <div class="form-group" style="margin-bottom:4px;">
+            <label>Overall Band Score</label>
+            <input type="text" id="gradeBandInput" class="form-input" placeholder="e.g. 6.5, 7.0, 7.5">
+          </div>
+          <div class="form-group" style="flex:1; display:flex; flex-direction:column; margin-bottom:4px;">
+            <label>Examiner / AI Feedback (TA, CC, LR, GRA)</label>
+            <textarea id="gradeFeedbackInput" class="form-input" style="flex:1; min-height:180px; line-height:1.6;" placeholder="Enter detailed band descriptors, lexical notes, and grammar corrections..."></textarea>
+          </div>
+          <button class="btn btn-emerald" id="btnSaveWritingEval" style="width:100%; padding:10px;" onclick="saveWritingEvaluation()">Save Evaluation</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CLEAN SCORE POPUP -->
+  <div class="modal-overlay" id="scoreSummaryModal">
+    <div class="modal-window" style="width: 450px; text-align: center;">
+      <div class="modal-header" style="justify-content: center;">Assessment Result</div>
+      <div class="modal-body" style="padding: 30px 20px;">
+        <div style="font-size: 48px; font-weight: 800; color: var(--emerald-accent);" id="summaryBandDisplay">Band 7.5</div>
+        <p style="font-size: 16px; font-weight: 700; color: #334155; margin-top: 8px;" id="summaryScoreDisplay">Correct: 32 / 40</p>
+        <p style="font-size: 13px; color: #64748b; margin-top: 14px;">
+          Your answers have been recorded. Click below to review answer keys, explanations, and passage evidence.
+        </p>
+      </div>
+      <div class="modal-footer" style="justify-content: center; gap: 12px;">
+        <button class="btn btn-secondary" onclick="closeScoreSummaryToDashboard()">Dashboard</button>
+        <button class="btn btn-emerald" onclick="enterReviewModeFromSummary()">Review Answers & Evidence</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LIVE EXPLANATION EDITOR -->
+  <div class="modal-overlay" id="teacherEditModal">
+    <div class="modal-window" style="width: 500px;">
+      <div class="modal-header">
+        <span id="teacherEditTitle">Edit Answer Key & Evidence</span>
+        <button class="btn btn-secondary" onclick="closeModal('teacherEditModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editKeyName">
+        <div class="form-group">
+          <label>Correct Key (Use | for multiple valid answers)</label>
+          <input type="text" id="editKeyVal" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Explanation</label>
+          <textarea id="editKeyExp" class="form-input" style="height: 90px;"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Evidence Quote (Exact text from passage/transcript)</label>
+          <input type="text" id="editKeyEvi" class="form-input">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('teacherEditModal')">Cancel</button>
+        <button class="btn btn-emerald" onclick="saveTeacherKeyUpdate()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: IMPORT / CREATE MULTI-FORMAT READING TEST -->
+  <div class="modal-overlay" id="readingEditorModal">
+    <div class="modal-window" style="width: 1080px;">
+      <div class="modal-header">
+        <span>Reading Test Builder</span>
+        <button class="btn btn-secondary" onclick="closeModal('readingEditorModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editingExamId">
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label>Exam Title</label>
+            <input type="text" id="reTitle" class="form-input" placeholder="e.g. Cambridge 19 Test 1 - Reading">
+          </div>
+          <div class="form-group">
+            <label>Duration (Minutes)</label>
+            <input type="number" id="reDuration" class="form-input" value="60">
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label>Section Category</label>
+            <select id="reCategory" class="form-input">
+              <option value="Full Test">Full Test (3 Passages)</option>
+              <option value="Passage 1">Passage 1</option>
+              <option value="Passage 2">Passage 2</option>
+              <option value="Passage 3">Passage 3</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Topic / Source</label>
+            <input type="text" id="reTopic" class="form-input" placeholder="e.g. Environment / Cambridge 19">
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin: 8px 0 12px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
+          <button class="btn btn-secondary active-subtab" id="subtab-p1" onclick="switchPassageEditor(1)">Passage 1</button>
+          <button class="btn btn-secondary" id="subtab-p2" onclick="switchPassageEditor(2)">Passage 2</button>
+          <button class="btn btn-secondary" id="subtab-p3" onclick="switchPassageEditor(3)">Passage 3</button>
+        </div>
+
+        <div class="template-toolbar">
+          <span style="font-size:11.5px; font-weight:800; color:#065f46; width:100%; margin-bottom:2px; text-transform:uppercase;">
+            ⚡ Insert Question Format Templates:
+          </span>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('tfng', 're')">+ TFNG / YNNG</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq1', 're')">+ Multiple Choice (1 Ans)</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq2', 're')">+ Choose TWO Letters</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('gapfill', 're')">+ Inline Gap-Fill</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('summary_drag', 're')">+ Drag & Drop Matching</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('headings', 're')">+ Matching Headings</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('matrix', 're')">+ Matrix Radio Grid</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('diagram', 're')">+ Diagram / Map Image</button>
+          <button type="button" class="btn btn-emerald" onclick="autoGenerateKeysFromHtml('re')">🔍 Auto-Detect Questions</button>
+        </div>
+
+        <div class="form-group">
+          <label>Passage Title</label>
+          <input type="text" id="rePTitle" class="form-input" placeholder="Enter passage title...">
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label>Passage HTML (Left Panel)</label>
+            <textarea id="rePText" class="form-input" style="height: 170px; font-family: monospace; font-size:12px;"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Questions HTML (Right Panel)</label>
+            <textarea id="rePQuestionsHtml" class="form-input" style="height: 170px; font-family: monospace; font-size:12px;"></textarea>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label>Correct Keys (q1=TRUE)</label>
+            <textarea id="rePKeys" class="form-input" style="height: 90px; font-family: monospace; font-size:12px;" placeholder="q1=TRUE&#10;q2=FALSE&#10;q3=canopy"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Explanations (q1=Explanation...)</label>
+            <textarea id="rePExps" class="form-input" style="height: 90px; font-family: monospace; font-size:12px;"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Evidence Quotes (q1=Exact quote)</label>
+            <textarea id="rePEvis" class="form-input" style="height: 90px; font-family: monospace; font-size:12px;"></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Vocabulary List (word | part of speech | meaning | synonyms)</label>
+          <textarea id="rePVocab" class="form-input" style="height: 65px; font-family: monospace; font-size:12px;" placeholder="indistinguishable | adj | identical in appearance | identical, similar"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('readingEditorModal')">Cancel</button>
+        <button class="btn btn-emerald" onclick="saveActiveExamFromEditor()">Save & Publish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CREATE LISTENING TEST (SUPPORTS 4 PARTS OR SINGLE PART) -->
+  <div class="modal-overlay" id="listeningEditorModal">
+    <div class="modal-window" style="width: 1080px;">
+      <div class="modal-header">
+        <span>Listening Test Builder (Supports Part 1–4 Full Test or Single Part)</span>
+        <button class="btn btn-secondary" onclick="closeModal('listeningEditorModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editingListeningId">
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px;">
+          <div class="form-group"><label>Exam Title</label><input type="text" id="leTitle" class="form-input" placeholder="e.g. Cambridge 19 Listening Test 1"></div>
+          <div class="form-group"><label>Duration (Minutes)</label><input type="number" id="leDuration" class="form-input" value="30"></div>
+        </div>
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label>Audio Source (Direct .mp3 URL, Google Drive / Dropbox Link, or Upload File to Cloud)</label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="leAudioUrl" class="form-input" placeholder="https://.../audio.mp3 or Google Drive Share Link">
+              <label class="btn btn-secondary" id="btnUploadAudioLabel" style="white-space:nowrap; cursor:pointer; margin:0;">
+                <i class="fas fa-cloud-upload-alt"></i> <span id="uploadAudioBtnText">Upload MP3</span>
+                <input type="file" accept="audio/*" style="display:none;" onchange="handleListeningAudioUpload(this)">
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Section Category</label>
+            <select id="leCategory" class="form-input">
+              <option value="Listening Full">Full Test (Part 1-4)</option>
+              <option value="Listening Part 1">Part 1</option>
+              <option value="Listening Part 2">Part 2</option>
+              <option value="Listening Part 3">Part 3</option>
+              <option value="Listening Part 4">Part 4</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label>Topic / Source</label><input type="text" id="leTopic" class="form-input" placeholder="e.g. Cam 19 Test 1 / Business"></div>
+
+        <!-- 4 PART SUBTABS FOR LISTENING -->
+        <div style="display: flex; gap: 8px; margin: 8px 0 12px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
+          <button type="button" class="btn btn-secondary active-subtab" id="subtab-lp1" onclick="switchListeningPartEditor(1)">Part 1</button>
+          <button type="button" class="btn btn-secondary" id="subtab-lp2" onclick="switchListeningPartEditor(2)">Part 2</button>
+          <button type="button" class="btn btn-secondary" id="subtab-lp3" onclick="switchListeningPartEditor(3)">Part 3</button>
+          <button type="button" class="btn btn-secondary" id="subtab-lp4" onclick="switchListeningPartEditor(4)">Part 4</button>
+        </div>
+
+        <div class="template-toolbar">
+          <span style="font-size:11.5px; font-weight:800; color:#065f46; width:100%; margin-bottom:2px; text-transform:uppercase;">
+            ⚡ Insert Listening Question Templates:
+          </span>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('gapfill', 'le')">+ Note / Form Gap-Fill</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq1', 'le')">+ Multiple Choice (A, B, C)</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('mcq2', 'le')">+ Choose TWO Letters</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('summary_drag', 'le')">+ Matching (Drag & Drop Box)</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('matrix', 'le')">+ Matching (Radio Grid)</button>
+          <button type="button" class="btn btn-secondary" onclick="insertQuestionTemplate('diagram', 'le')">+ Map / Plan Labelling Image</button>
+          <button type="button" class="btn btn-emerald" onclick="autoGenerateKeysFromHtml('le')">🔍 Auto-Detect Questions</button>
+        </div>
+
+        <div class="form-group">
+          <label>Part Title</label>
+          <input type="text" id="lePTitle" class="form-input" placeholder="e.g. Part 1: Questions 1–10">
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label>Transcript HTML for this Part (Displayed on Left Panel during Review Mode)</label>
+            <textarea id="leTranscript" class="form-input" style="height: 150px; font-family: monospace; font-size:12px;" placeholder="<p><b>Speaker:</b> Transcript text...</p>"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Questions HTML for this Part (Full-Screen during Test)</label>
+            <textarea id="leQuestions" class="form-input" style="height: 150px; font-family: monospace; font-size:12px;" placeholder="Insert question templates or paste HTML here..."></textarea>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+          <div class="form-group"><label>Correct Keys (q1=answer)</label><textarea id="leKeys" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;"></textarea></div>
+          <div class="form-group"><label>Explanations</label><textarea id="leExps" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;"></textarea></div>
+          <div class="form-group"><label>Evidence Quotes</label><textarea id="leEvis" class="form-input" style="height: 85px; font-family: monospace; font-size:12px;"></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('listeningEditorModal')">Cancel</button>
+        <button class="btn btn-emerald" onclick="saveListeningExam()">Save & Publish</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- WRITING MODAL -->
+  <div class="modal-overlay" id="writingEditorModal">
+    <div class="modal-window" style="width: 720px;">
+      <div class="modal-header">
+        <span>Writing Assessment Builder</span>
+        <button class="btn btn-secondary" onclick="closeModal('writingEditorModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editingWritingId">
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:14px;">
+          <div class="form-group"><label>Exam Title</label><input type="text" id="weTitle" class="form-input" placeholder="e.g. IELTS Academic Writing Test 02"></div>
+          <div class="form-group"><label>Duration (Minutes)</label><input type="number" id="weDuration" class="form-input" value="60"></div>
+        </div>
+        <div class="form-group">
+          <label>Task Type / Topic (e.g. Line Graph, Bar Chart, Map, Process, Opinion, Discussion)</label>
+          <input type="text" id="weTopic" class="form-input" placeholder="e.g. Bar Chart / Education">
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 1 (Leave blank for Task 2 Only test)</h4>
+          <div class="form-group"><label>Task 1 Prompt</label><textarea id="weT1Prompt" class="form-input" style="height: 85px;"></textarea></div>
+          <div class="form-group"><label>Chart / Diagram Image URL (Optional)</label><input type="text" id="weT1Image" class="form-input" placeholder="https://..."></div>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid var(--inspera-border); border-radius: 12px; padding: 14px;">
+          <h4 style="margin-bottom: 8px; color: var(--emerald-accent);">Writing Task 2 (Leave blank for Task 1 Only test)</h4>
+          <div class="form-group"><label>Task 2 Prompt</label><textarea id="weT2Prompt" class="form-input" style="height: 85px;"></textarea></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('writingEditorModal')">Cancel</button>
+        <button class="btn btn-emerald" onclick="saveWritingExam()">Save & Publish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE MODAL -->
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal-window" style="width: 400px;">
+      <div class="modal-header">Account Profile</div>
+      <div class="modal-body">
+        <div class="form-group"><label>Full Name</label><input type="text" id="profNameInput" class="form-input"></div>
+        <div class="form-group"><label>New Password (Optional)</label><input type="password" id="profPassInput" class="form-input"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('profileModal')">Cancel</button>
+        <button class="btn btn-emerald" onclick="saveProfileChanges()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLASS MODAL -->
+  <div class="modal-overlay" id="classModal">
+    <div class="modal-window" style="width: 400px;">
+      <div class="modal-header">Add New Class</div>
+      <div class="modal-body"><div class="form-group"><label>Class Name</label><input type="text" id="newClassName" class="form-input" placeholder="e.g. IELTS Intensive 7.5+"></div></div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('classModal')">Cancel</button><button class="btn btn-emerald" onclick="saveNewClass()">Save</button></div>
+    </div>
+  </div>
+
+  <!-- SINGLE STUDENT MODAL -->
+  <div class="modal-overlay" id="studentModal">
+    <div class="modal-window" style="width: 440px;">
+      <div class="modal-header" id="studentModalTitle">Register Student Account</div>
+      <div class="modal-body">
+        <input type="hidden" id="editingStudentId">
+        <div class="form-group"><label>Full Name</label><input type="text" id="newStuFullName" class="form-input" autocomplete="off" placeholder="Alex Johnson"></div>
+        <div class="form-group"><label>Username</label><input type="text" id="newStuUsername" class="form-input" autocomplete="off" placeholder="alexjohnson"></div>
+        <div class="form-group"><label>Password</label><input type="text" id="newStuPassword" class="form-input" value="123456"></div>
+        <div class="form-group"><label>Assign Class</label><select id="newStuClassSelect" class="form-input"></select></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('studentModal')">Cancel</button>
+        <button class="btn btn-emerald" id="studentModalSaveBtn" onclick="saveNewStudent()">Save Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BULK STUDENT GENERATOR MODAL -->
+  <div class="modal-overlay" id="bulkStudentModal">
+    <div class="modal-window" style="width: 540px;">
+      <div class="modal-header">
+        <span>⚡ Bulk Student Account Generator</span>
+        <button class="btn btn-secondary" onclick="closeModal('bulkStudentModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Target Class</label>
+          <select id="bulkStuClassSelect" class="form-input"></select>
+        </div>
+        <div class="form-group">
+          <label>Default Password</label>
+          <input type="text" id="bulkStuDefaultPass" class="form-input" value="123456">
+        </div>
+        <div class="form-group">
+          <label>Student List (One per line: "Full Name" OR "Full Name | username | password")</label>
+          <textarea id="bulkStuTextarea" class="form-input" style="height: 160px; font-family: monospace;" placeholder="Tran Minh Quan&#10;Le Hoang Nam&#10;Pham Thu Ha | thuha99 | 123456"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('bulkStudentModal')">Cancel</button>
+        <button class="btn btn-emerald" onclick="saveBulkStudents()">Generate Accounts</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSIGN EXAM MODAL -->
+  <div class="modal-overlay" id="assignModal">
+    <div class="modal-window" style="width: 420px;">
+      <div class="modal-header">Assign Assessment to Class</div>
+      <div class="modal-body">
+        <input type="hidden" id="assignExamId">
+        <input type="hidden" id="assignExamType">
+        <div class="form-group">
+          <label>Target Class</label>
+          <select id="assignCohortSelect" class="form-input"></select>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('assignModal')">Cancel</button><button class="btn btn-emerald" onclick="executeAssign()">Confirm</button></div>
+    </div>
+  </div>
+
+<!-- MODAL: VOCAB MILESTONE QUIZ (40 QUESTIONS - 6 FORMATS + REVIEW + AUTO VAULT) -->
+<div class="modal-overlay" id="vocabQuizModal" style="z-index: 99999;">
+  <div class="modal-window" style="width: 960px; height: 90vh;">
+    <div class="modal-header" style="background:#0f172a; color:#fff;">
+      <div>
+        <span id="vocabQuizModalTitle" style="font-size:16px; font-weight:800;">🎯 Milestone Vocabulary Review (40 Questions)</span>
+        <div id="vocabQuizSubHeader" style="font-size:12px; color:#cbd5e1; font-weight:500; margin-top:2px;">
+          Hoàn thành tối thiểu 60% (24/40 câu) để mở khóa chặng Reading tiếp theo. Từ làm sai sẽ tự động lưu vào Vocabulary Vault!
+        </div>
+      </div>
+      <button class="btn btn-secondary" onclick="closeModal('vocabQuizModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" id="vocabQuizBody" style="padding: 24px; background:#f8fafc; overflow-y:auto;"></div>
+    <div class="modal-footer" style="justify-content: space-between;">
+      <span id="vocabQuizResultSummary" style="font-weight:800; font-size:14px; color:#0f172a;">Tiến độ: 40 câu hỏi (Parts A – F)</span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-secondary" id="btnRetryVocabQuiz" style="display:none;" onclick="retryCurrentVocabQuiz()">🔄 Làm lại đề mới (AI)</button>
+        <button class="btn btn-emerald" id="btnSubmitVocabQuiz" onclick="submitVocabQuizAnswers()">✅ Nộp bài & Chấm điểm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GIAO DIỆN PHÒNG CHAT DISCORD NỔI -->
+<div id="loungeChatLauncher" onclick="toggleLoungeChatWindow()">
+  <span>💬 Study Lounge Chat</span>
+  <span id="loungeChatUnreadBadge">0</span>
+</div>
+
+<div id="loungeChatWindow">
+  <div class="lounge-chat-head">
+    <div>
+      <span>🍵 IELTS Study Lounge</span>
+      <div style="font-size:11px; font-weight:500; color:#a7f3d0;">Trao đổi bài vở & hỏi đáp trực tiếp</div>
+    </div>
+    <button type="button" onclick="toggleLoungeChatWindow()" style="background:rgba(255,255,255,0.15); border:none; color:#fff; width:28px; height:28px; border-radius:8px; cursor:pointer; font-weight:800;">✕</button>
+  </div>
+  <div class="lounge-chat-messages" id="loungeChatMsgList"></div>
+  <div class="lounge-chat-input-bar">
+    <input type="text" id="loungeChatInput" class="form-input" placeholder="Nhập tin nhắn (Enter để gửi)..." onkeydown="if(event.key==='Enter') sendLoungeChatMessage()">
+    <button type="button" class="btn btn-emerald" onclick="sendLoungeChatMessage()">Gửi</button>
+  </div>
+</div>
+
+<!-- MODAL 1: LỰA CHỌN CHẾ ĐỘ THI THẬT (EXAM MODE) HOẶC LUYỆN TẬP (PRACTICE MODE) -->
+<div class="modal-overlay" id="examModeSelectModal" style="z-index: 95000;">
+  <div class="modal-window" style="width: 580px;">
+    <div class="modal-header">
+      <span id="modeSelectModalTitle">⚙️ Chọn Chế Độ Làm Bài</span>
+      <button class="btn btn-secondary" onclick="closeModal('examModeSelectModal')">✕</button>
+    </div>
+    <div class="modal-body" style="padding: 22px;">
+      <p style="font-size: 13.5px; color: #475569; margin-bottom: 16px; font-weight: 500;" id="modeSelectExamNameLabel">
+        Hãy chọn chế độ phù hợp với mục tiêu buổi học hôm nay của bạn:
+      </p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+        <div class="mode-choice-card exam-mode" onclick="confirmLaunchWithMode('exam')">
+          <div style="font-size: 24px; margin-bottom: 8px;">🔴 ⏱️</div>
+          <div style="font-size: 15px; font-weight: 800; color: #b91c1c; margin-bottom: 6px;">Exam Mode (Thi Thật)</div>
+          <div style="font-size: 12.5px; color: #475569; line-height: 1.55;">
+            • Đồng hồ đếm ngược nghiêm ngặt.<br>
+            • Hết giờ hệ thống tự động thu bài.<br>
+            • Ẩn toàn bộ gợi ý/dàn ý để mô phỏng 100% phòng thi thật.
+          </div>
+        </div>
+        <div class="mode-choice-card" onclick="confirmLaunchWithMode('practice')">
+          <div style="font-size: 24px; margin-bottom: 8px;">🟢 🌱</div>
+          <div style="font-size: 15px; font-weight: 800; color: #047857; margin-bottom: 6px;">Practice Mode (Luyện Tập)</div>
+          <div style="font-size: 12.5px; color: #475569; line-height: 1.55;">
+            • Không giới hạn thời gian (Bấm giờ tăng dần & có nút Pause).<br>
+            • Thoải mái tra cứu và suy ngẫm.<br>
+            • <b>Đặc quyền PRO (Writing):</b> Xem trước <b>Dàn ý định hướng (Outline)</b> ngay khi viết bài!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 2: DAILY VOCAB DRILL (10 TỪ CẦN ÔN HÔM NAY - FLASHCARD & TRẮC NGHIỆM NHANH) -->
+<div class="modal-overlay" id="dailyVocabDrillModal" style="z-index: 96000;">
+  <div class="modal-window" style="width: 650px;">
+    <div class="modal-header" style="background: #064e3b; color: #fff;">
+      <span id="dailyDrillModalTitle">🎯 Daily Vocab Drill (10 Từ Cần Ôn Hôm Nay)</span>
+      <button class="btn btn-secondary" onclick="closeModal('dailyVocabDrillModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" id="dailyDrillModalBody" style="padding: 24px;"></div>
+    <div class="modal-footer" id="dailyDrillModalFooter" style="justify-content: space-between;"></div>
+  </div>
+</div>
+
+<!-- MODAL 3: THIẾT LẬP MỤC TIÊU HÀNG NGÀY (KHÓA CỐ ĐỊNH TRONG NGÀY) -->
+<div class="modal-overlay" id="dailyGoalConfigModal" style="z-index: 96500;">
+  <div class="modal-window" style="width: 480px;">
+    <div class="modal-header" style="background:#064e3b; color:#fff;">
+      <span>🎯 Thiết Lập Mục Tiêu Học Tập Hôm Nay</span>
+      <button class="btn btn-secondary" onclick="closeModal('dailyGoalConfigModal')">✕</button>
+    </div>
+    <div class="modal-body" style="padding: 22px;">
+      <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:10px 14px; margin-bottom:16px; font-size:12.5px; color:#92400e; line-height:1.5;">
+        ⚠️ <b>Quy tắc kỷ luật:</b> Sau khi bấm <b>"Khóa & Lưu Mục Tiêu"</b>, chỉ tiêu hôm nay sẽ được khóa cố định đến 24:00 đêm (ngày mai mới được đổi lại).<br>
+        • Bài <b>Reading / Listening</b> phải đạt tối thiểu <b>≥ 60% số câu đúng</b> mới được tính hoàn thành (chống nộp bài trắng).
+      </div>
+      <div class="form-group">
+        <label>📖 Số đề Reading mục tiêu hôm nay</label>
+        <input type="number" id="goalInputReading" class="form-input" min="0" max="10" value="1">
+      </div>
+      <div class="form-group">
+        <label>🎧 Số đề Listening mục tiêu hôm nay</label>
+        <input type="number" id="goalInputListening" class="form-input" min="0" max="10" value="1">
+      </div>
+      <div class="form-group" style="margin-bottom:4px;">
+        <label>✍️ Số bài Writing mục tiêu hôm nay</label>
+        <input type="number" id="goalInputWriting" class="form-input" min="0" max="10" value="1">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('dailyGoalConfigModal')">Hủy</button>
+      <button class="btn btn-emerald" onclick="saveAndLockDailyGoal()">🔒 Khóa & Lưu Mục Tiêu Hôm Nay</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP NỔI KHI BÔI ĐEN VĂN BẢN TRONG BÀI THI (HIGHLIGHT 2 MÀU) -->
+<div id="floatingDualHighlighter">
+  <button type="button" class="hl-swatch-btn" style="background:#fef9c3; color:#854d0e; border:1px solid #fde047;" onmousedown="applyUserTextHighlight('yellow', event)">
+    🟡 Keyword
+  </button>
+  <button type="button" class="hl-swatch-btn" style="background:#dcfce7; color:#166534; border:1px solid #86efac;" onmousedown="applyUserTextHighlight('green', event)">
+    🟢 Evidence
+  </button>
+  <button type="button" class="hl-swatch-btn" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;" onmousedown="clearSelectedHighlights(event)">
+    ✕ Xóa màu
+  </button>
+</div>
+
+<!-- MODAL 2: SỔ TAY LỖI SAI CÁ NHÂN (MISTAKE BANK & MINI QUIZ ÔN LẠI CÂU SAI) -->
+<div class="modal-overlay" id="mistakeBankModal" style="z-index: 97500;">
+  <div class="modal-window" style="width: 820px; max-height: 90vh;">
+    <div class="modal-header" style="background:#1f3d32; color:#faf8f2;">
+      <span id="mistakeBankModalTitle">📕 Sổ Tay Lỗi Sai Cá Nhân (Personal Mistake Bank)</span>
+      <button class="btn btn-secondary" onclick="closeModal('mistakeBankModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" id="mistakeBankModalBody" style="padding: 22px; overflow-y: auto;"></div>
+    <div class="modal-footer" id="mistakeBankModalFooter" style="justify-content: space-between;"></div>
+  </div>
+</div>
+
+<!-- MODAL VIẾT LẠI BẢN SỬA WRITING (WRITING REWRITE V2 WORKSPACE) -->
+<div class="modal-overlay" id="writingRewriteModal" style="z-index: 98000;">
+  <div class="modal-window" style="width: 1060px; max-height: 92vh;">
+    <div class="modal-header" style="background:#1f3d32; color:#faf8f2;">
+      <span id="writingRewriteModalTitle">✏️ Viết Lại Bản Sửa Hoàn Thiện (Writing Revision V2)</span>
+      <button class="btn btn-secondary" onclick="closeModal('writingRewriteModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" id="writingRewriteModalBody" style="padding: 20px; overflow-y: auto;"></div>
+    <div class="modal-footer" style="justify-content: space-between;">
+      <span style="font-size:12.5px; color:#64748b;">💡 Hãy đối chiếu nhận xét bên trái để sửa trực tiếp lỗi từ vựng, ngữ pháp và cấu trúc câu ở bên phải.</span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-secondary" id="btnExportDocFromRewrite">📄 Xuất File Word / Google Docs</button>
+        <button class="btn btn-emerald" onclick="saveWritingRewriteSubmission()">💾 Lưu Bản Sửa (Version 2)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX PHÓNG TO BIỂU ĐỒ TASK 1 KHI HỌC SINH BẤM VÀO ẢNH -->
+<div id="rewriteChartZoomOverlay" onclick="this.style.display='none'"
+  style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.86); z-index:99999; align-items:center; justify-content:center; padding:24px; cursor:zoom-out;">
+  <img id="rewriteChartZoomImg" src="" alt="Task 1 Chart" style="max-width:94vw; max-height:90vh; background:#ffffff; padding:12px; border-radius:12px; box-shadow:0 15px 40px rgba(0,0,0,0.4);">
+</div>
+
+<!-- NÚT MŨI TÊN CHUYỂN CÂU NHANH ← → -->
+<div class="mate-floating-prev-next" id="matePrevNextBox">
+  <button type="button" class="mate-nav-arrow-btn" onclick="stepExamQuestionByDelta(-1)" title="Câu trước (Previous Question)">←</button>
+  <button type="button" class="mate-nav-arrow-btn next-dark" onclick="stepExamQuestionByDelta(1)" title="Câu kế tiếp (Next Question)">→</button>
+</div>
+
+<!-- MODAL TẠO BỘ ĐỀ THI THỬ 3 KỸ NĂNG GIAO CHO LỚP (DÀNH CHO GIÁO VIÊN) -->
+<div class="modal-overlay" id="createMockSetModal" style="z-index: 98500;">
+  <div class="modal-window" style="width: 680px;">
+    <div class="modal-header" style="background:#1f3d32; color:#fff;">
+      <span>🎓 Tạo Bộ Đề Thi Thử 3 Kỹ Năng (Full Mock Test) Giao Cho Lớp</span>
+      <button class="btn btn-secondary" onclick="closeModal('createMockSetModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Tên Đợt Thi Thử / Bộ Đề (Ví dụ: Mock Test Tháng 10 - Cam 19)</label>
+        <input type="text" id="mockSetTitleInput" class="form-input" placeholder="Nhập tên bộ đề thi thử...">
+      </div>
+      <div class="form-group">
+        <label>Giao Cho Lớp (Target Class)</label>
+        <select id="mockSetClassSelect" class="form-input"></select>
+      </div>
+      <div class="form-group">
+        <label>1. Chọn Đề Listening (Kỹ năng 1)</label>
+        <select id="mockSetListeningSelect" class="form-input"></select>
+      </div>
+      <div class="form-group">
+        <label>2. Chọn Đề Reading (Kỹ năng 2)</label>
+        <select id="mockSetReadingSelect" class="form-input"></select>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label>3A. Chọn Đề Writing Task 1 (Hoặc Full)</label>
+          <select id="mockSetWritingT1Select" class="form-input"></select>
+        </div>
+        <div class="form-group">
+          <label>3B. Ghép Thêm Writing Task 2 (Tùy chọn)</label>
+          <select id="mockSetWritingT2Select" class="form-input"></select>
+        </div>
+      </div>
+      <div style="font-size:12px; color:#065f46; background:#ecfdf5; padding:10px 12px; border-radius:8px; border:1px solid #a7f3d0;">
+        💡 <b>Siêu tiết kiệm dung lượng:</b> Bộ đề chỉ lưu mã liên kết ID (~0.5KB), không nhân bản dữ liệu nên tuyệt đối không tốn bộ nhớ Firebase.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('createMockSetModal')">Hủy</button>
+      <button class="btn btn-emerald" onclick="saveCustomMockSet()">💾 Lưu & Giao Cho Lớp</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MÀN HÌNH CHUYỂN TIẾP GIỮA 3 KỸ NĂNG & BẢNG ĐIỂM TRF CUỐI BUỔI THI -->
+<div class="modal-overlay" id="mockTransitionModal" style="z-index: 99500;">
+  <div class="modal-window" style="width: 580px; text-align:center;">
+    <div class="modal-header" style="justify-content:center; background:#1f3d32; color:#fff;" id="mockTransitionHeader">
+      🎓 Chuyển Tiếp Kỹ Năng Thi Thử (CD-IELTS Official Flow)
+    </div>
+    <div class="modal-body" id="mockTransitionBody" style="padding: 28px 24px;"></div>
+    <div class="modal-footer" id="mockTransitionFooter" style="justify-content:center; gap:10px;"></div>
+  </div>
+</div>
+
+<!-- GIAO DIỆN CỔNG THI THỬ 4 BƯỚC (OFFICIAL CD-IELTS EXAM LOBBY OVERLAY) -->
+<div id="officialMockLobbyOverlay">
+  <div class="lobby-top-bar">
+    <div style="display:flex; align-items:center; gap:16px;">
+      <span style="font-size:18px; font-weight:900; color:#dc2626; letter-spacing:-0.5px;">IELTS</span>
+      <span id="lobbyCandidateLabel" style="font-size:13.5px; font-weight:700; color:#111827;">Candidate: Student</span>
+      <span id="lobbyMockTitleLabel" style="font-size:12.5px; color:#64748b;">Official Computer-Delivered Mock Test</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px; color:#475569; font-size:14px;">
+      <i class="fas fa-wifi" title="Connected"></i>
+      <i class="far fa-bell"></i>
+      <button class="inspera-flat-btn" onclick="abortOfficialMockLobby()">Exit Mock Test</button>
+    </div>
+  </div>
+
+  <div class="lobby-scroll-area">
+    <div class="lobby-accordion-stack" id="lobbyAccordionContainer"></div>
+  </div>
+
+  <div class="lobby-bottom-bar">
+    <span>CD-IELTS Official Simulation Environment</span>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span>🔊 Volume</span>
+      <input type="range" min="0" max="1" step="0.05" value="1" style="width:90px; accent-color:#111827;" oninput="setGlobalMockVolume(this.value)">
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 1: BẢNG ĐIỀU KHIỂN KẾT QUẢ MOCK TEST 3 KỸ NĂNG -->
+<div class="modal-overlay" id="mockTestHubModal" style="z-index: 9800;">
+  <div class="modal-window" style="width: 680px; max-width: 95vw;">
+    <div class="modal-header">
+      <span id="mockHubModalTitle">🎓 Kết Quả Kỳ Thi Mock Test (3 Kỹ Năng)</span>
+      <button class="btn btn-secondary" onclick="closeModal('mockTestHubModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" id="mockHubModalBody" style="padding: 20px;"></div>
+    <div class="modal-footer" id="mockHubModalFooter" style="justify-content: space-between;"></div>
+  </div>
+</div>
+
+<!-- MODAL 2: XEM TRƯỚC & IN PHIẾU ĐIỂM MOCK TEST (CHỈ IN ĐIỂM SỐ) -->
+<div class="modal-overlay" id="mockCleanScorePrintModal" style="z-index: 9999;">
+  <div class="modal-window" style="width: 680px; max-width: 95vw;">
+    <div class="modal-header">
+      <span>🖨️ Phiếu Kết Quả Điểm Mock Test</span>
+      <button class="btn btn-secondary" onclick="closeModal('mockCleanScorePrintModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" style="padding: 22px; background: #f1f5f9;">
+      <div id="mockCleanPrintableSheet">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #0f172a; padding-bottom:14px; margin-bottom:18px;">
+          <div>
+            <div style="font-size:22px; font-weight:800; color:#064e3b;">IELTS WITH AMURO</div>
+            <div style="font-size:11.5px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.6px;">Official Mock Test Score Report</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:13px; font-weight:800; color:#0f172a;" id="prtMockExamTitle">MOCK TEST</div>
+            <div style="font-size:12px; color:#64748b; margin-top:2px;" id="prtMockDate">Date: --/--/----</div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px 16px;">
+          <div>
+            <span style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; display:block;">Candidate Name</span>
+            <span style="font-size:17px; font-weight:800; color:#0f172a;" id="prtMockStudentName">Student Name</span>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; display:block;">Assessment Status</span>
+            <span style="font-size:13px; font-weight:800; color:#059669;">✓ Official Graded Result</span>
+          </div>
+        </div>
+
+        <div class="mock-print-score-grid">
+          <div class="mock-print-score-box">
+            <div class="sk-lbl">Listening</div>
+            <div class="sk-val" id="prtMockLBand">—</div>
+            <div class="sk-sub" id="prtMockLRaw"></div>
+          </div>
+          <div class="mock-print-score-box">
+            <div class="sk-lbl">Reading</div>
+            <div class="sk-val" id="prtMockRBand">—</div>
+            <div class="sk-sub" id="prtMockRRaw"></div>
+          </div>
+          <div class="mock-print-score-box">
+            <div class="sk-lbl">Writing</div>
+            <div class="sk-val" id="prtMockWBand">—</div>
+            <div class="sk-sub">Examiner Graded</div>
+          </div>
+          <div class="mock-print-score-box" style="background:#ecfdf5; border-color:#059669;">
+            <div class="sk-lbl" style="color:#047857;">Overall Band</div>
+            <div class="sk-val" style="color:#059669;" id="prtMockOverall">—</div>
+            <div class="sk-sub" style="color:#065f46;">IELTS Scale</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('mockCleanScorePrintModal')">Đóng</button>
+      <button class="btn btn-emerald" onclick="window.print()">🖨️ In Kết Quả Ngay</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CHUỖI KỶ LUẬT (STREAK) & BIỂU ĐỒ XU HƯỚNG -->
+<div class="modal-overlay" id="streakAndTrendModal" style="z-index: 97000;">
+  <div class="modal-window" style="width: 820px; max-height: 90vh;">
+    <div class="modal-header" style="background:#064e3b; color:#ffffff;">
+      <span>🔥 Chuỗi Kỷ Luật Học Tập (Study Streak) & Biểu Đồ Xu Hướng Điểm Số</span>
+      <button class="btn btn-secondary" onclick="closeModal('streakAndTrendModal')">✕ Đóng</button>
+    </div>
+    <div class="modal-body" id="streakAndTrendModalBody" style="padding: 22px; overflow-y: auto;"></div>
+  </div>
+</div>
+
+<!-- POPUP MENU HIGHLIGHT & NOTE CHUẨN INSPERA -->
+<div id="insperaHlPopup"></div>
+
+<!-- CỬA SỔ GHI CHÚ (NOTE CARD) -->
+<div id="insperaNoteCard">
+  <div class="inspera-note-header">
+    <span>💬 Note</span>
+    <button type="button" class="inspera-note-close" id="insperaNoteCloseBtn" title="Close">✕</button>
+  </div>
+  <div class="inspera-note-body">
+    <textarea id="insperaNoteTextarea" placeholder="Type your note here..."></textarea>
+  </div>
+  <div class="inspera-note-footer">
+    <button type="button" class="inspera-note-btn danger" id="insperaNoteDeleteBtn" style="display:none;">Delete Note</button>
+    <div style="margin-left:auto; display:flex; gap:6px;">
+      <button type="button" class="inspera-note-btn primary" id="insperaNoteSaveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: GIAO BÀI TẬP (TEACHER / ADMIN) -->
+  <div class="modal-overlay" id="createHomeworkModal" style="z-index: 9500;">
+    <div class="modal-window" style="width: 680px;">
+      <div class="modal-header">
+        <span>📋 Giao Bài Tập Về Nhà (Assign Homework)</span>
+        <button class="btn btn-secondary" onclick="closeModal('createHomeworkModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid; grid-template-columns: 1fr 1.6fr; gap:12px;">
+          <div class="form-group">
+            <label>1. Kỹ năng</label>
+            <select id="hwSkillSelect" class="form-input" onchange="populateHwExamOptions()">
+              <option value="reading">📖 Reading</option>
+              <option value="listening">🎧 Listening</option>
+              <option value="writing">✍️ Writing</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>2. Chọn đề thi</label>
+            <select id="hwExamSelect" class="form-input"></select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:8px;">
+            <label style="margin-bottom:0;">3. Chọn danh sách học sinh nhận bài</label>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <select id="hwFilterClassSelect" class="form-input" style="padding:4px 10px; font-size:12px; width:auto;" onchange="renderHwStudentChecklist()">
+                <option value="ALL">🏫 Tất cả các lớp</option>
+              </select>
+              <button type="button" class="btn btn-secondary" style="padding:4px 10px; font-size:11.5px;" onclick="toggleAllHwStudents(true)">☑️ Chọn tất cả</button>
+              <button type="button" class="btn btn-secondary" style="padding:4px 10px; font-size:11.5px;" onclick="toggleAllHwStudents(false)">⬜ Bỏ chọn</button>
+            </div>
+          </div>
+          <div id="hwStudentCheckListBox" style="max-height: 185px; overflow-y: auto; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; background: #f8fafc; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px;"></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:12px;">
+          <div class="form-group">
+            <label>4. Hạn nộp (Deadline)</label>
+            <input type="date" id="hwDeadlineInput" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>5. Lời nhắn / Ghi chú của Giáo viên</label>
+            <input type="text" id="hwNoteInput" class="form-input" placeholder="VD: Làm nghiêm túc bấm giờ 60 phút, nộp trước 21h...">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('createHomeworkModal')">Hủy</button>
+        <button class="btn btn-emerald" onclick="saveNewHomeworkAssignment()">🚀 Giao bài ngay</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NẠP 2 MODULE LOGIC ĐỘC LẬP (CÙNG THƯ MỤC VỚI INDEX.HTML) -->
+  <script src="app-core.js"></script>
+  <script src="exam-engine.js"></script>
+</body>
+</html>
