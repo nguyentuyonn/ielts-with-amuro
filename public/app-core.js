@@ -6514,633 +6514,6 @@ function applyMatchaEditorialLogin() {
     applyMatchaEditorialLogin();
   }
 
-/* === MODULE PART 9 (Lines 8570-9197) === */
-/* ==========================================================================
-     1. TÌM VÀ HIGHLIGHT TỪ VỰNG CHIA ĐỘNG TỪ / BIẾN THỂ (STEM & FUZZY MATCH)
-     ========================================================================== */
-  function buildSmartStemRegex(rawPhrase) {
-    const clean = String(rawPhrase || '').trim().replace(/\([^)]*\)/g, '').trim();
-    if (!clean) return null;
-    const words = clean.split(/\s+/);
-
-    const wordPatterns = words.map(w => {
-      const escaped = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      if (w.length <= 3) return `\\b${escaped}(?:s|es|ed|ing)?\\b`;
-      // Lấy gốc từ (cắt bỏ e, y, ed, ing, s ở cuối để bắt các dạng chia động từ)
-      let stem = w.toLowerCase();
-      if (stem.endsWith('ing') && stem.length > 5) stem = stem.slice(0, -3);
-      else if (stem.endsWith('ed') && stem.length > 4) stem = stem.slice(0, -2);
-      else if (stem.endsWith('es') && stem.length > 4) stem = stem.slice(0, -2);
-      else if (stem.endsWith('e') && stem.length > 4) stem = stem.slice(0, -1);
-      else if (stem.endsWith('y') && stem.length > 4) stem = stem.slice(0, -1);
-
-      const escStem = stem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      return `\\b(?:${escaped}|${escStem}[a-z]{0,6})\\b`;
-    });
-
-    return new RegExp('(' + wordPatterns.join('\\s+(?:[a-z]+\\s+)?') + ')', 'gi');
-  }
-
-  // Ghi đè hàm tìm từ trong passage để bắt trọn cả từ chia thì / biến thể
-  spotVocabWordInModal = function(word, pIdx) {
-    if (!currentReviewExam) return;
-    const regex = buildSmartStemRegex(word);
-    if (!regex) return;
-
-    let targetP = typeof pIdx === 'number' ? pIdx : reviewPassageIdx;
-    const checkInPassage = (idx) => {
-      const p = currentReviewExam.passages[idx];
-      if (!p) return false;
-      const plain = String(p.text || '').replace(/<[^>]*>/g, ' ');
-      return regex.test(plain);
-    };
-
-    if (!checkInPassage(targetP)) {
-      for (let i = 0; i < currentReviewExam.passages.length; i++) {
-        if (checkInPassage(i)) { targetP = i; break; }
-      }
-    }
-
-    selectReviewPassage(targetP);
-    const pObj = currentReviewExam.passages[targetP];
-    const pPane = document.getElementById('revPassagePane');
-    if (!pObj || !pPane) return;
-
-    let count = 0;
-    const htmlWithSpots = pObj.text.replace(/(<[^>]+>)|([^<]+)/g, (match, tag, textNode) => {
-      if (tag) return tag;
-      return textNode.replace(buildSmartStemRegex(word), (m) => {
-        count++;
-        return `<mark class="vocab-spot-mark" style="background:#fde047; color:#1f2e27; font-weight:800; padding:2px 5px; border-radius:4px; box-shadow:0 0 0 2px #eab308;">${m}</mark>`;
-      });
-    });
-
-    pPane.innerHTML = `<h3 style="margin-bottom:12px; color:#1f2e27;">${pObj.title}</h3><div>${htmlWithSpots}</div>`;
-    const firstMark = pPane.querySelector('mark.vocab-spot-mark');
-    if (firstMark) {
-      firstMark.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else {
-      alert(`Không tìm thấy từ "${word}" hoặc các dạng biến thể của nó trong bài đọc này.`);
-    }
-  };
-
-  /* ==========================================================================
-     2. GHIM VĨNH VIỄN TRẠNG THÁI "✓ DONE" VÀO HỒ SƠ HỌC SINH TRÊN FIREBASE
-     ========================================================================== */
-  function syncPermanentCompletedExams() {
-    if (!db || !Array.isArray(db.users)) return false;
-    let changed = false;
-
-    db.users.forEach(u => {
-      if (!u.completedExamIds || typeof u.completedExamIds !== 'object') {
-        u.completedExamIds = { reading: [], listening: [], writing: [] };
-        changed = true;
-      }
-      ['reading', 'listening', 'writing'].forEach(k => {
-        if (!Array.isArray(u.completedExamIds[k])) u.completedExamIds[k] = [];
-      });
-    });
-
-    // Quét toàn bộ kết quả hiện có để ghi nhận vĩnh viễn vào hồ sơ học sinh
-    (db.results || []).forEach(r => {
-      if (!r || !r.userName) return;
-      const u = db.users.find(user =>
-        String(user.name || '').toLowerCase() === String(r.userName || '').toLowerCase() ||
-        String(user.username || '').toLowerCase() === String(r.userName || '').toLowerCase()
-      );
-      if (!u) return;
-
-      const sType = (typeof detectResultSkillType === 'function') ? detectResultSkillType(r) : 'reading';
-      if (!['reading', 'listening', 'writing'].includes(sType)) return;
-
-      const pool = sType === 'reading' ? db.readingExams : (sType === 'listening' ? db.listeningExams : db.writingExams);
-      const matchedExam = (pool || []).find(ex =>
-        ex.id === r.examId ||
-        String(ex.title || '').trim().toLowerCase() === String(r.examTitle || '').trim().toLowerCase()
-      );
-
-      const targetId = matchedExam ? matchedExam.id : r.examId;
-      if (targetId && !u.completedExamIds[sType].includes(targetId)) {
-        u.completedExamIds[sType].push(targetId);
-        changed = true;
-      }
-    });
-
-    if (activeUser) {
-      const meInDb = db.users.find(u => u.id === activeUser.id || u.username === activeUser.username);
-      if (meInDb) activeUser.completedExamIds = meInDb.completedExamIds;
-    }
-    return changed;
-  }
-
-  // Nâng cấp hàm kiểm tra đề đã làm: Kết hợp cả hồ sơ vĩnh viễn lẫn lịch sử bài nộp
-  const _permOrigGetCompletedIds = getStudentCompletedExamIds;
-  getStudentCompletedExamIds = function(skillType) {
-    syncPermanentCompletedExams();
-    const fromHistory = _permOrigGetCompletedIds ? _permOrigGetCompletedIds(skillType) : [];
-    if (!activeUser) return fromHistory;
-    const meInDb = (db.users || []).find(u => u.id === activeUser.id || u.username === activeUser.username) || activeUser;
-    const fromProfile = (meInDb.completedExamIds && Array.isArray(meInDb.completedExamIds[skillType]))
-      ? meInDb.completedExamIds[skillType]
-      : [];
-    return Array.from(new Set([...fromHistory, ...fromProfile]));
-  };
-
-  // Tự động lưu ID đề vào hồ sơ ngay khi học sinh bấm nộp bài
-  const _permOrigFinishExam = finishExam;
-  finishExam = async function() {
-    const exId = activeExam ? activeExam.id : null;
-    await _permOrigFinishExam();
-    if (activeUser && exId) {
-      syncPermanentCompletedExams();
-      await persist();
-    }
-  };
-
-  const _permOrigSubmitListening = submitListeningExam;
-  submitListeningExam = async function() {
-    const exId = activeListeningExam ? activeListeningExam.id : null;
-    await _permOrigSubmitListening();
-    if (activeUser && exId) {
-      syncPermanentCompletedExams();
-      await persist();
-    }
-  };
-
-  const _permOrigSubmitWriting = submitWritingExam;
-  submitWritingExam = async function() {
-    const exId = activeWritingExam ? activeWritingExam.id : null;
-    await _permOrigSubmitWriting();
-    if (activeUser && exId) {
-      syncPermanentCompletedExams();
-      await persist();
-    }
-  };
-
-  /* ==========================================================================
-     3 & 4. ĐỊNH DẠNG DÀN Ý VÀ THẺ HÓA FEEDBACK CHẤM WRITING (4 TIÊU CHÍ)
-     ========================================================================== */
-  function beautifyOutlineText(rawText) {
-    if (!rawText) return '';
-    const lines = String(rawText).split(/\n+/);
-    let html = '';
-    let currentTitle = 'Nội dung hướng dẫn';
-    let currentBody = [];
-
-    const flushBlock = () => {
-      if (!currentBody.length) return;
-      html += `
-        <div class="outline-section-block">
-          <span class="outline-section-title">📌 ${currentTitle}</span>
-          <div>${currentBody.join('<br>')}</div>
-        </div>
-      `;
-      currentBody = [];
-    };
-
-    lines.forEach(line => {
-      const trimmed = line.trim();
-      if (!trimmed) return;
-      if (/^(intro|introduction|overview|body\s*1|body\s*2|conclusion|dàn ý|bài mẫu|sample|task\s*1|task\s*2)[:\s-]/i.test(trimmed) && trimmed.length < 65) {
-        flushBlock();
-        currentTitle = trimmed.replace(/[:\s-]+$/, '');
-      } else {
-        const formattedLine = trimmed
-          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-          .replace(/→/g, '<b style="color:#2d4a3e;"> ➔ </b>');
-        currentBody.push(formattedLine);
-      }
-    });
-    flushBlock();
-    return html || `<div class="outline-section-block">${rawText}</div>`;
-  }
-
-  function parseWritingFeedbackToCards(rawFb, overallBandStr) {
-    const text = String(rawFb || '').trim();
-    if (!text) {
-      return `<div style="padding:20px; text-align:center; color:#5c7065; background:#f4f5f0; border-radius:12px;">⏳ Bài viết đang chờ chấm hoặc chưa có nhận xét chi tiết.</div>`;
-    }
-
-    const extractCriterionScore = (regex) => {
-      const m = text.match(regex);
-      return m ? m[1] : '—';
-    };
-
-    const trScore = extractCriterionScore(/Task (?:Response|Achievement)[^:\n]*:\s*([0-9.]+)/i);
-    const ccScore = extractCriterionScore(/Coherence\s*&\s*Cohesion[^:\n]*:\s*([0-9.]+)/i);
-    const lrScore = extractCriterionScore(/Lexical Resource[^:\n]*:\s*([0-9.]+)/i);
-    const graScore = extractCriterionScore(/Grammatical Range[^:\n]*:\s*([0-9.]+)/i);
-
-    // Tách theo các đầu mục [1. ...], [2. ...] hoặc tên 4 tiêu chí
-    const sections = text.split(/(?=\[\d+\.\s*|\b(?:TASK RESPONSE|TASK ACHIEVEMENT|COHERENCE & COHESION|LEXICAL RESOURCE|GRAMMATICAL RANGE)\b)/i);
-
-    let cardsHtml = '';
-    sections.forEach(sec => {
-      const cleanSec = sec.trim();
-      if (!cleanSec) return;
-      const lines = cleanSec.split('\n').map(l => l.trim()).filter(Boolean);
-      const headerLine = lines[0] || '';
-
-      let critTitle = '';
-      if (/TASK (RESPONSE|ACHIEVEMENT)/i.test(headerLine)) critTitle = '🎯 Task Response / Achievement (TR)';
-      else if (/COHERENCE/i.test(headerLine)) critTitle = '🔗 Coherence & Cohesion (CC)';
-      else if (/LEXICAL/i.test(headerLine)) critTitle = '📚 Lexical Resource (LR)';
-      else if (/GRAMMATICAL/i.test(headerLine)) critTitle = '✍️ Grammatical Range & Accuracy (GRA)';
-
-      if (!critTitle) {
-        if (cardsHtml === '' && cleanSec.length > 30) {
-          cardsHtml += `<div class="fb-criterion-card"><div class="fb-criterion-head"><span>📋 Tổng Quan Đánh Giá</span><span>${overallBandStr || ''}</span></div><div style="font-size:13.8px; line-height:1.65; white-space:pre-line;">${cleanSec}</div></div>`;
-        }
-        return;
-      }
-
-      let bodyHtml = '';
-      lines.slice(1).forEach(line => {
-        const safeLine = line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        if (/^(•|-|\*)?\s*(Strengths?|Điểm mạnh|Ưu điểm)/i.test(line)) {
-          bodyHtml += `<div class="fb-sub-box fb-sub-strength"><b>✅ Điểm mạnh:</b> ${safeLine.replace(/^(•|-|\*)?\s*(Strengths?|Điểm mạnh|Ưu điểm)[:\s-]*/i, '')}</div>`;
-        } else if (/^(•|-|\*)?\s*(Weakness(?:es)?|Errors?|Mistakes?|Areas? for improvement|Điểm yếu|Lỗi sai|Hạn chế)/i.test(line)) {
-          bodyHtml += `<div class="fb-sub-box fb-sub-error"><b>⚠️ Lỗi cần khắc phục:</b> ${safeLine.replace(/^(•|-|\*)?\s*(Weakness(?:es)?|Errors?|Mistakes?|Areas? for improvement|Điểm yếu|Lỗi sai|Hạn chế)[:\s-]*/i, '')}</div>`;
-        } else if (/^(•|-|\*)?\s*(Suggestions?|Improvements?|Rewrite|How to improve|Gợi ý|Sửa lại)/i.test(line)) {
-          bodyHtml += `<div class="fb-sub-box fb-sub-suggest"><b>💡 Gợi ý nâng band:</b> ${safeLine.replace(/^(•|-|\*)?\s*(Suggestions?|Improvements?|Rewrite|How to improve|Gợi ý|Sửa lại)[:\s-]*/i, '')}</div>`;
-        } else {
-          bodyHtml += `<div style="margin-bottom:6px; padding-left:4px;">${safeLine}</div>`;
-        }
-      });
-
-      cardsHtml += `
-        <div class="fb-criterion-card">
-          <div class="fb-criterion-head">
-            <span>${critTitle}</span>
-          </div>
-          <div>${bodyHtml}</div>
-        </div>
-      `;
-    });
-
-    if (!cardsHtml) {
-      cardsHtml = `<div class="fb-criterion-card"><div style="white-space:pre-wrap; line-height:1.7;">${text}</div></div>`;
-    }
-
-    return `
-      <div class="fb-Formatted-Wrap">
-        <div class="fb-score-summary-bar">
-          <div class="fb-score-pill"><span class="lbl">TR / TA</span><span class="val">${trScore}</span></div>
-          <div class="fb-score-pill"><span class="lbl">CC</span><span class="val">${ccScore}</span></div>
-          <div class="fb-score-pill"><span class="lbl">LR</span><span class="val">${lrScore}</span></div>
-          <div class="fb-score-pill"><span class="lbl">GRA</span><span class="val">${graScore}</span></div>
-        </div>
-        ${cardsHtml}
-      </div>
-    `;
-  }
-
-  function enhanceWritingModalReadability() {
-    const fbTextarea = document.getElementById('wRevFeedbackInput');
-    const bandInput = document.getElementById('wRevBandInput');
-    if (!fbTextarea) return;
-
-    let cardContainer = document.getElementById('wRevFormattedFeedbackView');
-    if (!cardContainer) {
-      cardContainer = document.createElement('div');
-      cardContainer.id = 'wRevFormattedFeedbackView';
-      fbTextarea.parentNode.insertBefore(cardContainer, fbTextarea);
-    }
-
-    let toggleBtn = document.getElementById('wRevToggleEditModeBtn');
-    if (!toggleBtn && activeUser && activeUser.role === 'teacher') {
-      toggleBtn = document.createElement('button');
-      toggleBtn.id = 'wRevToggleEditModeBtn';
-      toggleBtn.type = 'button';
-      toggleBtn.className = 'btn btn-secondary btn-sm';
-      toggleBtn.style.marginBottom = '8px';
-      toggleBtn.innerHTML = '✏️ Chuyển sang sửa văn bản (Edit Text)';
-      toggleBtn.onclick = () => {
-        const isEditing = fbTextarea.style.display !== 'none';
-        if (isEditing) {
-          fbTextarea.style.display = 'none';
-          cardContainer.style.display = 'block';
-          cardContainer.innerHTML = parseWritingFeedbackToCards(fbTextarea.value, bandInput?.value);
-          toggleBtn.innerHTML = '✏️ Chuyển sang sửa văn bản (Edit Text)';
-        } else {
-          fbTextarea.style.display = 'block';
-          cardContainer.style.display = 'none';
-          toggleBtn.innerHTML = '👁️ Xem dạng Thẻ 4 Tiêu Chí (Card View)';
-        }
-      };
-      fbTextarea.parentNode.insertBefore(toggleBtn, cardContainer);
-    }
-
-    if (toggleBtn) {
-      toggleBtn.style.display = (activeUser && activeUser.role === 'teacher') ? 'inline-flex' : 'none';
-    }
-
-    // Luôn hiển thị chế độ Thẻ đẹp mắt mặc định
-    fbTextarea.style.display = 'none';
-    cardContainer.style.display = 'block';
-    cardContainer.innerHTML = parseWritingFeedbackToCards(fbTextarea.value, bandInput?.value);
-
-    // Làm đẹp phần Dàn ý & Bài mẫu bên trái nếu có
-    const sampleBox = document.getElementById('proSampleWritingBox');
-    if (sampleBox) {
-      sampleBox.querySelectorAll('div[style*="pre-line"]').forEach(el => {
-        if (!el.dataset.beautified) {
-          el.innerHTML = beautifyOutlineText(el.textContent);
-          el.dataset.beautified = '1';
-        }
-      });
-    }
-  }
-
-  const _fbOrigOpenWritingRev = openWritingReviewModal;
-  openWritingReviewModal = function(resultId) {
-    _fbOrigOpenWritingRev(resultId);
-    setTimeout(enhanceWritingModalReadability, 60);
-  };
-
-  /* ==========================================================================
-     5. SỔ TỪ VỰNG NGỮ CẢNH (IN-CONTEXT SENTENCE) & FLASHCARD 3D LẬT MẶT
-     ========================================================================== */
-  function findContextSentenceForWord(word) {
-    const cleanW = String(word || '').trim();
-    if (!cleanW) return '';
-    const reg = buildSmartStemRegex(cleanW);
-    if (!reg) return '';
-
-    const pools = [];
-    if (currentReviewExam && currentReviewExam.passages) pools.push(...currentReviewExam.passages);
-    if (activeExam && activeExam.passages) pools.push(...activeExam.passages);
-    if (activeListeningExam && activeListeningExam.parts) {
-      activeListeningExam.parts.forEach(p => pools.push({ text: p.transcript || p.questionsHtml || '' }));
-    }
-
-    for (const p of pools) {
-      const plain = String(p.text || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');
-      const sentences = plain.match(/[^.!?]+[.!?]+/g) || [plain];
-      for (const s of sentences) {
-        if (reg.test(s) && s.trim().length > 20 && s.trim().length < 260) {
-          return s.trim();
-        }
-      }
-    }
-    return '';
-  }
-
-  // Tự động đính kèm câu ngữ cảnh gốc khi lưu từ vựng
-  const _ctxOrigSaveVocab = saveNewVocabItem;
-  saveNewVocabItem = async function() {
-    const wordInp = document.getElementById('vocabWordInput');
-    const noteInp = document.getElementById('vocabNoteInput');
-    if (wordInp && noteInp) {
-      const ctxSentence = findContextSentenceForWord(wordInp.value);
-      if (ctxSentence && !noteInp.value.includes(ctxSentence)) {
-        noteInp.value = (noteInp.value ? noteInp.value + '\n' : '') + `📖 Ngữ cảnh: "${ctxSentence}"`;
-      }
-    }
-    await _ctxOrigSaveVocab();
-  };
-
-  let fcIndex = 0;
-  function injectFlashcardModeUI() {
-    const vaultTab = document.getElementById('tab-vocab');
-    if (!vaultTab || document.getElementById('vaultFlashcardWrapper')) return;
-
-    const wrapper = document.createElement('div');
-    wrapper.id = 'vaultFlashcardWrapper';
-    wrapper.className = 'card';
-    wrapper.style.marginBottom = '20px';
-    wrapper.style.display = 'none';
-    vaultTab.insertBefore(wrapper, vaultTab.firstChild.nextSibling);
-
-    const headerBar = vaultTab.querySelector('.section-header');
-    if (headerBar && !document.getElementById('toggleFlashcardBtn')) {
-      const btn = document.createElement('button');
-      btn.id = 'toggleFlashcardBtn';
-      btn.className = 'btn btn-emerald';
-      btn.innerHTML = '🃏 Học Flashcard 3D (In-Context)';
-      btn.onclick = () => {
-        const isHidden = wrapper.style.display === 'none';
-        wrapper.style.display = isHidden ? 'block' : 'none';
-        if (isHidden) {
-          fcIndex = 0;
-          renderCurrentFlashcard();
-        }
-      };
-      headerBar.appendChild(btn);
-    }
-  }
-
-  window.renderCurrentFlashcard = function() {
-    const wrapper = document.getElementById('vaultFlashcardWrapper');
-    if (!wrapper) return;
-    const myWords = (db.vocab || []).filter(v => !activeUser || v.userId === activeUser.id || v.userName === activeUser.name);
-
-    if (!myWords.length) {
-      wrapper.innerHTML = `<div style="text-align:center; padding:20px; color:#5c7065;">Bạn chưa có từ vựng nào trong sổ tay. Hãy lưu từ vựng khi đọc bài để luyện Flashcard nhé!</div>`;
-      return;
-    }
-
-    if (fcIndex >= myWords.length) fcIndex = 0;
-    if (fcIndex < 0) fcIndex = myWords.length - 1;
-    const item = myWords[fcIndex];
-
-    wrapper.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <div style="font-weight:800; color:#2d4a3e;">🃏 Luyện Tập Flashcard Ngữ Cảnh (${fcIndex + 1} / ${myWords.length})</div>
-        <span style="font-size:12px; color:#5c7065;">💡 Bấm vào thẻ để lật mặt sau</span>
-      </div>
-      <div class="vault-flashcard-stage" onclick="this.querySelector('.vault-flashcard-inner').classList.toggle('is-flipped')">
-        <div class="vault-flashcard-inner">
-          <div class="vault-fc-face vault-fc-front">
-            <span style="font-size:11px; font-weight:800; color:#52796f; text-transform:uppercase; letter-spacing:1px;">TERM / WORD</span>
-            <div style="font-family:'Cormorant Garamond', Georgia, serif; font-size:36px; font-weight:700; color:#1f2e27; margin:10px 0;">${item.word}</div>
-            <div style="font-size:12.5px; color:#5c7065;">Nguồn: <b>${item.source || 'IELTS Passage'}</b></div>
-          </div>
-          <div class="vault-fc-face vault-fc-back">
-            <span style="font-size:11px; font-weight:800; color:#a7f3d0; text-transform:uppercase; letter-spacing:1px;">MEANING & CONTEXT</span>
-            <div style="font-size:20px; font-weight:800; margin:8px 0;">${item.meaning}</div>
-            <div style="font-size:13px; color:#e2e8df; font-style:italic; line-height:1.5; max-width:90%;">${item.notes || 'Chưa có câu ngữ cảnh.'}</div>
-          </div>
-        </div>
-      </div>
-      <div style="display:flex; justify-content:center; gap:12px; margin-top:12px;">
-        <button class="btn btn-secondary" onclick="fcIndex--; renderCurrentFlashcard();">⬅️ Từ trước</button>
-        <button class="btn btn-emerald" onclick="fcIndex++; renderCurrentFlashcard();">Từ tiếp theo ➡️</button>
-      </div>
-    `;
-  };
-
-  /* ==========================================================================
-     6 & 7. MISTAKE NOTEBOOK (LUYỆN LẠI CÂU SAI) & SKILL ANALYTICS THEO DẠNG BÀI
-     ========================================================================== */
-  function classifyQuestionCategory(qObj) {
-    const raw = String((qObj && (qObj.type || qObj.instruction || qObj.prompt || qObj.text)) || '').toLowerCase();
-    if (raw.includes('true') || raw.includes('false') || raw.includes('not given')) return 'True / False / Not Given';
-    if (raw.includes('yes') || raw.includes('no')) return 'Yes / No / Not Given';
-    if (raw.includes('heading')) return 'Matching Headings';
-    if (raw.includes('match') || raw.includes('information') || raw.includes('feature')) return 'Matching Information';
-    if (raw.includes('multiple') || (qObj && Array.isArray(qObj.options) && qObj.options.length >= 3)) return 'Multiple Choice (Trắc nghiệm)';
-    return 'Gap Fill / Note & Summary Completion';
-  }
-
-  function renderStudentSkillAnalyticsAndMistakeBox() {
-    if (!activeUser) return;
-    const homeTab = document.getElementById('tab-home');
-    const recentCard = document.getElementById('homeRecentActivityTbody')?.closest('.card');
-    if (!homeTab || !recentCard) return;
-
-    let analyticsBox = document.getElementById('studentSkillAnalyticsBox');
-    if (!analyticsBox) {
-      analyticsBox = document.createElement('div');
-      analyticsBox.id = 'studentSkillAnalyticsBox';
-      analyticsBox.className = 'skill-analytics-card';
-      homeTab.insertBefore(analyticsBox, recentCard);
-    }
-
-    const myResults = (db.results || []).filter(r =>
-      activeUser.role === 'teacher'
-        ? true
-        : String(r.userName || '').toLowerCase() === String(activeUser.name || '').toLowerCase()
-    );
-
-    const catStats = {};
-    const wrongItems = [];
-
-    myResults.forEach(res => {
-      if (!Array.isArray(res.details)) return;
-      res.details.forEach(d => {
-        const cat = classifyQuestionCategory(d);
-        if (!catStats[cat]) catStats[cat] = { total: 0, correct: 0 };
-        catStats[cat].total++;
-        if (d.isCorrect) {
-          catStats[cat].correct++;
-        } else {
-          wrongItems.push({
-            examTitle: res.examTitle,
-            qNum: d.qNum,
-            userAns: d.userAns || '(Bỏ trống)',
-            correctAns: d.correctAns,
-            explain: d.explain || '',
-            cat: cat
-          });
-        }
-      });
-    });
-
-    const cats = Object.keys(catStats);
-    if (!cats.length) {
-      analyticsBox.style.display = 'none';
-      return;
-    }
-
-    analyticsBox.style.display = 'block';
-    analyticsBox.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-        <div>
-          <div style="font-size:15.5px; font-weight:800; color:#1f2e27;">📊 Phân Tích Điểm Mù Kỹ Năng & Sổ Tay Câu Sai (Skill Analytics & Mistake Log)</div>
-          <div style="font-size:12px; color:#5c7065; font-weight:600;">Thống kê tỷ lệ chính xác theo từng dạng câu hỏi để tập trung cải thiện điểm yếu</div>
-        </div>
-        ${wrongItems.length ? `<button class="btn btn-emerald btn-sm" onclick="openMistakeRetestModal()">🔁 Luyện Lại ${wrongItems.length} Câu Đã Làm Sai</button>` : ''}
-      </div>
-      <div class="qtype-stat-grid">
-        ${cats.map(c => {
-          const st = catStats[c];
-          const pct = Math.round((st.correct / st.total) * 100);
-          const barColor = pct >= 75 ? '#2d4a3e' : (pct >= 50 ? '#9c6631' : '#9e3a3a');
-          return `
-            <div class="qtype-stat-item">
-              <div style="display:flex; justify-content:space-between; font-size:12.5px; font-weight:800; color:#1f2e27; margin-bottom:6px;">
-                <span>${c}</span>
-                <span style="color:${barColor};">${pct}%</span>
-              </div>
-              <div style="height:7px; background:#e2e8df; border-radius:99px; overflow:hidden; margin-bottom:5px;">
-                <div style="height:100%; width:${pct}%; background:${barColor};"></div>
-              </div>
-              <div style="font-size:11.5px; color:#5c7065; font-weight:600;">Đúng ${st.correct} / ${st.total} câu</div>
-            </div>
-          `;
-        }).join('')}
-      </div>
-    `;
-    window._cachedMistakeItems = wrongItems.slice(-25).reverse();
-  }
-
-  window.openMistakeRetestModal = function() {
-    const items = window._cachedMistakeItems || [];
-    if (!items.length) return alert('Chúc mừng! Hiện chưa ghi nhận câu sai nào cần làm lại.');
-
-    let modal = document.getElementById('mistakeRetestModal');
-    if (!modal) {
-      modal = document.createElement('div');
-      modal.id = 'mistakeRetestModal';
-      modal.className = 'modal-backdrop';
-      document.body.appendChild(modal);
-    }
-
-    modal.innerHTML = `
-      <div class="modal-window" style="width:780px; max-width:94vw; max-height:88vh;">
-        <div class="modal-header">
-          <h3>🔁 Sổ Tay Luyện Lại Câu Sai (Mistake Notebook)</h3>
-          <button class="btn btn-secondary btn-sm" onclick="closeModal('mistakeRetestModal')">Đóng</button>
-        </div>
-        <div class="modal-body" style="overflow-y:auto; max-height:70vh;">
-          <p style="font-size:13px; color:#5c7065; margin-bottom:14px;">Gõ lại đáp án đúng vào ô bên dưới để tự kiểm tra trí nhớ và rút kinh nghiệm từ các lỗi sai trước đó:</p>
-          ${items.map((it, idx) => `
-            <div style="background:#f4f5f0; border:1px solid #d8e0d5; border-radius:12px; padding:13px 16px; margin-bottom:10px;">
-              <div style="display:flex; justify-content:space-between; font-size:12px; color:#5c7065; font-weight:700; margin-bottom:6px;">
-                <span>📘 ${it.examTitle} — Câu #${it.qNum} (${it.cat})</span>
-                <span style="color:#9e3a3a;">Lần trước chọn: <b>${it.userAns}</b></span>
-              </div>
-              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                <input type="text" id="retestInp_${idx}" class="form-input" style="max-width:260px;" placeholder="Nhập lại đáp án đúng...">
-                <button class="btn btn-emerald btn-sm" onclick="checkMistakeRetestItem(${idx}, '${String(it.correctAns).replace(/'/g, "\\'")}')">Kiểm tra</button>
-                <span id="retestStatus_${idx}" style="font-size:13px; font-weight:700;"></span>
-              </div>
-              <div id="retestExplain_${idx}" style="display:none; margin-top:8px; padding:8px 12px; background:#eef2eb; border-radius:8px; font-size:13px; color:#1f2e27;">
-                ✅ <b>Đáp án chuẩn:</b> ${it.correctAns} ${it.explain ? `<br>💡 <b>Giải thích:</b> ${it.explain}` : ''}
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
-    openModal('mistakeRetestModal');
-  };
-
-  window.checkMistakeRetestItem = function(idx, correctAns) {
-    const val = document.getElementById('retestInp_' + idx)?.value.trim().toLowerCase() || '';
-    const target = String(correctAns || '').trim().toLowerCase();
-    const st = document.getElementById('retestStatus_' + idx);
-    const exp = document.getElementById('retestExplain_' + idx);
-    if (st) {
-      if (val && val === target) {
-        st.innerHTML = '<span style="color:#15803d;">🎉 Chính xác! Bạn đã khắc phục được câu này.</span>';
-      } else {
-        st.innerHTML = '<span style="color:#b91c1c;">❌ Chưa khớp, hãy xem đáp án chuẩn bên dưới!</span>';
-      }
-    }
-    if (exp) exp.style.display = 'block';
-  };
-
-  /* KẾT NỐI ĐỒNG BỘ VÀO DASHBOARD */
-  const _u7OrigRenderHome = renderHomeTab;
-  renderHomeTab = function() {
-    syncPermanentCompletedExams();
-    _u7OrigRenderHome();
-    renderStudentSkillAnalyticsAndMistakeBox();
-  };
-
-  const _u7OrigRenderVocab = renderVocabTable;
-  renderVocabTable = function() {
-    injectFlashcardModeUI();
-    _u7OrigRenderVocab();
-  };
-
-  window.addEventListener('load', () => {
-    syncPermanentCompletedExams();
-    injectFlashcardModeUI();
-    renderStudentSkillAnalyticsAndMistakeBox();
-  });
 
 /* === MODULE PART 10 (Lines 9327-9810) === */
 /* ==========================================================================
@@ -13128,101 +12501,7 @@ function applyMatchaEditorialLogin() {
     }, 650);
   };
 
-  /* ==========================================================================
-     6. BÚT TÔ SÁNG 2 MÀU CHUẨN CD-IELTS (🟡 KEYWORD / 🟢 EVIDENCE HIGHLIGHTER)
-     ========================================================================== */
-  document.addEventListener('mouseup', function(ev) {
-    const popup = document.getElementById('floatingDualHighlighter');
-    if (!popup) return;
-    if (popup.contains(ev.target)) return;
-
-    const splitBox = document.getElementById('insperaSplitBox');
-    if (!splitBox || splitBox.offsetParent === null) {
-      popup.style.display = 'none';
-      return;
-    }
-
-    const sel = window.getSelection();
-    if (!sel || sel.isCollapsed || !sel.toString().trim()) {
-      popup.style.display = 'none';
-      return;
-    }
-
-    const anchorNode = sel.anchorNode;
-    if (!anchorNode || !splitBox.contains(anchorNode)) {
-      popup.style.display = 'none';
-      return;
-    }
-
-    const range = sel.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-    if (rect.width < 5) {
-      popup.style.display = 'none';
-      return;
-    }
-
-    popup.style.display = 'flex';
-    popup.style.top = `${Math.max(10, rect.top - 44)}px`;
-    popup.style.left = `${Math.max(10, Math.min(window.innerWidth - 280, rect.left + rect.width / 2 - 125))}px`;
-  });
-
-  window.applyUserTextHighlight = function(colorType, ev) {
-    if (ev) {
-      ev.preventDefault();
-      ev.stopPropagation();
-    }
-    const sel = window.getSelection();
-    const popup = document.getElementById('floatingDualHighlighter');
-    if (!sel || sel.isCollapsed) {
-      if (popup) popup.style.display = 'none';
-      return;
-    }
-
-    try {
-      const range = sel.getRangeAt(0);
-      const span = document.createElement('span');
-      span.className = colorType === 'green' ? 'user-hl-green' : 'user-hl-yellow';
-      span.appendChild(range.extractContents());
-      range.insertNode(span);
-      sel.removeAllRanges();
-    } catch (e) {}
-
-    if (popup) popup.style.display = 'none';
-  };
-
-  window.clearSelectedHighlights = function(ev) {
-    if (ev) {
-      ev.preventDefault();
-      ev.stopPropagation();
-    }
-    const splitBox = document.getElementById('insperaSplitBox');
-    const sel = window.getSelection();
-    if (splitBox && sel && !sel.isCollapsed) {
-      const container = sel.getRangeAt(0).commonAncestorContainer;
-      const rootEl = container.nodeType === 1 ? container : container.parentElement;
-      if (rootEl) {
-        rootEl.querySelectorAll('.user-hl-yellow, .user-hl-green').forEach(el => {
-          const parent = el.parentNode;
-          while (el.firstChild) parent.insertBefore(el.firstChild, el);
-          parent.removeChild(el);
-        });
-      }
-      sel.removeAllRanges();
-    }
-    const popup = document.getElementById('floatingDualHighlighter');
-    if (popup) popup.style.display = 'none';
-  };
-
-  // Tự động đồng bộ thanh Phòng Tự Học, Streak và nút Lưu Lỗi Sai
-  setInterval(() => {
-    const homeTab = document.getElementById('tab-home');
-    if (homeTab && homeTab.style.display !== 'none' && activeUser) {
-      renderUnifiedLoungeAndStreakBar();
-    }
-    if (isReviewMode) {
-      injectSaveMistakeButtonsInReviewDOM();
-    }
-  }, 900);
+  
 
 /* === MODULE PART 18 (Lines 16363-17140) === */
 /* ==========================================================================
@@ -13556,277 +12835,7 @@ function applyMatchaEditorialLogin() {
     });
   };
 
-  /* ==========================================================================
-     3. SỔ TAY LỖI SAI CÁ NHÂN (MISTAKE BANK):
-        - Chuyển sang "Thẻ Bóc Tách Bẫy Ngữ Cảnh" (Trap & Context Flashcard)
-        - Tự động lấy câu hỏi gốc có chỗ trống [ ___ (Q29) ___ ] từ đề thi
-     ========================================================================== */
-  function extractOriginalQuestionContextText(exam, qNumStr) {
-    if (!exam || !Array.isArray(exam.passages)) return '';
-    const qKey = `q${qNumStr}`;
-
-    for (const p of exam.passages) {
-      const qHtml = String(p.questionsHtml || '');
-      if (!qHtml) continue;
-
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = qHtml;
-
-      // Tìm ô input, select, radio hoặc vùng kéo thả của câu hỏi qKey
-      const targetEl = tempDiv.querySelector(`[name="${qKey}"], [data-target="${qKey}"], [data-multi-pair*="${qKey}"]`);
-      if (targetEl) {
-        let block = targetEl.closest('li, tr, p, .question-row, .q-item, div');
-        if (!block || (block.textContent || '').trim().length < 18) {
-          block = targetEl.parentElement?.parentElement || targetEl.parentElement;
-        }
-        if (block) {
-          const cloneBlock = block.cloneNode(true);
-          // Bỏ các hộp giải thích đỏ bên trong nếu có
-          cloneBlock.querySelectorAll('button, .btn-save-mistake-inline').forEach(b => b.remove());
-          const targetInClone = cloneBlock.querySelector(`[name="${qKey}"], [data-target="${qKey}"]`);
-          if (targetInClone) {
-            const placeholderSpan = document.createElement('span');
-            placeholderSpan.textContent = ` [ ___ (Q${qNumStr}) ___ ] `;
-            targetInClone.replaceWith(placeholderSpan);
-          }
-          const cleanStr = (cloneBlock.textContent || '').replace(/\s+/g, ' ').trim();
-          if (cleanStr.length >= 8) {
-            return cleanStr.length > 280 ? cleanStr.substring(0, 277) + '...' : cleanStr;
-          }
-        }
-      }
-    }
-    return `Câu hỏi số ${qNumStr} trong đề "${exam.title}": Hãy điền/chọn đáp án đúng vào vị trí [ ___ (Q${qNumStr}) ___ ].`;
-  }
-
-  // Ghi đè hàm lưu câu sai để lưu kèm cả Câu hỏi gốc có chỗ trống + Dẫn chứng nguyên bản + Giải thích
-  window.saveSingleQuestionToMistakeBank = function(qNumStr, btnEl) {
-    if (!activeExam || !activeUser) return;
-    const qKey = `q${qNumStr}`;
-    const correctAns = String((activeExam.correctAnswers && activeExam.correctAnswers[qKey]) || '').trim();
-    if (!correctAns) return;
-
-    const userAns = String(userAnswers[qKey] || '').trim() || 'Bỏ trống';
-    const exp = (activeExam.explanations && activeExam.explanations[qKey]) ? activeExam.explanations[qKey] : '';
-    const evi = (activeExam.evidences && activeExam.evidences[qKey]) ? activeExam.evidences[qKey] : '';
-    const questionContext = extractOriginalQuestionContextText(activeExam, qNumStr);
-    const qCategory = typeof detectQuestionCategoryFromExam === 'function' ? detectQuestionCategoryFromExam(activeExam, qKey) : 'IELTS Question';
-
-    const list = getSavedMistakeList();
-    const itemId = `${activeExam.id}_${qKey}`;
-    const newRecord = {
-      id: itemId,
-      examId: activeExam.id,
-      examTitle: activeExam.title,
-      skill: activeExamType || 'reading',
-      qNum: qNumStr,
-      qCategory,
-      questionContext,
-      userAns,
-      correctAns: correctAns.split('|')[0].trim(),
-      evidenceQuote: evi ? evi.replace(/<[^>]+>/g, '').trim() : '',
-      explanation: exp || 'Đối chiếu kỹ từ đồng nghĩa (Paraphrase) giữa câu hỏi và dẫn chứng trong bài.',
-      savedAt: new Date().toLocaleDateString()
-    };
-
-    const existingIdx = list.findIndex(x => x.id === itemId);
-    if (existingIdx !== -1) list[existingIdx] = newRecord;
-    else list.unshift(newRecord);
-    saveMistakeListToStorage(list);
-
-    if (btnEl) {
-      btnEl.textContent = '✓ Đã lưu vào Sổ Lỗi Sai';
-      btnEl.style.background = '#dcfce7';
-      btnEl.style.color = '#15803d';
-      btnEl.style.borderColor = '#86efac';
-    }
-    renderUnifiedLoungeAndStreakBar();
-  };
-
-  let trapCardRevealed = false;
-  let trapUserTypedGuess = '';
-
-  window.flipTrapFlashcard = function() {
-    const inp = document.getElementById('trapGuessInputBox');
-    if (inp) trapUserTypedGuess = inp.value.trim();
-    trapCardRevealed = true;
-    renderMistakeBankModalContent();
-  };
-
-  window.nextTrapFlashcard = function(removeCurrentId) {
-    if (removeCurrentId) {
-      const list = getSavedMistakeList().filter(x => x.id !== removeCurrentId);
-      saveMistakeListToStorage(list);
-      renderUnifiedLoungeAndStreakBar();
-    } else {
-      mistakeQuizStep++;
-    }
-    trapCardRevealed = false;
-    trapUserTypedGuess = '';
-    renderMistakeBankModalContent();
-  };
-
-  // Ghi đè giao diện Sổ Tay Lỗi Sai sang Thẻ Bóc Tách Bẫy Ngữ Cảnh (Context Flashcard)
-  renderMistakeBankModalContent = function() {
-    const body = document.getElementById('mistakeBankModalBody');
-    const footer = document.getElementById('mistakeBankModalFooter');
-    const list = getSavedMistakeList();
-    if (!body || !footer) return;
-
-    if (!list.length) {
-      body.innerHTML = `
-        <div style="text-align:center; padding:36px 20px; color:#64748b;">
-          <div style="font-size:42px; margin-bottom:10px;">📕</div>
-          <div style="font-size:16px; font-weight:800; color:#0f172a; margin-bottom:6px;">Sổ Tay Lỗi Sai Của Bạn Đang Trống</div>
-          <p style="font-size:13.5px; max-width:520px; margin:0 auto; line-height:1.6;">
-            Khi xem lại bài làm (<b>Review Keys</b>), bạn hãy bấm nút <b>"📌 Lưu vào Sổ Lỗi Sai"</b> ở những câu bị bẫy để lưu nguyên ngữ cảnh câu hỏi về đây ôn tập nhé!
-          </p>
-        </div>
-      `;
-      footer.innerHTML = `<div></div><button class="btn btn-secondary" onclick="closeModal('mistakeBankModal')">Đóng</button>`;
-      return;
-    }
-
-    // Tự động bổ sung ngữ cảnh câu hỏi gốc cho các mục lưu từ phiên bản trước (nếu chưa có questionContext)
-    list.forEach(item => {
-      if (!item.questionContext) {
-        const ex = (db.readingExams || []).find(e => e.id === item.examId) || (db.listeningExams || []).find(e => e.id === item.examId);
-        item.questionContext = ex ? extractOriginalQuestionContextText(ex, item.qNum) : `Câu số ${item.qNum} trong đề "${item.examTitle}" — vị trí cần điền: [ ___ (Q${item.qNum}) ___ ]`;
-        if (ex && !item.evidenceQuote && ex.evidences && ex.evidences[`q${item.qNum}`]) {
-          item.evidenceQuote = ex.evidences[`q${item.qNum}`].replace(/<[^>]+>/g, '').trim();
-        }
-      }
-    });
-
-    if (!mistakeQuizMode) {
-      body.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
-          <span style="font-size:14px; font-weight:800; color:#1f3d32;">📕 Danh sách ${list.length} câu hỏi & bẫy ngữ cảnh cần khắc phục:</span>
-          <button class="btn btn-emerald" onclick="trapCardRevealed=false; trapUserTypedGuess=''; openMistakeBankModal(true);">
-            🃏 Lật Thẻ Ôn Tập Ngữ Cảnh & Bẫy (${list.length} thẻ)
-          </button>
-        </div>
-        ${list.map(item => `
-          <div class="mistake-card-item">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <span style="font-size:12px; font-weight:800; color:#059669; background:#ecfdf5; padding:3px 9px; border-radius:6px;">
-                ${item.skill === 'listening' ? '🎧 Listening' : '📖 Reading'} • ${item.examTitle} — Câu ${item.qNum} (${item.qCategory || 'Question'})
-              </span>
-              <button class="btn btn-danger" style="padding:2px 8px; font-size:11px;" onclick="deleteMistakeItem('${item.id}')">✓ Đã hiểu bẫy / Gỡ</button>
-            </div>
-            <div style="font-size:13.5px; color:#0f172a; background:#faf8f2; padding:8px 12px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:6px;">
-              <b>Ngữ cảnh câu hỏi gốc:</b> ${String(item.questionContext).replace(/\[\s*___\s*\(Q\d+\)\s*___\s*\]/g, `<span class="trap-blank-pill">[ ___ (Q${item.qNum}) ___ ]</span>`)}
-            </div>
-            <div style="font-size:13.5px; margin-bottom:6px;">
-              • Lần trước điền: <b style="color:#dc2626;">${item.userAns}</b>
-              &nbsp; ➔ &nbsp; Đáp án chuẩn: <b style="color:#15803d; font-size:14.5px;">${item.correctAns}</b>
-            </div>
-            ${item.evidenceQuote ? `
-              <div style="font-size:12.5px; color:#065f46; background:#f0fdf4; padding:7px 11px; border-radius:7px; border:1px solid #bbf7d0; margin-bottom:5px;">
-                🔎 <b>Dẫn chứng nguyên bản trong bài:</b> "${item.evidenceQuote}"
-              </div>
-            ` : ''}
-            <div style="font-size:12.5px; color:#334155; background:#f8fafc; padding:7px 11px; border-radius:7px; border:1px solid #e2e8f0;">
-              💡 <b>Phân tích Paraphrase & Bẫy:</b> ${item.explanation}
-            </div>
-          </div>
-        `).join('')}
-      `;
-      footer.innerHTML = `
-        <span style="font-size:12px; color:#64748b;">Bấm "🃏 Lật Thẻ Ôn Tập Ngữ Cảnh & Bẫy" để tự nhẩm lại đáp án trên câu hỏi gốc mà không bị lộ đáp án</span>
-        <button class="btn btn-secondary" onclick="closeModal('mistakeBankModal')">Đóng</button>
-      `;
-    } else {
-      if (mistakeQuizStep >= list.length) mistakeQuizStep = 0;
-      const cur = list[mistakeQuizStep];
-      const formattedQuestion = String(cur.questionContext || '').replace(
-        /\[\s*___\s*\(Q\d+\)\s*___\s*\]/g,
-        `<span class="trap-blank-pill">[ ______ (Câu ${cur.qNum}) ______ ]</span>`
-      );
-
-      body.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:13px; font-weight:800; color:#1f3d32;">
-          <span>🃏 Thẻ Bóc Tách Bẫy Ngữ Cảnh • ${cur.skill === 'listening' ? '🎧 Listening' : '📖 Reading'}: ${cur.examTitle}</span>
-          <span>Thẻ ${mistakeQuizStep + 1} / ${list.length}</span>
-        </div>
-
-        <!-- MẶT TRƯỚC: CÂU HỎI GỐC CÓ CHỖ TRỐNG (KHÔNG HỀ LỘ ĐÁP ÁN) -->
-        <div class="trap-flashcard-front">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <span style="font-size:12px; font-weight:800; color:#059669; text-transform:uppercase;">
-              Mặt Trước: Ngữ Cảnh Câu Hỏi Gốc Trong Đề (Câu ${cur.qNum} • ${cur.qCategory || 'IELTS'})
-            </span>
-            <span style="font-size:12px; color:#92400e; background:#fef3c7; padding:2px 9px; border-radius:99px; font-weight:700;">
-              Lần thi trước bạn đã điền: "${cur.userAns}"
-            </span>
-          </div>
-
-          <div class="trap-context-box">
-            ${formattedQuestion}
-          </div>
-
-          <div style="display:flex; gap:10px; align-items:center; margin-top:12px; flex-wrap:wrap;">
-            <input type="text" id="trapGuessInputBox" class="form-input" style="flex:1; min-width:220px;"
-              placeholder="Gõ thử từ/đáp án bạn nhớ vào đây trước khi lật thẻ..."
-              value="${trapUserTypedGuess.replace(/"/g, '&quot;')}"
-              onkeydown="if(event.key==='Enter') flipTrapFlashcard();">
-            ${!trapCardRevealed ? `
-              <button type="button" class="btn btn-emerald" style="padding:10px 18px;" onclick="flipTrapFlashcard()">
-                👁️ Lật Thẻ Xem Đáp Án & Cặp Từ Paraphrase
-              </button>
-            ` : ''}
-          </div>
-        </div>
-
-        <!-- MẶT SAU: CHỈ HIỆN RA KHI HỌC SINH BẤM LẬT THẺ -->
-        ${trapCardRevealed ? `
-          <div class="trap-flashcard-back">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px; border-bottom:1px solid #bbf7d0; padding-bottom:10px;">
-              <div style="font-size:17px; font-weight:800; color:#065f46;">
-                🎯 ĐÁP ÁN CHUẨN: <span style="background:#ffffff; padding:3px 12px; border-radius:8px; border:1.5px solid #059669; color:#047857;">${cur.correctAns}</span>
-              </div>
-              ${trapUserTypedGuess ? `
-                <div style="font-size:13px; font-weight:800; color:${trapUserTypedGuess.toLowerCase() === cur.correctAns.toLowerCase() ? '#15803d' : '#b91c1c'};">
-                  ${trapUserTypedGuess.toLowerCase() === cur.correctAns.toLowerCase() ? '✅ Bạn vừa gõ chính xác 100%!' : `❌ Bạn vừa gõ: "${trapUserTypedGuess}"`}
-                </div>
-              ` : ''}
-            </div>
-
-            ${cur.evidenceQuote ? `
-              <div style="margin-bottom:10px; background:#ffffff; padding:11px 14px; border-radius:10px; border:1px solid #86efac;">
-                <div style="font-size:12px; font-weight:800; color:#065f46; margin-bottom:3px;">1. DẪN CHỨNG NGUYÊN BẢN TRONG BÀI ĐỌC / TRANSCRIPT:</div>
-                <div style="font-size:14px; color:#0f172a; font-style:italic;">"${cur.evidenceQuote}"</div>
-              </div>
-            ` : ''}
-
-            <div style="background:#ffffff; padding:11px 14px; border-radius:10px; border:1px solid #cbd5e1;">
-              <div style="font-size:12px; font-weight:800; color:#1f3d32; margin-bottom:3px;">
-                ${cur.evidenceQuote ? '2.' : '1.'} PHÂN TÍCH CẶP TỪ PARAPHRASE & BẢN CHẤT BẪY CẦN NHỚ:
-              </div>
-              <div style="font-size:13.5px; color:#1e293b; line-height:1.6;">${cur.explanation}</div>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; gap:10px; flex-wrap:wrap;">
-              <button type="button" class="btn btn-secondary" onclick="nextTrapFlashcard(null)">
-                🔁 Giữ lại trong sổ để mai ôn tiếp ➡️
-              </button>
-              <button type="button" class="btn btn-emerald" onclick="nextTrapFlashcard('${cur.id}')">
-                ✅ Đã hiểu rõ bẫy này (Gỡ khỏi sổ & Qua thẻ kế)
-              </button>
-            </div>
-          </div>
-        ` : ''}
-      `;
-
-      footer.innerHTML = `
-        <button class="btn btn-secondary" onclick="mistakeQuizMode=false; renderMistakeBankModalContent();">🔙 Xem dạng danh sách</button>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-secondary" onclick="if(mistakeQuizStep>0){mistakeQuizStep--; trapCardRevealed=false; renderMistakeBankModalContent();}">⬅️ Thẻ trước</button>
-          <button class="btn btn-secondary" onclick="mistakeQuizStep=(mistakeQuizStep+1)%${list.length}; trapCardRevealed=false; renderMistakeBankModalContent();">Thẻ kế tiếp ➡️</button>
-        </div>
-      `;
-    }
-  };
+  
 
   /* ==========================================================================
      4. BỘ LỌC ĐỀ THI THEO "DẠNG CÂU HỎI YẾU" (QUESTION TYPE FILTER) CHO READING & LISTENING
@@ -14158,5 +13167,128 @@ function applyMatchaEditorialLogin() {
     if (document.getElementById('filterAnalyticsExamSelect')) document.getElementById('filterAnalyticsExamSelect').value = 'ALL';
     if (document.getElementById('filterAnalyticsDateTo')) document.getElementById('filterAnalyticsDateTo').value = '';
     if (typeof _exportOrigClearFilters === 'function') _exportOrigClearFilters();
+  };
+})();
+/* ============================================================================
+   BẢN Vá ĐỒNG BỘ CUỐI:
+   1. THANH KÉO SLIDER TỐC ĐỘ AUDIO LISTENING (0.5x - 2.0x) & TẮT MENU 3 CHẤM CHROME
+   2. CHẤM WRITING HIỂN THỊ RÕ ĐIỂM THÀNH PHẦN TASK 1, TASK 2 & OVERALL
+   3. MỞ KHÓA NÚT START TEST TRONG MOCK TEST LOBBY
+   ============================================================================ */
+(function() {
+  // 1. Tắt menu Playback Speed trùng lặp của Chrome và chuyển dropdown #examAudioSpeedSelect thành Thanh Kéo Slider
+  function syncModernListeningAudioBar() {
+    const audioEl = document.getElementById('examAudioPlayer');
+    if (audioEl && audioEl.getAttribute('controlsList') !== 'nodownload noplaybackrate') {
+      audioEl.setAttribute('controlsList', 'nodownload noplaybackrate');
+    }
+
+    const oldSelect = document.getElementById('examAudioSpeedSelect') || document.getElementById('insperaAudioSpeed');
+    if (oldSelect) oldSelect.style.display = 'none';
+
+    const container = document.getElementById('listeningAudioHeaderContainer');
+    if (!container) return;
+
+    const isStrictExam = (typeof currentExecutionMode !== 'undefined' && currentExecutionMode === 'exam') ||
+                         (window.mockSession && window.mockSession.active);
+
+    let sliderWrap = document.getElementById('listeningSpeedSliderBox');
+    if (!sliderWrap) {
+      sliderWrap = document.createElement('div');
+      sliderWrap.id = 'listeningSpeedSliderBox';
+      sliderWrap.className = 'audio-speed-slider-wrap';
+      sliderWrap.innerHTML = `
+        <span title="Kéo để chỉnh tốc độ nghe (0.5x - 2.0x)">⚡</span>
+        <input type="range" id="listeningSpeedRangeInput" min="0.5" max="2.0" step="0.05" value="1.0"
+          oninput="window.applyCustomListeningSpeed(this.value)">
+        <span id="listeningSpeedValueLabel" onclick="window.applyCustomListeningSpeed(1.0)" title="Bấm để về chuẩn 1.0x">1.0x</span>
+      `;
+      container.appendChild(sliderWrap);
+    }
+
+    // Chỉ hiện thanh kéo tốc độ khi Luyện tập (Practice Mode) hoặc Review Mode; ẩn hoàn toàn khi Thi thật / Mock Test
+    sliderWrap.style.display = (isStrictExam && !isReviewMode) ? 'none' : 'inline-flex';
+  }
+
+  window.applyCustomListeningSpeed = function(val) {
+    const num = Math.max(0.5, Math.min(2.0, parseFloat(val) || 1.0));
+    const audioEl = document.getElementById('examAudioPlayer') || document.getElementById('insperaAudioPlayer');
+    if (audioEl) audioEl.playbackRate = num;
+    const lbl = document.getElementById('listeningSpeedValueLabel');
+    if (lbl) lbl.textContent = `${num.toFixed(2).replace(/\.00$/, '.0').replace(/(\.\d)0$/, '$1')}x`;
+    const slider = document.getElementById('listeningSpeedRangeInput');
+    if (slider && parseFloat(slider.value) !== num) slider.value = num;
+  };
+
+  setInterval(syncModernListeningAudioBar, 400);
+
+  // 2. Nâng cấp Prompt AI chấm Writing: Bắt buộc trả về điểm riêng của Task 1, Task 2 và điểm thành phần
+  window.buildIeltsExaminerPrompt = function(wExam, submission) {
+    const hasT1 = Boolean(submission.task1 && submission.task1.trim());
+    const hasT2 = Boolean(submission.task2 && submission.task2.trim());
+    const t1Prompt = (wExam && wExam.task1 && wExam.task1.prompt) || 'Task 1 Academic Writing';
+    const t2Prompt = (wExam && wExam.task2 && wExam.task2.prompt) || 'Task 2 Academic Essay';
+    const customRule = (db.aiConfig && db.aiConfig.customPrompt) ? `\nAdditional Teacher Instructions: ${db.aiConfig.customPrompt}\n` : '';
+
+    return `You are a certified Senior IELTS Writing Examiner. Evaluate the student submission strictly according to the official IELTS Writing Band Descriptors.
+${customRule}
+${hasT1 ? `--- WRITING TASK 1 (Weight: 1/3) ---\nPrompt: ${t1Prompt}\nStudent Response:\n${submission.task1}\n` : ''}
+${hasT2 ? `--- WRITING TASK 2 (Weight: 2/3) ---\nPrompt: ${t2Prompt}\nStudent Response:\n${submission.task2}\n` : ''}
+
+IMPORTANT:
+- Write in clean PLAIN TEXT only (NO Markdown **, *, ###).
+- If BOTH Task 1 and Task 2 are present, clearly state the individual band score for Task 1, individual band score for Task 2, and the weighted Overall Band Score = (Task 1 + 2 * Task 2) / 3 rounded to the nearest 0.5.
+- Structure the "feedback" text with exact section headers so the 4-Tab system parses them cleanly:
+[OVERALL & TASK BREAKDOWN]
+• Task 1 Band: X.X (TA: X, CC: X, LR: X, GRA: X)
+• Task 2 Band: Y.Y (TR: Y, CC: Y, LR: Y, GRA: Y)
+• Overall Writing Band: Z.Z
+
+[1. TASK RESPONSE] Band Z.Z
+• Strengths: ...
+• Weaknesses / Errors: ...
+• Suggestions: ...
+
+[2. COHERENCE & COHESION] Band Z.Z
+• Strengths: ...
+• Weaknesses / Errors: ...
+• Suggestions: ...
+
+[3. LEXICAL RESOURCE] Band Z.Z
+• Strengths: ...
+• Weaknesses / Errors: ...
+• Suggestions (use "wrong phrase" -> "upgraded phrase"): ...
+
+[4. GRAMMATICAL RANGE & ACCURACY] Band Z.Z
+• Strengths: ...
+• Weaknesses / Errors: ...
+• Suggestions (use "wrong grammar" -> "corrected grammar"): ...
+
+Return JSON with fields:
+1. "band": string (e.g. "6.5")
+2. "feedback": string (full structured breakdown above)`;
+  };
+
+  // 3. Đảm bảo nút "Start test" trong Cổng chờ Mock Test mở thẳng phòng thi không bị chặn bởi Popup chọn Mode
+  window.enterMockListeningRoomNow = function() {
+    if (typeof currentExecutionMode !== 'undefined') currentExecutionMode = 'exam';
+    if (typeof isPracticePaused !== 'undefined') isPracticePaused = false;
+    const pb = document.getElementById('btnPracticePauseToggle'); if (pb) pb.style.display = 'none';
+    document.getElementById('officialMockLobbyOverlay').style.display = 'none';
+    if (typeof _coreLaunchListening === 'function') _coreLaunchListening(mockSession.listeningExam.id);
+    else launchListeningExam(mockSession.listeningExam.id);
+    if (typeof activateStrictMockListeningAudio === 'function') activateStrictMockListeningAudio();
+    if (typeof syncExamRoomBodyClass === 'function') syncExamRoomBodyClass();
+  };
+
+  window.enterMockReadingRoomNow = function() {
+    if (typeof currentExecutionMode !== 'undefined') currentExecutionMode = 'exam';
+    if (typeof isPracticePaused !== 'undefined') isPracticePaused = false;
+    const pb = document.getElementById('btnPracticePauseToggle'); if (pb) pb.style.display = 'none';
+    document.getElementById('officialMockLobbyOverlay').style.display = 'none';
+    if (typeof _coreLaunchReading === 'function') _coreLaunchReading(mockSession.readingExam.id);
+    else launchExam(mockSession.readingExam.id);
+    if (typeof activateStrictMockListeningAudio === 'function') activateStrictMockListeningAudio();
+    if (typeof syncExamRoomBodyClass === 'function') syncExamRoomBodyClass();
   };
 })();
