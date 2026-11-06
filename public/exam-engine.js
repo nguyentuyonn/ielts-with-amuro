@@ -4303,6 +4303,25 @@ function applyCleanHomeDisplayRules() {
     // Bọc vùng chọn bằng thẻ <mark> an toàn (hỗ trợ cả khi bôi đen qua nhiều thẻ in nghiêng/in đậm/đoạn văn)
     function highlightRangeWithGroupId(range, groupId, isNote = false) {
       if (!range || range.collapsed) return null;
+	  // TỰ ĐỘNG MỞ RỘNG VÙNG BÔI ĐEN ĐỂ BẮT TRỌN VẸN TỪ (CHỐNG CẮT ĐÔI CHỮ "expl ain")
+      try {
+        if (range.startContainer.nodeType === 3) {
+          const sText = range.startContainer.nodeValue || '';
+          let sOff = range.startOffset;
+          while (sOff > 0 && /[a-zA-Z0-9'-]/.test(sText[sOff - 1]) && /[a-zA-Z0-9'-]/.test(sText[sOff] || '')) {
+            sOff--;
+          }
+          range.setStart(range.startContainer, sOff);
+        }
+        if (range.endContainer.nodeType === 3) {
+          const eText = range.endContainer.nodeValue || '';
+          let eOff = range.endOffset;
+          while (eOff < eText.length && /[a-zA-Z0-9'-]/.test(eText[eOff]) && /[a-zA-Z0-9'-]/.test(eText[eOff - 1] || '')) {
+            eOff++;
+          }
+          range.setEnd(range.endContainer, eOff);
+        }
+      } catch (snapErr) {}
 
       const root = range.commonAncestorContainer.nodeType === 1
         ? range.commonAncestorContainer
@@ -5427,3 +5446,20 @@ function formatSmartFeedbackHtml(rawText) {
         }
       }, 1000);
     })();
+	/* ============================================================================
+   FIX KHE HỞ KHOẢNG TRẮNG KHI BÔI VÀNG HIGHLIGHT (PADDING = 0PX)
+   ============================================================================ */
+(function() {
+  const hlStyle = document.createElement('style');
+  hlStyle.innerHTML = `
+    mark.inspera-hl-mark, .user-highlight-span, .user-highlight-green {
+      padding-left: 0px !important;
+      padding-right: 0px !important;
+      margin-left: 0px !important;
+      margin-right: 0px !important;
+      border-radius: 2px !important;
+      display: inline !important;
+    }
+  `;
+  document.head.appendChild(hlStyle);
+})();

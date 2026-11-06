@@ -13171,3 +13171,80 @@ Return JSON with fields:
     if (typeof syncExamRoomBodyClass === 'function') syncExamRoomBodyClass();
   };
 })();
+/* ============================================================================
+   FIX TRIỆT ĐỂ LỖI TRÙNG TÊN ĐỀ ("VOL 10 - TEST 10") NHẬN NHẦM "✓ DONE" GIỮA READING & LISTENING
+   ============================================================================ */
+(function() {
+  // 1. Chỉ lấy kết quả nộp bài nếu khớp ĐÚNG KỸ NĂNG (Reading riêng, Listening riêng, Writing riêng)
+  window.getLatestUserSubmissionForExam = function(examId, examTitle, expectedSkill) {
+    if (typeof activeUser === 'undefined' || !activeUser || typeof db === 'undefined') return null;
+
+    // Nếu nơi gọi không truyền expectedSkill vào, tự động tra xem examId này thuộc mảng đề của kỹ năng nào
+    let targetSkill = expectedSkill;
+    if (!targetSkill && examId) {
+      if ((db.readingExams || []).some(e => e.id === examId)) targetSkill = 'reading';
+      else if ((db.listeningExams || []).some(e => e.id === examId)) targetSkill = 'listening';
+      else if ((db.writingExams || []).some(e => e.id === examId)) targetSkill = 'writing';
+    }
+
+    const uNameLow = String(activeUser.name || '').trim().toLowerCase();
+    const uUserLow = String(activeUser.username || '').trim().toLowerCase();
+    const titleLow = String(examTitle || '').trim().toLowerCase();
+
+    const all = (db.results || []).filter(r => {
+      if (!r) return false;
+      const rUser = String(r.userName || '').trim().toLowerCase();
+      if (rUser !== uNameLow && rUser !== uUserLow) return false;
+
+      // Bắt buộc kiểm tra đúng kỹ năng trước khi so sánh tên đề!
+      if (targetSkill && typeof detectResultSkillType === 'function') {
+        const resSkill = detectResultSkillType(r);
+        if (resSkill !== targetSkill) return false;
+      }
+
+      if (examId && r.examId === examId) return true;
+      // Chỉ cho phép khớp theo tên đề nếu đã xác nhận cùng kỹ năng
+      if (titleLow && String(r.examTitle || '').trim().toLowerCase() === titleLow) return true;
+      return false;
+    });
+
+    return all.length ? all[all.length - 1] : null;
+  };
+
+  // 2. Chỉ đánh dấu Completed ID khi bài nộp thuộc đúng kỹ năng đó (Không lấy bài Reading gán sang Listening)
+  window.getStudentCompletedExamIds = function(skillType) {
+    if (typeof activeUser === 'undefined' || !activeUser || typeof db === 'undefined') return [];
+    const examPool = skillType === 'reading' ? (db.readingExams || [])
+      : (skillType === 'listening' ? (db.listeningExams || []) : (db.writingExams || []));
+    const poolIds = new Set(examPool.map(e => e.id));
+    const completed = new Set();
+
+    const uNameLow = String(activeUser.name || '').trim().toLowerCase();
+    const uUserLow = String(activeUser.username || '').trim().toLowerCase();
+
+    (db.results || []).forEach(r => {
+      if (!r) return;
+      const rUser = String(r.userName || '').trim().toLowerCase();
+      if (rUser !== uNameLow && rUser !== uUserLow) return;
+
+      // Kiểm tra bài nộp này thuộc kỹ năng nào
+      const resSkill = (typeof detectResultSkillType === 'function') ? detectResultSkillType(r) : '';
+      if (resSkill && resSkill !== skillType) return; // Khác kỹ năng -> Bỏ qua ngay!
+
+      if (poolIds.has(r.examId)) {
+        completed.add(r.examId);
+      } else if (resSkill === skillType) {
+        const byTitle = examPool.find(ex => String(ex.title || '').trim().toLowerCase() === String(r.examTitle || '').trim().toLowerCase());
+        if (byTitle) completed.add(byTitle.id);
+      }
+    });
+
+    // Làm sạch lại mảng completedExamIds trong hồ sơ user để xóa các ID từng bị nhận nhầm từ kỹ năng khác
+    const meInDb = (db.users || []).find(u => u.id === activeUser.id || u.username === activeUser.username) || activeUser;
+    if (meInDb && meInDb.completedExamIds) {
+      meInDb.completedExamIds[skillType] = Array.from(completed);
+    }
+
+    return Array.from(completed);
+  };
+})();
