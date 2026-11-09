@@ -615,17 +615,18 @@ Return your evaluation in JSON format with two fields:
 
     /* DASHBOARD CONTROLLER */
     function switchDashTab(tab) {
-      document.querySelectorAll('.dash-tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.dash-pane').forEach(p => p.style.display = 'none');
-      
-      const targetBtn = document.getElementById('tabbtn-' + tab);
-      const targetPane = document.getElementById('tab-' + tab);
-      if (targetBtn) targetBtn.classList.add('active');
-      if (targetPane) targetPane.style.display = 'block';
+    document.querySelectorAll('.dash-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.dash-pane').forEach(p => p.style.display = 'none');
 
-      renderDashboard();
+    const targetBtn = document.getElementById('tabbtn-' + tab);
+    const targetPane = document.getElementById('tab-' + tab);
+    if (targetBtn) targetBtn.classList.add('active');
+    if (targetPane) targetPane.style.display = 'block';
+
+    if (tab === 'home') {
+        renderDashboard();
     }
-
+}
     function getVisibleExams(examList) {
       if (!activeUser) return [];
       if (activeUser.role === 'teacher') return examList || [];
