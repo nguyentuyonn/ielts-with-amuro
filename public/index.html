@@ -3838,7 +3838,6 @@
         <button class="dash-tab-btn" id="tabbtn-reading" onclick="switchDashTab('reading')">📖 Reading Tests</button>
         <button class="dash-tab-btn" id="tabbtn-listening" onclick="switchDashTab('listening')">🎧 Listening Tests</button>
         <button class="dash-tab-btn" id="tabbtn-writing" onclick="switchDashTab('writing')">✍️ Writing Tests</button>
-		<button class="dash-tab-btn" id="tabbtn-speaking" onclick="switchDashTab('speaking')">🗣️ Speaking Practice</button>
         <button class="dash-tab-btn" id="tabbtn-myvocab" onclick="switchDashTab('myvocab')">⭐ Vocabulary Vault</button>
         <button class="dash-tab-btn teacher-item" id="tabbtn-classes" onclick="switchDashTab('classes')">🏫 Classes</button>
         <button class="dash-tab-btn teacher-item" id="tabbtn-students" onclick="switchDashTab('students')">👤 Students</button>
@@ -3987,130 +3986,6 @@
           </table>
         </div>
       </div>
-	  <!-- TAB SPEAKING -->
-<div id="tab-speaking" class="dash-pane" style="display: none;">
-  <div id="spkAppRoot">
-    <aside class="side">
-      <div class="amuro-logo">AMURO</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:-8px;">
-        <span class="cap">Forecast Q3/2026</span>
-      </div>
-      <div class="draw-head"><span class="lbl">draw</span><span class="cap">random</span></div>
-      <div class="parts">
-        <div class="part-row">
-          <button class="part" data-part="p1" title="Bốc ngẫu nhiên một câu Part 1 (phím 1)" type="button">
-            <span class="num">01</span><span class="t"><b>Part 1</b><small id="spk-cnt-p1">0 / 209 câu đã luyện</small></span>
-          </button>
-          <button class="spk-btn topic-btn" data-topic="p1" title="Bốc cả một chủ đề Part 1" type="button">Topic</button>
-        </div>
-        <div class="part-row">
-          <button class="part on" data-part="p2" title="Bốc ngẫu nhiên một cue card Part 2 (phím 2)" type="button">
-            <span class="num">02</span><span class="t"><b>Part 2</b><small id="spk-cnt-p2">0 / 66 cue cards đã luyện</small></span>
-          </button>
-        </div>
-        <div class="part-row">
-          <button class="part" data-part="p3" title="Bốc ngẫu nhiên một câu Part 3 (phím 3)" type="button">
-            <span class="num">03</span><span class="t"><b>Part 3</b><small id="spk-cnt-p3">0 / 283 câu đã luyện</small></span>
-          </button>
-          <button class="spk-btn topic-btn" data-topic="p3" title="Bốc cả một chủ đề Part 3" type="button">Topic</button>
-        </div>
-      </div>
-      <p class="note">Bấm Part để bốc một câu. Bấm Topic để bốc cả bộ câu hỏi của một chủ đề.</p>
-      <div class="opts">
-        <label class="opt" for="spkNoRepeat">
-          <input id="spkNoRepeat" type="checkbox" checked/>
-          <span>Không lặp lại câu đã bốc<small>Chỉ bốc câu chưa luyện cho đến khi hết</small></span>
-        </label>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <button class="spk-btn" id="spkResetUsed" type="button">Reset đã luyện</button>
-          <span class="note" id="spkUsedTotal">0 / 558 đã luyện</span>
-        </div>
-      </div>
-    </aside>
-
-    <main class="stage">
-      <div class="top">
-        <div class="who">
-          <span aria-hidden="true" class="big-no" id="spkBigNo">02</span>
-          <h1 class="hero" id="spkHero">Part 2</h1>
-          <span class="sub" id="spkSub">Cue card · 1 phút chuẩn bị, 1–2 phút nói</span>
-        </div>
-        <div class="clock" id="spkClock">
-          <div class="ring">
-            <svg aria-hidden="true" viewBox="0 0 100 100">
-              <circle class="bg" cx="50" cy="50" r="47"></circle>
-              <circle class="fg" cx="50" cy="50" id="spkRingFg" r="47" stroke-dasharray="295.31" stroke-dashoffset="295.31"></circle>
-            </svg>
-            <div class="digits"><span id="spkDigits">0:00</span><small id="spkAim">aim 2:00</small></div>
-          </div>
-          <div class="c-side">
-            <span class="cap">speaking time</span>
-            <div class="c-row">
-              <button class="spk-btn rec" id="spkRecBtn" type="button"><span class="dot"></span><span id="spkRecLabel">Record</span></button>
-              <button class="spk-btn solid" id="spkTStart" type="button">Start</button>
-              <button class="spk-btn" id="spkTReset" type="button">Reset</button>
-            </div>
-            <div class="level"><i id="spkLevel"></i></div>
-            <span class="status" id="spkStatus">Record để ghi âm và tính giờ, hoặc Start để chỉ bấm giờ.</span>
-          </div>
-        </div>
-      </div>
-
-      <section class="panel">
-        <div class="panel-head">
-          <div class="ph-left"><span class="lbl">question</span><span class="cap" id="spkQMeta">cue card</span></div>
-          <div class="tools">
-            <button class="spk-btn ghost" id="spkNextBtn" type="button">Part 3 on this topic →</button>
-            <button class="spk-btn ghost" id="spkClearQ" type="button">Clear</button>
-          </div>
-        </div>
-        <textarea class="q card" id="spkQ" placeholder="Bốc một câu hỏi, chọn từ kho bên phải, hoặc tự gõ câu hỏi vào đây" rows="3"></textarea>
-        <p class="msg" id="spkQMsg" style="padding:0 20px 12px"></p>
-      </section>
-
-      <div class="lower">
-        <section class="panel">
-          <div class="panel-head"><div class="ph-left"><span class="lbl">recordings</span><span class="cap" id="spkTakesInfo"></span></div></div>
-          <div class="takes" id="spkTakes">
-            <p class="empty">Bấm Record rồi trả lời câu hỏi. Sau khi thu xong, bấm <b>Submit</b> để nộp bài hoặc <b>Save</b> để tải về máy.</p>
-          </div>
-        </section>
-        <section class="panel">
-          <div class="panel-head">
-            <div class="ph-left"><span class="lbl">notes</span></div>
-            <div class="tools"><button class="spk-btn ghost" id="spkClearNotes" type="button">Clear</button></div>
-          </div>
-          <textarea class="notes-ta" id="spkNotes" placeholder="Ghi ý chính, từ vựng muốn dùng, dàn ý..."></textarea>
-        </section>
-      </div>
-    </main>
-
-    <aside class="bank" id="spkBank">
-      <button class="bank-toggle" id="spkBankToggle" title="Mở/Đóng kho câu hỏi" type="button">☰</button>
-      <div class="bank-body">
-        <div class="bank-head"><span class="lbl">bank</span><span class="cap" id="spkBankInfo">66 cue cards</span></div>
-        <div class="seg" id="spkSeg">
-          <button aria-pressed="false" data-part="p1" type="button">Part 1</button>
-          <button aria-pressed="true" data-part="p2" type="button">Part 2</button>
-          <button aria-pressed="false" data-part="p3" type="button">Part 3</button>
-        </div>
-        <input class="field" id="spkSearch" placeholder="Tìm câu hỏi hoặc chủ đề..." type="search"/>
-        <div class="bank-acts">
-          <button class="spk-btn" id="spkAddToggle" type="button">+ Thêm câu hỏi</button>
-          <button class="spk-btn ghost" id="spkUnmark" type="button">Bỏ ✓</button>
-          <button class="spk-btn ghost" id="spkRestore" type="button">Khôi phục</button>
-        </div>
-        <div class="add" hidden id="spkAddBox">
-          <span class="cap" id="spkAddTitle">Thêm vào Part 2</span>
-          <textarea class="field" id="spkPaste" placeholder="Dán câu hỏi vào đây..." rows="3"></textarea>
-          <button class="spk-btn solid" id="spkAddPaste" type="button">Lưu câu hỏi</button>
-          <p class="msg" id="spkAddMsg"></p>
-        </div>
-        <div class="list" id="spkList"></div>
-      </div>
-    </aside>
-  </div>
-</div>
 
       <!-- TAB 4: MY SAVED VOCAB -->
       <div id="tab-myvocab" class="dash-pane" style="display: none;">
@@ -5112,6 +4987,5 @@
   <!-- NẠP 2 MODULE LOGIC ĐỘC LẬP (CÙNG THƯ MỤC VỚI INDEX.HTML) -->
   <script src="app-core.js"></script>
   <script src="exam-engine.js"></script>
-  <script src="speaking-module.js"></script>
 </body>
 </html>
